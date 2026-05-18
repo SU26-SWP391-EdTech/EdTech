@@ -6,7 +6,10 @@ import { UsersModule } from './user/user.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env'
+    }),
 
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -22,4 +25,4 @@ import { UsersModule } from './user/user.module';
     UsersModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity('user')
 export class User {
@@ -6,5 +6,5 @@ export class User {
   userId: number;
 
   @Column()
-  first_name: string;
+  full_name: string;
 }
