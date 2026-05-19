@@ -7,7 +7,12 @@ git clone https://github.com/SU26-SWP391-EdTech/EdTech.git
 ```
 cd EdTech
 ```
-## Tạo file .env cho docker-conpose và chỉnh sửa biến môi trường
+## Tạo file .env cho docker-compose và chỉnh sửa biến môi trường
+### WINDOWS (PowerShell/CMD)
+```
+copy-Item .env.example .env
+```
+### LINUX
 ```
 touch .env
 cp .env.example .env
@@ -25,6 +30,12 @@ cd backend/monolithic
 npm install
 ```
 ## Tạo file .env trong backend
+
+### WINDOWS (PowerShell/CMD)
+```
+Copy-Item .env.example -Destination .env
+```
+### LINUX
 ```
 touch .env
 cp .env.example .env
