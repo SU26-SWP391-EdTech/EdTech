@@ -1,10 +1,12 @@
-# Cấu trúc thư mục
+## Cấu trúc folder 
+
+```bash
 src/
 │
 ├── main.ts
 ├── app.module.ts
 │
-├── common/                  # Shared reusable stuff
+├── common/                     # Shared reusable stuff
 │   ├── decorators/
 │   ├── guards/
 │   ├── interceptors/
@@ -14,7 +16,7 @@ src/
 │   ├── constants/
 │   └── utils/
 │
-├── config/                  # Environment & configs
+├── config/                    # Environment & configs
 │
 ├── database/
 │   ├── migrations/
@@ -22,7 +24,6 @@ src/
 │   └── data-source.ts
 │
 ├── modules/
-│   │
 │   ├── auth/
 │   │   ├── dto/
 │   │   ├── guards/
@@ -36,20 +37,17 @@ src/
 │       ├── dto/
 │       │   ├── create-user.dto.ts
 │       │   └── update-user.dto.ts
-│       │
 │       ├── entities/
 │       │   └── user.entity.ts
-│       │
 │       ├── user.controller.ts
 │       ├── user.service.ts
 │       ├── user.module.ts
 │       └── user.repository.ts
-│   
 │
-├── shared/                  # Shared modules/services
+├── shared/                   # Shared modules/services
 │   ├── mail/
 │   ├── redis/
-│   └── upload/
-│
-└── types/
+│   ├── upload/
+│   └── types/
+
 
