@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { User } from './user/user.entity';
-import { UsersModule } from './user/user.module';
+import { UsersModule } from './modules/users/users.module';
+import { RolesModule } from './modules/roles/roles.module';
 
 @Module({
   imports: [
+    // modules
+    UsersModule,
+    RolesModule,
+
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env'
@@ -18,11 +22,12 @@ import { UsersModule } from './user/user.module';
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [User],
-      synchronize: false,
+      autoLoadEntities: true,
+      synchronize: true,
     }),
 
-    UsersModule,
+    RolesModule,
+
   ],
 })
 export class AppModule { }
