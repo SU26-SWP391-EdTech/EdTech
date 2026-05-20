@@ -3,13 +3,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './modules/users/users.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { EnrollmentsModule } from './modules/enrollments/enrollments.module';
+import { CoursesModule } from './modules/courses/courses.module';
+import { LessonsModule } from './modules/lessons/lessons.module';
+import { OrganizationsModule } from './modules/organizations/organizations.module';
+import { LearnersModule } from './modules/learners/learners.module';
+import { CourseProvidersModule } from './modules/course-providers/course-providers.module';
+import { LearningPathsModule } from './modules/learning-paths/learning-paths.module';
+import { OrganizationMemberProfilesModule } from './modules/organization-member-profiles/organization-member-profiles.module';
+import { OrganizationRegistrationApplicationModule } from './modules/organization-registration-application/organization-registration-application.module';
+import { JoinOrganizationApplicationModule } from './modules/join-organization-application/join-organization-application.module';
 
 @Module({
   imports: [
-    // modules
-    UsersModule,
-    RolesModule,
-
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env'
@@ -26,8 +32,19 @@ import { RolesModule } from './modules/roles/roles.module';
       synchronize: true,
     }),
 
+     // modules
+    UsersModule,
     RolesModule,
-
+    EnrollmentsModule,
+    CoursesModule,
+    LessonsModule,
+    OrganizationsModule,
+    LearnersModule,
+    CourseProvidersModule,
+    LearningPathsModule,
+    OrganizationMemberProfilesModule,
+    OrganizationRegistrationApplicationModule,
+    JoinOrganizationApplicationModule,
   ],
 })
 export class AppModule { }
