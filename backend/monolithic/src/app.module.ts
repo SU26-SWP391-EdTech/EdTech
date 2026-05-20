@@ -1,14 +1,19 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { User } from './user/user.entity';
-import { UsersModule } from './user/user.module';
+import { User } from './modules/user/entities/user.entity';
+import { UsersModule } from './modules/user/user.module';
+import { RoleModule } from './modules/role/role.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { CommonModule } from './common/common.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env'
+      envFilePath: ['.env', '../.env'],
     }),
 
     TypeOrmModule.forRoot({
@@ -21,8 +26,16 @@ import { UsersModule } from './user/user.module';
       entities: [User],
       synchronize: false,
     }),
-
+    CommonModule,
     UsersModule,
+    RoleModule,
+    AuthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard, // Áp dụng global guard cho toàn bộ app
+    },
   ],
 })
 export class AppModule { }
