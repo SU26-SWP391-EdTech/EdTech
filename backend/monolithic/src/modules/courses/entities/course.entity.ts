@@ -20,7 +20,7 @@ export class Course {
     @PrimaryGeneratedColumn({name: 'course_id'})
     courseId!: number;
 
-    // userId FK -> id of course provider
+    // userId FK -> id of course provider (nguoi tao khoa hoc)
     @ManyToOne(() => User, (user) => user.courses, {
         nullable: false
     })
@@ -100,8 +100,8 @@ export class Course {
     @UpdateDateColumn({ name: 'updated_at' })
     updatedAt!: Date;
 
-     // nguoi duyet
-  @ManyToOne(() => User, (user) => user.courses, {
+    // người duyệt khóa học
+  @ManyToOne(() => User, (user) => user.reviewedCourses, {
     nullable: true,
   })
   @JoinColumn({ name: 'reviewed_by' })
