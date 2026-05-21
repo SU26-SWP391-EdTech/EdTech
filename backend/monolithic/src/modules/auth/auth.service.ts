@@ -1,10 +1,8 @@
 // auth/auth.service.ts
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import type { Response } from 'express';
-import { LearnerRegisterDto } from './dto/learner-register.dto';
 import { User } from '../users/entities/user.entity';
 import { LearnerProfile } from '../learners/entities/learner-profile.entity';
-import { CourseProviderRegisterDto } from './dto/course-provider-register.dto';
 import { CourseProviderProfile } from '../course-providers/entities/course-provider-profile.entity';
 import * as bcrypt from 'bcryptjs';
 import { InjectRepository } from '@nestjs/typeorm';
