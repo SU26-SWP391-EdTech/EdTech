@@ -51,7 +51,7 @@ export class AuthService {
   }
 
   //checkauth api
-  async checkAuth(userId: number) {
+  async getMe(userId: number) {
     const user = await this.userRepository.findOne({
       where: { userId },
       relations: ['role'],

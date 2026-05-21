@@ -54,8 +54,8 @@ export class AuthController {
     return res.json(result);
   }
 
-  @Get('checkAuth')
+  @Get('me')
   async getMe(@CurrentUser() user: JwtPayloadUser) {
-    return this.authService.checkAuth(user.userId);
+    return this.authService.getMe(user.userId);
   }
 }
