@@ -20,3 +20,4 @@ export class Role {
   @OneToMany(() => User, (user) => user.role, {nullable: false})
   users!: User[]
 }
+

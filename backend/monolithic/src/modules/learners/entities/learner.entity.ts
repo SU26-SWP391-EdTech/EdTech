@@ -6,7 +6,7 @@ export class Learner {
     @PrimaryColumn({name: 'user_id'})
     userId!: number;
 
-    @OneToOne(() => User, (user) => user.learner, {nullable: false})
+    @OneToOne(() => User, (user) => user.learnerProfile, {nullable: false})
     @JoinColumn({ name: 'user_id' })
     user!: User
 

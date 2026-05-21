@@ -13,12 +13,16 @@ import { LearningPathsModule } from './modules/learning-paths/learning-paths.mod
 import { OrganizationMemberProfilesModule } from './modules/organization-member-profiles/organization-member-profiles.module';
 import { OrganizationRegistrationApplicationModule } from './modules/organization-registration-application/organization-registration-application.module';
 import { JoinOrganizationApplicationModule } from './modules/join-organization-application/join-organization-application.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { CommonModule } from './common/common.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env'
+      envFilePath: ['.env', '../.env'],
     }),
 
     TypeOrmModule.forRoot({
@@ -31,7 +35,8 @@ import { JoinOrganizationApplicationModule } from './modules/join-organization-a
       autoLoadEntities: true,
       synchronize: true,
     }),
-
+    CommonModule,
+    UsersModule,
      // modules
     UsersModule,
     RolesModule,
@@ -44,7 +49,15 @@ import { JoinOrganizationApplicationModule } from './modules/join-organization-a
     LearningPathsModule,
     OrganizationMemberProfilesModule,
     OrganizationRegistrationApplicationModule,
-    JoinOrganizationApplicationModule,
+    JoinOrganizationApplicationModule,    AuthModule,
+    LearnersModule,
+    CourseProvidersModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard, // Áp dụng global guard cho toàn bộ app
+    },
   ],
 })
 export class AppModule { }
