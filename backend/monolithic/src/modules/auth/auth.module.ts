@@ -4,10 +4,10 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { User } from '../user/entities/user.entity';
-import { Role } from '../role/entities/role.entity';
-import { LearnerProfile } from '../user/entities/learner-profile.entity';
-import { CourseProviderProfile } from '../user/entities/course-provider-profile.entity';
+import { User } from '../users/entities/users.entity';
+import { Role } from '../roles/entities/role.entity';
+import { LearnerProfile } from '../users/entities/learner-profile.entity';
+import { CourseProviderProfile } from '../users/entities/course-provider-profile.entity';
 import { jwtConstants } from '../../common/constants/jwt.constants';
 
 @Module({

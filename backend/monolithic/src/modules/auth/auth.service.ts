@@ -2,13 +2,13 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import type { Response } from 'express';
 import { LearnerRegisterDto } from './dto/learner-register.dto';
-import { User } from '../user/entities/user.entity';
-import { LearnerProfile } from '../user/entities/learner-profile.entity';
+import { User } from '../users/entities/users.entity';
+import { LearnerProfile } from '../users/entities/learner-profile.entity';
 import { CourseProviderRegisterDto } from './dto/course-provider-register.dto';
-import { CourseProviderProfile } from '../user/entities/course-provider-profile.entity';
+import { CourseProviderProfile } from '../users/entities/course-provider-profile.entity';
 import * as bcrypt from 'bcryptjs';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Role } from '../role/entities/role.entity';
+import { Role } from '../roles/entities/role.entity';
 import { DataSource, Repository } from 'typeorm';
 import { clearTokenCookie, setTokenCookie } from '../../common/helpers/jwt.helper';
 import { LoginDto } from './dto/login.dto';
@@ -54,7 +54,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new NotFoundException('Người dùng không tồn tại');
+      throw new NotFoundException('User not found');
     }
 
     return {
@@ -79,12 +79,12 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+      throw new UnauthorizedException('Email or password is not true');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+      throw new UnauthorizedException('Email or password is not true');
     }
 
     const userData = {
@@ -101,7 +101,7 @@ export class AuthService {
 
     return {
       success: true,
-      message: 'Đăng nhập thành công',
+      message: 'Login succesfully',
       token: token,
       user: userData,
     };
@@ -115,12 +115,12 @@ export class AuthService {
     });
     
     if (existingUser) {
-      throw new BadRequestException('Email đã tồn tại');
+      throw new BadRequestException('Email has found');
     }
 
     // Tìm role
     const role = await this.roleRepository.findOne({ where: { roleName } });
-    if (!role) throw new NotFoundException('Vai trò hệ thống không tồn tại');
+    if (!role) throw new NotFoundException('Role dont exist');
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -166,7 +166,7 @@ export class AuthService {
 
       return {
         success: true,
-        message: 'Đăng ký thành công',
+        message: 'Register succesfully',
         token: token,
         user: userData,
       };
@@ -187,11 +187,11 @@ export class AuthService {
     });
     
     if (existingUser) {
-      throw new BadRequestException('Email đã tồn tại');
+      throw new BadRequestException('Email existed');
     }
 
     const role = await this.roleRepository.findOne({ where: { roleName } });
-    if (!role) throw new NotFoundException('Vai trò hệ thống không tồn tại');
+    if (!role) throw new NotFoundException('Role dont exist');
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -232,7 +232,7 @@ export class AuthService {
 
       return {
         success: true,
-        message: 'Đăng ký thành công',
+        message: 'Register successfully',
         token: token,
         user: userData,
       };
@@ -249,7 +249,7 @@ export class AuthService {
     clearTokenCookie(res);
     return {
       success: true,
-      message: 'Đăng xuất thành công',
+      message: 'Logout successfully',
     };
   }
 }

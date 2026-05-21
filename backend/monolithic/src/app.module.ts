@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { User } from './modules/user/entities/user.entity';
-import { UsersModule } from './modules/user/user.module';
-import { RoleModule } from './modules/role/role.module';
+import { User } from './modules/users/entities/users.entity';
+import { UsersModule } from './modules/users/users.module';
+import { RoleModule } from './modules/roles/roles.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CommonModule } from './common/common.module';
 import { APP_GUARD } from '@nestjs/core';

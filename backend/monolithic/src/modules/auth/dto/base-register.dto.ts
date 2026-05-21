@@ -16,7 +16,7 @@ export class BaseRegisterDto{
 
     @IsNotEmpty()
     @IsIn([UserRole.LEARNER, UserRole.COURSE_PROVIDER], {
-        message: `Vai trò không hợp lệ. Bạn chỉ có thể chọn giữa '${UserRole.LEARNER}' hoặc '${UserRole.COURSE_PROVIDER}'`,
+        message: `Invalid role. You can only choose between '${UserRole.LEARNER}' and '${UserRole.COURSE_PROVIDER}'`,
     })
     roleName: UserRole; 
 }

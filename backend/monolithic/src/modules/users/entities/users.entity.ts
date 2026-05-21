@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
-import { Role } from 'src/modules/role/entities/role.entity';
+import { Role } from 'src/modules/roles/entities/role.entity';
 import { LearnerProfile } from './learner-profile.entity';
 import { CourseProviderProfile } from './course-provider-profile.entity';
 
