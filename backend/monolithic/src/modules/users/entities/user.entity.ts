@@ -1,11 +1,12 @@
-import { CourseProvider } from 'src/modules/course-providers/entities/course-provider.entity';
+import { CourseProviderProfile } from 'src/modules/course-providers/entities/course-provider-profile.entity';
 import { Course } from 'src/modules/courses/entities/course.entity';
 import { Enrollment } from 'src/modules/enrollments/entities/enrollment.entity';
 import { JoinOrganizationApplication } from 'src/modules/join-organization-application/entities/join-organization-application.entity';
-import { Learner } from 'src/modules/learners/entities/learner.entity';
+import { LearnerProfile } from 'src/modules/learners/entities/learner-profile.entity';
 import { OrganizationMemberProfile } from 'src/modules/organization-member-profiles/entities/organization-member-profile.entity';
 import { OrganizationRegistrationApplication } from 'src/modules/organization-registration-application/entities/organization-registration-application.entity';
 import { Role } from 'src/modules/roles/entities/role.entity';
+
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -59,16 +60,14 @@ export class User {
   )
   reviewedOrganizationRegistrationApplications!: OrganizationRegistrationApplication[];
 
-  // learner
-  @OneToOne(() => Learner, (learner) => learner.user, { nullable: false })
-  learner!: Learner;
+  @OneToOne(() => LearnerProfile, (learnerProfile) => learnerProfile.user)
+  learnerProfile?: LearnerProfile;
 
-  // course provider
-  @OneToOne(() => CourseProvider, (courseProvider) => courseProvider.user, {
-    nullable: false,
-  })
-  courseProvider!: CourseProvider;
-
+  @OneToOne(
+    () => CourseProviderProfile,
+    (courseProviderProfile) => courseProviderProfile.user,
+  )
+  courseProviderProfile?: CourseProviderProfile;
   // course
   @OneToMany(() => Course, (course) => course.user, { nullable: false })
   courses!: Course[];

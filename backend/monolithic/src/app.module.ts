@@ -17,8 +17,6 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CommonModule } from './common/common.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
-import { LearnersModule } from './modules/learners/learners.module';
-import { CourseProvidersModule } from './modules/course-providers/course-providers.module';
 
 @Module({
   imports: [

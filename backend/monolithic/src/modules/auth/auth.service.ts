@@ -67,9 +67,9 @@ export class AuthService {
         userId: user.userId,
         email: user.email,
         fullName: user.fullName,
-        roleId: user.roleId,
+        roleId: user.role,
         roleName: user.role.roleName,
-        avatarUrl: user.avatarUrl,
+        avatarUrl: user.avatar,
       },
     };
   }
@@ -96,9 +96,9 @@ export class AuthService {
       userId: user.userId,
       email: user.email,
       fullName: user.fullName,
-      roleId: user.roleId,
+      roleId: user.role,
       roleName: user.role.roleName,
-      avatarUrl: user.avatarUrl,
+      avatarUrl: user.avatar,
     };
 
     // Tạo token và set cookie
@@ -294,9 +294,9 @@ export class AuthService {
         userId: savedUser.userId,
         fullName: savedUser.fullName,
         email: savedUser.email,
-        roleId: savedUser.roleId,
+        roleId: savedUser.role,
         roleName: role.roleName,
-        avatarUrl: savedUser.avatarUrl
+        avatarUrl: savedUser.avatar
       };
 
       const token = setTokenCookie(res, userData);
