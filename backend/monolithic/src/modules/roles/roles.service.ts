@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ALL_ROLE_NAMES } from '../../common/constants/role.constants';
-import { Role } from './entities/roles.entity';
+import { Role } from './entities/role.entity';
 
 @Injectable()
 export class RolesService implements OnModuleInit {

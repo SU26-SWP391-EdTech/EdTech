@@ -1,5 +1,5 @@
 import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
-import { User } from '../../users/entities/users.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity('course_provider_profiles')
 export class CourseProviderProfile {
