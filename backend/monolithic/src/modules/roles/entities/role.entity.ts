@@ -9,15 +9,15 @@ import {
 @Entity('roles')
 export class Role {
   @PrimaryGeneratedColumn({ name: 'role_id' })
-  roleId: number;
+  roleId!: number;
 
   @Column({
     name: 'role_name',
     unique: true
   })
-  roleName: string;
+  roleName!: string
 
-  @OneToMany(() => User, (user) => user.role)
-  users: User[];
+  @OneToMany(() => User, (user) => user.role, {nullable: false})
+  users!: User[]
 }
 
