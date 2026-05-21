@@ -11,6 +11,10 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
   imports: [
+    // modules
+    UsersModule,
+    RolesModule,
+
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env', '../.env'],
@@ -23,8 +27,8 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [User],
-      synchronize: false,
+      autoLoadEntities: true,
+      synchronize: true,
     }),
     CommonModule,
     UsersModule,
