@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { User } from './modules/users/entities/users.entity';
 import { UsersModule } from './modules/users/users.module';
-import { RoleModule } from './modules/roles/roles.module';
+import { RolesModule } from './modules/roles/roles.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CommonModule } from './common/common.module';
 import { APP_GUARD } from '@nestjs/core';
@@ -28,7 +28,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     }),
     CommonModule,
     UsersModule,
-    RoleModule,
+    RolesModule,
     AuthModule,
   ],
   providers: [
