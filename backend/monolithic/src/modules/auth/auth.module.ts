@@ -5,9 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { User } from '../users/entities/users.entity';
-import { Role } from '../roles/entities/role.entity';
-import { LearnerProfile } from '../users/entities/learner-profile.entity';
-import { CourseProviderProfile } from '../users/entities/course-provider-profile.entity';
+import { Role } from '../roles/entities/roles.entity';
+import { LearnerProfile } from '../learners/entities/learner-profile.entity';
+import { CourseProviderProfile } from '../course-providers/entities/course-provider-profile.entity';
 import { jwtConstants } from '../../common/constants/jwt.constants';
 
 @Module({

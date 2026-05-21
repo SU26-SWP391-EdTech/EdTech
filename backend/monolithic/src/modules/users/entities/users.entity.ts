@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
-import { Role } from 'src/modules/roles/entities/role.entity';
-import { LearnerProfile } from './learner-profile.entity';
-import { CourseProviderProfile } from './course-provider-profile.entity';
+import { Role } from 'src/modules/roles/entities/roles.entity';
+import { LearnerProfile } from '../../learners/entities/learner-profile.entity';
+import { CourseProviderProfile } from '../../course-providers/entities/course-provider-profile.entity';
 
 @Entity('users')
 export class User {

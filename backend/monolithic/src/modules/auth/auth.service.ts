@@ -3,15 +3,17 @@ import { BadRequestException, Injectable, NotFoundException, UnauthorizedExcepti
 import type { Response } from 'express';
 import { LearnerRegisterDto } from './dto/learner-register.dto';
 import { User } from '../users/entities/users.entity';
-import { LearnerProfile } from '../users/entities/learner-profile.entity';
+import { LearnerProfile } from '../learners/entities/learner-profile.entity';
 import { CourseProviderRegisterDto } from './dto/course-provider-register.dto';
-import { CourseProviderProfile } from '../users/entities/course-provider-profile.entity';
+import { CourseProviderProfile } from '../course-providers/entities/course-provider-profile.entity';
 import * as bcrypt from 'bcryptjs';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Role } from '../roles/entities/role.entity';
+import { Role } from '../roles/entities/roles.entity';
 import { DataSource, Repository } from 'typeorm';
 import { clearTokenCookie, setTokenCookie } from '../../common/helpers/jwt.helper';
 import { LoginDto } from './dto/login.dto';
+import { RoleName } from '../../common/constants/role.constants';
+import { BaseRegisterDto } from './dto/base-register.dto';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +27,7 @@ export class AuthService {
     private dataSource: DataSource,
   ) {}
 
+//validate fields
   async validateUser(email: string, password: string) {
     const user = await this.userRepository.findOne({
       where: { email },
@@ -47,6 +50,7 @@ export class AuthService {
     };
   }
 
+  //checkauth api
   async getMe(userId: number) {
     const user = await this.userRepository.findOne({
       where: { userId },
@@ -70,6 +74,7 @@ export class AuthService {
     };
   }
 
+  //login api
   async login(loginDto: LoginDto, res: Response) {
     const { email, password } = loginDto;
     
@@ -107,127 +112,193 @@ export class AuthService {
     };
   }
 
-  async registerLearner(learnerDto: LearnerRegisterDto, res: Response) {
-    const { email, password, roleName, learningGoal, level, bio, fullName } = learnerDto;
+  //register api
+  // async registerLearner(learnerDto: LearnerRegisterDto, res: Response) {
+  //   const { fullName, email, password, learningGoal, level, bio } = learnerDto;
 
-    const existingUser = await this.userRepository.findOne({
-      where: { email }
-    });
+  //   const existingUser = await this.userRepository.findOne({
+  //     where: { email }
+  //   });
     
-    if (existingUser) {
-      throw new BadRequestException('Email has found');
-    }
+  //   if (existingUser) {
+  //     throw new BadRequestException('Email has found');
+  //   }
 
-    // Tìm role
-    const role = await this.roleRepository.findOne({ where: { roleName } });
-    if (!role) throw new NotFoundException('Role dont exist');
+  //   const role = await this.roleRepository.findOne({
+  //     where: { roleName: RoleName.LEARNER },
+  //   });
+  //   if (!role) {
+  //     throw new NotFoundException(`Role "${RoleName.LEARNER}" does not exist`);
+  //   }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+  //   // Hash password
+  //   const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Dùng transaction để tạo user + learner profile
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+  //   // Dùng transaction để tạo user + learner profile
+  //   const queryRunner = this.dataSource.createQueryRunner();
+  //   await queryRunner.connect();
+  //   await queryRunner.startTransaction();
 
-    try {
-      // Tạo user
-      const newUser = queryRunner.manager.create(User, {
-        email,
-        password: hashedPassword,
-        fullName: fullName,
-        role: role,
-        avatarUrl: ''
-      });
-      const savedUser = await queryRunner.manager.save(newUser);
+  //   try {
+  //     // Tạo user
+  //     const newUser = queryRunner.manager.create(User, {
+  //       fullName: fullName,
+  //       email,
+  //       password: hashedPassword,
+  //       role: role,
+  //       avatarUrl: ''
+  //     });
+  //     const savedUser = await queryRunner.manager.save(newUser);
 
-      // Tạo learner profile
-      const learnerProfile = queryRunner.manager.create(LearnerProfile, {
-        userId: savedUser.userId,
-        learningGoal,
-        level,
-        bio
-      });
-      await queryRunner.manager.save(learnerProfile);
+  //     // Tạo learner profile
+  //     const learnerProfile = queryRunner.manager.create(LearnerProfile, {
+  //       userId: savedUser.userId,
+  //       learningGoal,
+  //       level,
+  //       bio
+  //     });
+  //     await queryRunner.manager.save(learnerProfile);
 
-      await queryRunner.commitTransaction();
+  //     await queryRunner.commitTransaction();
 
-      const userData = {
-        userId: savedUser.userId,
-        email: savedUser.email,
-        fullName: savedUser.fullName,
-        roleId: savedUser.roleId,
-        roleName: role.roleName,
-        avatarUrl: savedUser.avatarUrl,
-      };
+  //     const userData = {
+  //       userId: savedUser.userId,
+  //       email: savedUser.email,
+  //       fullName: savedUser.fullName,
+  //       roleId: savedUser.roleId,
+  //       roleName: role.roleName,
+  //       avatarUrl: savedUser.avatarUrl,
+  //     };
 
-      // Tạo token và set cookie
-      const token = setTokenCookie(res, userData);
+  //     // Tạo token và set cookie
+  //     const token = setTokenCookie(res, userData);
 
-      return {
-        success: true,
-        message: 'Register succesfully',
-        token: token,
-        user: userData,
-      };
+  //     return {
+  //       success: true,
+  //       message: 'Register succesfully',
+  //       token: token,
+  //       user: userData,
+  //     };
 
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
-    }
-  }
+  //   } catch (error) {
+  //     await queryRunner.rollbackTransaction();
+  //     throw error;
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
 
-  async registerCourseProvider(providerDto: CourseProviderRegisterDto, res: Response) {
-    const { email, password, roleName, expertise, experienceYears, fullName } = providerDto;
+  // async registerCourseProvider(providerDto: CourseProviderRegisterDto, res: Response) {
+  //   const { fullName, email, password, expertise, experienceYears } = providerDto;
 
-    const existingUser = await this.userRepository.findOne({
-      where: { email }
-    });
+  //   const existingUser = await this.userRepository.findOne({
+  //     where: { email }
+  //   });
     
-    if (existingUser) {
+  //   if (existingUser) {
+  //     throw new BadRequestException('Email existed');
+  //   }
+
+  //   const role = await this.roleRepository.findOne({
+  //     where: { roleName: RoleName.COURSE_PROVIDER },
+  //   });
+  //   if (!role) {
+  //     throw new NotFoundException(`Role "${RoleName.COURSE_PROVIDER}" does not exist`);
+  //   }
+
+  //   const hashedPassword = await bcrypt.hash(password, 10);
+
+  //   const queryRunner = this.dataSource.createQueryRunner();
+  //   await queryRunner.connect();
+  //   await queryRunner.startTransaction();
+
+  //   try {
+  //     const newUser = queryRunner.manager.create(User, {
+  //       email,
+  //       password: hashedPassword,
+  //       fullName: fullName,
+  //       role: role,
+  //       avatarUrl: ''
+  //     });
+  //     const savedUser = await queryRunner.manager.save(newUser);
+
+  //     const courseProviderProfile = queryRunner.manager.create(CourseProviderProfile, {
+  //       userId: savedUser.userId,
+  //       expertise,
+  //       experienceYears
+  //     });
+  //     await queryRunner.manager.save(courseProviderProfile);
+
+  //     await queryRunner.commitTransaction();
+
+  //     const userData = {
+  //       userId: savedUser.userId,
+  //       email: savedUser.email,
+  //       fullName: savedUser.fullName,
+  //       roleId: savedUser.roleId,
+  //       roleName: role.roleName,
+  //       avatarUrl: savedUser.avatarUrl,
+  //     };
+
+  //     // Tạo token và set cookie
+  //     const token = setTokenCookie(res, userData);
+
+  //     return {
+  //       success: true,
+  //       message: 'Register successfully',
+  //       token: token,
+  //       user: userData,
+  //     };
+
+  //   } catch (error) {
+  //     await queryRunner.rollbackTransaction();
+  //     throw error;
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
+
+  async register(baseDto: BaseRegisterDto, res: Response){
+    const { fullName, email, password, roleName } = baseDto;
+
+    const existingUser = await this.userRepository.findOne({where:{email}});
+    
+    if(existingUser){
       throw new BadRequestException('Email existed');
     }
 
-    const role = await this.roleRepository.findOne({ where: { roleName } });
-    if (!role) throw new NotFoundException('Role dont exist');
+    const role = await this.roleRepository.findOne({where: {roleName}});
+
+    if(!role){
+      throw new NotFoundException("Role doesn't exist");
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
       const newUser = queryRunner.manager.create(User, {
+        fullName: fullName,
         email,
         password: hashedPassword,
-        fullName: fullName,
         role: role,
-        avatarUrl: ''
+        avatarUrl: ""
       });
+
       const savedUser = await queryRunner.manager.save(newUser);
-
-      const courseProviderProfile = queryRunner.manager.create(CourseProviderProfile, {
-        userId: savedUser.userId,
-        expertise,
-        experienceYears
-      });
-      await queryRunner.manager.save(courseProviderProfile);
-
       await queryRunner.commitTransaction();
 
       const userData = {
         userId: savedUser.userId,
-        email: savedUser.email,
         fullName: savedUser.fullName,
+        email: savedUser.email,
         roleId: savedUser.roleId,
         roleName: role.roleName,
-        avatarUrl: savedUser.avatarUrl,
+        avatarUrl: savedUser.avatarUrl
       };
 
-      // Tạo token và set cookie
       const token = setTokenCookie(res, userData);
 
       return {
@@ -236,11 +307,10 @@ export class AuthService {
         token: token,
         user: userData,
       };
-
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
-    } finally {
+    } finally{
       await queryRunner.release();
     }
   }

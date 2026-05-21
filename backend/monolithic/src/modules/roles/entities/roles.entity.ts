@@ -1,4 +1,4 @@
-import { User } from 'src/modules/users/entities/user.entity';
+import { User } from 'src/modules/users/entities/users.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -15,8 +15,9 @@ export class Role {
     name: 'role_name',
     unique: true
   })
-  roleName: string
+  roleName: string;
 
   @OneToMany(() => User, (user) => user.role)
-  users: User[]
+  users: User[];
 }
+
