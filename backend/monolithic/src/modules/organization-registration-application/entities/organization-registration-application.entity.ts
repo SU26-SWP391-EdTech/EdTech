@@ -15,9 +15,8 @@ export class OrganizationRegistrationApplication {
   @PrimaryGeneratedColumn({ name: 'application_id' })
   applicationId!: number;
 
-  // requesterUser
   // Người gửi đơn
-  @ManyToOne(() => User, (user) => user.organizationRegistrationApplications, {nullable: false})
+  @ManyToOne(() => User, (user) => user.requestOrganizationRegistrationApplications, {nullable: false})
   @JoinColumn({ name: 'requester_user_id' })
   requesterUser!: User;
 

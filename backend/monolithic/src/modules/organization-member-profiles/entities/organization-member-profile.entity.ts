@@ -14,16 +14,16 @@ export class OrganizationMemberProfile {
   @PrimaryColumn({ name: 'user_id' })
   userId!: number;
 
-  @Column({ name: 'organization_id' })
-  organizationId!: number;
-
   @OneToOne(() => User, (user) => user.organizationProfile, {nullable: false})
   @JoinColumn({ name: 'user_id' })
   user!: User;
 
+  @Column({ name: 'organization_id' })
+  organizationId!: number;
+
   @ManyToOne(
     () => Organization,
-    (organization) => organization.organizationProfiles,
+    (organization) => organization.organizationMemberProfiles,
     {nullable: false}
   )
   @JoinColumn({ name: 'organization_id' })

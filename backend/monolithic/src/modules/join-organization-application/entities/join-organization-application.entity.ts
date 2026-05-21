@@ -22,15 +22,15 @@ export class JoinOrganizationApplication {
   @Column({ name: 'user_id' })
   userId!: number;
 
+  @ManyToOne(() => User, (user) => user.requestJoinOrganizationApplications, {nullable: false})
+  @JoinColumn({ name: 'user_id' })
+  user!: User;
+
   // FK -> organizations.organization_id
   @Column({
     name: 'organization_id',
   })
   organizationId!: number;
-
-  @ManyToOne(() => User, (user) => user.joinOrganizationApplications, {nullable: false})
-  @JoinColumn({ name: 'user_id' })
-  user!: User;
 
   @ManyToOne(
     () => Organization,
@@ -64,7 +64,7 @@ export class JoinOrganizationApplication {
     (user) => user.reviewedJoinOrganizationApplications,
     {nullable: true}
   )
-  @JoinColumn({ name: 'reviewed_by_user_id' })
+  @JoinColumn({ name: 'reviewed_by' })
   reviewedBy!: User;
 
   @Column({
