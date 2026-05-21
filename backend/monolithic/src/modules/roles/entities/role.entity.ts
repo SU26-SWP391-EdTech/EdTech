@@ -1,19 +1,22 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { User } from "src/modules/users/entities/users.entity";
-import { UserRole } from "src/common/enums/role.enum";
+import { User } from 'src/modules/users/entities/user.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+} from 'typeorm';
 
 @Entity('roles')
 export class Role {
-    @PrimaryGeneratedColumn({ name: 'role_id' })
-    roleId: number;
-    
-    @Column({
-        name: 'role_name',
-        type: 'enum',
-        enum: UserRole,
-    })
-    roleName: UserRole;
+  @PrimaryGeneratedColumn({ name: 'role_id' })
+  roleId: number;
 
-    @OneToMany(() => User, (user) => user.role)
-    users: User[];
+  @Column({
+    name: 'role_name',
+    unique: true
+  })
+  roleName: string
+
+  @OneToMany(() => User, (user) => user.role)
+  users: User[]
 }
