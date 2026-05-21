@@ -16,18 +16,6 @@ export class Organization {
   @PrimaryGeneratedColumn({ name: 'organization_id' })
   organizationId!: string;
 
-  // tổ chức duyệt đơn join
-  @OneToMany(
-    () => JoinOrganizationApplication,
-    (joinOrganizationApplication) => joinOrganizationApplication.organization,
-    { nullable: false }
-  )
-  joinOrganizationApplications!: JoinOrganizationApplication[];
-
-  // learning path
-  @OneToMany(() => LearningPath, (lp) => lp.organization, { nullable: false })
-  learningPaths!: LearningPath[];
-
   @Column({ name: 'organization_name' })
   organizationName!: string;
 
@@ -43,18 +31,30 @@ export class Organization {
   @Column({ name: 'description', type: 'text', nullable: true })
   description!: string;
 
-  // organization profiles
-  @OneToMany(
-    () => OrganizationMemberProfile,
-    (organizationMemberProfile) => organizationMemberProfile.organization,
-    {nullable: false}
-  )
-  organizationProfiles!: OrganizationMemberProfile[];
-
   // course
   @OneToMany(() => Course, (course) => course.organization, {nullable: false})
   courses!: Course[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
+
+  // organization profiles
+  @OneToMany(
+    () => OrganizationMemberProfile,
+    (organizationMemberProfile) => organizationMemberProfile.organization,
+    {nullable: false}
+  )
+  organizationMemberProfiles!: OrganizationMemberProfile[];
+
+   // tổ chức duyệt đơn join
+  @OneToMany(
+    () => JoinOrganizationApplication,
+    (joinOrganizationApplication) => joinOrganizationApplication.organization,
+    { nullable: false }
+  )
+  joinOrganizationApplications!: JoinOrganizationApplication[];
+
+  // learning path
+  @OneToMany(() => LearningPath, (lp) => lp.organization, { nullable: false })
+  learningPaths!: LearningPath[];
 }

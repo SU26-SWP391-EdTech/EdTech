@@ -11,7 +11,7 @@ export class LearningPath {
   @Column({name: 'title'})
   title!: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ name: 'description', type: 'text', nullable: true })
   description!: string;
 
   @Column({ name: 'slug', unique: true})
