@@ -2,15 +2,13 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import type { Response } from 'express';
 import { User } from '../users/entities/user.entity';
-import { LearnerProfile } from '../learners/entities/learner-profile.entity';
-import { CourseProviderProfile } from '../course-providers/entities/course-provider-profile.entity';
+import { CourseProvider } from '../course-providers/entities/course-provider-profile.entity';
 import * as bcrypt from 'bcryptjs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from '../roles/entities/role.entity';
 import { DataSource, Repository } from 'typeorm';
 import { clearTokenCookie, setTokenCookie } from '../../common/helpers/jwt.helper';
 import { LoginDto } from './dto/login.dto';
-import { RoleName } from '../../common/constants/role.constants';
 import { BaseRegisterDto } from './dto/base-register.dto';
 
 @Injectable()
