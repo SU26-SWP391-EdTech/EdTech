@@ -10,6 +10,12 @@ export class UsersController {
   getUser(@Param('id') id: string) {
     return this.usersService.findOne(Number(id));
   }
+
+  @Get()
+  findAll() {
+    return this.usersService.findAll();
+  }
+
   @Post()
   create(@Body() CreateUserDto: CreateUserDto) {
     return this.usersService.create(CreateUserDto);

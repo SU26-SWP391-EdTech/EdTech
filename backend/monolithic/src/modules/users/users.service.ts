@@ -39,4 +39,17 @@ export class UsersService {
     });
     return await this.userRepo.save(newUser);
   }
+
+  async findAll() {
+    const users = await this.userRepo.find({
+      relations:
+        ['role'],
+
+    });
+    return users.map((users) => {
+      const { password, ...result } = users;
+      return result;
+    })
+  }
 }
+
