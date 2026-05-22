@@ -2,7 +2,8 @@
 import { Controller, Get, Post, Body, Res, HttpCode, HttpStatus, Req } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
-
+//import { LearnerRegisterDto } from './dto/learner-register.dto';
+//import { CourseProviderRegisterDto } from './dto/course-provider-register.dto';
 import { LoginDto } from './dto/login.dto';
 import { Public } from '../../common/decorators/public.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -11,7 +12,7 @@ import { BaseRegisterDto } from './dto/base-register.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Public()
   @Post('register')

@@ -22,7 +22,7 @@ export class User {
   @PrimaryGeneratedColumn({ name: 'user_id' })
   userId!: number;
 
-  @OneToMany(() => LearningPathCourse, (lpc) => lpc.editted_by, {nullable: false})
+  @OneToMany(() => LearningPathCourse, (lpc) => lpc.editted_by, { nullable: false })
   learningPathCourses!: LearningPathCourse[];
 
   // ==== course ====
