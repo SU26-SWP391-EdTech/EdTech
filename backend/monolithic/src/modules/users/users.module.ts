@@ -5,12 +5,14 @@ import { LearnerProfile } from '../learners/entities/learner-profile.entity';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
+import { Role } from '../roles/entities/role.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, LearnerProfile, CourseProviderProfile]),
+    TypeOrmModule.forFeature([User, LearnerProfile, CourseProviderProfile, Role]),
   ],
   providers: [UsersService],
   controllers: [UsersController],
+  exports: [UsersService],
 })
-export class UsersModule {}
+export class UsersModule { }

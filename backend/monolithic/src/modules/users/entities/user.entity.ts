@@ -24,7 +24,7 @@ export class User {
   @PrimaryGeneratedColumn({ name: 'user_id' })
   userId!: number;
 
-  @OneToMany(() => LearningPathCourse, (lpc) => lpc.editted_by, {nullable: false})
+  @OneToMany(() => LearningPathCourse, (lpc) => lpc.editted_by, { nullable: false })
   learningPathCourses!: LearningPathCourse[];
 
   // ==== course ====
@@ -82,9 +82,6 @@ export class User {
     (courseProviderProfile) => courseProviderProfile.user,
   )
   courseProviderProfile?: CourseProviderProfile;
-  // course
-  @OneToMany(() => Course, (course) => course.user, { nullable: false })
-  courses!: Course[];
 
   @Column({
     name: 'full_name',
