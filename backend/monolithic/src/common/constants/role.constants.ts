@@ -1,9 +1,9 @@
 /** Role names stored in DB (`roles.role_name`). Must match exactly. */
 export const RoleName = {
-  ADMIN: 'Admin',
-  EDUCATIONAL_ORGANIZATION: 'Educational Organization',
-  COURSE_PROVIDER: 'Course Provider',
-  LEARNER: 'LEARNER',
+  ADMIN: 'admin',
+  EDUCATIONAL_ORGANIZATION: 'organization',
+  COURSE_PROVIDER: 'course provider',
+  LEARNER: 'learner',
 } as const;
 
 export type RoleNameValue = (typeof RoleName)[keyof typeof RoleName];
