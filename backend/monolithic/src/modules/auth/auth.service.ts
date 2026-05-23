@@ -94,7 +94,7 @@ export class AuthService {
       userId: user.userId,
       email: user.email,
       fullName: user.fullName,
-      roleId: user.role,
+      roleId: user.role.roleId,
       roleName: user.role.roleName,
       avatarUrl: user.avatar,
     };
@@ -292,7 +292,7 @@ export class AuthService {
         userId: savedUser.userId,
         fullName: savedUser.fullName,
         email: savedUser.email,
-        roleId: savedUser.role,
+        roleId: savedUser.role.roleId,
         roleName: role.roleName,
         avatarUrl: savedUser.avatar
       };

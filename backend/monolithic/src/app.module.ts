@@ -49,14 +49,15 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     LearningPathsModule,
     OrganizationMemberProfilesModule,
     OrganizationRegistrationApplicationModule,
-    JoinOrganizationApplicationModule,    AuthModule,
+    JoinOrganizationApplicationModule,    
+    AuthModule,
     LearnersModule,
     CourseProvidersModule,
   ],
   providers: [
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard, // Áp dụng global guard cho toàn bộ app
+      useClass: JwtAuthGuard,
     },
   ],
 })
