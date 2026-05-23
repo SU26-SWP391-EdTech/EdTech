@@ -82,9 +82,6 @@ export class User {
     (courseProviderProfile) => courseProviderProfile.user,
   )
   courseProviderProfile?: CourseProviderProfile;
-  // course
-  @OneToMany(() => Course, (course) => course.user, { nullable: false })
-  courses!: Course[];
 
   @Column({
     name: 'full_name',

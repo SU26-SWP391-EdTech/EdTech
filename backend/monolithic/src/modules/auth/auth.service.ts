@@ -315,6 +315,7 @@ export class AuthService {
 
   async logout(res: Response) {
     clearTokenCookie(res);
+    console.log
     return {
       success: true,
       message: 'Logout successfully',
