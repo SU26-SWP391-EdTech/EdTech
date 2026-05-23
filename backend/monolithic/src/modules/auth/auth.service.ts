@@ -2,15 +2,13 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import type { Response } from 'express';
 import { User } from '../users/entities/user.entity';
-import { LearnerProfile } from '../learners/entities/learner-profile.entity';
-import { CourseProviderProfile } from '../course-providers/entities/course-provider-profile.entity';
+import { CourseProvider } from '../course-providers/entities/course-provider-profile.entity';
 import * as bcrypt from 'bcryptjs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from '../roles/entities/role.entity';
 import { DataSource, Repository } from 'typeorm';
 import { clearTokenCookie, setTokenCookie } from '../../common/helpers/jwt.helper';
 import { LoginDto } from './dto/login.dto';
-import { RoleName } from '../../common/constants/role.constants';
 import { BaseRegisterDto } from './dto/base-register.dto';
 
 @Injectable()
@@ -18,14 +16,14 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    
+
     @InjectRepository(Role)
     private roleRepository: Repository<Role>,
 
     private dataSource: DataSource,
-  ) {}
+  ) { }
 
-//validate fields
+  //validate fields
   async validateUser(email: string, password: string) {
     const user = await this.userRepository.findOne({
       where: { email },
@@ -75,7 +73,7 @@ export class AuthService {
   //login api
   async login(loginDto: LoginDto, res: Response) {
     const { email, password } = loginDto;
-    
+
     const user = await this.userRepository.findOne({
       where: { email },
       relations: ['role'],
@@ -117,7 +115,7 @@ export class AuthService {
   //   const existingUser = await this.userRepository.findOne({
   //     where: { email }
   //   });
-    
+
   //   if (existingUser) {
   //     throw new BadRequestException('Email has found');
   //   }
@@ -192,7 +190,7 @@ export class AuthService {
   //   const existingUser = await this.userRepository.findOne({
   //     where: { email }
   //   });
-    
+
   //   if (existingUser) {
   //     throw new BadRequestException('Email existed');
   //   }
@@ -256,18 +254,18 @@ export class AuthService {
   //   }
   // }
 
-  async register(baseDto: BaseRegisterDto, res: Response){
-    const { fullName, email, password, roleName } = baseDto;
+  async register(baseDto: BaseRegisterDto, res: Response) {
+    const { fullName, email, password, roleName, avatar_url } = baseDto;
 
-    const existingUser = await this.userRepository.findOne({where:{email}});
-    
-    if(existingUser){
+    const existingUser = await this.userRepository.findOne({ where: { email } });
+
+    if (existingUser) {
       throw new BadRequestException('Email existed');
     }
 
-    const role = await this.roleRepository.findOne({where: {roleName}});
+    const role = await this.roleRepository.findOne({ where: { roleName } });
 
-    if(!role){
+    if (!role) {
       throw new NotFoundException("Role doesn't exist");
     }
 
@@ -282,7 +280,7 @@ export class AuthService {
         email,
         password: hashedPassword,
         role: role,
-        avatarUrl: ""
+        avatar: avatar_url
       });
 
       const savedUser = await queryRunner.manager.save(newUser);
@@ -308,7 +306,7 @@ export class AuthService {
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
-    } finally{
+    } finally {
       await queryRunner.release();
     }
   }

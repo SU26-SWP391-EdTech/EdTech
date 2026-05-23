@@ -1,14 +1,12 @@
-import { CourseProviderProfile } from 'src/modules/course-providers/entities/course-provider-profile.entity';
+import { CourseProvider } from 'src/modules/course-providers/entities/course-provider-profile.entity';
 import { Course } from 'src/modules/courses/entities/course.entity';
 import { Enrollment } from 'src/modules/enrollments/entities/enrollment.entity';
 import { JoinOrganizationApplication } from 'src/modules/join-organization-application/entities/join-organization-application.entity';
-import { LearnerProfile } from 'src/modules/learners/entities/learner-profile.entity';
 import { Learner } from 'src/modules/learners/entities/learner.entity';
 import { LearningPathCourse } from 'src/modules/learning-paths/entities/learning-path-course.entity';
 import { OrganizationMemberProfile } from 'src/modules/organization-member-profiles/entities/organization-member-profile.entity';
 import { OrganizationRegistrationApplication } from 'src/modules/organization-registration-application/entities/organization-registration-application.entity';
 import { Role } from 'src/modules/roles/entities/role.entity';
-
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -24,7 +22,7 @@ export class User {
   @PrimaryGeneratedColumn({ name: 'user_id' })
   userId!: number;
 
-  @OneToMany(() => LearningPathCourse, (lpc) => lpc.editted_by, {nullable: false})
+  @OneToMany(() => LearningPathCourse, (lpc) => lpc.editted_by, { nullable: false })
   learningPathCourses!: LearningPathCourse[];
 
   // ==== course ====
@@ -74,14 +72,15 @@ export class User {
   reviewedOrganizationRegistrationApplications!: OrganizationRegistrationApplication[];
   // ====
 
-  @OneToOne(() => LearnerProfile, (learnerProfile) => learnerProfile.user)
-  learnerProfile?: LearnerProfile;
+  // learner
+  @OneToOne(() => Learner, (learner) => learner.user, { nullable: false })
+  learner!: Learner;
 
-  @OneToOne(
-    () => CourseProviderProfile,
-    (courseProviderProfile) => courseProviderProfile.user,
-  )
-  courseProviderProfile?: CourseProviderProfile;
+  // course provider
+  @OneToOne(() => CourseProvider, (courseProvider) => courseProvider.user, {
+    nullable: false,
+  })
+  courseProvider!: CourseProvider;
 
   @Column({
     name: 'full_name',

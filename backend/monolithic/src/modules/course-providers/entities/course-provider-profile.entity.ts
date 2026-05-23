@@ -1,19 +1,34 @@
-import { Entity, PrimaryColumn, Column, OneToOne, JoinColumn } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import { User } from "src/modules/users/entities/user.entity";
+import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
 
 @Entity('course_provider_profiles')
-export class CourseProviderProfile {
-  @PrimaryColumn({ name: 'user_id' })
-  userId: number;
+export class CourseProvider {
+    @PrimaryColumn({ name: 'user_id' })
+    userId!: number;
 
-  @OneToOne(() => User, user => user.courseProviderProfile)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
+    // user
+    @OneToOne(() => User, (user) => user.courseProvider, {
+        nullable: false
+    })
+    @JoinColumn({ name: 'user_id' })
+    user!: User;
 
-  @Column({ name: 'expertise', nullable: true })
-  expertise: string;
+    @Column({
+        type: 'text',
+        nullable: true,
+    })
+    expertise!: string;
+    // VD: "NestJS, React, System Design"
 
-  @Column({ name: 'experience_years', nullable: true, type: 'int' })
-  experienceYears: number;
+    @Column({
+        name: 'experience_years',
+        nullable: true,
+    })
+    experienceYears!: number;
 
+    @CreateDateColumn({ name: 'created_at' })
+    createdAt!: Date;
+
+    @UpdateDateColumn({ name: 'updated_at' })
+    updatedAt!: Date;
 }
