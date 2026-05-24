@@ -16,7 +16,7 @@ export class OrganizationRegistrationApplication {
   applicationId!: number;
 
   // Người gửi đơn
-  @ManyToOne(() => User, (user) => user.requestOrganizationRegistrationApplications, {nullable: false})
+  @ManyToOne(() => User, (user) => user.requestOrganizationRegistrationApplications, { nullable: false })
   @JoinColumn({ name: 'requester_user_id' })
   requesterUser!: User;
 
@@ -35,7 +35,7 @@ export class OrganizationRegistrationApplication {
   })
   website!: string;
 
-  @Column({ name: 'phone'})
+  @Column({ name: 'phone', unique: true })
   phone!: string;
 
   @Column({
@@ -45,7 +45,7 @@ export class OrganizationRegistrationApplication {
   })
   description!: string;
 
-   // Logo
+  // Logo
   @Column({
     name: 'logo_url',
     nullable: true,
@@ -65,7 +65,7 @@ export class OrganizationRegistrationApplication {
   })
   taxCode!: string;
 
-   @Column({ name: 'address' })
+  @Column({ name: 'address' })
   address!: string;
 
   // Trạng thái duyệt
