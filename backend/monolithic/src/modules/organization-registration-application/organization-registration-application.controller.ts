@@ -11,6 +11,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 
 @Controller('organization-registration-application')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class OrganizationRegistrationApplicationController {
   constructor(
     private readonly organizationRegistrationApplicationService: OrganizationRegistrationApplicationService,
@@ -23,7 +24,6 @@ export class OrganizationRegistrationApplicationController {
   }
 
   // gui don dang ky to chuc
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('course provider')
   @Post()
   public async createApplication(
@@ -40,7 +40,6 @@ export class OrganizationRegistrationApplicationController {
   }
 
   // duyệt đơn đăng ký
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Patch(':id/approve')
   public async approveApplication(
@@ -57,7 +56,6 @@ export class OrganizationRegistrationApplicationController {
   }
 
   // từ chối đơn đăng ký
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Patch(':id/reject')
   public async rejectApplication(
