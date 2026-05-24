@@ -16,6 +16,7 @@ import {
   JoinColumn,
   OneToOne,
   OneToMany,
+  DeleteDateColumn
 } from 'typeorm';
 @Entity('users')
 export class User {
@@ -124,4 +125,7 @@ export class User {
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  deletedAt?: Date;
 }
