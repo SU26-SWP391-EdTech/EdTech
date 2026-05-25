@@ -6,7 +6,6 @@ import { RolesModule } from './modules/roles/roles.module';
 import { EnrollmentsModule } from './modules/enrollments/enrollments.module';
 import { CoursesModule } from './modules/courses/courses.module';
 import { LessonsModule } from './modules/lessons/lessons.module';
-import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { LearnersModule } from './modules/learners/learners.module';
 import { CourseProvidersModule } from './modules/course-providers/course-providers.module';
 import { LearningPathsModule } from './modules/learning-paths/learning-paths.module';
@@ -17,7 +16,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CommonModule } from './common/common.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
-// import { MailModule } from './modules/mail/mail.module';
+import { OrganizationsModule } from './modules/organizations/organizations.module';
 
 @Module({
   imports: [
@@ -37,7 +36,6 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
       synchronize: true,
     }),
     CommonModule,
-    UsersModule,
      // modules
     UsersModule,
     RolesModule,
@@ -50,11 +48,8 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     LearningPathsModule,
     OrganizationMemberProfilesModule,
     OrganizationRegistrationApplicationModule,
-    JoinOrganizationApplicationModule,    
+    JoinOrganizationApplicationModule,   
     AuthModule,
-    LearnersModule,
-    CourseProvidersModule,
-    // MailModule,
   ],
   providers: [
     {

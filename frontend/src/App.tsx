@@ -1,19 +1,10 @@
 import './App.css'
+import { RouterProvider } from "react-router-dom";
 
-function App() {
+import { router } from './routes/index'
 
-  return (
-    <>
-      <div className="flex items-center justify-center h-screen">
-        <div>
-          This is button
-        </div>
-        <button className="btn btn-active btn-neutral">
-          Hello DaisyUI
-        </button>
-      </div>
-    </>
-  )
-}
+const App = () => {
+  return <RouterProvider router={router} />;
+};
 
-export default App
+export default App;

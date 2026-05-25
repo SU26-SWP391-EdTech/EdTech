@@ -1,5 +1,5 @@
 export enum OrganizationRegistrationApplicationStatus {
-  PENDING = 'peding',
+  PENDING = 'pending',
   APPROVED = 'approved',
   REJECTED = 'rejected',
 }
