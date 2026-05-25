@@ -9,6 +9,37 @@ export class CoursesRepository extends Repository<Course> {
         super(Course, dataSource.createEntityManager());
     }
 
+    // ==================== CRUD Operations ====================
+
+    public async createCourse(data: Partial<Course>): Promise<Course> {
+        const course = this.create(data);
+        return await this.save(course);
+    }
+
+    public async findAllCourses(): Promise<Course[]> {
+        return await this.find({
+            relations: ['user', 'organization'],
+        });
+    }
+
+    public async findCourseById(id: number): Promise<Course | null> {
+        return await this.findOne({
+            where: { courseId: id },
+            relations: ['user', 'organization', 'lessons'],
+        });
+    }
+
+    public async saveCourse(course: Course): Promise<Course> {
+        return await this.save(course);
+    }
+
+    public async removeCourse(course: Course): Promise<string> {
+        await this.remove(course);
+        return `Course ID ${course.courseId} has been deleted`;
+    }
+
+    // ==================== Search & Filter ====================
+
     async searchCourses(dto: SearchCourseDto): Promise<{ data: Course[]; total: number }> {
         const {
             search,

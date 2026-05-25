@@ -1,5 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Course } from './entities/course.entity';
 import { CoursesRepository } from './courses.repository';
+import { CreateCourseDto } from './dto/create-course.dto';
+import { UpdateCourseDto } from './dto/update-course.dto';
 import { SearchCourseDto } from './dto/search-course.dto';
 
 @Injectable()
@@ -7,6 +10,55 @@ export class CoursesService {
     constructor(
         private readonly coursesRepository: CoursesRepository,
     ) { }
+
+    // ==================== CRUD ====================
+
+    async create(createCourseDto: CreateCourseDto, userId: number): Promise<Course> {
+        return this.coursesRepository.createCourse({
+            ...createCourseDto,
+            // Gán user (người tạo khóa học)
+            user: { userId } as any,
+            // Gán organization mà khóa học này thuộc về
+            organization: { organizationId: createCourseDto.organizationId } as any,
+        });
+    }
+
+    async findAll(): Promise<Course[]> {
+        return this.coursesRepository.findAllCourses();
+    }
+
+    async findOne(id: number): Promise<Course> {
+        const course = await this.coursesRepository.findCourseById(id);
+
+        if (!course) {
+            throw new NotFoundException(`Không tìm thấy khóa học với ID ${id}`);
+        }
+
+        return course;
+    }
+
+    async update(id: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
+        const course = await this.findOne(id);
+
+        // Nếu có cập nhật tổ chức
+        if (updateCourseDto.organizationId) {
+            course.organization = { organizationId: updateCourseDto.organizationId } as any;
+        }
+
+        // Gộp các trường mới vào entity (ngoại trừ tổ chức đã xử lý ở trên)
+        const { organizationId, ...otherUpdates } = updateCourseDto;
+        Object.assign(course, otherUpdates);
+
+        return this.coursesRepository.saveCourse(course);
+    }
+
+    async remove(id: number): Promise<{ message: string }> {
+        const course = await this.findOne(id);
+        const message = await this.coursesRepository.removeCourse(course);
+        return { message };
+    }
+
+    // ==================== Search & Filter ====================
 
     async search(dto: SearchCourseDto) {
         const { data, total } = await this.coursesRepository.searchCourses(dto);
@@ -22,16 +74,5 @@ export class CoursesService {
                 },
             },
         };
-    }
-
-    async findOne(id: number) {
-        const course = await this.coursesRepository.findDetail(id);
-
-
-        if (!course) {
-            throw new NotFoundException(`Không tìm thấy khóa học với ID ${id}`);
-        }
-
-        return course;
     }
 }
