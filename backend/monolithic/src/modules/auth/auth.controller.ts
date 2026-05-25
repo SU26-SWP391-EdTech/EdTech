@@ -28,21 +28,6 @@ export class AuthController {
     return res.json(result);
   }
 
-  // @Public()
-  // @Post('register/learner')
-  // @HttpCode(HttpStatus.CREATED)
-  // async registerLearner(@Body() learnerDto: LearnerRegisterDto, @Res() res: Response) {
-  //   const result = await this.authService.registerLearner(learnerDto, res);
-  //   return res.json(result);
-  // }
-
-  // @Public()
-  // @Post('register/course-provider')
-  // @HttpCode(HttpStatus.CREATED)
-  // async registerProvider(@Body() providerDto: CourseProviderRegisterDto, @Res() res: Response) {
-  //   const result = await this.authService.registerCourseProvider(providerDto, res);
-  //   return res.json(result);
-  // }
 
   @Public()
   @Post('logout')

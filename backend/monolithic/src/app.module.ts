@@ -17,6 +17,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CommonModule } from './common/common.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+// import { MailModule } from './modules/mail/mail.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     AuthModule,
     LearnersModule,
     CourseProvidersModule,
+    // MailModule,
   ],
   providers: [
     {
