@@ -124,4 +124,22 @@ export class User {
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
+
+  @Column({
+    name: 'is_email_verified',
+    nullable: false,
+  })
+  isEmailVerifed!: boolean;
+
+  @Column({
+    name: 'email_verification_token',
+    nullable: false,
+  })
+  emailVerificationToken!: string;
+
+  @Column({
+    name: 'email_verification_expires_at',
+    nullable: true ,
+  })
+  emailVerificationExpiresAt!: Date;
 }
