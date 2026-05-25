@@ -1,6 +1,7 @@
 export enum CourseStatus {
-  DRAF = 'draf',
+  DRAFT = 'draft',
   PENDING = 'pending',
   APPROVED = 'approved',
   REJECTED = 'rejected',
 }
+
