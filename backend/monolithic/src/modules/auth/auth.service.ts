@@ -24,11 +24,14 @@ export class AuthService {
   ) { }
 
   //validate fields
+  //use this so it can read password field which has select: false in user entity
   async validateUser(email: string, password: string) {
-    const user = await this.userRepository.findOne({
-      where: { email },
-      relations: ['role'],
-    });
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.email = :email', { email })
+      .leftJoinAndSelect('user.role', 'role')
+      .getOne();
 
     if (!user) {
       return null;
@@ -74,10 +77,12 @@ export class AuthService {
   async login(loginDto: LoginDto, res: Response) {
     const { email, password } = loginDto;
 
-    const user = await this.userRepository.findOne({
-      where: { email },
-      relations: ['role'],
-    });
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.email = :email', { email })
+      .leftJoinAndSelect('user.role', 'role')
+      .getOne();
 
     if (!user) {
       throw new UnauthorizedException('Email or password is not true');

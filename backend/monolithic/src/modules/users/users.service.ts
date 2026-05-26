@@ -19,6 +19,7 @@ export class UsersService {
   async findOne(id: number) {
     return this.userRepo.findOne({
       where: { userId: id },
+      relations: ['role'],
     });
   }
 
