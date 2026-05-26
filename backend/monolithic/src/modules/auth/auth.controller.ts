@@ -7,10 +7,12 @@ import { Public } from '../../common/decorators/public.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { JwtPayloadUser } from '../../common/decorators/current-user.decorator';
 import { BaseRegisterDto } from './dto/base-register.dto';
+import { VerifyEmailDto } from '../mail/dto/verifyEmail.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService,
+  ) { }
 
   @Public()
   @Post('register')
@@ -40,5 +42,11 @@ export class AuthController {
   @Get('me')
   async getMe(@CurrentUser() user: JwtPayloadUser) {
     return this.authService.getMe(user.userId);
+  }
+
+  @Post('verify-mail')
+  async verifyEmail(@Body() verifyEmailDto:VerifyEmailDto, @Res() res: Response){
+    const result = await this.authService.verifyEmail(verifyEmailDto);
+    return res.json(result);
   }
 }

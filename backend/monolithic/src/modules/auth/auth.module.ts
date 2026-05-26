@@ -9,6 +9,7 @@ import { Role } from '../roles/entities/role.entity';
 import { Learner } from '../learners/entities/learner.entity';
 import { jwtConstants } from '../../common/constants/jwt.constants';
 import { CourseProvider } from '../course-providers/entities/course-provider-profile.entity';
+import { MailService } from '../mail/mail.service';
 
 
 @Module({
@@ -21,7 +22,7 @@ import { CourseProvider } from '../course-providers/entities/course-provider-pro
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, MailService],
   exports: [AuthService],
 })
 export class AuthModule {}

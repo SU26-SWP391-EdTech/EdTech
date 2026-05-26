@@ -17,6 +17,9 @@ import { CommonModule } from './common/common.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
+import { MailModule } from './modules/mail/mail.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -24,6 +27,13 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
       isGlobal: true,
       envFilePath: ['.env', '../.env'],
     }),
+
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 5,
+      },
+    ]),
 
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -50,11 +60,16 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
     OrganizationRegistrationApplicationModule,
     JoinOrganizationApplicationModule,   
     AuthModule,
+    MailModule
   ],
   providers: [
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })

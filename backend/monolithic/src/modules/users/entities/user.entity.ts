@@ -126,16 +126,15 @@ export class User {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-<<<<<<< HEAD
   @Column({
     name: 'is_email_verified',
-    nullable: false,
+    default: false,
   })
-  isEmailVerifed!: boolean;
+  isEmailVerified!: boolean;
 
   @Column({
     name: 'email_verification_token',
-    nullable: false,
+    nullable: true,
   })
   emailVerificationToken!: string;
 
@@ -144,8 +143,4 @@ export class User {
     nullable: true ,
   })
   emailVerificationExpiresAt!: Date;
-=======
-  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
-  deletedAt?: Date;
->>>>>>> 8f84eb925dd599c0fbbffe3759c285fb6204c69a
 }

@@ -1,5 +1,10 @@
 // auth/auth.service.ts
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import type { Response } from 'express';
 import { User } from '../users/entities/user.entity';
 import { CourseProvider } from '../course-providers/entities/course-provider-profile.entity';
@@ -7,9 +12,15 @@ import * as bcrypt from 'bcryptjs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from '../roles/entities/role.entity';
 import { DataSource, Repository } from 'typeorm';
-import { clearTokenCookie, setTokenCookie } from '../../common/helpers/jwt.helper';
+import {
+  clearTokenCookie,
+  setTokenCookie,
+} from '../../common/helpers/jwt.helper';
 import { LoginDto } from './dto/login.dto';
 import { BaseRegisterDto } from './dto/base-register.dto';
+import { MailService } from '../mail/mail.service';
+import { JwtService } from '@nestjs/jwt';
+import { VerifyEmailDto } from '../mail/dto/verifyEmail.dto';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +32,10 @@ export class AuthService {
     private roleRepository: Repository<Role>,
 
     private dataSource: DataSource,
-  ) { }
+
+    private mailService: MailService,
+    private jwtService: JwtService,
+  ) {}
 
   //validate fields
   async validateUser(email: string, password: string) {
@@ -111,7 +125,9 @@ export class AuthService {
   async register(baseDto: BaseRegisterDto, res: Response) {
     const { fullName, email, password, roleName, avatar_url } = baseDto;
 
-    const existingUser = await this.userRepository.findOne({ where: { email } });
+    const existingUser = await this.userRepository.findOne({
+      where: { email },
+    });
 
     if (existingUser) {
       throw new BadRequestException('Email existed');
@@ -134,11 +150,11 @@ export class AuthService {
         email,
         password: hashedPassword,
         role: role,
-        avatar: avatar_url
+        avatar: avatar_url,
+        isEmailVerified: false,
       });
 
       const savedUser = await queryRunner.manager.save(newUser);
-      await queryRunner.commitTransaction();
 
       const userData = {
         userId: savedUser.userId,
@@ -146,15 +162,32 @@ export class AuthService {
         email: savedUser.email,
         roleId: savedUser.role.roleId,
         roleName: role.roleName,
-        avatarUrl: savedUser.avatar
+        avatarUrl: savedUser.avatar,
+        isEmailVerified: false,
       };
+      await queryRunner.commitTransaction();
 
-      const token = setTokenCookie(res, userData);
+      const emailVerifyToken = this.jwtService.sign(
+        {
+          sub: savedUser.userId,
+          email: savedUser.email,
+          type: 'email-verification',
+        },
+        {
+          secret: process.env.JWT_SECRET,
+          expiresIn: '15m',
+        },
+      );
+
+      try {
+        await this.mailService.sendVerificationEmail(savedUser.email, emailVerifyToken);
+      } catch (error) {
+        console.error('Send mail failed', error);
+      }
 
       return {
         success: true,
-        message: 'Register successfully',
-        token: token,
+        message: 'Register successfully, please check your mail',
         user: userData,
       };
     } catch (error) {
@@ -167,10 +200,42 @@ export class AuthService {
 
   async logout(res: Response) {
     clearTokenCookie(res);
-    console.log
+    console.log;
     return {
       success: true,
       message: 'Logout successfully',
+    };
+  }
+
+  async verifyEmail(dto: VerifyEmailDto){
+    
+    const payload = this.jwtService.verify(dto.token,
+      {
+        secret: process.env.JWT_SECRET
+      },
+    );
+
+    if(payload.type !== 'email-verification'){
+      throw new UnauthorizedException();
+    }
+
+    const user = await this.userRepository.findOne({
+      where: {
+        userId: payload.sub,
+      }
+    });
+
+    if (!user) {
+      throw new NotFoundException();
+    }
+  
+    user.isEmailVerified = true;
+  
+    await this.userRepository.save(user);
+  
+    return {
+      success: true,
+      message: 'Email verified successfully',
     };
   }
 }
