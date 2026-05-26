@@ -11,14 +11,10 @@ export class CoursesService {
         private readonly coursesRepository: CoursesRepository,
     ) { }
 
-    // ==================== CRUD ====================
-
     async create(createCourseDto: CreateCourseDto, userId: number): Promise<Course> {
         return this.coursesRepository.createCourse({
             ...createCourseDto,
-            // Gán user (người tạo khóa học)
             user: { userId } as any,
-            // Gán organization mà khóa học này thuộc về
             organization: { organizationId: createCourseDto.organizationId } as any,
         });
     }
@@ -31,7 +27,7 @@ export class CoursesService {
         const course = await this.coursesRepository.findCourseById(id);
 
         if (!course) {
-            throw new NotFoundException(`Không tìm thấy khóa học với ID ${id}`);
+            throw new NotFoundException(`Not found course with ID ${id}`);
         }
 
         return course;
@@ -40,12 +36,9 @@ export class CoursesService {
     async update(id: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
         const course = await this.findOne(id);
 
-        // Nếu có cập nhật tổ chức
         if (updateCourseDto.organizationId) {
             course.organization = { organizationId: updateCourseDto.organizationId } as any;
         }
-
-        // Gộp các trường mới vào entity (ngoại trừ tổ chức đã xử lý ở trên)
         const { organizationId, ...otherUpdates } = updateCourseDto;
         Object.assign(course, otherUpdates);
 
@@ -65,7 +58,7 @@ export class CoursesService {
 
         return {
             statusCode: 200,
-            message: 'Lấy danh sách khóa học thành công',
+            message: 'Get course list successfully',
             data: {
                 items: data,
                 meta: {
