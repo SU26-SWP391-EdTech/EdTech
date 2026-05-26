@@ -42,7 +42,7 @@ export class Course {
     name: 'status',
     type: 'enum',
     enum: CourseStatus,
-    default: CourseStatus.DRAF,
+    default: CourseStatus.DRAFT,
   })
   status!: CourseStatus;
 
@@ -111,6 +111,6 @@ export class Course {
   @JoinColumn({ name: 'reviewed_by' })
   reviewedBy!: User;
 
-  @Column({name: 'errollment_count', default: 0})
+  @Column({ name: 'errollment_count', default: 0 })
   enrollmentCount!: number;
 }
