@@ -20,6 +20,7 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
 import { MailModule } from './modules/mail/mail.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -60,7 +61,8 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     OrganizationRegistrationApplicationModule,
     JoinOrganizationApplicationModule,   
     AuthModule,
-    MailModule
+    MailModule,
+    CloudinaryModule
   ],
   providers: [
     {
