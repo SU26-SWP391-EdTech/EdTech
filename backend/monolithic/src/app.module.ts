@@ -16,6 +16,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { MailModule } from './modules/mail/mail.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -51,7 +52,20 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     CoursesModule,
     LessonsModule,
     LearnersModule,
-    LearningPathsModule,
+    LearningPathsModule,  
+    AuthModule,
+    MailModule,
+    CloudinaryModule
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule { }
