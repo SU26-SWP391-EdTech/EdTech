@@ -6,13 +6,9 @@ import { RolesModule } from './modules/roles/roles.module';
 import { EnrollmentsModule } from './modules/enrollments/enrollments.module';
 import { CoursesModule } from './modules/courses/courses.module';
 import { LessonsModule } from './modules/lessons/lessons.module';
-import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { LearnersModule } from './modules/learners/learners.module';
-import { CourseProvidersModule } from './modules/course-providers/course-providers.module';
 import { LearningPathsModule } from './modules/learning-paths/learning-paths.module';
-import { OrganizationMemberProfilesModule } from './modules/organization-member-profiles/organization-member-profiles.module';
-import { OrganizationRegistrationApplicationModule } from './modules/organization-registration-application/organization-registration-application.module';
-import { JoinOrganizationApplicationModule } from './modules/join-organization-application/join-organization-application.module';
+import { PlatformSettingsModule } from './modules/platform-settings/platform-settings.module';
 
 @Module({
   imports: [
@@ -38,13 +34,9 @@ import { JoinOrganizationApplicationModule } from './modules/join-organization-a
     EnrollmentsModule,
     CoursesModule,
     LessonsModule,
-    OrganizationsModule,
     LearnersModule,
-    CourseProvidersModule,
     LearningPathsModule,
-    OrganizationMemberProfilesModule,
-    OrganizationRegistrationApplicationModule,
-    JoinOrganizationApplicationModule,
+    PlatformSettingsModule,
   ],
 })
 export class AppModule { }

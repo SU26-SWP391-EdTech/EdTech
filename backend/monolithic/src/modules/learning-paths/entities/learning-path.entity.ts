@@ -1,7 +1,7 @@
 import { LearningPathLevel } from 'src/common/enums/learning-path.enum';
-import { Organization } from 'src/modules/organizations/entities/organization.entity';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { LearningPathCourse } from './learning-path-course.entity';
+import { User } from 'src/modules/users/entities/user.entity';
 
 @Entity('learning_paths')
 export class LearningPath {
@@ -28,15 +28,16 @@ export class LearningPath {
   })
   level!: LearningPathLevel;
 
-  // organization
-  @ManyToOne(() => Organization, (org) => org.learningPaths, {nullable: false})
-  @JoinColumn({ name: 'organization_id' })
-  organization!: Organization;
-
+  
   // learning path course
   @OneToMany(() => LearningPathCourse, (learningPathCourse) => learningPathCourse.learningPath, {nullable: false})
   learningPathCourses!: LearningPathCourse[];
 
+  @ManyToOne(() => User, (user) => user.learningPathCourses, {nullable: false})
+  @JoinColumn({name: 'editted_by'})
+  edittedBy!: User;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
+
 }

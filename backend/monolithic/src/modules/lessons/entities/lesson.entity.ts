@@ -14,7 +14,7 @@ export class Lesson {
     @PrimaryGeneratedColumn({name: 'lesson_id'})
     lessonId!: string;
 
-    // Course
+    // course 1-n lesson
     @ManyToOne(() => Course, (course) => course.lessons, {nullable: false})
     @JoinColumn({ name: 'course_id' })
     course!: Course;
@@ -37,7 +37,7 @@ export class Lesson {
     @CreateDateColumn({ name: 'created_at' })
     createdAt!: Date;
 
-    @UpdateDateColumn({ name: 'updated_at' })
+    @UpdateDateColumn({ name: 'updated_at', nullable: true })
     updatedAt!: Date;
 
 }
