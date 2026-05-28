@@ -6,5 +6,4 @@ export class GetLearnerProfileDto {
     level?: string;
     bio?: string;
     createdAt?: Date;
-    updatedAt?: Date;
   }
