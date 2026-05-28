@@ -17,7 +17,7 @@ export class Enrollment {
   @PrimaryGeneratedColumn({ name: 'enrollments_id' })
   enrollmentId!: number;
 
-  // ===== USER FK =====
+  // user 1-n enrollment
   @ManyToOne(() => User, (user) => user.enrollments, {
     nullable: false
   })

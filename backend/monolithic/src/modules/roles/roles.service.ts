@@ -1,26 +1,13 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { ALL_ROLE_NAMES } from '../../common/constants/role.constants';
-import { Role } from './entities/role.entity';
+import { RolesRepository } from './roles.repository';
+import { RoleEnum } from 'src/common/enums/role.enum';
 
 @Injectable()
 export class RolesService implements OnModuleInit {
-  constructor(
-    @InjectRepository(Role)
-    private readonly roleRepository: Repository<Role>,
-  ) {}
+  constructor(private readonly rolesRepository: RolesRepository) {}
 
-  async onModuleInit() {
-    for (const roleName of ALL_ROLE_NAMES) {
-      const exists = await this.roleRepository.exist({ where: { roleName } });
-      if (!exists) {
-        await this.roleRepository.save(this.roleRepository.create({ roleName }));
-      }
-    }
-  }
-
-  findAll() {
-    return this.roleRepository.find({ order: { roleId: 'ASC' } });
+  public async onModuleInit() {
+    const roles = Object.values(RoleEnum);
+    await this.rolesRepository.seedRoles(roles);
   }
 }

@@ -27,6 +27,6 @@ export class LearningPathCourse {
   
   @ManyToOne(() => User, (user) => user.learningPathCourses, {nullable: false})
   @JoinColumn({name: 'editted_by'})
-  editted_by!: User;
+  edittedBy!: User;
 
 }
