@@ -1,5 +1,5 @@
 
-export class GetCourseProviderProfileDto{
+export class GetAcademicUserProfileDto{
     fullName: string;
     email?: string;
     avatarUrl?: string;

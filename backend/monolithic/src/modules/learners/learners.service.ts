@@ -1,9 +1,8 @@
 import { Injectable, NotFoundException, UseInterceptors } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
-import { UpdateLearnerProfileDto } from './dto/update-learner-profile.dto';
+import { EditLearnerProfileDto } from './dto/edit-learner-profile.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { UsersService } from '../users/users.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Learner } from './entities/learner.entity';
 import { GetLearnerProfileDto } from './dto/get-learner-profile.dto';
@@ -40,7 +39,7 @@ export class LearnersService {
     return this.learnerRepository.save(learner);
 }
 
-  async editLearnerProfile(id: number, dto: UpdateLearnerProfileDto, file?: Express.Multer.File){
+  async editLearnerProfile(id: number, dto: EditLearnerProfileDto, file?: Express.Multer.File){
       const learnerProfile = await this.userRepository.findOne({
         where: {
           userId: id,

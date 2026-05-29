@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { User } from '../users/entities/user.entity';
-import { CourseProvider } from '../course-providers/entities/course-provider-profile.entity';
 import * as bcrypt from 'bcryptjs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from '../roles/entities/role.entity';

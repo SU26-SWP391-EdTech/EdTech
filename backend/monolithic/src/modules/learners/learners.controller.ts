@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, ParseIntPipe, Req, UseGuards } from '@nestjs/common';
 import { LearnersService } from './learners.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UpdateLearnerProfileDto } from './dto/update-learner-profile.dto';
+import { EditLearnerProfileDto } from './dto/edit-learner-profile.dto';
 import { ChangePasswordDto } from '../users/dto/change-password.dto';
 import { UsersService } from '../users/users.service';
 import { UpdateLearnerInfoDto } from './dto/update-learner-info.dto';
@@ -35,11 +35,11 @@ export class LearnersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('learner')
   @Patch('edit-profile/:id')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('avatarUrl'))
   async editLearnerProfile(
     @Param('id', ParseIntPipe) id: number,
 
-    @Body() dto: UpdateLearnerProfileDto,
+    @Body() dto: EditLearnerProfileDto,
 
     @UploadedFile() file?: Express.Multer.File,
   ) {

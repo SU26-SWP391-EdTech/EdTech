@@ -5,11 +5,13 @@ import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { UserProfile } from './entities/user-profile.entity';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { Role } from '../roles/entities/role.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, UserProfile])],
-  providers: [UsersService],
+  imports: [TypeOrmModule.forFeature([User, UserProfile, Role])],
+  providers: [UsersService,CloudinaryService],
   controllers: [UsersController],
-  exports: [UsersService],
+  exports: [UsersService, CloudinaryService],
 })
 export class UsersModule { }

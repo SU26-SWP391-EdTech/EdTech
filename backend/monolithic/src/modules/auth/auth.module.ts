@@ -8,13 +8,13 @@ import { User } from '../users/entities/user.entity';
 import { Role } from '../roles/entities/role.entity';
 import { Learner } from '../learners/entities/learner.entity';
 import { jwtConstants } from '../../common/constants/jwt.constants';
-import { CourseProvider } from '../course-providers/entities/course-provider-profile.entity';
 import { MailService } from '../mail/mail.service';
+import { UserProfile } from '../users/entities/user-profile.entity';
 
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Role, Learner, CourseProvider]),
+    TypeOrmModule.forFeature([User, Role, Learner, UserProfile]),
     PassportModule,
     JwtModule.register({
       secret: jwtConstants.secret,
