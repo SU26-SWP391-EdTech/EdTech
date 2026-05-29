@@ -78,18 +78,18 @@ const STEPS = [
 
 const TESTIMONIALS = [
     {
-        id: 1, name: 'Mia Tanaka', role: 'Frontend Dev at Stripe', av: 'MT', color: '#7C3AED',
-        quote: 'LearningPath gave me the structured roadmap I needed. I went from zero to landing my first dev job in 5 months. The progress tracking kept me accountable every day.',
+        id: 1, name: 'Mark Zuckerberg', role: 'CEO of Meta', av: "https://imageio.forbes.com/specials-images/imageserve/5c76b7d331358e35dd2773a9/0x0.jpg?format=jpg&crop=4401,4401,x0,y0,safe&height=416&width=416&fit=bounds", color: '#7C3AED',
+        quote: 'A great learning product is not only useful, but also makes people want to come back every day',
         rating: 5,
     },
     {
-        id: 2, name: 'James Okafor', role: 'Data Analyst at Meta', av: 'JO', color: '#0369A1',
-        quote: 'The Data Analyst path was exactly what I needed. The courses are practical, the projects are real-world, and the certificate got me noticed by recruiters immediately.',
+        id: 2, name: 'Elon Musk', role: 'CEO of Tesla & SpaceX', av: 'https://assets.weforum.org/sf_account/image/SU7jY2MYK0Qaj6IgY6e0hXgO4LBYNB6qKxy9f-cr8KU.jpg', color: '#0369A1',
+        quote: 'I like how LearningPath breaks big goals into small, actionable steps. It makes learning feel faster and more focused',
         rating: 5,
     },
     {
-        id: 3, name: 'Sofia Reyes', role: 'UX Designer at Figma', av: 'SR', color: '#D97706',
-        quote: "Nothing matched the clarity and quality of LearningPath. The UI/UX path is brilliantly structured and the community support is genuinely incredible.",
+        id: 3, name: 'Bill Gates', role: 'Founder of Microsoft', av: 'https://imageio.forbes.com/specials-images/imageserve/62d599ede3ff49f348f9b9b4/0x0.jpg?format=jpg&crop=821,821,x155,y340,safe&height=416&width=416&fit=bounds', color: '#D97706',
+        quote: "    LearningPath turns self-learning into a clear journey. You know where to start, what to learn next, and how far you have progressed.",
         rating: 5,
     },
 ];
@@ -198,8 +198,8 @@ function HeroDashboardMockup() {
                             {['HTML', 'JS', 'React', 'TS', 'Next'].map((n, i) => (
                                 <div key={n} className="flex items-center gap-1.5">
                                     <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 ${i < 2 ? 'bg-[#10B981] border-[#10B981]' :
-                                            i === 2 ? 'bg-[#E11D48] border-[#E11D48]' :
-                                                'bg-white border-[#E5E7EB]'
+                                        i === 2 ? 'bg-[#E11D48] border-[#E11D48]' :
+                                            'bg-white border-[#E5E7EB]'
                                         }`}>
                                         {i < 2 ? <Check className="w-3 h-3 text-white" /> :
                                             i === 2 ? <div className="w-2 h-2 rounded-full bg-white" /> :
@@ -347,8 +347,8 @@ function LargeDashboardMockup() {
                                 ].map((node) => (
                                     <div key={node.label} className="flex items-center gap-2">
                                         <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${node.state === 'done' ? 'bg-[#10B981]' :
-                                                node.state === 'active' ? 'bg-[#E11D48]' :
-                                                    'bg-[#F3F4F6] border border-[#E5E7EB]'
+                                            node.state === 'active' ? 'bg-[#E11D48]' :
+                                                'bg-[#F3F4F6] border border-[#E5E7EB]'
                                             }`}>
                                             {node.state === 'done' && <Check className="w-3 h-3 text-white" />}
                                             {node.state === 'active' && <div className="w-2 h-2 rounded-full bg-white" />}
@@ -373,37 +373,7 @@ function LargeDashboardMockup() {
 
 // ── Nav ────────────────────────────────────────────────────────────────────────
 
-function LandingNav() {
-    return (
-        <nav className="sticky top-0 z-50 bg-white/90 border-b border-[#E5E7EB]" style={{ backdropFilter: 'blur(12px)' }}>
-            <div className="max-w-[1200px] mx-auto px-8 h-16 flex items-center justify-between">
-                <div className="flex items-center gap-10">
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-lg bg-[#E11D48] flex items-center justify-center shadow-sm shadow-[#E11D48]/30">
-                            <BookOpen className="w-3.5 h-3.5 text-white" />
-                        </div>
-                        <span className="text-[#111827]" style={{ fontWeight: 700, fontSize: 16 }}>LearningPath</span>
-                    </div>
-                    <div className="flex items-center gap-7">
-                        {['Features', 'Learning Paths', 'Courses', 'Organizations', 'Pricing', 'About'].map(link => (
-                            <a key={link} href="#" className="text-[#6B7280] hover:text-[#111827] transition-colors" style={{ fontSize: 14, fontWeight: 500 }}>
-                                {link}
-                            </a>
-                        ))}
-                    </div>
-                </div>
-                <div className="flex items-center gap-3">
-                    <button className="text-[#374151] hover:text-[#111827] transition-colors" style={{ fontSize: 14, fontWeight: 500 }}>
-                        Sign In
-                    </button>
-                    <button className="px-4 py-2 bg-[#E11D48] text-white rounded-xl hover:bg-[#BE123C] transition-all shadow-sm shadow-[#E11D48]/25" style={{ fontSize: 14, fontWeight: 600 }}>
-                        Get Started
-                    </button>
-                </div>
-            </div>
-        </nav>
-    );
-}
+
 
 // ── Hero ───────────────────────────────────────────────────────────────────────
 
@@ -814,9 +784,13 @@ function TestimonialsSection() {
                             </div>
                             <p className="text-[#374151] mb-7" style={{ fontSize: 15, lineHeight: 1.7 }}>"{t.quote}"</p>
                             <div className="flex items-center gap-3 pt-5 border-t border-[#F3F4F6]">
-                                <div className="w-10 h-10 rounded-full flex items-center justify-center text-white flex-shrink-0" style={{ backgroundColor: t.color, fontSize: 12, fontWeight: 700 }}>
-                                    {t.av}
-                                </div>
+                                {t.av.startsWith('http') || t.av.startsWith('/') ? (
+                                    <img src={t.av} alt={t.name} className="w-10 h-10 rounded-full flex items-center justify-center text-white flex-shrink-0" />
+                                ) : (
+                                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-white flex-shrink-0" style={{ backgroundColor: t.color, fontSize: 12, fontWeight: 700 }}>
+                                        {t.av}
+                                    </div>
+                                )}
                                 <div>
                                     <p className="text-[#111827]" style={{ fontWeight: 600, fontSize: 14 }}>{t.name}</p>
                                     <p className="text-[#9CA3AF]" style={{ fontSize: 13 }}>{t.role}</p>
@@ -922,9 +896,9 @@ function Footer() {
                         </p>
                         <div className="flex items-center gap-3">
                             {[
-                                { icon: <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>, href: '#' },
-                                { icon: <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0z"/></svg>, href: '#' },
-                                { icon: <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.11.82-.26.82-.577v-2.234c-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.43.372.82 1.102.82 2.222v3.293c0 .319.22.694.825.576C20.565 21.795 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>, href: '#' },
+                                { icon: <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>, href: '#' },
+                                { icon: <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0z" /></svg>, href: '#' },
+                                { icon: <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.11.82-.26.82-.577v-2.234c-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.43.372.82 1.102.82 2.222v3.293c0 .319.22.694.825.576C20.565 21.795 24 17.3 24 12c0-6.63-5.37-12-12-12z" /></svg>, href: '#' },
                             ].map((s, i) => (
                                 <a key={i} href={s.href} className="w-8 h-8 rounded-lg bg-[#1F2937] hover:bg-[#374151] flex items-center justify-center text-[#9CA3AF] hover:text-white transition-all">
                                     {s.icon}
@@ -972,7 +946,6 @@ function Footer() {
 export function LandingPage() {
     return (
         <div className="bg-white overflow-x-hidden">
-            <LandingNav />
             <HeroSection />
             <TrustSection />
             <FeaturesSection />
