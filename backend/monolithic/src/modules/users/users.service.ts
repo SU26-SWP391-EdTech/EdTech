@@ -33,6 +33,13 @@ export class UsersService {
   async findOne(id: number) {
     return this.userRepo.findOne({
       where: { userId: id },
+      select: {
+        userId: true,
+        fullName: true,
+        email: true,
+        avatar: true,
+        createdAt: true,
+      },
     });
   }
 
