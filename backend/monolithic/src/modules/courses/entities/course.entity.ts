@@ -34,7 +34,7 @@ export class Course {
     name: 'status',
     type: 'enum',
     enum: CourseStatus,
-    default: CourseStatus.DRAFTT,
+    default: CourseStatus.DRAFT,
   })
   status!: CourseStatus;
 
