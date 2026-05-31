@@ -5,10 +5,6 @@ export class CreateCourseDto {
   @IsString()
   title!: string;
 
-  @IsNotEmpty({ message: 'ID của tổ chức (organizationId) không được để trống' })
-  @IsNumber()
-  organizationId!: number;
-
   @IsOptional()
   @IsString()
   description?: string;

@@ -25,7 +25,7 @@ export class CoursesRepository extends Repository<Course> {
     public async findCourseById(id: number): Promise<Course | null> {
         return await this.findOne({
             where: { courseId: id },
-            relations: ['user', 'organization', 'lessons'],
+            relations: ['user', 'lessons'],
         });
     }
 
@@ -45,7 +45,6 @@ export class CoursesRepository extends Repository<Course> {
             search,
             status,
             language,
-            organizationId,
             minDuration,
             maxDuration,
             sortBy = 'createdAt',
@@ -58,8 +57,7 @@ export class CoursesRepository extends Repository<Course> {
         // Nạp thêm các quan hệ cần hiển thị (ví dụ: thông tin người tạo, tổ chức)
         queryBuilder
             .leftJoin('course.user', 'user')
-            .addSelect(['user.userId', 'user.fullName', 'user.avatar'])
-            .leftJoinAndSelect('course.organization', 'organization');
+            .addSelect(['user.userId', 'user.fullName', 'user.ava2232tar'])
 
         // 1. Tìm kiếm text động theo Title hoặc Description (không phân biệt chữ hoa chữ thường)
         if (search) {
@@ -79,12 +77,7 @@ export class CoursesRepository extends Repository<Course> {
             queryBuilder.andWhere('LOWER(course.language) = LOWER(:language)', { language });
         }
 
-        // 4. Lọc theo Organization ID
-        if (organizationId) {
-            queryBuilder.andWhere('course.organization.organizationId = :organizationId', { organizationId });
-        }
-
-        // 5. Lọc theo khoảng thời lượng (min - max duration)
+        // 4. Lọc theo khoảng thời lượng (min - max duration)
         if (minDuration !== undefined) {
             queryBuilder.andWhere('course.duration >= :minDuration', { minDuration });
         }
@@ -92,7 +85,7 @@ export class CoursesRepository extends Repository<Course> {
             queryBuilder.andWhere('course.duration <= :maxDuration', { maxDuration });
         }
 
-        // 7. Sắp xếp động
+        // 5. Sắp xếp động
         // Đảm bảo tránh lỗi SQL Injection bằng cách kiểm tra thuộc tính hợp lệ trước khi order
         const allowedSortFields = ['createdAt', 'updatedAt', 'title', 'duration', 'enrollmentCount'];
         const actualSortBy = allowedSortFields.includes(sortBy) ? `course.${sortBy}` : 'course.createdAt';
@@ -108,7 +101,6 @@ export class CoursesRepository extends Repository<Course> {
         return this.createQueryBuilder('course')
             .leftJoin('course.user', 'user')
             .addSelect(['user.userId', 'user.fullName', 'user.email', 'user.avatar'])
-            .leftJoinAndSelect('course.organization', 'organization')
             .leftJoinAndSelect('course.lessons', 'lessons')
             .where('course.courseId = :id', { id })
             .getOne();

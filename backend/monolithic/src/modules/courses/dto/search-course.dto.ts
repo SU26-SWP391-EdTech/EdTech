@@ -27,12 +27,6 @@ export class SearchCourseDto {
     @IsOptional()
     @Type(() => Number)
     @IsInt()
-    organizationId?: number;
-
-
-    @IsOptional()
-    @Type(() => Number)
-    @IsInt()
     @Min(0)
     minDuration?: number;
 

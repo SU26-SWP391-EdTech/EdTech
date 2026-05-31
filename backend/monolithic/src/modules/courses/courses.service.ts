@@ -15,7 +15,6 @@ export class CoursesService {
         return this.coursesRepository.createCourse({
             ...createCourseDto,
             user: { userId } as any,
-            organization: { organizationId: createCourseDto.organizationId } as any,
         });
     }
 
@@ -35,11 +34,7 @@ export class CoursesService {
 
     async update(id: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
         const course = await this.findOne(id);
-
-        if (updateCourseDto.organizationId) {
-            course.organization = { organizationId: updateCourseDto.organizationId } as any;
-        }
-        const { organizationId, ...otherUpdates } = updateCourseDto;
+        const { ...otherUpdates } = updateCourseDto;
         Object.assign(course, otherUpdates);
 
         return this.coursesRepository.saveCourse(course);

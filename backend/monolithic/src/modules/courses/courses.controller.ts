@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, Req } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -9,12 +9,8 @@ export class CoursesController {
     constructor(private readonly coursesService: CoursesService) { }
 
     @Post()
-    create(@Body() createCourseDto: CreateCourseDto) {
-        // Trong thực tế, sau khi tích hợp Authentication, userId sẽ được lấy từ JWT Token
-        // Ví dụ: @Req() req -> userId = req.user.id
-        // Tạm thời mình hardcode userId = 1 để test chức năng tạo khóa học
-        const mockUserId = 1;
-        return this.coursesService.create(createCourseDto, mockUserId);
+    create(@Req() req, @Body() createCourseDto: CreateCourseDto) {
+        return this.coursesService.create(createCourseDto, req.user.id);
     }
 
     // Endpoint: GET /courses (Ví dụ: GET /courses?search=javascript&page=1&limit=5)
