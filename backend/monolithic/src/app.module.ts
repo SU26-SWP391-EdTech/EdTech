@@ -1,8 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { User } from './user/user.entity';
-import { UsersModule } from './user/user.module';
+import { UsersModule } from './modules/users/users.module';
+import { RolesModule } from './modules/roles/roles.module';
+import { EnrollmentsModule } from './modules/enrollments/enrollments.module';
+import { CoursesModule } from './modules/courses/courses.module';
+import { LessonsModule } from './modules/lessons/lessons.module';
+import { LearnersModule } from './modules/learners/learners.module';
+import { LearningPathsModule } from './modules/learning-paths/learning-paths.module';
+import { PlatformSettingsModule } from './modules/platform-settings/platform-settings.module';
 
 @Module({
   imports: [
@@ -18,11 +24,19 @@ import { UsersModule } from './user/user.module';
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [User],
-      synchronize: false,
+      autoLoadEntities: true,
+      synchronize: true,
     }),
 
+     // modules
     UsersModule,
+    RolesModule,
+    EnrollmentsModule,
+    CoursesModule,
+    LessonsModule,
+    LearnersModule,
+    LearningPathsModule,
+    PlatformSettingsModule,
   ],
 })
 export class AppModule { }
