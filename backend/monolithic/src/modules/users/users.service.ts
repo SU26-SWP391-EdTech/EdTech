@@ -130,6 +130,8 @@ export class UsersService {
     if (!academicUser) {
       academicUser = this.userProfileRepo.create({
         userId: id,
+        expertise: dto.expertise,
+        experienceYears: dto.experienceYears,
       });
     } else {
       Object.assign(academicUser, {
@@ -153,7 +155,7 @@ export class UsersService {
     });
 
     if (!academicUser) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Academic User not found');
     }
 
     if (file) {
@@ -167,26 +169,23 @@ export class UsersService {
     return await this.userRepo.save(academicUser);
   }
 
-  async viewAcademicUserProfile(
-    id: number,
-    dto: GetAcademicUserProfileDto,
-  ) {
-    const academicUser = await this.userProfileRepo.findOne({
+  async viewAcademicUserProfile(id: number, dto: GetAcademicUserProfileDto) {
+    const academicUser = await this.userRepo.findOne({
       where: { userId: id },
-      relations: ['user'],
+      relations: ['userProfile'],
     });
 
-    if (!academicUser || !academicUser.user) {
-      throw new NotFoundException('Learner not exist');
+    if (!academicUser) {
+      throw new NotFoundException('Academic User not exist');
     }
 
     return {
-      fullName: academicUser.user.fullName,
-      email: academicUser.user.email,
-      avatarUrl: academicUser.user.avatar,
-      expertise: academicUser.expertise,
-      experienceYears: academicUser.experienceYears,
-      createdAt: academicUser.user.createdAt,
+      fullName: academicUser.fullName,
+      email: academicUser.email,
+      avatarUrl: academicUser.avatar,
+      expertise: academicUser.userProfile?.expertise,
+      experienceYears: academicUser.userProfile?.experienceYears,
+      createdAt: academicUser.createdAt,
     };
   }
 }

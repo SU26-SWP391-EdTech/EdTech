@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import { IsNumber, IsOptional, IsString, IsUrl } from "class-validator";
 
 export class EditAcademicUserProfileDto {
@@ -14,6 +15,7 @@ export class EditAcademicUserProfileDto {
   expertise?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   experienceYears?: number;
 }

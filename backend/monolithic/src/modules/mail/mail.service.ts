@@ -1,24 +1,13 @@
-import { Body, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { VerifyEmailDto } from './dto/verifyEmail.dto';
-import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../users/entities/user.entity';
-import { Repository } from 'typeorm';
 
 @Injectable()
 export class MailService {
- 
-  constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-    private readonly mailerService: MailerService,
-    private jwtService:JwtService,
-    
-  ) {}
+  constructor(private readonly mailerService: MailerService) {}
 
-  async sendVerificationEmail(email: string, token: string ){
-    const verifyLink = `http://localhost:5173/verify-mail?token=${token}`;
+  async sendVerificationEmail(email: string, token: string) {
+    //Hien tai chua co frontend nen test vao api cua backend luon sau nay da co frontend roi thi moi doi lai url
+    const verifyLink = `http://localhost:5002/auth/verify-mail?token=${token}`;
 
     await this.mailerService.sendMail({
       to: email,
@@ -29,7 +18,6 @@ export class MailService {
           Verify
         </a>
       `,
-    })
+    });
   }
-
 }

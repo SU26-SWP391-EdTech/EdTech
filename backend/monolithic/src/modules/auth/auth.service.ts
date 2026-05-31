@@ -96,6 +96,10 @@ export class AuthService {
       throw new UnauthorizedException('Email or password is not true');
     }
 
+    if (!user.isEmailVerified) {
+      throw new UnauthorizedException('Please verify your email first');
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Email or password is not true');
@@ -138,6 +142,8 @@ export class AuthService {
       throw new NotFoundException("Role doesn't exist");
     }
 
+    if(password.length<8) throw new BadRequestException("Password length must more than 8 characters");
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -164,7 +170,6 @@ export class AuthService {
         avatarUrl: savedUser.avatar,
         isEmailVerified: false,
       };
-      await queryRunner.commitTransaction();
 
       const emailVerifyToken = this.jwtService.sign(
         {
@@ -178,11 +183,12 @@ export class AuthService {
         },
       );
 
-      try {
-        await this.mailService.sendVerificationEmail(savedUser.email, emailVerifyToken);
-      } catch (error) {
-        console.error('Send mail failed', error);
-      }
+      await this.mailService.sendVerificationEmail(
+        savedUser.email,
+        emailVerifyToken,
+      );
+
+      await queryRunner.commitTransaction();
 
       return {
         success: true,
@@ -206,9 +212,9 @@ export class AuthService {
     };
   }
 
-  async verifyEmail(dto: VerifyEmailDto){
+  async verifyEmail(token: string){
     
-    const payload = this.jwtService.verify(dto.token,
+    const payload = this.jwtService.verify(token,
       {
         secret: process.env.JWT_SECRET
       },

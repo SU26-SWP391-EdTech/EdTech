@@ -8,13 +8,14 @@ import { User } from '../users/entities/user.entity';
 import { Role } from '../roles/entities/role.entity';
 import { Learner } from '../learners/entities/learner.entity';
 import { jwtConstants } from '../../common/constants/jwt.constants';
-import { MailService } from '../mail/mail.service';
 import { UserProfile } from '../users/entities/user-profile.entity';
+import { MailModule } from '../mail/mail.module';
 
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Role, Learner, UserProfile]),
+    MailModule,
     PassportModule,
     JwtModule.register({
       secret: jwtConstants.secret,
@@ -22,7 +23,7 @@ import { UserProfile } from '../users/entities/user-profile.entity';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, MailService],
+  providers: [AuthService],
   exports: [AuthService],
 })
 export class AuthModule {}

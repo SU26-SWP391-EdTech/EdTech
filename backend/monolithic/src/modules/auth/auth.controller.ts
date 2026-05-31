@@ -1,5 +1,5 @@
 // auth/auth.controller.ts
-import { Controller, Get, Post, Body, Res, HttpCode, HttpStatus, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Res, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -7,7 +7,6 @@ import { Public } from '../../common/decorators/public.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { JwtPayloadUser } from '../../common/decorators/current-user.decorator';
 import { BaseRegisterDto } from './dto/base-register.dto';
-import { VerifyEmailDto } from '../mail/dto/verifyEmail.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -44,9 +43,10 @@ export class AuthController {
     return this.authService.getMe(user.userId);
   }
 
-  @Post('verify-mail')
-  async verifyEmail(@Body() verifyEmailDto:VerifyEmailDto, @Res() res: Response){
-    const result = await this.authService.verifyEmail(verifyEmailDto);
+  @Public()
+  @Get('verify-mail')
+  async verifyEmail(@Query('token') token, @Res() res: Response){
+    const result = await this.authService.verifyEmail(token);
     return res.json(result);
   }
 }

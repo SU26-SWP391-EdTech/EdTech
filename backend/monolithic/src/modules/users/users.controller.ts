@@ -21,6 +21,7 @@ import { Roles } from 'src/common/decorators/roles/roles.decorator';
 import { UpdateAcademicUserInfoDto } from './dto/update-academic-user-info.dto';
 import { EditAcademicUserProfileDto } from './dto/edit-academic-user-profile.dto';
 import { GetAcademicUserProfileDto } from './dto/get-academic-user-profile.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('user')
 @UseGuards(JwtAuthGuard)
@@ -64,6 +65,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('course provider','academic manager')
   @Patch('edit-academic-user-profile/:id')
+  @UseInterceptors(FileInterceptor('avatarUrl'))
   async editAcademicUserProfile(
     @Param('id') id: number,
     @Body() dto: EditAcademicUserProfileDto,
@@ -71,7 +73,7 @@ export class UsersController {
   ) {
     return this.usersService.editAcademicUserProfile(id, dto, file);
   }
-
+  
   @Get('academic-user/:id')
   async viewAcademicUserProfile(
     @Param('id') id: number,
