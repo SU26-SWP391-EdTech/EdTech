@@ -5,7 +5,7 @@ export class CreateLearningPathDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  title: string;
+  title!: string;
 
   @IsString()
   @IsOptional()
