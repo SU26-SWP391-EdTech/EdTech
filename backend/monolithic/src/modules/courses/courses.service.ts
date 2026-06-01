@@ -4,17 +4,38 @@ import { CoursesRepository } from './courses.repository';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { SearchCourseDto } from './dto/search-course.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../users/entities/user.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class CoursesService {
     constructor(
         private readonly coursesRepository: CoursesRepository,
+        private cloudinaryService: CloudinaryService,
+        @InjectRepository(User) private userRepository: Repository<User>,
     ) { }
 
-    async create(createCourseDto: CreateCourseDto, userId: number): Promise<Course> {
+    async create(createCourseDto: CreateCourseDto, userId: number, file?: Express.Multer.File): Promise<Course> {
+        const courseProvider = await this.userRepository.findOne({
+            where: {
+                userId: userId,
+            }
+        });
+
+        if (!courseProvider) {
+            throw new NotFoundException('User not found');
+        }
+
+        if (file) {
+            const uploaded = await this.cloudinaryService.uploadFile(file);
+            createCourseDto.thumbnailUrl = uploaded.secure_url;
+        }
+
         return this.coursesRepository.createCourse({
             ...createCourseDto,
-            user: { userId } as any,
+            user: courseProvider, 
         });
     }
 

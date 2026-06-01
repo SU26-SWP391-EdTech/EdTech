@@ -13,7 +13,7 @@ export class LearningPathsController {
   constructor(private readonly learningPathsService: LearningPathsService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleEnum.ADMIN, RoleEnum.COURSE_PROVIDER)
+  @Roles(RoleEnum.COURSE_PROVIDER)
   @Post()
   @ApiOperation({
     summary: 'Create a learning path',

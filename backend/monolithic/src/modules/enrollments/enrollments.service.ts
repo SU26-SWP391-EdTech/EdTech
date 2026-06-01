@@ -16,18 +16,17 @@ export class EnrollmentsService {
         private readonly courseRepo: Repository<Course>,
     ) { }
 
-    async enrollCourse(userId: number, dto: EnrollCourseDto): Promise<Enrollment> {
-        const { courseId } = dto;
+    async enrollCourse(userId: number, id: number): Promise<Enrollment> {
 
         const course = await this.courseRepo.findOne({
-            where: { courseId },
+            where: { courseId: id },
         });
 
         if (!course) {
-            throw new NotFoundException(`Not found course with ID ${courseId}`);
+            throw new NotFoundException(`Not found course with ID ${id}`);
         }
 
-        const existingEnrollment = await this.enrollmentsRepo.findByUserAndCourse(userId, courseId);
+        const existingEnrollment = await this.enrollmentsRepo.findByUserAndCourse(userId, id);
 
         if (existingEnrollment) {
             if (existingEnrollment.status === EnrollmentStatus.ACTIVE) {
@@ -43,7 +42,7 @@ export class EnrollmentsService {
             return await this.enrollmentsRepo.save(existingEnrollment);
         }
 
-        const newEnrollment = this.enrollmentsRepo.create(userId, courseId);
+        const newEnrollment = this.enrollmentsRepo.create(userId, id);
         newEnrollment.status = EnrollmentStatus.ACTIVE;
         newEnrollment.progress = 0;
         newEnrollment.enrolledAt = new Date();
