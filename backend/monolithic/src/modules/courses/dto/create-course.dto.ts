@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateCourseDto {
@@ -22,6 +23,7 @@ export class CreateCourseDto {
   language?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   duration?: number;
 }

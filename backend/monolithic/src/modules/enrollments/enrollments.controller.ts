@@ -10,12 +10,12 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 export class EnrollmentsController {
     constructor(private readonly enrollmentsService: EnrollmentsService) { }
     //enroll course
-    @Post('enroll')
-    async enroll(@CurrentUser() user: JwtPayloadUser, @Body() dto: EnrollCourseDto) {
-        return await this.enrollmentsService.enrollCourse(user.userId, dto);
+    @Post('enroll/:id')
+    async enroll(@CurrentUser() user: JwtPayloadUser, @Param('id', ParseIntPipe) id: number) {
+        return await this.enrollmentsService.enrollCourse(user.userId, id);
     }
     //get my enrollments
-    @Get('my')
+    @Get('myenrollments')
     async getMyEnrollments(@CurrentUser() user: JwtPayloadUser) {
         return await this.enrollmentsService.getMyEnrollments(user.userId);
     }
