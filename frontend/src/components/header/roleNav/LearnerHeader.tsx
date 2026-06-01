@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MessageSquare, Play, Flame, ChevronDown, LogOut, UserCircle, BookOpen, Settings } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
@@ -8,6 +9,7 @@ import { NavItem } from '../shared/NavItem';
 import { LEARNER_NAV } from '../config/nav-config';
 
 export function LearnerHeader() {
+    const navigate = useNavigate();
     const [active, setActive] = useState('dashboard');
     const [open, setOpen] = useState(false);
 
@@ -101,12 +103,18 @@ export function LearnerHeader() {
                                 </div>
 
                                 {[
-                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile' },
+                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', path: '/learner/UserProfile' },
                                     { icon: <BookOpen className="w-4 h-4" />, label: 'My Learning' },
                                     { icon: <Settings className="w-4 h-4" />, label: 'Settings' },
                                 ].map((item) => (
                                     <button
                                         key={item.label}
+                                        onClick={() => {
+                                            if (item.path) {
+                                                navigate(item.path);
+                                                setOpen(false);
+                                            }
+                                        }}
                                         className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F8FAFC] transition-colors"
                                     >
                                         <span className="text-[#9CA3AF]">{item.icon}</span>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Play } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import { Logo } from '../shared/Logo';
 import { SearchBar } from '../shared/SearchBar';
@@ -8,6 +9,7 @@ import { GUEST_NAV } from '../config/nav-config';
 
 export function GuestHeader() {
     const [active, setActive] = useState('explore');
+    const navigate = useNavigate();
 
     const ACC = '#E11D48'; // Guest/Default Accent: Crimson
     const ACTIVE_BG = '#FFF1F3';
@@ -29,7 +31,14 @@ export function GuestHeader() {
                             active={active === item.id}
                             accentColor={ACC}
                             activeBg={ACTIVE_BG}
-                            onClick={() => setActive(item.id)}
+                            onClick={() => {
+                                setActive(item.id);
+                                if (item.id === 'users') {
+                                    navigate('/users');
+                                } else {
+                                    navigate(`/${item.id}`);
+                                }
+                            }}
                         />
                     ))}
                 </nav>
@@ -47,7 +56,7 @@ export function GuestHeader() {
                     >
                         Sign In
                     </button>
-                    
+
                     <button
                         onClick={() => window.location.href = '/register'}
                         className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-sm transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"

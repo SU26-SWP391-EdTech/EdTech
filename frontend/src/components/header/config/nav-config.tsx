@@ -8,6 +8,7 @@ import {
     CheckSquare,
     Globe,
 } from 'lucide-react';
+import { href } from 'react-router-dom';
 
 export const LEARNER_NAV = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
@@ -17,9 +18,9 @@ export const LEARNER_NAV = [
 ];
 
 export const ADMIN_NAV = [
-    { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
-    { id: 'users', label: 'Users', icon: <Users className="w-3.5 h-3.5" />, count: 3, countColor: '#0EA5E9' },
-    { id: 'analytics', label: 'Analytics', icon: <BarChart2 className="w-3.5 h-3.5" /> },
+    { id: 'dashboard', label: 'Dashboard', path: '/admin', icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
+    { id: 'users', label: 'Users', path: '/admin/users', icon: <Users className="w-3.5 h-3.5" />, count: 3, countColor: '#0EA5E9' },
+    { id: 'analytics', label: 'Analytics', path: '/admin/analytics', icon: <BarChart2 className="w-3.5 h-3.5" /> },
 ];
 
 export const PROVIDER_NAV = [

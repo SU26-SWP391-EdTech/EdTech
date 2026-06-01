@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown, LogOut, UserCircle, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import { Logo } from '../shared/Logo';
 import { SearchBar } from '../shared/SearchBar';
@@ -8,6 +9,7 @@ import { NavItem } from '../shared/NavItem';
 import { ADMIN_NAV } from '../config/nav-config';
 
 export function AdminHeader() {
+    const navigate = useNavigate();
     const [active, setActive] = useState('dashboard');
     const [open, setOpen] = useState(false);
 
@@ -34,11 +36,15 @@ export function AdminHeader() {
                             badge={(item as any).badge}
                             count={(item as any).count}
                             countColor={(item as any).countColor}
-                            onClick={() => setActive(item.id)}
+                            onClick={() => {
+                                setActive(item.id);
+                                if ((item as any).path) {
+                                    navigate((item as any).path);
+                                }
+                            }}
                         />
                     ))}
                 </nav>
-
                 <div className="flex-1" />
 
                 <SearchBar placeholder="Search admin panels..." accentColor={ACC} />
@@ -82,12 +88,16 @@ export function AdminHeader() {
                                 </div>
 
                                 {[
-                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile' },
+                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', path: '/admin/UserProfile' },
                                     { icon: <Settings className="w-4 h-4" />, label: 'System Settings' },
                                 ].map((item) => (
                                     <button
                                         key={item.label}
                                         className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F8FAFC] transition-colors"
+                                        onClick={() => {
+                                            navigate(item.path || '#');
+                                            setOpen(false);
+                                        }}
                                     >
                                         <span className="text-[#9CA3AF]">{item.icon}</span>
                                         {item.label}
@@ -95,7 +105,7 @@ export function AdminHeader() {
                                 ))}
 
                                 <div className="border-t border-[#F3F4F6] mt-1">
-                                    <button 
+                                    <button
                                         onClick={() => window.location.href = '/login'}
                                         className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#E11D48] hover:bg-[#FFF1F3] transition-colors"
                                     >

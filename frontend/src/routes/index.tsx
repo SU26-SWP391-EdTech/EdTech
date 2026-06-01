@@ -9,6 +9,8 @@ import { VerifyEmail } from '../pages/auth/VerifyEmail';
 //Role navigation pages 
 import { GuestLayout } from '../layouts/Dashboard/GuestLayout';
 import { DashboardLayout } from '../layouts/Dashboard/Dashboard';
+import { UserManagement } from '../pages/admin/UserManagement';
+import { UserProfile } from '../pages/Users/UserProfile';
 
 export const router = createBrowserRouter([
     // ==========================================
@@ -28,6 +30,7 @@ export const router = createBrowserRouter([
             }
         ]
     },
+
     // ==========================================
     // 🔐 NHÓM 2: Giao diện đăng nhập/đăng ký (AUTH LAYOUT)
     // ==========================================
@@ -64,9 +67,14 @@ export const router = createBrowserRouter([
             {
                 index: true,
                 element: <h1>Home learner</h1>
+            },
+            {
+                path: "UserProfile",
+                element: <UserProfile />
             }
         ]
     },
+
     // --- CHO GIẢNG VIÊN (PROVIDER) ---
     {
         path: "/provider",
@@ -75,6 +83,10 @@ export const router = createBrowserRouter([
             {
                 index: true,
                 element: <h1>Home Provider</h1>
+            },
+            {
+                path: "UserProfile",
+                element: <UserProfile />
             }
         ]
     },
@@ -86,6 +98,14 @@ export const router = createBrowserRouter([
             {
                 index: true,
                 element: <h1>Home Admin</h1>
+            },
+            {
+                path: "users",
+                element: <UserManagement />
+            },
+            {
+                path: "UserProfile",
+                element: <UserProfile />
             }
         ]
     },
@@ -97,8 +117,13 @@ export const router = createBrowserRouter([
             {
                 index: true,
                 element: <h1>Home Academic</h1>
+            },
+            {
+                path: "UserProfile",
+                element: <UserProfile />
             }
         ]
+
     },
 
 
