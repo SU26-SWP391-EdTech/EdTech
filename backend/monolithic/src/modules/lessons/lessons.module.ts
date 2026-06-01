@@ -5,6 +5,7 @@ import { Course } from '../courses/entities/course.entity';
 import { LessonsController } from './lessons.controller';
 import { LessonsService } from './lessons.service';
 import { LessonsRepository } from './lessons.repository';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Module({
     imports: [
@@ -14,10 +15,12 @@ import { LessonsRepository } from './lessons.repository';
     providers: [
         LessonsService,
         LessonsRepository,
+        CloudinaryService,
     ],
     exports: [
         LessonsService,
         LessonsRepository,
+        CloudinaryService
     ],
 })
 export class LessonsModule { }

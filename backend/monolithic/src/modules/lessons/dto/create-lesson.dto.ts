@@ -1,9 +1,7 @@
+import { Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateLessonDto {
-    @IsNotEmpty()
-    @IsNumber()
-    courseId!: number;
 
     @IsNotEmpty()
     @IsString()
@@ -18,6 +16,7 @@ export class CreateLessonDto {
     videoUrl?: string;
 
     @IsOptional()
+    @Type(() => Number)
     @IsNumber()
     videoDuration?: number;
 
