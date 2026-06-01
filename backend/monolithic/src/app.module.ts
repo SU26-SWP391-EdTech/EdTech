@@ -9,13 +9,28 @@ import { LessonsModule } from './modules/lessons/lessons.module';
 import { LearnersModule } from './modules/learners/learners.module';
 import { LearningPathsModule } from './modules/learning-paths/learning-paths.module';
 import { PlatformSettingsModule } from './modules/platform-settings/platform-settings.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { CommonModule } from './common/common.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { MailModule } from './modules/mail/mail.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env'
+      envFilePath: ['.env', '../.env'],
     }),
+
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 5,
+      },
+    ]),
 
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -27,16 +42,30 @@ import { PlatformSettingsModule } from './modules/platform-settings/platform-set
       autoLoadEntities: true,
       synchronize: true,
     }),
-
-     // modules
+    CommonModule,
+    PlatformSettingsModule,
+    AuthModule,
+    MailModule,
     UsersModule,
     RolesModule,
     EnrollmentsModule,
     CoursesModule,
     LessonsModule,
     LearnersModule,
-    LearningPathsModule,
-    PlatformSettingsModule,
+    LearningPathsModule,  
+    AuthModule,
+    MailModule,
+    CloudinaryModule
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule { }

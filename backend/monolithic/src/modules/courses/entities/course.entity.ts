@@ -91,7 +91,7 @@ export class Course {
   @JoinColumn({ name: 'reviewed_by' })
   reviewedBy!: User;
 
-  @Column({ name: 'errollment_count', default: 0 })
+  @Column({ name: 'enrollment_count', default: 0 })
   enrollmentCount!: number;
 
   // course 1-n learning-path-course
