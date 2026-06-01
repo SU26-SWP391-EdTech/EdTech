@@ -1,22 +1,19 @@
-import './App.css';
-import { RouterProvider } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import { router } from './routes/index';
-import AuthInitializer from './components/auth/AuthInitializer';
+import './App.css'
 
-const App = () => {
+function App() {
+
   return (
-    <AuthInitializer>
-      <RouterProvider router={router} />
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 4000,
-          style: { fontSize: '14px' },
-        }}
-      />
-    </AuthInitializer>
-  );
-};
+    <>
+      <div className="flex items-center justify-center h-screen">
+        <div>
+          This is button
+        </div>
+        <button className="btn btn-active btn-neutral">
+          Hello DaisyUI
+        </button>
+      </div>
+    </>
+  )
+}
 
-export default App;
+export default App
