@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, Req, UploadedFile, UseInterceptors, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -9,6 +10,7 @@ import { Roles } from 'src/common/decorators/roles/roles.decorator';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 
+@ApiTags('Courses')
 @Controller('courses')
 export class CoursesController {
     constructor(private readonly coursesService: CoursesService) { }
@@ -47,6 +49,12 @@ export class CoursesController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(RoleEnum.ACADEMIC_MANAGER)
     @Patch(':id/approve')
+    @ApiOperation({ summary: 'Approve a course' })
+    @ApiResponse({ status: 200, description: 'Course approved successfully' })
+    @ApiResponse({ status: 400, description: 'Course is not in pending status or missing lessons' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - requires Academic Manager role' })
+    @ApiResponse({ status: 404, description: 'Course or Reviewer not found' })
     public async approveCourse(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
         return this.coursesService.approveCourse(id, req.user.userId);
     }
