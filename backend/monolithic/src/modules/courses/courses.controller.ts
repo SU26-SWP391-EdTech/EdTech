@@ -59,4 +59,6 @@ export class CoursesController {
         return this.coursesService.approveCourse(id, req.user.userId);
     }
 
+    
+
 }
