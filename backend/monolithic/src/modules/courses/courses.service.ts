@@ -96,6 +96,31 @@ export class CoursesService {
 
         return this.coursesRepository.saveCourse(course);
     }
+
+    public async rejectCourse(id: number, reviewerId: number): Promise<Course> {
+        const course = await this.coursesRepository.findCourseById(id);
+
+        if (!course) {
+            throw new NotFoundException(`Not found course with ID ${id}`);
+        }
+
+        if (course.status !== CourseStatus.PENDING) {
+            throw new BadRequestException('Course is not in pending status');
+        }
+
+        const reviewer = await this.userRepository.findOne({
+            where: { userId: reviewerId }
+        });
+
+        if (!reviewer) {
+            throw new NotFoundException('Reviewer not found');
+        }
+
+        course.status = CourseStatus.REJECTED;
+        course.reviewedBy = reviewer;
+
+        return this.coursesRepository.saveCourse(course);
+    }
     // ==================== Search & Filter ====================
 
     async search(dto: SearchCourseDto) {
