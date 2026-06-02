@@ -59,6 +59,17 @@ export class CoursesController {
         return this.coursesService.approveCourse(id, req.user.userId);
     }
 
-    
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(RoleEnum.ACADEMIC_MANAGER)
+    @Patch(':id/reject')
+    @ApiOperation({ summary: 'Reject a course' })
+    @ApiResponse({ status: 200, description: 'Course rejected successfully' })
+    @ApiResponse({ status: 400, description: 'Course is not in pending status' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - requires Academic Manager role' })
+    @ApiResponse({ status: 404, description: 'Course or Reviewer not found' })
+    public async rejectCourse(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+        return this.coursesService.rejectCourse(id, req.user.userId);
+    }
 
 }
