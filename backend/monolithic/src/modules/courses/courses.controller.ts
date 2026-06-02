@@ -1,9 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, Req, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, Req, UploadedFile, UseInterceptors, UseGuards } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { SearchCourseDto } from './dto/search-course.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { RoleEnum } from 'src/common/enums/role.enum';
+import { Roles } from 'src/common/decorators/roles/roles.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 
 @Controller('courses')
 export class CoursesController {
@@ -39,4 +43,12 @@ export class CoursesController {
     remove(@Param('id', ParseIntPipe) id: number) {
         return this.coursesService.remove(id);
     }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(RoleEnum.ACADEMIC_MANAGER)
+    @Patch(':id/approve')
+    public async approveCourse(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+        return this.coursesService.approveCourse(id, req.user.userId);
+    }
+
 }
