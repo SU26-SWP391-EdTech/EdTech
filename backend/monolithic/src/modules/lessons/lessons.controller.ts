@@ -21,7 +21,9 @@ import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { Roles } from 'src/common/decorators/roles/roles.decorator';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Lessons')
 @Controller('lessons')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class LessonsController {
@@ -31,16 +33,30 @@ export class LessonsController {
     @Post(':id')
     @Roles(RoleEnum.COURSE_PROVIDER)
     @UseInterceptors(FileInterceptor('videoUrl'))
+    @ApiOperation({ summary: 'Create a lesson in a course' })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({ type: CreateLessonDto })
+    @ApiResponse({ status: 201, description: 'Lesson created successfully' })
+    @ApiResponse({ status: 400, description: 'Invalid request data' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden' })
     async create(@Param('id', ParseIntPipe) courseId: number, @Body() createLessonDto: CreateLessonDto, @UploadedFile() file?: Express.Multer.File) {
         return await this.lessonsService.create(courseId, createLessonDto, file);
     }
 
     @Get('course/:courseId')
+    @ApiOperation({ summary: 'Get all lessons by course' })
+    @ApiResponse({ status: 200, description: 'Lessons returned successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
     async findAllByCourse(@Param('courseId', ParseIntPipe) courseId: number) {
         return await this.lessonsService.findAllByCourse(courseId);
     }
 
     @Get(':id')
+    @ApiOperation({ summary: 'Get lesson detail' })
+    @ApiResponse({ status: 200, description: 'Lesson returned successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 404, description: 'Lesson not found' })
     async findOne(@Param('id', ParseIntPipe) id: number) {
         return await this.lessonsService.findOne(id);
     }
@@ -49,6 +65,14 @@ export class LessonsController {
     @Patch(':courseId')
     @Roles(RoleEnum.COURSE_PROVIDER)
     @UseInterceptors(FileInterceptor('videoUrl'))
+    @ApiOperation({ summary: 'Update a lesson in a course' })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({ type: UpdateLessonDto })
+    @ApiResponse({ status: 200, description: 'Lesson updated successfully' })
+    @ApiResponse({ status: 400, description: 'Invalid request data' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden' })
+    @ApiResponse({ status: 404, description: 'Lesson not found' })
     async update(
         @Param('courseId', ParseIntPipe) courseId: number,
         @Query('lessonId', ParseIntPipe) lessonId: number,
@@ -60,6 +84,11 @@ export class LessonsController {
 
     @Delete(':id')
     @Roles(RoleEnum.COURSE_PROVIDER)
+    @ApiOperation({ summary: 'Delete a lesson' })
+    @ApiResponse({ status: 200, description: 'Lesson deleted successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden' })
+    @ApiResponse({ status: 404, description: 'Lesson not found' })
     async remove(@Param('id', ParseIntPipe) id: number) {
         return await this.lessonsService.remove(id);
     }

@@ -9,8 +9,10 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { Roles } from 'src/common/decorators/roles/roles.decorator';
 import { Role } from '../roles/entities/role.entity';
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 
+@ApiTags('Learners')
 @Controller('learners')
 export class LearnersController {
   constructor(
@@ -21,6 +23,12 @@ export class LearnersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('learner')
   @Patch('update-profile/:id')
+  @ApiOperation({ summary: 'Update learner profile information' })
+  @ApiResponse({ status: 200, description: 'Learner profile updated successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Learner not found' })
   async updateProfile(@Param('id') id:number, @Body() dto: UpdateLearnerInfoDto){
     return this.learnersService.updateProfile(id, dto);
   }
@@ -28,6 +36,11 @@ export class LearnersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('learner')
   @Patch('change-password')
+  @ApiOperation({ summary: 'Change learner password' })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   async changePassword(@Req() req, @Body() dto:ChangePasswordDto){
     return this.usersService.changePassword(req.user.id, dto);
   }
@@ -36,6 +49,14 @@ export class LearnersController {
   @Roles('learner')
   @Patch('edit-profile/:id')
   @UseInterceptors(FileInterceptor('avatarUrl'))
+  @ApiOperation({ summary: 'Edit learner profile with avatar upload' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: EditLearnerProfileDto })
+  @ApiResponse({ status: 200, description: 'Learner profile edited successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Learner not found' })
   async editLearnerProfile(
     @Param('id', ParseIntPipe) id: number,
 
@@ -51,6 +72,9 @@ export class LearnersController {
   }
   
   @Get(':id')
+  @ApiOperation({ summary: 'View learner profile' })
+  @ApiResponse({ status: 200, description: 'Learner profile returned successfully' })
+  @ApiResponse({ status: 404, description: 'Learner not found' })
   async viewLearnerProfile(@Param('id') id: number){
     return this.learnersService.viewLearnerProfile(id);
   }
