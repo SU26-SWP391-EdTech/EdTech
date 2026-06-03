@@ -20,7 +20,7 @@ export function SignUp() {
   const [showPwd, setShowPwd] = useState(false);
   const [terms, setTerms] = useState(false);
   const [error, setError] = useState('');
-  
+
   const strength = password ? getPasswordStrength(password) : null;
   const canSubmit = !!name && !!email && password.length >= 8 && terms;
 
@@ -30,7 +30,7 @@ export function SignUp() {
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
     const backendRoleName = role === 'provider' ? 'course provider' : 'learner';
-    
+
     try {
       await register({
         fullName: trimmedName,
@@ -38,6 +38,7 @@ export function SignUp() {
         password: trimmedPassword,
         roleName: backendRoleName,
       });
+      sessionStorage.setItem('registered_email', trimmedEmail);
       navigate('/verify-email', { state: { email: trimmedEmail } });
     }
     catch (error: any) {
