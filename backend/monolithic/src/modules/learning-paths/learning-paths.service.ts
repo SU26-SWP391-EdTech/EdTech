@@ -82,4 +82,50 @@ export class LearningPathsService {
       user,
     );
   }
+
+  public async removeCourse(
+    learningPathId: number,
+    courseId: number,
+  ): Promise<{ message: string }> {
+    const learningPath =
+      await this.learningPathsRepository.getLearningPathById(learningPathId);
+
+    if (!learningPath) {
+      throw new NotFoundException('Learning path not found');
+    }
+
+    const course = await this.courseRepository.findCourseById(courseId);
+
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    const existed = await this.learningPathsRepository.isCourseInLearningPath(
+      learningPathId,
+      courseId,
+    );
+
+    if (!existed) {
+      throw new NotFoundException('Course not found in learning path');
+    }
+
+    await this.learningPathsRepository.removeCourse(learningPathId, courseId);
+
+    return { message: 'Course removed from learning path successfully' };
+  }
+
+  public async getCoursesInLearningPath(
+    learningPathId: number,
+  ): Promise<LearningPathCourse[]> {
+    const learningPath =
+      await this.learningPathsRepository.getLearningPathById(learningPathId);
+
+    if (!learningPath) {
+      throw new NotFoundException('Learning path not found');
+    }
+
+    return await this.learningPathsRepository.getCoursesByLearningPathId(
+      learningPathId,
+    );
+  }
 }

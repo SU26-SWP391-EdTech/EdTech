@@ -47,7 +47,7 @@ export class LearningPathsRepository {
     });
   }
 
-  async addCourse(
+  public async addCourse(
     learningPath: LearningPath,
     course: any,
     position: number,
@@ -63,5 +63,17 @@ export class LearningPathsRepository {
     });
 
     return await this.learningPathCourseRepo.save(learningPathCourse);
+  }
+
+  public async removeCourse(learningPathId: number, courseId: number): Promise<void> {
+    await this.learningPathCourseRepo.delete({ learningPathId, courseId });
+  }
+
+  public async getCoursesByLearningPathId(learningPathId: number): Promise<LearningPathCourse[]> {
+    return await this.learningPathCourseRepo.find({
+      where: { learningPathId },
+      relations: ['course'],
+      order: { position: 'ASC' },
+    });
   }
 }

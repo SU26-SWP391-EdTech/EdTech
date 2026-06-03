@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Delete, Get, Body, UseGuards, Req, Param, ParseIntPipe } from '@nestjs/common';
 import { LearningPathsService } from './learning-paths.service';
 import { CreateLearningPathDto } from './dto/create-learning-path.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
@@ -59,5 +59,45 @@ export class LearningPathsController {
 
   ) {
     return this.learningPathsService.addCourse(learningPathId, dto, req.user)
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ACADEMIC_MANAGER)
+  @Delete(':id/courses/:courseId')
+  @ApiOperation({
+    summary: 'Remove a course from a learning path',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Course removed from learning path successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Learning path or course not found',
+  })
+  public async removeCourse(
+    @Param('id', ParseIntPipe) learningPathId: number,
+    @Param('courseId', ParseIntPipe) courseId: number,
+  ) {
+    return this.learningPathsService.removeCourse(learningPathId, courseId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/courses')
+  @ApiOperation({
+    summary: 'Get courses in a learning path',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of courses in the learning path',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Learning path not found',
+  })
+  public async getCourses(
+    @Param('id', ParseIntPipe) learningPathId: number,
+  ) {
+    return this.learningPathsService.getCoursesInLearningPath(learningPathId);
   }
 }
