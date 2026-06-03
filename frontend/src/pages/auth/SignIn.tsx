@@ -4,31 +4,44 @@ import { CustomCheckbox } from '../../components/auth/CustomCheckbox';
 import { FormInput } from '../../components/auth/FormInput';
 import { PrimaryButton } from '../../components/auth/PrimaryButton';
 import { SplitAuthLayout } from '../../layouts/Auth/SplitAuthLayout';
-
-function goTo(path: string) {
-  window.location.href = path;
-}
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../stores/auth.stores';
 
 export function SignIn() {
-  const [email, setEmail] = useState('alex@example.com');
+  const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
   const [remember, setRemember] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = () => {
-    if (!email || !password) {
+  const handleSubmit = async () => {
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail || !trimmedPassword) {
       setError('Please fill in all fields.');
       return;
     }
 
     setError('');
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setError('Incorrect email or password. Please try again.');
-    }, 1800);
+
+    try {
+      const user = await login({ email: trimmedEmail, password: trimmedPassword });
+      if (user.roleName === 'admin') {
+        navigate('/admin');
+      } else if (user.roleName === 'course provider') {
+        navigate('/provider');
+      } else if (user.roleName === 'academic manager') {
+        navigate('/academic');
+      } else {
+        navigate('/learner');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Đăng nhập không thành công.');
+    }
   };
 
   return (
@@ -83,13 +96,13 @@ export function SignIn() {
             <CustomCheckbox checked={remember} onChange={() => setRemember((value) => !value)} />
             <span className="text-sm text-[#6B7280]">Remember me</span>
           </label>
-          <button onClick={() => goTo('/forgot-password')} className="text-sm text-[#E11D48] hover:text-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
+          <button onClick={() => navigate('/forgot-password')} className="text-sm text-[#E11D48] hover:text-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
             Forgot password?
           </button>
         </div>
 
         <div className="space-y-4">
-          <PrimaryButton onClick={handleSubmit} loading={loading}>
+          <PrimaryButton onClick={handleSubmit} loading={isLoading} disabled={isLoading}>
             Sign In
           </PrimaryButton>
           {/* <Divider label="or continue with" />
@@ -98,7 +111,7 @@ export function SignIn() {
 
         <p className="text-center text-sm text-[#6B7280] mt-6">
           Don't have an account?{' '}
-          <button onClick={() => goTo('/register')} className="text-[#E11D48] hover:text-[#BE123C] transition-colors" style={{ fontWeight: 600 }}>
+          <button onClick={() => navigate('/register')} className="text-[#E11D48] hover:text-[#BE123C] transition-colors" style={{ fontWeight: 600 }}>
             Create account
           </button>
         </p>

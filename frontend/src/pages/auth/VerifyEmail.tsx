@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Check, CheckCircle2, Inbox, RefreshCw } from 'lucide-react';
 import { PrimaryButton } from '../../components/auth/PrimaryButton';
 import { SplitAuthLayout } from '../../layouts/Auth/SplitAuthLayout';
 
-function goTo(path: string) {
-  window.location.href = path;
-}
-
 export function VerifyEmail() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Lấy email động được truyền từ màn hình SignUp thông qua router state
+  const registeredEmail = location.state?.email || 'your email';
+
   const [countdown, setCountdown] = useState(0);
   const [resent, setResent] = useState(false);
 
@@ -38,7 +41,7 @@ export function VerifyEmail() {
         <p className="text-[#6B7280] mb-1" style={{ fontSize: 14, lineHeight: 1.6 }}>
           We sent a verification link to
         </p>
-        <p className="text-[#111827] mb-2" style={{ fontWeight: 600, fontSize: 14 }}>alex@example.com</p>
+        <p className="text-[#111827] mb-2" style={{ fontWeight: 600, fontSize: 14 }}>{registeredEmail}</p>
         <p className="text-[#9CA3AF] mb-7" style={{ fontSize: 13, lineHeight: 1.65 }}>
           Click the link in the email to verify your account. The link expires in 24 hours.
         </p>
@@ -51,7 +54,7 @@ export function VerifyEmail() {
         )}
 
         <div className="space-y-3">
-          <PrimaryButton onClick={() => goTo('/')}>
+          <PrimaryButton onClick={() => navigate('/login')}>
             Continue to Platform
           </PrimaryButton>
           <button

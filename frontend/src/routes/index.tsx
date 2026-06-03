@@ -3,6 +3,8 @@ import { createBrowserRouter } from 'react-router-dom';
 import { LandingPage } from '../pages/LandingPage/LandingPage';
 //Auth pages
 import { SignIn } from '../pages/auth/SignIn';
+//Role Guards
+import { GuestGuard, LearnerGuard, ProviderGuard, AdminGuard, AcademicGuard } from '../components/auth/RoleGuards';
 import { SignUp } from '../pages/auth/SignUp';
 import { ForgotPassword } from '../pages/auth/ForgotPassword';
 import { VerifyEmail } from '../pages/auth/VerifyEmail';
@@ -32,6 +34,7 @@ export const router = createBrowserRouter([
     // 🔐 NHÓM 2: Giao diện đăng nhập/đăng ký (AUTH LAYOUT)
     // ==========================================
     {
+        element: <GuestGuard />, // Chỉ cho phép khách chưa đăng nhập truy cập trang login/register
         children: [
             {
                 path: "/login",
@@ -59,7 +62,11 @@ export const router = createBrowserRouter([
     // --- CHO HỌC VIÊN ---
     {
         path: "/learner",
-        element: <DashboardLayout role="learner" />, // Tự động có LearnerHeader với màu Crimson
+        element: (
+            <LearnerGuard>
+                <DashboardLayout role="learner" />
+            </LearnerGuard>
+        ), // Tự động có LearnerHeader với màu Crimson
         children: [
             {
                 index: true,
@@ -70,7 +77,11 @@ export const router = createBrowserRouter([
     // --- CHO GIẢNG VIÊN (PROVIDER) ---
     {
         path: "/provider",
-        element: <DashboardLayout role="provider" />, // Tự động có ProviderHeader với màu Sky Blue
+        element: (
+            <ProviderGuard>
+                <DashboardLayout role="provider" />
+            </ProviderGuard>
+        ), // Tự động có ProviderHeader với màu Sky Blue
         children: [
             {
                 index: true,
@@ -81,7 +92,11 @@ export const router = createBrowserRouter([
     // --- CHO QUẢN TRỊ VIÊN (ADMIN) ---
     {
         path: "/admin",
-        element: <DashboardLayout role="admin" />,
+        element: (
+            <AdminGuard>
+                <DashboardLayout role="admin" />
+            </AdminGuard>
+        ),
         children: [
             {
                 index: true,
@@ -92,7 +107,11 @@ export const router = createBrowserRouter([
     // --- CHO QUẢN LÝ ĐÀO TẠO (ACADEMIC MANAGER) ---
     {
         path: "/academic",
-        element: <DashboardLayout role="academic-manager" />,
+        element: (
+            <AcademicGuard>
+                <DashboardLayout role="academic-manager" />
+            </AcademicGuard>
+        ),
         children: [
             {
                 index: true,
@@ -100,7 +119,4 @@ export const router = createBrowserRouter([
             }
         ]
     },
-
-
-
-]);
+]);
