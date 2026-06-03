@@ -1,34 +1,48 @@
 import { useState } from 'react';
-import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
 import { CustomCheckbox } from '../../components/auth/CustomCheckbox';
 import { FormInput } from '../../components/auth/FormInput';
 import { PrimaryButton } from '../../components/auth/PrimaryButton';
 import { SplitAuthLayout } from '../../layouts/Auth/SplitAuthLayout';
 import { getPasswordStrength } from '../../utils/passwordStrength';
-
-function goTo(path: string) {
-  window.location.href = path;
-}
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../stores/auth.stores';
 
 export function SignUp() {
+  const navigate = useNavigate();
+  const register = useAuthStore((state) => state.register);
+  const isLoading = useAuthStore((state) => state.isLoading);
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'learner' | 'provider'>('learner');
   const [showPwd, setShowPwd] = useState(false);
   const [terms, setTerms] = useState(false);
-  const [loading, setLoading] = useState(false);
-
+  const [error, setError] = useState('');
+  
   const strength = password ? getPasswordStrength(password) : null;
   const canSubmit = !!name && !!email && password.length >= 8 && terms;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!canSubmit) return;
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      goTo('/verify-email');
-    }, 1800);
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    const backendRoleName = role === 'provider' ? 'course provider' : 'learner';
+    
+    try {
+      await register({
+        fullName: trimmedName,
+        email: trimmedEmail,
+        password: trimmedPassword,
+        roleName: backendRoleName,
+      });
+      navigate('/verify-email', { state: { email: trimmedEmail } });
+    }
+    catch (error: any) {
+      setError(error.message || 'Registration failed');
+    }
   };
 
   return (
@@ -38,6 +52,13 @@ export function SignUp() {
           <h1 className="text-[#111827] mb-1.5" style={{ fontWeight: 700, fontSize: 28 }}>Create your account</h1>
           <p className="text-[#6B7280]" style={{ fontSize: 15 }}>Join 50,000+ learners building their future</p>
         </div>
+
+        {error && (
+          <div className="flex items-start gap-3 p-3.5 bg-[#FFF1F4] border border-[#FECDD3] rounded-xl mb-5">
+            <AlertCircle className="w-4 h-4 text-[#E11D48] flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-[#BE123C]" style={{ fontWeight: 500 }}>{error}</p>
+          </div>
+        )}
 
         <div className="space-y-4 mb-5">
           <FormInput label="Full name" placeholder="Alex Morgan" value={name} onChange={setName} icon={<User className="w-4 h-4" />} />
@@ -110,7 +131,7 @@ export function SignUp() {
         </label>
 
         <div className="space-y-4">
-          <PrimaryButton onClick={handleSubmit} loading={loading} disabled={!canSubmit}>
+          <PrimaryButton onClick={handleSubmit} loading={isLoading} disabled={!canSubmit}>
             Create Account
           </PrimaryButton>
           {/* <Divider label="or sign up with" />
@@ -119,7 +140,7 @@ export function SignUp() {
 
         <p className="text-center text-sm text-[#6B7280] mt-6">
           Already have an account?{' '}
-          <button onClick={() => goTo('/login')} className="text-[#E11D48] hover:text-[#BE123C] transition-colors" style={{ fontWeight: 600 }}>
+          <button onClick={() => navigate('/login')} className="text-[#E11D48] hover:text-[#BE123C] transition-colors" style={{ fontWeight: 600 }}>
             Sign in
           </button>
         </p>
