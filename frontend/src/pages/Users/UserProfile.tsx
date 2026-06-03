@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   MapPin, Mail, Edit3, Share2, BookOpen, GraduationCap, Award,
-  Clock, TrendingUp, Zap, Star, CheckCircle2, Lock, Eye,
-  Download, ChevronRight, Plus, X, Check, Camera, Target,
-  Flame, Trophy, Users, MessageSquare, BarChart2, Calendar,
+  Clock, Zap, Star, CheckCircle2,
+  Download, X, Check,
+  Flame, Trophy, MessageSquare, Calendar,
   ExternalLink, ArrowUpRight, Shield, Bookmark, Briefcase
 } from 'lucide-react';
 
@@ -104,22 +104,22 @@ const ACTIVITY = [
   },
 ];
 
-type AchievState = 'earned' | 'progress' | 'locked';
-const ACHIEVEMENTS: { icon: string; name: string; desc: string; state: AchievState; xp: number; pct?: number }[] = [
-  { icon: '🎯', name: 'First Step', desc: 'Complete your first lesson', state: 'earned', xp: 50 },
-  { icon: '🔥', name: '7-Day Streak', desc: 'Learn 7 days in a row', state: 'earned', xp: 100 },
-  { icon: '⚡', name: 'Fast Learner', desc: 'Finish a course in under a week', state: 'earned', xp: 150 },
-  { icon: '⭐', name: '5-Star Review', desc: 'Leave your first course review', state: 'earned', xp: 75 },
-  { icon: '🏆', name: 'Path Finisher', desc: 'Complete a learning path', state: 'progress', xp: 200, pct: 68 },
-  { icon: '👥', name: 'Team Player', desc: 'Join an organization', state: 'progress', xp: 100, pct: 40 },
-  { icon: '📚', name: 'Bookworm', desc: 'Complete 10 courses', state: 'locked', xp: 300 },
-  { icon: '🎓', name: 'Valedictorian', desc: 'Earn 5 certificates', state: 'locked', xp: 500 },
-];
+// type AchievState = 'earned' | 'progress' | 'locked';
+// const ACHIEVEMENTS: { icon: string; name: string; desc: string; state: AchievState; xp: number; pct?: number }[] = [
+//   { icon: '🎯', name: 'First Step', desc: 'Complete your first lesson', state: 'earned', xp: 50 },
+//   { icon: '🔥', name: '7-Day Streak', desc: 'Learn 7 days in a row', state: 'earned', xp: 100 },
+//   { icon: '⚡', name: 'Fast Learner', desc: 'Finish a course in under a week', state: 'earned', xp: 150 },
+//   { icon: '⭐', name: '5-Star Review', desc: 'Leave your first course review', state: 'earned', xp: 75 },
+//   { icon: '🏆', name: 'Path Finisher', desc: 'Complete a learning path', state: 'progress', xp: 200, pct: 68 },
+//   { icon: '👥', name: 'Team Player', desc: 'Join an organization', state: 'progress', xp: 100, pct: 40 },
+//   { icon: '📚', name: 'Bookworm', desc: 'Complete 10 courses', state: 'locked', xp: 300 },
+//   { icon: '🎓', name: 'Valedictorian', desc: 'Earn 5 certificates', state: 'locked', xp: 500 },
+// ];
 
-const CERTIFICATES = [
-  { title: 'Data Analytics Foundation', path: 'Data Analyst Path', date: 'May 15, 2026', id: 'CERT-2026-DA-004821', color: '#6366F1', bg: '#F5F3FF' },
-  { title: 'UI/UX Design Basics', path: 'UI/UX Designer Starter', date: 'Apr 2, 2026', id: 'CERT-2026-UX-003317', color: '#10B981', bg: '#ECFDF5' },
-];
+// const CERTIFICATES = [
+//   { title: 'Data Analytics Foundation', path: 'Data Analyst Path', date: 'May 15, 2026', id: 'CERT-2026-DA-004821', color: '#6366F1', bg: '#F5F3FF' },
+//   { title: 'UI/UX Design Basics', path: 'UI/UX Designer Starter', date: 'Apr 2, 2026', id: 'CERT-2026-UX-003317', color: '#10B981', bg: '#ECFDF5' },
+// ];
 
 const COMPLETED_PATHS = [
   {
@@ -439,7 +439,7 @@ export function UserProfile() {
   ];
 
   const xpTotal = 375;
-  const xpNext = 500;
+  // const xpNext = 500;
 
   const isImg = profile.avatar && (profile.avatar.startsWith('http') || profile.avatar.startsWith('data:image'));
 
@@ -929,7 +929,7 @@ export function UserProfile() {
               <p key={h} className="text-[#6B7280] text-xs" style={{ fontWeight: 600 }}>{h}</p>
             ))}
           </div>
-          {COURSE_HISTORY.map((c, i) => (
+          {COURSE_HISTORY.map((c) => (
             <div key={c.name}
               className={`grid px-6 py-4 items-center border-b border-[#F3F4F6] last:border-0 hover:bg-[#F9FAFB] transition-colors group`}
               style={{ gridTemplateColumns: '2fr 1.2fr 120px 160px 130px 80px' }}>

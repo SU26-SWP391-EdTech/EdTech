@@ -2,11 +2,10 @@ import './App.css';
 import { RouterProvider } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { router } from './routes/index';
-import AuthInitializer from './components/auth/AuthInitializer';
 
 const App = () => {
   return (
-    <AuthInitializer>
+    <>
       <RouterProvider router={router} />
       <Toaster
         position="top-right"
@@ -15,7 +14,7 @@ const App = () => {
           style: { fontSize: '14px' },
         }}
       />
-    </AuthInitializer>
+    </>
   );
 };
 

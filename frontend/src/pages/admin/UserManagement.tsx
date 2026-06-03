@@ -1,9 +1,8 @@
 import { useState, useMemo } from 'react';
 import {
-  Search, Filter, Download, Eye, Edit2, Trash2,
-  ChevronRight, Home, Plus, X, ChevronDown,
-  Users, UserCheck, UserPlus, TrendingUp,
-  ArrowUpDown, MoreHorizontal, Inbox, Mail,
+  Search, Download, Eye, Edit2, Trash2,
+  Plus, X, ChevronDown,
+  ArrowUpDown, Mail,
   Shield, GraduationCap, Building2, BookOpen,
   Check, AlertCircle, Clock, Ban
 } from 'lucide-react';
@@ -346,12 +345,7 @@ export function UserManagement() {
       });
   }, [users, search, roleFilter, statusFilter, sortField, sortAsc]);
 
-  const stats = {
-    total: users.length,
-    active: users.filter(u => u.status === 'Active').length,
-    newThisMonth: users.filter(u => u.joined.startsWith('May')).length,
-    growth: 14.2,
-  };
+
 
   const toggleSort = (field: 'name' | 'joined') => {
     if (sortField === field) setSortAsc(a => !a);

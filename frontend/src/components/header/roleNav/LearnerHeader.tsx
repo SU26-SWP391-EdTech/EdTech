@@ -7,9 +7,12 @@ import { SearchBar } from '../shared/SearchBar';
 import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { LEARNER_NAV } from '../config/nav-config';
+import { useAuthStore } from '../../../stores/auth.stores';
 
 export function LearnerHeader() {
     const navigate = useNavigate();
+    const user = useAuthStore((s) => s.user);
+    const logout = useAuthStore((s) => s.logout);
     const [active, setActive] = useState('dashboard');
     const [open, setOpen] = useState(false);
 
@@ -74,12 +77,12 @@ export function LearnerHeader() {
                         className="flex items-center gap-2 p-1 pr-2.5 rounded-xl hover:bg-[#F8FAFC] transition-colors"
                     >
                         <div className="w-8 h-8 rounded-lg bg-[#E11D48] flex items-center justify-center text-white text-xs font-bold">
-                            L
+                            {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'L'}
                         </div>
 
                         <div className="hidden xl:block text-left">
                             <p className="text-xs text-[#111827] leading-none font-medium">
-                                Linh Tran
+                                {user?.fullName || 'Your User Name'}
                             </p>
                             <p className="text-[10px] text-[#9CA3AF] mt-0.5 leading-none">
                                 Level 4 · 40%
@@ -98,8 +101,8 @@ export function LearnerHeader() {
 
                             <div className="absolute top-full right-0 mt-2 w-52 bg-white border border-[#E5E7EB] rounded-2xl shadow-xl z-50 py-1.5 overflow-hidden">
                                 <div className="px-4 py-3 border-b border-[#F3F4F6] bg-[#FFF8F9]">
-                                    <p className="text-sm text-[#111827] font-semibold">Linh Tran</p>
-                                    <p className="text-xs text-[#9CA3AF]">linh@student.vn</p>
+                                    <p className="text-sm text-[#111827] font-semibold">{user?.fullName || 'Your User Name'}</p>
+                                    <p className="text-xs text-[#9CA3AF]">{user?.email || 'user@student.vn'}</p>
                                 </div>
 
                                 {[
@@ -121,7 +124,13 @@ export function LearnerHeader() {
                                 ))}
 
                                 <div className="border-t border-[#F3F4F6] mt-1">
-                                    <button className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#E11D48] hover:bg-[#FFF1F3] transition-colors">
+                                    <button 
+                                        onClick={() => {
+                                            logout();
+                                            navigate('/login');
+                                        }}
+                                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#E11D48] hover:bg-[#FFF1F3] transition-colors"
+                                    >
                                         <LogOut className="w-4 h-4" />
                                         Sign Out
                                     </button>

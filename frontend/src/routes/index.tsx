@@ -1,70 +1,35 @@
-<<<<<<< Updated upstream
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import UserPage from '../layouts/admin/UserPage';
-import DashboardPage from '../pages/admin/DashboardPage';
-import AdminLayout from '../layouts/admin/AdminLayout';
-import LoginPage from '../pages/public/LoginPage';
-import HomePage from '../pages/public/HomePage';
-import ProtectedRoute from '../components/auth/ProtectedRoute';
-import GuestRoute from '../components/auth/GuestRoute';
-=======
-import { createBrowserRouter } from 'react-router-dom';
-//Landing pages
+
+// Landing pages
 import { LandingPage } from '../pages/LandingPage/LandingPage';
-//Auth pages
+
+// Auth pages
 import { SignIn } from '../pages/auth/SignIn';
 import { SignUp } from '../pages/auth/SignUp';
 import { ForgotPassword } from '../pages/auth/ForgotPassword';
 import { VerifyEmail } from '../pages/auth/VerifyEmail';
-//Admin pages
+
+// Admin pages
 import { UserManagement } from '../pages/admin/UserManagement';
-//User Profile page
+
+// User Profile page
 import { UserProfile } from '../pages/Users/UserProfile';
-//Role navigation pages 
+
+// Role navigation pages 
 import { GuestLayout } from '../layouts/Dashboard/GuestLayout';
 import { DashboardLayout } from '../layouts/Dashboard/Dashboard';
->>>>>>> Stashed changes
+
+// Role Guards
+import { GuestGuard, LearnerGuard, ProviderGuard, AdminGuard, AcademicGuard } from '../components/auth/RoleGuards';
 
 export const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <HomePage />,
-  },
-  {
-    element: <GuestRoute />,
-    children: [
-      {
-        path: '/login',
-        element: <LoginPage />,
-      },
-    ],
-  },
-  {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        path: '/admin',
-        element: <AdminLayout />,
+    // ==========================================
+    // 🌐 NHÓM 1: Giao diện công khai (GUEST LAYOUT)
+    // ==========================================
+    {
+        path: "/",
+        element: <GuestLayout />, // Sử dụng GuestLayout cho các trang công khai
         children: [
-<<<<<<< Updated upstream
-          {
-            index: true,
-            element: <DashboardPage />,
-          },
-          {
-            path: 'users',
-            element: <UserPage />,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    path: '*',
-    element: <Navigate to="/login" replace />,
-  },
-]);
-=======
             {
                 index: true,
                 element: <LandingPage />
@@ -79,6 +44,7 @@ export const router = createBrowserRouter([
     // 🔐 NHÓM 2: Giao diện đăng nhập/đăng ký (AUTH LAYOUT)
     // ==========================================
     {
+        element: <GuestGuard />, // Chỉ cho phép khách chưa đăng nhập truy cập
         children: [
             {
                 path: "/login",
@@ -101,12 +67,15 @@ export const router = createBrowserRouter([
     // ==========================================
     // 📊 NHÓM 3: Giao diện bảo mật theo vai trò (DASHBOARD LAYOUT)
     // ==========================================
-    // Bạn truyền trực tiếp prop `role` tương ứng vào DashboardLayout!
 
     // --- CHO HỌC VIÊN ---
     {
         path: "/learner",
-        element: <DashboardLayout role="learner" />, // Tự động có LearnerHeader với màu Crimson
+        element: (
+            <LearnerGuard>
+                <DashboardLayout role="learner" />
+            </LearnerGuard>
+        ),
         children: [
             {
                 index: true,
@@ -121,7 +90,11 @@ export const router = createBrowserRouter([
     // --- CHO GIẢNG VIÊN (PROVIDER) ---
     {
         path: "/provider",
-        element: <DashboardLayout role="provider" />, // Tự động có ProviderHeader với màu Sky Blue
+        element: (
+            <ProviderGuard>
+                <DashboardLayout role="provider" />
+            </ProviderGuard>
+        ),
         children: [
             {
                 index: true,
@@ -136,7 +109,11 @@ export const router = createBrowserRouter([
     // --- CHO QUẢN TRỊ VIÊN (ADMIN) ---
     {
         path: "/admin",
-        element: <DashboardLayout role="admin" />,
+        element: (
+            <AdminGuard>
+                <DashboardLayout role="admin" />
+            </AdminGuard>
+        ),
         children: [
             {
                 index: true,
@@ -159,7 +136,11 @@ export const router = createBrowserRouter([
     // --- CHO QUẢN LÝ ĐÀO TẠO (ACADEMIC MANAGER) ---
     {
         path: "/academic",
-        element: <DashboardLayout role="academic-manager" />,
+        element: (
+            <AcademicGuard>
+                <DashboardLayout role="academic-manager" />
+            </AcademicGuard>
+        ),
         children: [
             {
                 index: true,
@@ -171,5 +152,9 @@ export const router = createBrowserRouter([
             }
         ]
     },
+    // --- FALLBACK ---
+    {
+        path: "*",
+        element: <Navigate to="/" replace />
+    }
 ]);
->>>>>>> Stashed changes

@@ -34,7 +34,7 @@ export class AuthService {
 
     private mailService: MailService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   //validate fields
   async validateUser(email: string, password: string) {
@@ -142,7 +142,7 @@ export class AuthService {
       throw new NotFoundException("Role doesn't exist");
     }
 
-    if(password.length<8) throw new BadRequestException("Password length must more than 8 characters");
+    if (password.length < 8) throw new BadRequestException("Password length must more than 8 characters");
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const queryRunner = this.dataSource.createQueryRunner();
@@ -212,15 +212,15 @@ export class AuthService {
     };
   }
 
-  async verifyEmail(token: string){
-    
+  async verifyEmail(token: string) {
+
     const payload = this.jwtService.verify(token,
       {
         secret: process.env.JWT_SECRET
       },
     );
 
-    if(payload.type !== 'email-verification'){
+    if (payload.type !== 'email-verification') {
       throw new UnauthorizedException();
     }
 
@@ -233,11 +233,11 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException();
     }
-  
+
     user.isEmailVerified = true;
-  
+
     await this.userRepository.save(user);
-  
+
     return {
       success: true,
       message: 'Email verified successfully',

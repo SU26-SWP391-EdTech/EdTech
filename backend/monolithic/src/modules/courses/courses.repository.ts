@@ -57,7 +57,7 @@ export class CoursesRepository extends Repository<Course> {
         // Nạp thêm các quan hệ cần hiển thị (ví dụ: thông tin người tạo, tổ chức)
         queryBuilder
             .leftJoin('course.user', 'user')
-            .addSelect(['user.userId', 'user.fullName', 'user.ava2232tar'])
+            .addSelect(['user.userId', 'user.fullName', 'user.avatar'])
 
         // 1. Tìm kiếm text động theo Title hoặc Description (không phân biệt chữ hoa chữ thường)
         if (search) {

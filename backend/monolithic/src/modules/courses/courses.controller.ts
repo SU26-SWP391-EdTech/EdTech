@@ -1,16 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, Req, UploadedFile, UseInterceptors, UseGuards } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { SearchCourseDto } from './dto/search-course.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { RoleEnum } from 'src/common/enums/role.enum';
+import { Roles } from 'src/common/decorators/roles/roles.decorator';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 
+@ApiTags('Courses')
 @Controller('courses')
 export class CoursesController {
     constructor(private readonly coursesService: CoursesService) { }
 
     @Post()
-    create(@Req() req, @Body() createCourseDto: CreateCourseDto) {
-        return this.coursesService.create(createCourseDto, req.user.id);
+    @UseInterceptors(FileInterceptor('thumbnailUrl'))
+    create(@Req() req, @Body() createCourseDto: CreateCourseDto, @UploadedFile() file?: Express.Multer.File) {
+        return this.coursesService.create(createCourseDto, req.user.id, file);
     }
 
     // Endpoint: GET /courses (Ví dụ: GET /courses?search=javascript&page=1&limit=5)
@@ -37,4 +45,31 @@ export class CoursesController {
     remove(@Param('id', ParseIntPipe) id: number) {
         return this.coursesService.remove(id);
     }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(RoleEnum.ACADEMIC_MANAGER)
+    @Patch(':id/approve')
+    @ApiOperation({ summary: 'Approve a course' })
+    @ApiResponse({ status: 200, description: 'Course approved successfully' })
+    @ApiResponse({ status: 400, description: 'Course is not in pending status or missing lessons' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - requires Academic Manager role' })
+    @ApiResponse({ status: 404, description: 'Course or Reviewer not found' })
+    public async approveCourse(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+        return this.coursesService.approveCourse(id, req.user.userId);
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(RoleEnum.ACADEMIC_MANAGER)
+    @Patch(':id/reject')
+    @ApiOperation({ summary: 'Reject a course' })
+    @ApiResponse({ status: 200, description: 'Course rejected successfully' })
+    @ApiResponse({ status: 400, description: 'Course is not in pending status' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 403, description: 'Forbidden - requires Academic Manager role' })
+    @ApiResponse({ status: 404, description: 'Course or Reviewer not found' })
+    public async rejectCourse(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+        return this.coursesService.rejectCourse(id, req.user.userId);
+    }
+
 }
