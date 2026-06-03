@@ -22,29 +22,47 @@ import { UpdateAcademicUserInfoDto } from './dto/update-academic-user-info.dto';
 import { EditAcademicUserProfileDto } from './dto/edit-academic-user-profile.dto';
 import { GetAcademicUserProfileDto } from './dto/get-academic-user-profile.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Users')
 @Controller('user')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get user by ID' })
+  @ApiResponse({ status: 200, description: 'User returned successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   getUser(@Param('id') id: string) {
     return this.usersService.findOne(Number(id));
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiResponse({ status: 200, description: 'Users returned successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   findAll() {
     return this.usersService.findAll();
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create a user' })
+  @ApiResponse({ status: 201, description: 'User created successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   create(@Body() CreateUserDto: CreateUserDto) {
     return this.usersService.create(CreateUserDto);
   }
 
   @Roles('course provider','academic manager','learner')
   @Patch('change-password')
+  @ApiOperation({ summary: 'Change current user password' })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   async changePassword(
     @Req() req,
     @Body() changePasswordDto: ChangePasswordDto,
@@ -55,6 +73,12 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('course provider','academic manager')
   @Patch('update-academic-user-profile/:id')
+  @ApiOperation({ summary: 'Update academic user profile information' })
+  @ApiResponse({ status: 200, description: 'Academic user profile updated successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Academic user not found' })
   async updateProfile(
     @Param('id') id: number,
     @Body() dto: UpdateAcademicUserInfoDto,
@@ -66,6 +90,14 @@ export class UsersController {
   @Roles('course provider','academic manager')
   @Patch('edit-academic-user-profile/:id')
   @UseInterceptors(FileInterceptor('avatarUrl'))
+  @ApiOperation({ summary: 'Edit academic user profile with avatar upload' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: EditAcademicUserProfileDto })
+  @ApiResponse({ status: 200, description: 'Academic user profile edited successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Academic user not found' })
   async editAcademicUserProfile(
     @Param('id') id: number,
     @Body() dto: EditAcademicUserProfileDto,
@@ -75,6 +107,10 @@ export class UsersController {
   }
   
   @Get('academic-user/:id')
+  @ApiOperation({ summary: 'View academic user profile' })
+  @ApiResponse({ status: 200, description: 'Academic user profile returned successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Academic user not found' })
   async viewAcademicUserProfile(
     @Param('id') id: number,
     dto: GetAcademicUserProfileDto,
@@ -84,11 +120,20 @@ export class UsersController {
 
   
   @Patch(':id')
+  @ApiOperation({ summary: 'Update user by ID' })
+  @ApiResponse({ status: 200, description: 'User updated successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   update(@Param('id') id: string, @Body() UpdateUserDto: UpdateUserDto) {
     return this.usersService.update(Number(id), UpdateUserDto);
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete user by ID' })
+  @ApiResponse({ status: 200, description: 'User deleted successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   remove(@Param('id') id: string) {
     return this.usersService.remove(Number(id));
   }
