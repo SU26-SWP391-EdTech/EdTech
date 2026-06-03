@@ -228,6 +228,7 @@ export class UsersService implements OnApplicationBootstrap{
       email: 'admin@system.com',
       password: hashedPassword,
       role: adminRole,
+      isEmailVerified: true,
     });
 
     await this.userRepo.save(admin);
