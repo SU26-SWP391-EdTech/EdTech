@@ -21,6 +21,7 @@ import { User } from '../users/entities/user.entity';
     ],
     exports: [
         CoursesService,    // Export nếu các module khác cần sử dụng
+        CoursesRepository
     ],
 })
 export class CoursesModule { }
