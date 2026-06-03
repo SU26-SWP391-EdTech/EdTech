@@ -1,114 +1,109 @@
-# 📘 TÀI LIỆU BÀN GIAO HỆ THỐNG ROLE-BASED NAVIGATION
+# 📘 HƯỚNG DẪN KIẾN TRÚC & CẤU TRÚC THƯ MỤC FRONTEND
 
-Hệ thống **Role-Based Navigation** và **Unified Header Layout** cho dự án EdTech đã được xây dựng hoàn chỉnh, sạch mã, đạt chuẩn sản xuất (production-ready) và vượt qua quá trình biên dịch nghiêm ngặt của TypeScript (`npm run build` thành công 100% không cảnh báo).
-
-Dưới đây là hướng dẫn chi tiết dành cho bạn hoặc thành viên khác trong nhóm phát triển để tiếp quản, sử dụng và mở rộng hệ thống này.
+Tài liệu này cung cấp cái nhìn toàn diện về cấu trúc thư mục, kiến trúc dự án và chức năng của từng thành phần trong mã nguồn Frontend dự án EdTech. Giao diện được xây dựng bằng **React 18**, **TypeScript**, **Vite**, **Zustand** (quản lý state toàn cục), và **TailwindCSS** (styling).
 
 ---
 
-## 📂 1. Cấu trúc thư mục các File liên quan
+## 📂 1. Sơ đồ Cấu trúc Thư mục Tổng quan
 
-Toàn bộ logic phân quyền giao diện và thanh điều hướng được chia nhỏ thành các Component riêng biệt, đặt tại:
+Dưới đây là cây thư mục chính của dự án Frontend nằm trong thư mục `frontend/src`:
 
 ```bash
 src/
-├── components/
-│   └── header/
-│       ├── config/
-│       │   └── nav-config.tsx      # ⚙️ Nơi định nghĩa các mảng Menu cho từng Role
-│       ├── roleNav/
-│       │   ├── GuestHeader.tsx      # 🟢 Header dành cho Khách (Chưa đăng nhập)
-│       │   ├── LearnerHeader.tsx    # 🔴 Header dành cho Học viên (Crimson Accent)
-│       │   ├── ProviderHeader.tsx   # 🔵 Header dành cho Giảng viên (Sky Blue Accent)
-│       │   ├── AcademicManagerHeader.tsx # 🟡 Header dành cho Quản lý đào tạo (Amber Accent)
-│       │   └── AdminHeader.tsx      # 🟣 Header dành cho Quản trị viên (Purple Accent)
-│       └── shared/
-│           ├── Logo.tsx             # 🎨 Component Logo dùng chung (Đổi Icon & Màu theo Role)
-│           ├── NavItem.tsx          # 🔗 Nút Menu điều hướng riêng lẻ hỗ trợ Badge & Count
-│           ├── NotifBell.tsx        # 🔔 Chuông thông báo đồng bộ màu theo Accent
-│           └── SearchBar.tsx        # 🔍 Thanh tìm kiếm thông minh đồng bộ màu theo Accent
-├── layouts/
-│   └── Dashboard/
-│       ├── GuestLayout.tsx          # 🌐 Layout dùng chung cho Khách (Bao bọc Landing Page)
-│       └── Dashboard.tsx            # 📊 Layout dùng chung cho Auth Users (Render Header theo Role)
-└── routes/
-    └── index.tsx                    # 🛣️ File cấu hình phân tuyến của React Router DOM
+├── assets/             # 🎨 Tài nguyên tĩnh (Hình ảnh, logo, svg, v.v.)
+├── components/         # 🧱 Các Component giao diện nhỏ, tái sử dụng cao
+│   ├── auth/           #   - FormInput, CustomCheckbox, PrimaryButton cho Auth
+│   └── header/         #   - Các Header chuyên biệt theo từng vai trò (Role)
+│       ├── config/     #     * nav-config.tsx (Cấu hình menu điều hướng)
+│       ├── roleNav/    #     * GuestHeader, LearnerHeader, AdminHeader, v.v.
+│       └── shared/     #     * Logo, SearchBar, NotifBell dùng chung
+├── contexts/           # 🌐 React Contexts quản lý state nội bộ của cây component
+├── hooks/              # ⚓ Custom Hooks tùy chỉnh tái sử dụng logic React
+├── layouts/            # 📐 Khung bao bọc giao diện lớn (Layouts)
+│   ├── Auth/           #   - SplitAuthLayout, CenteredAuthLayout
+│   └── Dashboard/      #   - GuestLayout (Landing), DashboardLayout (Dashboard chính)
+├── lib/                # ⚙️ Cấu hình thư viện bên thứ ba (Axios Client)
+│   └── axios.ts        #   - Axios interceptors xử lý Token và đồng bộ 401
+├── pages/              # 📄 Các màn hình (Pages) chính của ứng dụng
+│   ├── auth/           #   - Màn hình Login, SignUp, VerifyEmail
+│   ├── dashboard/      #   - Trang Dashboard chung sau đăng nhập
+│   └── (modules)/      #   - Các màn hình chuyên biệt (Learner, Provider, Admin...)
+├── routes/             # 🛣️ Định tuyến & Phân quyền trang (Routing & Guards)
+│   ├── index.tsx       #   - Khai báo Router, Route Guards bảo vệ các tuyến đường
+│   └── routeGuards.tsx #   - GuestGuard, LearnerGuard, ProviderGuard, v.v.
+├── stores/             # 💾 Quản lý State toàn cục bằng Zustand
+│   └── auth.stores.ts  #   - Lưu trữ phiên đăng nhập, thông tin user và token
+├── types/              # 🏷️ Các định nghĩa kiểu dữ liệu (TypeScript Interfaces/Types)
+└── utils/              # 🛠️ Các hàm tiện ích bổ trợ (Utilities)
 ```
 
 ---
 
-## ⚡ 2. Cơ chế hoạt động của Hệ thống
+## 🔍 2. Chức năng Chi tiết của Từng Thư mục
 
-1. **Logo Động & Điều Hướng Nhanh (`Logo.tsx`):**
-   * Tự động thay đổi Icon theo `variant` (BookOpen cho Học viên, Shield cho Admin, GraduationCap cho Giảng viên, Award cho Academic).
-   * Được bọc bằng `<Link to="/">` giúp nhấp chuột là quay về trang chủ lập tức mà không tải lại toàn bộ trang.
-2. **Đồng bộ hóa Chiều rộng Layout:**
-   * Tất cả các Header được thiết lập lớp `w-full px-8` thay vì bị giới hạn chiều rộng, giúp thanh điều hướng luôn tràn màn hình đẹp mắt và không bao giờ bị lệch sang trái/phải trên các độ phân giải lớn.
-3. **Quản lý Menu tập trung (`nav-config.tsx`):**
-   * Toàn bộ cấu trúc danh sách menu được lưu trữ tập trung tại `nav-config.tsx`. Khi cần chỉnh sửa menu của bất kỳ Role nào, dev chỉ cần sửa file cấu hình này mà không cần động vào code logic hiển thị của các Header.
+### 🎨 2.1. `src/assets`
+* **Vai trò:** Nơi lưu trữ tất cả các tệp tĩnh không thay đổi trong quá trình chạy ứng dụng.
+* **Nội dung:** Ảnh minh họa, biểu tượng SVG tùy biến, tệp font chữ hoặc ảnh đại diện mặc định.
 
----
+### 🧱 2.2. `src/components`
+* **Vai trò:** Chứa các Component UI độc lập, không gắn liền với một trang cụ thể, có thể tái sử dụng ở nhiều nơi.
+* **Cấu trúc con:**
+  * `auth/`: Chứa các ô nhập liệu dạng Form, nút nhấn đặc trưng của luồng đăng ký/đăng nhập.
+  * `header/`: Chứa toàn bộ hệ thống thanh điều hướng phân quyền (Role-based Navigation). Các file thiết kế riêng cho từng vai trò được đặt trong `roleNav/`, các cấu phần nhỏ dùng chung như `Logo`, `SearchBar`, `NotifBell` được đặt trong `shared/`, và menu điều hướng tĩnh được cấu hình tại `config/nav-config.tsx`.
 
-## 🚀 3. Hướng dẫn Tích hợp Backend & Quản lý State (Dành cho Developer tiếp quản)
+### 🌐 2.3. `src/contexts`
+* **Vai trò:** Nơi định nghĩa các React Context để chia sẻ dữ liệu hoặc trạng thái nhẹ cho các Component cấp dưới mà không cần dùng đến Zustand.
+* **Ứng dụng:** Theme chế độ sáng/tối (Dark/Light), cài đặt ngôn ngữ cục bộ, v.v.
 
-Để hệ thống chuyển từ chế độ dữ liệu giả lập (mocked role) sang chạy thực tế bằng API và tài khoản người dùng, hãy thực hiện theo các bước sau:
+### ⚓ 2.4. `src/hooks`
+* **Vai trò:** Chứa các React Custom Hooks để tách biệt logic xử lý ra khỏi giao diện hiển thị, giúp code ngắn gọn và dễ bảo trì hơn.
+* **Ví dụ:** `useDebounce` (tránh gọi API liên tục khi gõ tìm kiếm), `useWindowSize` (lắng nghe kích thước màn hình).
 
-### Bước 1: Kết nối Auth State từ Zustand Store hoặc JWT
-Trong file `src/layouts/Dashboard/Dashboard.tsx` hiện tại đang nhận role cứng từ React Router:
-```typescript
-// src/layouts/Dashboard/Dashboard.tsx
-export function DashboardLayout({ role }: { role: string }) {
-    // Hiện tại: Lấy từ prop role được khai báo ở routes
-```
-Khi bàn giao, lập trình viên frontend chỉ cần kết nối với Zustand Store chứa trạng thái đăng nhập thực tế của người dùng:
-```typescript
-import { useAuthStore } from '@/stores/authStore'; // Ví dụ store chứa thông tin user
+### 📐 2.5. `src/layouts`
+* **Vai trò:** Định nghĩa khung bố cục lớn của các trang. Layout quyết định vị trí hiển thị của Header, Sidebar, Footer và phần nội dung động (thông qua `<Outlet />`).
+* **Ví dụ:**
+  * `SplitAuthLayout`: Thiết kế chia đôi màn hình (một bên là Form, một bên là Banner) dùng cho Đăng nhập/Đăng ký.
+  * `DashboardLayout`: Giao diện làm việc chính, tự động kiểm tra vai trò của người dùng để render Header tương ứng và bao bọc các trang nội dung bên trong.
 
-export function DashboardLayout() {
-    const { user } = useAuthStore();
-    const currentRole = user?.role || 'guest';
-    
-    // Sử dụng currentRole để render Header tương ứng thay vì dùng prop role cứng
-```
+### ⚙️ 2.6. `src/lib`
+* **Vai trò:** Cấu hình và khởi tạo các thư viện bên thứ ba được sử dụng trong dự án.
+* **Ví dụ:** `axios.ts` thiết lập một Axios client gọi là `api` có cấu hình `baseURL` và tự động gắn Token dạng `Bearer` vào Request Header, đồng thời xử lý lỗi `401` để tự động đăng xuất người dùng khi token hết hạn.
 
-### Bước 2: Thiết lập Route Guard (Bảo vệ tuyến đường)
-Trong file `src/routes/index.tsx`, để tránh việc người dùng gõ trực tiếp URL `/admin` hay `/provider` khi chưa đăng nhập, lập trình viên cần bọc các tuyến đường bằng một Component bảo vệ (ví dụ: `ProtectedRoute` hoặc `RoleGuard`):
+### 📄 2.7. `src/pages`
+* **Vai trò:** Nơi chứa giao diện hoàn chỉnh của từng trang ứng dụng tương ứng với các URL định tuyến. Các file ở đây sẽ ghép nối các Component nhỏ lại và gọi Action từ Store để hiển thị dữ liệu.
+* **Cấu trúc:** Phân nhóm theo thư mục chức năng, ví dụ `/auth/Login.tsx`, `/auth/VerifyEmail.tsx`.
 
-```typescript
-// Ví dụ tạo component Guard đơn giản:
-function RoleGuard({ allowedRoles, children }) {
-    const { user, isAuthenticated } = useAuthStore();
-    
-    if (!isAuthenticated) return <Navigate to="/login" replace />;
-    if (!allowedRoles.includes(user.role)) return <Navigate to="/unauthorized" replace />;
-    
-    return children;
-}
+### 🛣️ 2.8. `src/routes`
+* **Vai trò:** Quản lý toàn bộ cấu trúc định tuyến (URLs) và kiểm soát phân quyền truy cập trang.
+* **Nội dung:** 
+  * Định nghĩa danh sách các Route (Tĩnh và Động) bằng `react-router-dom`.
+  * Triển khai các **Route Guards** (như `GuestGuard` chặn người dùng chưa đăng nhập truy cập dashboard, và `LearnerGuard`/`ProviderGuard`/`AdminGuard` chặn người dùng truy cập vào trang của vai trò khác).
 
-// Cấu hình trong routes/index.tsx:
-{
-    path: "/admin",
-    element: (
-        <RoleGuard allowedRoles={['admin']}>
-            <DashboardLayout role="admin" />
-        </RoleGuard>
-    ),
-    children: [ ... ]
-}
-```
+### 💾 2.9. `src/stores`
+* **Vai trò:** Quản lý các State toàn cục (Global States) của ứng dụng bằng **Zustand** thay cho Redux để đạt hiệu năng cao và code ngắn gọn.
+* **Nội dung:** `auth.stores.ts` quản lý việc lưu trữ token, thông tin người dùng đang đăng nhập, thực hiện gọi API đăng ký, đăng nhập, xác thực email, đăng xuất và đồng bộ hóa lưu trữ với `localStorage`.
+
+### 🏷️ 2.10. `src/types`
+* **Vai trò:** Nơi khai báo tập trung các Interface, Type của TypeScript để chia sẻ kiểu dữ liệu trên toàn dự án, tránh lặp lại định nghĩa kiểu.
+* **Ví dụ:** Định nghĩa kiểu `User`, `Course`, `Lesson`, `Notification`.
+
+### 🛠️ 2.11. `src/utils`
+* **Vai trò:** Các hàm xử lý logic thuần túy (Helper/Utility functions) không liên quan trực tiếp đến giao diện.
+* **Ví dụ:** Định dạng ngày tháng năm, kiểm tra độ mạnh của mật khẩu (`passwordStrength.ts`).
 
 ---
 
-## ⚙️ 4. Hướng dẫn Mở rộng & Tùy biến (Chỉnh sửa trong tương lai)
+## ⚡ 3. Các Luồng Hoạt Động Cốt Lõi (Core Workflows)
 
-* **Muốn thêm/bớt mục trên Navbar của một Role:**
-  * Truy cập `src/components/header/config/nav-config.tsx`.
-  * Tìm tới mảng tương ứng (ví dụ: `LEARNER_NAV`, `ADMIN_NAV`) để thêm hoặc xóa đối tượng mong muốn. Các Icon có thể import trực tiếp từ thư viện `lucide-react`.
-* **Muốn thay đổi thông tin User hiển thị ở Dropdown bên phải:**
-  * Vào tệp Header của role đó (ví dụ: `src/components/header/roleNav/LearnerHeader.tsx`).
-  * Tìm phần State chứa avatar, tên hiển thị và email (dòng 99) để liên kết với dữ liệu `user` thực tế lấy từ API backend.
+### 3.1. Luồng Xác thực Email (Email Verification Flow)
+* **Kích hoạt:** Khi nhấp vào liên kết xác nhận trên email -> Mở trang `/verify-email?token=...`.
+* **Xử lý:**
+  1. Frontend giải mã JWT token tại Client thông qua hàm `decodeJwt(token)` để lấy thông tin email và hiển thị ngay trên UI của trang.
+  2. Gửi yêu cầu kiểm tra token lên backend thông qua action `verifyEmail(token)`.
+  3. Hiển thị thông báo Toast kết quả thành công/thất bại và thiết lập bộ đếm thời gian 5 giây để điều hướng trở lại màn hình Đăng nhập `/login`.
 
----
-
-> [!TIP]
-> **Đánh giá tổng quan:** Mã nguồn hiện tại được viết cực kỳ tường minh (clean code), tuân thủ chặt chẽ tiêu chuẩn thiết kế hiện đại, responsive hoàn hảo và đã được tối ưu hóa tối đa. Tài liệu bàn giao này đã bao quát toàn bộ các khía cạnh cần thiết giúp bất kỳ lập trình viên nào cũng có thể tiếp quản và triển khai tiếp dự án một cách trơn tru nhất!
+### 3.2. Đồng bộ hóa Trạng thái Đăng xuất & Lỗi 401
+* **Khi Người dùng Đăng xuất (Sign Out):** 
+  Hàm `logout` trong `auth.stores.ts` được kích hoạt sẽ thực hiện gọi API `POST /auth/logout` để báo cho Backend xóa cookie, đồng thời xóa token ở `localStorage` và đặt lại Zustand State của user về `null`.
+* **Khi Tài khoản bị xóa hoặc Token hết hạn (Lỗi 401):**
+  Axios Interceptor ở `lib/axios.ts` phát hiện mã lỗi `401 Unauthorized` từ API -> Tự động phát ra một sự kiện toàn cục `auth:logout` -> `auth.stores.ts` lắng nghe sự kiện này và reset ngay lập tức Zustand State về trạng thái chưa đăng nhập, giúp các Route Guards kích hoạt chuyển hướng tức thì và an toàn về `/login`.
