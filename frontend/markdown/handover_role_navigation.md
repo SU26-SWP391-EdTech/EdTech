@@ -31,6 +31,8 @@ src/
 ├── routes/             # 🛣️ Định tuyến & Phân quyền trang (Routing & Guards)
 │   ├── index.tsx       #   - Khai báo Router, Route Guards bảo vệ các tuyến đường
 │   └── routeGuards.tsx #   - GuestGuard, LearnerGuard, ProviderGuard, v.v.
+├── services/           # 🔌 Lớp kết nối API mạng (Services)
+│   └── auth/           #   - Module Auth Service chứa auth.service.ts gọi API
 ├── stores/             # 💾 Quản lý State toàn cục bằng Zustand
 │   └── auth.stores.ts  #   - Lưu trữ phiên đăng nhập, thông tin user và token
 ├── types/              # 🏷️ Các định nghĩa kiểu dữ liệu (TypeScript Interfaces/Types)
@@ -79,15 +81,19 @@ src/
   * Định nghĩa danh sách các Route (Tĩnh và Động) bằng `react-router-dom`.
   * Triển khai các **Route Guards** (như `GuestGuard` chặn người dùng chưa đăng nhập truy cập dashboard, và `LearnerGuard`/`ProviderGuard`/`AdminGuard` chặn người dùng truy cập vào trang của vai trò khác).
 
-### 💾 2.9. `src/stores`
-* **Vai trò:** Quản lý các State toàn cục (Global States) của ứng dụng bằng **Zustand** thay cho Redux để đạt hiệu năng cao và code ngắn gọn.
-* **Nội dung:** `auth.stores.ts` quản lý việc lưu trữ token, thông tin người dùng đang đăng nhập, thực hiện gọi API đăng ký, đăng nhập, xác thực email, đăng xuất và đồng bộ hóa lưu trữ với `localStorage`.
+### 🔌 2.9. `src/services`
+* **Vai trò:** Lớp gọi API mạng. Tách biệt hoàn toàn các logic gửi yêu cầu (HTTP Requests) tới server ra khỏi giao diện và store.
+* **Nội dung:** `auth/auth.service.ts` định nghĩa các hàm bất đồng bộ tương tác trực tiếp với Backend.
 
-### 🏷️ 2.10. `src/types`
+### 💾 2.10. `src/stores`
+* **Vai trò:** Quản lý các State toàn cục (Global States) của ứng dụng bằng **Zustand** kết hợp Persist Middleware.
+* **Nội dung:** `auth.stores.ts` quản lý việc lưu trữ token, thông tin người dùng đang đăng nhập và tự động đồng bộ hóa với localStorage.
+
+### 🏷️ 2.11. `src/types`
 * **Vai trò:** Nơi khai báo tập trung các Interface, Type của TypeScript để chia sẻ kiểu dữ liệu trên toàn dự án, tránh lặp lại định nghĩa kiểu.
 * **Ví dụ:** Định nghĩa kiểu `User`, `Course`, `Lesson`, `Notification`.
 
-### 🛠️ 2.11. `src/utils`
+### 🛠️ 2.12. `src/utils`
 * **Vai trò:** Các hàm xử lý logic thuần túy (Helper/Utility functions) không liên quan trực tiếp đến giao diện.
 * **Ví dụ:** Định dạng ngày tháng năm, kiểm tra độ mạnh của mật khẩu (`passwordStrength.ts`).
 

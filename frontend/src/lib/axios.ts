@@ -8,9 +8,17 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('edtech_auth_token');
-    if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
+    try {
+        const authStorage = localStorage.getItem('edtech-auth-storage');
+        if (authStorage) {
+            const parsed = JSON.parse(authStorage);
+            const token = parsed?.state?.token;
+            if (token && config.headers) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+        }
+    } catch (e) {
+        console.error('Failed to parse auth storage from localStorage', e);
     }
     return config;
 }, (error) => {
@@ -19,8 +27,7 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use((response) => response, (error) => {
     if (error.response && error.response.status === 401) {
-        localStorage.removeItem('edtech_auth_token');
-        localStorage.removeItem('edtech_auth_user');
+        localStorage.removeItem('edtech-auth-storage');
         
         // Phát sự kiện logout để đồng bộ với Zustand store
         if (typeof window !== 'undefined') {
