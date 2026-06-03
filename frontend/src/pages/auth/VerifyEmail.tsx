@@ -1,15 +1,48 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Check, CheckCircle2, Inbox, RefreshCw } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { PrimaryButton } from '../../components/auth/PrimaryButton';
 import { SplitAuthLayout } from '../../layouts/Auth/SplitAuthLayout';
+import { useAuthStore } from '../../stores/auth.stores';
+
+// Helper function to decode JWT payload on the client side
+function decodeJwt(token: string) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      window
+        .atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    return null;
+  }
+}
 
 export function VerifyEmail() {
   const location = useLocation();
   const navigate = useNavigate();
-  
-  // Lấy email động được truyền từ màn hình SignUp thông qua router state
-  const registeredEmail = location.state?.email || 'your email';
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
+
+  const { verifyEmail } = useAuthStore();
+  const [verifying, setVerifying] = useState(!!token);
+
+  // Extract email from decoded token payload if present
+  const decodedToken = token ? decodeJwt(token) : null;
+  const tokenEmail = decodedToken?.email;
+
+  // Lấy email từ router state, decoded token hoặc sessionStorage
+  const registeredEmail =
+    location.state?.email ||
+    tokenEmail ||
+    sessionStorage.getItem('registered_email') ||
+    'your email';
 
   const [countdown, setCountdown] = useState(0);
   const [resent, setResent] = useState(false);
@@ -20,10 +53,56 @@ export function VerifyEmail() {
     return () => clearTimeout(timer);
   }, [countdown]);
 
+  useEffect(() => {
+    if (!token) return;
+
+    const performVerification = async () => {
+      try {
+        await verifyEmail(token);
+
+        toast.success('Xác thực email thành công! Đang chuyển hướng về trang đăng nhập...', {
+          id: 'verify-email-success',
+        });
+
+        setTimeout(() => {
+          navigate('/login');
+        }, 5000);
+      } catch (error: any) {
+        toast.error(error.message || 'Xác thực email thất bại hoặc liên kết đã hết hạn.', {
+          id: 'verify-email-error',
+        });
+
+        setTimeout(() => {
+          navigate('/login');
+        }, 5000);
+      } finally {
+        setVerifying(false);
+      }
+    };
+
+    performVerification();
+  }, [token, verifyEmail, navigate]);
+
   const handleResend = () => {
     setResent(true);
     setCountdown(60);
   };
+
+  if (verifying) {
+    return (
+      <SplitAuthLayout screen="verify">
+        <div className="w-full max-w-sm text-center">
+          <div className="relative w-20 h-20 mx-auto mb-7 flex items-center justify-center">
+            <RefreshCw className="w-10 h-10 text-[#E11D48] animate-spin" />
+          </div>
+          <h1 className="text-[#111827] mb-2" style={{ fontWeight: 700, fontSize: 26 }}>Verifying Email</h1>
+          <p className="text-[#6B7280] mb-1" style={{ fontSize: 14, lineHeight: 1.6 }}>
+            Please wait while we verify your account...
+          </p>
+        </div>
+      </SplitAuthLayout>
+    );
+  }
 
   return (
     <SplitAuthLayout screen="verify">
