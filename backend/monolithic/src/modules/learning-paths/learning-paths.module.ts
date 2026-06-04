@@ -5,9 +5,13 @@ import { LearningPathCourse } from './entities/learning-path-course.entity';
 import { LearningPathsController } from './learning-paths.controller';
 import { LearningPathsService } from './learning-paths.service';
 import { LearningPathsRepository } from './learning-paths.repository';
+import { CoursesModule } from '../courses/courses.module';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([LearningPath, LearningPathCourse])],
+    imports: [
+        TypeOrmModule.forFeature([LearningPath, LearningPathCourse]),
+        CoursesModule
+    ],
     controllers: [LearningPathsController],
     providers: [LearningPathsService, LearningPathsRepository],
     exports: [LearningPathsService, LearningPathsRepository]
