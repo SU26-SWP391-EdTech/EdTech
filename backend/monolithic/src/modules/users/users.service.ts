@@ -3,6 +3,8 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  OnApplicationBootstrap,
+  Logger
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -17,9 +19,10 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { GetAcademicUserProfileDto } from './dto/get-academic-user-profile.dto';
 import { EditAcademicUserProfileDto } from './dto/edit-academic-user-profile.dto';
 import { UpdateAcademicUserInfoDto } from './dto/update-academic-user-info.dto';
+import { RoleEnum } from 'src/common/enums/role.enum';
 
 @Injectable()
-export class UsersService {
+export class UsersService implements OnApplicationBootstrap{
   constructor(
     @InjectRepository(User)
     private userRepo: Repository<User>,
@@ -29,6 +32,8 @@ export class UsersService {
     private userProfileRepo: Repository<UserProfile>,
     private cloudinaryService: CloudinaryService,
   ) { }
+
+  private readonly logger = new Logger(UsersService.name);
 
   async findOne(id: number) {
     return this.userRepo.findOne({
@@ -230,5 +235,39 @@ export class UsersService {
       experienceYears: academicUser.userProfile?.experienceYears,
       createdAt: academicUser.createdAt,
     };
+  }
+
+  async onApplicationBootstrap() {
+    await this.createDefaultAdmin();
+  }
+
+  private async createDefaultAdmin(){
+    const userCount = await this.userRepo.count();
+
+    if(userCount > 0){
+      this.logger.log('Users already exist, skip admin seeding');
+      return;
+    }
+
+    const adminRole = await this.roleRepo.findOne({
+      where: { roleName: RoleEnum.ADMIN },
+    });
+    
+    if (!adminRole) {
+      throw new Error('ADMIN role not found');
+    }
+
+    const hashedPassword = await bcrypt.hash('Admin@123', 10);
+
+    const admin = this.userRepo.create({
+      fullName: 'Admin',
+      email: 'admin@system.com',
+      password: hashedPassword,
+      role: adminRole,
+      isEmailVerified: true,
+    });
+
+    await this.userRepo.save(admin);
+    this.logger.log('Default admin account created');
   }
 }

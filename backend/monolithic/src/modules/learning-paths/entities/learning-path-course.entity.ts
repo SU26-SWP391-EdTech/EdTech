@@ -8,25 +8,29 @@ export class LearningPathCourse {
   @PrimaryColumn({ name: 'learning_path_id' })
   learningPathId!: number;
 
-  @PrimaryColumn({ name: 'course_id' })
-  courseId!: number;
-  @ManyToOne(() => Course, (course) => course.learningPathCourses, {nullable: false})
-  @JoinColumn({ name: 'course_id' })
-  course!: Course;
-
   @ManyToOne(
     () => LearningPath,
     (learningPath) => learningPath.learningPathCourses,
-    {nullable: false}
+    { nullable: false },
   )
   @JoinColumn({ name: 'learning_path_id' })
   learningPath!: LearningPath;
-  
-  @Column({ name: 'position', unique: true, nullable: false})
-  position!: number;
-  
-  @ManyToOne(() => User, (user) => user.learningPathCourses, {nullable: false})
-  @JoinColumn({name: 'editted_by'})
-  edittedBy!: User;
 
+  @PrimaryColumn({ name: 'course_id' })
+  courseId!: number;
+
+  @ManyToOne(() => Course, (course) => course.learningPathCourses, {
+    nullable: false,
+  })
+  @JoinColumn({ name: 'course_id' })
+  course!: Course;
+
+  @Column({ name: 'position', nullable: false })
+  position!: number;
+
+  @ManyToOne(() => User, (user) => user.learningPathCourses, {
+    nullable: false,
+  })
+  @JoinColumn({ name: 'editted_by' })
+  edittedBy!: User;
 }
