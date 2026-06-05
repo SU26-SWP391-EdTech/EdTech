@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDown, LogOut, UserCircle, Settings } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
@@ -11,14 +11,23 @@ import { useAuthStore } from '../../../stores/auth.stores';
 
 export function AdminHeader() {
     const navigate = useNavigate();
+    const location = useLocation();
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
 
-    const [active, setActive] = useState('dashboard');
     const [open, setOpen] = useState(false);
 
     const ACC = '#7C3AED'; // Admin Accent: Purple
     const ACTIVE_BG = '#EDE9FE';
+
+    // Determine active item based on current URL path
+    const getActiveTab = () => {
+        if (location.pathname.includes('/usermanagement')) return 'users';
+        if (location.pathname.includes('/analytics')) return 'analytics';
+        return 'dashboard';
+    };
+
+    const active = getActiveTab();
 
     return (
         <div className="bg-white border-b border-[#E5E7EB] shadow-sm">
@@ -40,7 +49,15 @@ export function AdminHeader() {
                             badge={(item as any).badge}
                             count={(item as any).count}
                             countColor={(item as any).countColor}
-                            onClick={() => setActive(item.id)}
+                            onClick={() => {
+                                if (item.id === 'users') {
+                                    navigate('/admin/usermanagement');
+                                } else if (item.id === 'dashboard') {
+                                    navigate('/admin');
+                                } else if (item.id === 'analytics') {
+                                    navigate('/admin/analytics');
+                                }
+                            }}
                         />
                     ))}
                 </nav>
@@ -88,11 +105,15 @@ export function AdminHeader() {
                                 </div>
 
                                 {[
-                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile' },
+                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/admin/adminprofile') },
                                     { icon: <Settings className="w-4 h-4" />, label: 'System Settings' },
                                 ].map((item) => (
                                     <button
                                         key={item.label}
+                                        onClick={() => {
+                                            if (item.onClick) item.onClick();
+                                            setOpen(false);
+                                        }}
                                         className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F8FAFC] transition-colors"
                                     >
                                         <span className="text-[#9CA3AF]">{item.icon}</span>

@@ -40,28 +40,57 @@ export class LearnersService {
 }
 
   async editLearnerProfile(id: number, dto: EditLearnerProfileDto, file?: Express.Multer.File){
-      const learnerProfile = await this.userRepository.findOne({
+      const user = await this.userRepository.findOne({
         where: {
           userId: id,
         }
       });
 
-      if(!learnerProfile){
+      if(!user){
         throw new NotFoundException('User not found');
       }
       
       if (file) {
         const uploaded =
           await this.cloudinaryService.uploadFile(file);
-  
-        dto.avatarUrl = uploaded.secure_url;
+        user.avatar = uploaded.secure_url;
+      } else if (dto.avatarUrl) {
+        user.avatar = dto.avatarUrl;
       }
 
-      Object.assign(learnerProfile, dto);
-  
-      return await this.userRepository.save(
-        learnerProfile,
-      );
+      if (dto.fullName) {
+        user.fullName = dto.fullName;
+      }
+
+      await this.userRepository.save(user);
+
+      // Save learner profile details
+      let learner = await this.learnerRepository.findOne({ where: { userId: id } });
+      if (!learner) {
+        learner = this.learnerRepository.create({
+          userId: id,
+        });
+      }
+
+      if (dto.learningGoal !== undefined) {
+        learner.learningGoal = dto.learningGoal;
+      }
+      if (dto.level !== undefined) {
+        learner.level = dto.level;
+      }
+      if (dto.bio !== undefined) {
+        learner.bio = dto.bio;
+      }
+
+      const savedLearner = await this.learnerRepository.save(learner);
+
+      return {
+        fullName: user.fullName,
+        avatarUrl: user.avatar,
+        learningGoal: savedLearner.learningGoal,
+        level: savedLearner.level,
+        bio: savedLearner.bio,
+      };
   }
 
   async viewLearnerProfile(id: number): Promise<GetLearnerProfileDto> {
@@ -70,18 +99,32 @@ export class LearnersService {
       relations: ['user'],
     });
   
-    if (!learner || !learner.user) {
-      throw new NotFoundException('Learner not exist');
+    if (learner && learner.user) {
+      return {
+        fullName: learner.user.fullName,
+        email: learner.user.email,
+        avatarUrl: learner.user.avatar,
+        learningGoal: learner.learningGoal || '',
+        level: learner.level || '',
+        bio: learner.bio || '',
+        createdAt: learner.user.createdAt,
+      };
     }
-  
+
+    // Fallback if learner profile record doesn't exist yet
+    const user = await this.userRepository.findOne({ where: { userId: id } });
+    if (!user) {
+      throw new NotFoundException('User not exist');
+    }
+
     return {
-      fullName: learner.user.fullName,
-      email: learner.user.email,
-      avatarUrl: learner.user.avatar,
-      learningGoal: learner.learningGoal,
-      level: learner.level,
-      bio: learner.bio,
-      createdAt: learner.user.createdAt,
+      fullName: user.fullName,
+      email: user.email,
+      avatarUrl: user.avatar,
+      learningGoal: '',
+      level: '',
+      bio: '',
+      createdAt: user.createdAt,
     };
   }
 }
