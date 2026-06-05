@@ -105,7 +105,7 @@ export function AdminHeader() {
                                 </div>
 
                                 {[
-                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/admin/userprofile') },
+                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/admin/adminprofile') },
                                     { icon: <Settings className="w-4 h-4" />, label: 'System Settings' },
                                 ].map((item) => (
                                     <button

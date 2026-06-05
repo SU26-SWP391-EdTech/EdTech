@@ -27,20 +27,20 @@ import {
 //   { title: 'UI/UX Design Basics', path: 'UI/UX Designer Starter', date: 'Apr 2, 2026', id: 'CERT-2026-UX-003317', color: '#10B981', bg: '#ECFDF5' },
 // ];
 
-const COMPLETED_PATHS = [
-    {
-        title: 'Frontend Developer Path', pct: 100, date: 'Mar 20, 2026',
-        skills: ['React', 'TypeScript', 'CSS', 'Webpack'], color: '#E11D48', bg: 'from-[#E11D48] to-[#7C3AED]',
-    },
-    {
-        title: 'Data Analytics Foundation', pct: 100, date: 'May 15, 2026',
-        skills: ['SQL', 'Python', 'Tableau', 'Statistics'], color: '#6366F1', bg: 'from-[#6366F1] to-[#0EA5E9]',
-    },
-    {
-        title: 'Java Backend Roadmap', pct: 72, date: 'In progress',
-        skills: ['Java', 'Spring Boot', 'Docker', 'REST APIs'], color: '#F59E0B', bg: 'from-[#F59E0B] to-[#EF4444]',
-    },
-];
+// const COMPLETED_PATHS = [
+//     {
+//         title: 'Frontend Developer Path', pct: 100, date: 'Mar 20, 2026',
+//         skills: ['React', 'TypeScript', 'CSS', 'Webpack'], color: '#E11D48', bg: 'from-[#E11D48] to-[#7C3AED]',
+//     },
+//     {
+//         title: 'Data Analytics Foundation', pct: 100, date: 'May 15, 2026',
+//         skills: ['SQL', 'Python', 'Tableau', 'Statistics'], color: '#6366F1', bg: 'from-[#6366F1] to-[#0EA5E9]',
+//     },
+//     {
+//         title: 'Java Backend Roadmap', pct: 72, date: 'In progress',
+//         skills: ['Java', 'Spring Boot', 'Docker', 'REST APIs'], color: '#F59E0B', bg: 'from-[#F59E0B] to-[#EF4444]',
+//     },
+// ];
 
 type CourseStatus = 'Completed' | 'In Progress' | 'Not Started';
 const COURSE_HISTORY: { name: string; provider: string; status: CourseStatus; pct: number; date: string }[] = [
@@ -188,18 +188,6 @@ function EditProfileModal({ onClose, profile, onSave }: EditProfileModalProps) {
                         />
                     </div>
 
-                    {/* Email (Read-only) */}
-                    <div>
-                        <label className="block text-xs text-[#374151] mb-1.5" style={{ fontWeight: 500 }}>Email</label>
-                        <input
-                            type="text"
-                            value={profile.email}
-                            disabled
-                            className="w-full px-3 py-2.5 bg-[#F3F4F6] border border-[#E5E7EB] text-[#9CA3AF] rounded-xl text-sm cursor-not-allowed focus:outline-none"
-                        />
-                        <p className="text-[10px] text-[#9CA3AF] mt-1">Email cannot be modified.</p>
-                    </div>
-
                     {/* Expertise */}
                     {isAcademic && (
                         <div>
@@ -313,7 +301,7 @@ const mapRoleNameToLabel = (roleName?: string): string => {
     }
 };
 
-export function UserProfile() {
+export function AdminProfile() {
     const [showEdit, setShowEdit] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -341,7 +329,7 @@ export function UserProfile() {
             setProfile({
                 name: res.fullName || loggedInUser.fullName || 'No Name',
                 email: res.email || loggedInUser.email,
-                bio: 'User bio description not stored on server.',
+                bio: 'dang cap vcl',
                 location: 'Not set',
                 organization: 'EdTech Platform',
                 avatar: res.avatarUrl || loggedInUser.avatarUrl || '',
@@ -360,7 +348,7 @@ export function UserProfile() {
             setProfile({
                 name: loggedInUser.fullName || 'No Name',
                 email: loggedInUser.email,
-                bio: 'User bio description not stored on server.',
+                bio: 'dang cap vcl',
                 location: 'Not set',
                 organization: 'EdTech Platform',
                 avatar: loggedInUser.avatarUrl || '',
@@ -378,23 +366,12 @@ export function UserProfile() {
         fetchProfileData();
     }, [loggedInUser]);
 
-    const STATS = profile.role === 'Course Provider'
-        ? [
-            { label: 'Courses Published', value: '4', change: '+1 this month', icon: BookOpen, color: '#6366F1', bg: '#F5F3FF' },
-            { label: 'Total Enrolled Students', value: '1,420', change: '+124 this week', icon: GraduationCap, color: '#10B981', bg: '#ECFDF5' },
-            { label: 'Average Course Rating', value: '4.8', change: '420 reviews', icon: Award, color: '#E11D48', bg: '#FFF1F2' },
-          ]
-        : profile.role === 'Academic Manager'
-        ? [
-            { label: 'Managed Courses', value: '48', change: 'All active', icon: BookOpen, color: '#6366F1', bg: '#F5F3FF' },
-            { label: 'Active Providers', value: '14', change: '+2 new providers', icon: Briefcase, color: '#10B981', bg: '#ECFDF5' },
-            { label: 'Pending Reviews', value: '3', change: 'Requires action', icon: Clock, color: '#F59E0B', bg: '#FFFBEB' },
-          ]
-        : [
-            { label: 'Courses Completed', value: '12', change: '+2 this month', icon: BookOpen, color: '#6366F1', bg: '#F5F3FF' },
-            { label: 'Paths Completed', value: '2', change: '1 in progress', icon: GraduationCap, color: '#10B981', bg: '#ECFDF5' },
-            { label: 'Learning Hours', value: '148', change: '+12 this week', icon: Clock, color: '#F59E0B', bg: '#FFFBEB' },
-          ];
+    const STATS = [
+        { label: 'Courses Completed', value: '12', change: '+2 this month', icon: BookOpen, color: '#6366F1', bg: '#F5F3FF' },
+        { label: 'Paths Completed', value: '2', change: '1 in progress', icon: GraduationCap, color: '#10B981', bg: '#ECFDF5' },
+        // { label: 'Certificates Earned', value: '2', change: 'Next: Path Finisher', icon: Award, color: '#E11D48', bg: '#FFF1F2' },
+        { label: 'Learning Hours', value: '148', change: '+12 this week', icon: Clock, color: '#F59E0B', bg: '#FFFBEB' },
+    ];
 
     const xpTotal = 375;
     // const xpNext = 500;
@@ -589,7 +566,7 @@ export function UserProfile() {
                 </div>
 
                 {/* ── STAT CARDS ── */}
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                {/* <div className="grid grid-cols-3 gap-4 mb-6">
                     {STATS.map(({ label, value, change, icon: Icon, color, bg }) => (
                         <div key={label} className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm">
                             <div className="flex items-start justify-between mb-3">
@@ -603,72 +580,46 @@ export function UserProfile() {
                             <div className="text-[#6B7280] text-[11px] mt-1" style={{ fontWeight: 500 }}>{change}</div>
                         </div>
                     ))}
-                </div>
+                </div> */}
 
                 {/* ── MAIN 2-COLUMN GRID ── */}
                 <div className="flex gap-5 mb-6">
                     {/* LEFT: About */}
-                    <div className="w-[268px] flex-shrink-0 space-y-4">
-                        {/* About */}
+                    {/* <div className="w-[268px] flex-shrink-0 space-y-4">
+                        About
                         <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm">
                             <p className="text-[#111827] text-sm mb-3" style={{ fontWeight: 600 }}>About Me</p>
                             <p className="text-[#6B7280] text-xs" style={{ lineHeight: 1.7 }}>
-                                {profile.role === 'Course Provider'
-                                    ? 'Professional educator providing high-quality courses and instructional resources on the EdTech Platform.'
-                                    : profile.role === 'Academic Manager'
-                                    ? 'Academic program administrator managing curricula, quality assurance, and educational standards on the EdTech Platform.'
-                                    : '3rd year CS student at FPT University. I love building full-stack apps and exploring data-driven solutions.'}
+                                3rd year CS student at FPT University. I love building full-stack apps and exploring data-driven solutions. Currently diving deep into Spring Boot and React ecosystems.
                             </p>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* RIGHT: Completed Learning Paths */}
-                    <div className="flex-1 min-w-0 space-y-4">
+                    {/* <div className="flex-1 min-w-0 space-y-4">
                         <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm">
-                            <p className="text-[#111827] text-sm mb-4" style={{ fontWeight: 600 }}>
-                                {profile.role === 'Course Provider'
-                                    ? 'Teaching Paths'
-                                    : profile.role === 'Academic Manager'
-                                    ? 'Managed Learning Paths'
-                                    : 'Learning Paths'
-                                }
-                            </p>
+                            <p className="text-[#111827] text-sm mb-4" style={{ fontWeight: 600 }}>Learning Paths</p>
                             <div className="space-y-3">
-                                {(profile.role === 'Course Provider'
-                                    ? [
-                                        { title: 'Frontend Developer Path', count: '3 courses', date: 'Active', skills: ['React', 'TypeScript', 'CSS'], color: '#E11D48', bg: 'from-[#E11D48] to-[#7C3AED]' },
-                                        { title: 'Java Backend Roadmap', count: '1 course', date: 'Active', skills: ['Java', 'Spring Boot', 'REST APIs'], color: '#F59E0B', bg: 'from-[#F59E0B] to-[#EF4444]' }
-                                      ]
-                                    : profile.role === 'Academic Manager'
-                                    ? [
-                                        { title: 'Computer Science Curriculum', count: '15 courses', date: 'Managed', skills: ['Algorithms', 'Databases', 'OS'], color: '#6366F1', bg: 'from-[#6366F1] to-[#0EA5E9]' },
-                                        { title: 'Business Analyst Path', count: '8 courses', date: 'Managed', skills: ['Requirements', 'Agile', 'SQL'], color: '#10B981', bg: 'from-[#10B981] to-[#059669]' }
-                                      ]
-                                    : COMPLETED_PATHS.map(p => ({ ...p, count: undefined }))
-                                ).map(p => (
+                                {COMPLETED_PATHS.map(p => (
                                     <div key={p.title} className="border border-[#E5E7EB] rounded-xl overflow-hidden">
-                                        {/* Mini banner */}
-                                        <div className={`h-10 bg-gradient-to-r ${p.bg || 'from-slate-500 to-slate-700'} relative`}>
+                                        Mini banner
+                                        <div className={`h-10 bg-gradient-to-r ${p.bg} relative`}>
                                             <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '12px 12px' }} />
                                         </div>
                                         <div className="px-4 py-3">
                                             <div className="flex items-center justify-between mb-2">
                                                 <p className="text-[#111827] text-sm" style={{ fontWeight: 600 }}>{p.title}</p>
-                                                <span className="px-2 py-0.5 bg-[#ECFDF5] text-[#065F46] text-[11px] rounded-full" style={{ fontWeight: 500 }}>
-                                                    {p.count ? p.date : (p.pct === 100 ? 'Completed' : 'In Progress')}
-                                                </span>
+                                                {p.pct === 100
+                                                    ? <span className="px-2 py-0.5 bg-[#ECFDF5] text-[#065F46] text-[11px] rounded-full" style={{ fontWeight: 500 }}>Completed</span>
+                                                    : <span className="px-2 py-0.5 bg-[#FFFBEB] text-[#92400E] text-[11px] rounded-full" style={{ fontWeight: 500 }}>In Progress</span>
+                                                }
                                             </div>
-                                            {p.pct !== undefined && (
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <div className="flex-1 h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
-                                                        <div className="h-full rounded-full" style={{ width: `${p.pct}%`, backgroundColor: p.pct === 100 ? '#10B981' : p.color }} />
-                                                    </div>
-                                                    <span className="text-[11px] text-[#6B7280]" style={{ fontWeight: 500 }}>{p.pct}%</span>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="flex-1 h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
+                                                    <div className="h-full rounded-full" style={{ width: `${p.pct}%`, backgroundColor: p.pct === 100 ? '#10B981' : p.color }} />
                                                 </div>
-                                            )}
-                                            {p.count && (
-                                                <p className="text-xs text-[#475569] mb-2 font-medium">{p.count}</p>
-                                            )}
+                                                <span className="text-[11px] text-[#6B7280]" style={{ fontWeight: 500 }}>{p.pct}%</span>
+                                            </div>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex flex-wrap gap-1">
                                                     {p.skills.slice(0, 3).map(s => (
@@ -676,14 +627,14 @@ export function UserProfile() {
                                                     ))}
                                                     {p.skills.length > 3 && <span className="text-[#9CA3AF] text-[10px]">+{p.skills.length - 3}</span>}
                                                 </div>
-                                                <p className="text-[#9CA3AF] text-[11px]">{p.count ? '' : p.date}</p>
+                                                <p className="text-[#9CA3AF] text-[11px]">{p.date}</p>
                                             </div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* RIGHT: Achievements + Certificates */}
                     {/* <div className="w-[300px] flex-shrink-0 space-y-4">
@@ -800,153 +751,58 @@ export function UserProfile() {
           </div> */}
                 </div>
 
-                {/* ── COURSE HISTORY / PUBLISHED COURSES / CURRICULUM OVERVIEW TABLE ── */}
-                <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden shadow-sm">
-                    {profile.role === 'Course Provider' ? (
-                        <>
-                            <div className="flex items-center justify-between px-6 py-4 border-b border-[#F3F4F6]">
-                                <div>
-                                    <p className="text-[#111827] text-sm" style={{ fontWeight: 600 }}>Published Courses</p>
-                                    <p className="text-[#9CA3AF] text-xs mt-0.5">All courses authored by you</p>
+                {/* ── COURSE HISTORY TABLE ── */}
+                {/* <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden shadow-sm">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-[#F3F4F6]">
+                        <div>
+                            <p className="text-[#111827] text-sm" style={{ fontWeight: 600 }}>Course History</p>
+                            <p className="text-[#9CA3AF] text-xs mt-0.5">All enrolled and completed courses</p>
+                        </div>
+                        <button className="flex items-center gap-2 px-3.5 py-2 border border-[#E5E7EB] text-[#374151] rounded-xl text-sm hover:bg-[#F9FAFB] transition-colors" style={{ fontWeight: 500 }}>
+                            <Download className="w-3.5 h-3.5" />Export
+                        </button>
+                    </div>
+                    Headers
+                    <div className="grid px-6 py-3 bg-[#F9FAFB] border-b border-[#F3F4F6]" style={{ gridTemplateColumns: '2fr 1.2fr 120px 160px 130px 80px' }}>
+                        {['Course', 'Provider', 'Status', 'Progress', 'Completed', 'Actions'].map(h => (
+                            <p key={h} className="text-[#6B7280] text-xs" style={{ fontWeight: 600 }}>{h}</p>
+                        ))}
+                    </div>
+                    {COURSE_HISTORY.map((c) => (
+                        <div key={c.name}
+                            className={`grid px-6 py-4 items-center border-b border-[#F3F4F6] last:border-0 hover:bg-[#F9FAFB] transition-colors group`}
+                            style={{ gridTemplateColumns: '2fr 1.2fr 120px 160px 130px 80px' }}>
+                            <div>
+                                <p className="text-[#111827] text-sm" style={{ fontWeight: 500 }}>{c.name}</p>
+                            </div>
+                            <p className="text-[#6B7280] text-sm">{c.provider}</p>
+                            <div><StatusPill status={c.status} /></div>
+                            <div className="flex items-center gap-2 pr-4">
+                                <div className="flex-1 h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
+                                    <div className="h-full rounded-full" style={{
+                                        width: `${c.pct}%`,
+                                        backgroundColor: c.pct === 100 ? '#10B981' : c.pct > 0 ? '#E11D48' : '#E5E7EB'
+                                    }} />
                                 </div>
-                                <button className="flex items-center gap-2 px-3.5 py-2 border border-[#E5E7EB] text-[#374151] rounded-xl text-sm hover:bg-[#F9FAFB] transition-colors" style={{ fontWeight: 500 }}>
-                                    <Download className="w-3.5 h-3.5" />Export
+                                <span className="text-[11px] text-[#6B7280] w-8 flex-shrink-0" style={{ fontWeight: 500 }}>{c.pct}%</span>
+                            </div>
+                            <p className="text-[#6B7280] text-sm">{c.date}</p>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                {c.status === 'Completed' && (
+                                    <button className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors" title="View Certificate">
+                                        <Award className="w-3.5 h-3.5 text-[#E11D48]" />
+                                    </button>
+                                )}
+                                <button className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors" title="View Course">
+                                    <ExternalLink className="w-3.5 h-3.5 text-[#6B7280]" />
+                                </button>
+                                <button className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors" title="Bookmark">
+                                    <Bookmark className="w-3.5 h-3.5 text-[#6B7280]" />
                                 </button>
                             </div>
-                            <div className="grid px-6 py-3 bg-[#F9FAFB] border-b border-[#F3F4F6]" style={{ gridTemplateColumns: '2fr 1.5fr 1.2fr 1.2fr 1.2fr 80px' }}>
-                                {['Course', 'Category', 'Enrolled Students', 'Rating', 'Status', 'Actions'].map(h => (
-                                    <p key={h} className="text-[#6B7280] text-xs" style={{ fontWeight: 600 }}>{h}</p>
-                                ))}
-                            </div>
-                            {[
-                                { name: 'React Advanced Frameworks', category: 'Software Development', students: '450 students', rating: '4.9 ⭐', status: 'Active' },
-                                { name: 'Spring Boot Microservices', category: 'Backend Development', students: '680 students', rating: '4.8 ⭐', status: 'Active' },
-                                { name: 'UI/UX Basics & Design System', category: 'Design', students: '290 students', rating: '4.7 ⭐', status: 'Active' },
-                                { name: 'Introduction to Python', category: 'Data Science', students: '0 students', rating: '0.0 ⭐', status: 'Draft' },
-                            ].map((c) => (
-                                <div key={c.name}
-                                    className="grid px-6 py-4 items-center border-b border-[#F3F4F6] last:border-0 hover:bg-[#F9FAFB] transition-colors group"
-                                    style={{ gridTemplateColumns: '2fr 1.5fr 1.2fr 1.2fr 1.2fr 80px' }}>
-                                    <p className="text-[#111827] text-sm" style={{ fontWeight: 500 }}>{c.name}</p>
-                                    <p className="text-[#6B7280] text-sm">{c.category}</p>
-                                    <p className="text-[#6B7280] text-sm">{c.students}</p>
-                                    <p className="text-[#6B7280] text-sm">{c.rating}</p>
-                                    <div>
-                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] ${c.status === 'Active' ? 'bg-[#ECFDF5] text-[#065F46]' : 'bg-[#F3F4F6] text-[#4B5563]'}`} style={{ fontWeight: 500 }}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${c.status === 'Active' ? 'bg-[#10B981]' : 'bg-[#9CA3AF]'}`} />
-                                            {c.status}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors" title="Edit Course">
-                                            <Edit3 className="w-3.5 h-3.5 text-[#E11D48]" />
-                                        </button>
-                                        <button className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors" title="View Students">
-                                            <GraduationCap className="w-3.5 h-3.5 text-[#6B7280]" />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </>
-                    ) : profile.role === 'Academic Manager' ? (
-                        <>
-                            <div className="flex items-center justify-between px-6 py-4 border-b border-[#F3F4F6]">
-                                <div>
-                                    <p className="text-[#111827] text-sm" style={{ fontWeight: 600 }}>Curriculum Courses Overview</p>
-                                    <p className="text-[#9CA3AF] text-xs mt-0.5">List of active courses under your review and management</p>
-                                </div>
-                                <button className="flex items-center gap-2 px-3.5 py-2 border border-[#E5E7EB] text-[#374151] rounded-xl text-sm hover:bg-[#F9FAFB] transition-colors" style={{ fontWeight: 500 }}>
-                                    <Download className="w-3.5 h-3.5" />Export
-                                </button>
-                            </div>
-                            <div className="grid px-6 py-3 bg-[#F9FAFB] border-b border-[#F3F4F6]" style={{ gridTemplateColumns: '2fr 1.5fr 1.2fr 1.2fr 1.2fr 80px' }}>
-                                {['Course', 'Provider', 'Category', 'Enrolled', 'Approval Status', 'Actions'].map(h => (
-                                    <p key={h} className="text-[#6B7280] text-xs" style={{ fontWeight: 600 }}>{h}</p>
-                                ))}
-                            </div>
-                            {[
-                                { name: 'React Advanced Frameworks', provider: 'FPT University', category: 'Software Development', enrolled: '450 enrolled', status: 'Approved' },
-                                { name: 'Spring Boot Microservices', provider: 'Coursera', category: 'Backend Development', enrolled: '680 enrolled', status: 'Approved' },
-                                { name: 'Advanced Machine Learning', provider: 'Udemy', category: 'Data Science', enrolled: '120 enrolled', status: 'Pending Review' },
-                                { name: 'Introduction to Python', provider: 'DataCamp', category: 'Data Science', enrolled: '310 enrolled', status: 'Approved' },
-                            ].map((c) => (
-                                <div key={c.name}
-                                    className="grid px-6 py-4 items-center border-b border-[#F3F4F6] last:border-0 hover:bg-[#F9FAFB] transition-colors group"
-                                    style={{ gridTemplateColumns: '2fr 1.5fr 1.2fr 1.2fr 1.2fr 80px' }}>
-                                    <p className="text-[#111827] text-sm" style={{ fontWeight: 500 }}>{c.name}</p>
-                                    <p className="text-[#6B7280] text-sm">{c.provider}</p>
-                                    <p className="text-[#6B7280] text-sm">{c.category}</p>
-                                    <p className="text-[#6B7280] text-sm">{c.enrolled}</p>
-                                    <div>
-                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] ${c.status === 'Approved' ? 'bg-[#ECFDF5] text-[#065F46]' : 'bg-[#FFFBEB] text-[#92400E]'}`} style={{ fontWeight: 500 }}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${c.status === 'Approved' ? 'bg-[#10B981]' : 'bg-[#F59E0B]'}`} />
-                                            {c.status}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors" title="Review Curriculum">
-                                            <Check className="w-3.5 h-3.5 text-[#E11D48]" />
-                                        </button>
-                                        <button className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors" title="View Course Details">
-                                            <ExternalLink className="w-3.5 h-3.5 text-[#6B7280]" />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </>
-                    ) : (
-                        <>
-                            <div className="flex items-center justify-between px-6 py-4 border-b border-[#F3F4F6]">
-                                <div>
-                                    <p className="text-[#111827] text-sm" style={{ fontWeight: 600 }}>Course History</p>
-                                    <p className="text-[#9CA3AF] text-xs mt-0.5">All enrolled and completed courses</p>
-                                </div>
-                                <button className="flex items-center gap-2 px-3.5 py-2 border border-[#E5E7EB] text-[#374151] rounded-xl text-sm hover:bg-[#F9FAFB] transition-colors" style={{ fontWeight: 500 }}>
-                                    <Download className="w-3.5 h-3.5" />Export
-                                </button>
-                            </div>
-                            <div className="grid px-6 py-3 bg-[#F9FAFB] border-b border-[#F3F4F6]" style={{ gridTemplateColumns: '2fr 1.2fr 120px 160px 130px 80px' }}>
-                                {['Course', 'Provider', 'Status', 'Progress', 'Completed', 'Actions'].map(h => (
-                                    <p key={h} className="text-[#6B7280] text-xs" style={{ fontWeight: 600 }}>{h}</p>
-                                ))}
-                            </div>
-                            {COURSE_HISTORY.map((c) => (
-                                <div key={c.name}
-                                    className={`grid px-6 py-4 items-center border-b border-[#F3F4F6] last:border-0 hover:bg-[#F9FAFB] transition-colors group`}
-                                    style={{ gridTemplateColumns: '2fr 1.2fr 120px 160px 130px 80px' }}>
-                                    <div>
-                                        <p className="text-[#111827] text-sm" style={{ fontWeight: 500 }}>{c.name}</p>
-                                    </div>
-                                    <p className="text-[#6B7280] text-sm">{c.provider}</p>
-                                    <div><StatusPill status={c.status} /></div>
-                                    <div className="flex items-center gap-2 pr-4">
-                                        <div className="flex-1 h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
-                                            <div className="h-full rounded-full" style={{
-                                                width: `${c.pct}%`,
-                                                backgroundColor: c.pct === 100 ? '#10B981' : c.pct > 0 ? '#E11D48' : '#E5E7EB'
-                                            }} />
-                                        </div>
-                                        <span className="text-[11px] text-[#6B7280] w-8 flex-shrink-0" style={{ fontWeight: 500 }}>{c.pct}%</span>
-                                    </div>
-                                    <p className="text-[#6B7280] text-sm">{c.date}</p>
-                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        {c.status === 'Completed' && (
-                                            <button className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors" title="View Certificate">
-                                                <Award className="w-3.5 h-3.5 text-[#E11D48]" />
-                                            </button>
-                                        )}
-                                        <button className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors" title="View Course">
-                                            <ExternalLink className="w-3.5 h-3.5 text-[#6B7280]" />
-                                        </button>
-                                        <button className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors" title="Bookmark">
-                                            <Bookmark className="w-3.5 h-3.5 text-[#6B7280]" />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </>
-                    )}
-                </div>
+                        </div>
+                    ))}
+                </div> */}
             </div>
         </div>
     );

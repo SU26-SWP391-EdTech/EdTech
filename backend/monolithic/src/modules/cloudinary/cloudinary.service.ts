@@ -40,4 +40,21 @@ export class CloudinaryService {
         .end(file.buffer);
     });
   }
+
+  async uploadBase64(
+    base64Str: string,
+  ): Promise<UploadApiResponse> {
+    return new Promise((resolve, reject) => {
+      cloudinary.uploader.upload(
+        base64Str,
+        {
+          folder: 'avatars',
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result as UploadApiResponse);
+        },
+      );
+    });
+  }
 }

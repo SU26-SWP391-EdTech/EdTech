@@ -106,7 +106,7 @@ export function LearnerHeader() {
                                 </div>
 
                                 {[
-                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/learner/userprofile') },
+                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/learner/learnerprofile') },
                                     { icon: <BookOpen className="w-4 h-4" />, label: 'My Learning' },
                                     { icon: <Settings className="w-4 h-4" />, label: 'Settings' },
                                 ].map((item) => (

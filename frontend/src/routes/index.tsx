@@ -13,6 +13,7 @@ import { VerifyEmail } from '../pages/auth/VerifyEmail';
 import { UserManagement } from '../pages/admin/UserManagement';
 
 // User Profile page
+import { LearnerProfile } from '../pages/Users/LearnerProfile';
 import { UserProfile } from '../pages/Users/UserProfile';
 
 // Role navigation pages 
@@ -21,6 +22,7 @@ import { DashboardLayout } from '../layouts/Dashboard/Dashboard';
 
 // Role Guards
 import { GuestGuard, LearnerGuard, ProviderGuard, AdminGuard, AcademicGuard } from '../components/auth/RoleGuards';
+import { AdminProfile } from '../pages/admin/AdminProfile';
 
 export const router = createBrowserRouter([
     // ==========================================
@@ -82,8 +84,8 @@ export const router = createBrowserRouter([
                 element: <h1>Home learner</h1>
             },
             {
-                path: 'userprofile',
-                element: <UserProfile />
+                path: 'learnerprofile',
+                element: <LearnerProfile />
             }
         ]
     },
@@ -128,8 +130,8 @@ export const router = createBrowserRouter([
                 element: <h1>Analytics Admin</h1>
             },
             {
-                path: 'userprofile',
-                element: <UserProfile />
+                path: 'adminprofile',
+                element: <AdminProfile />
             }
         ]
     },

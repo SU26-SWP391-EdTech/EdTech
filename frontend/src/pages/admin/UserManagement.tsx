@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { getUsers, createUser, updateUser, deleteUser } from '../../services/user.service';
 import {
   Search, Download, Eye, Edit2, Trash2,
   Plus, X, ChevronDown,
@@ -9,7 +10,7 @@ import {
 
 /* ─── Types ─── */
 type Role = 'Admin' | 'Learner' | 'Academic Manager' | 'Course Provider';
-type Status = 'Active' | 'Pending' | 'Suspended' | 'Inactive';
+type Status = 'Active' | 'Inactive';
 
 interface User {
   id: number;
@@ -24,21 +25,7 @@ interface User {
   updatedAt?: string;
 }
 
-/* ─── Mock data ─── */
-const MOCK_USERS: User[] = [
-  { id: 1, name: 'Alexandra Moore', email: 'a.moore@company.com', role: 'Admin', status: 'Active', joined: 'Jan 12, 2026', avatar: 'AM', avatarColor: '#E11D48', lastSeen: '2m ago' },
-  { id: 2, name: 'James Wilson', email: 'j.wilson@corp.io', role: 'Course Provider', status: 'Active', joined: 'Jan 28, 2026', avatar: 'JW', avatarColor: '#7C3AED', lastSeen: '1h ago' },
-  { id: 3, name: 'Nina Patel', email: 'n.patel@edu.org', role: 'Learner', status: 'Active', joined: 'Feb 5, 2026', avatar: 'NP', avatarColor: '#2563EB', lastSeen: '3h ago' },
-  { id: 4, name: 'Robert Chen', email: 'r.chen@globalfirm.com', role: 'Academic Manager', status: 'Pending', joined: 'Feb 20, 2026', avatar: 'RC', avatarColor: '#16A34A', lastSeen: '1d ago' },
-  { id: 5, name: 'Sophia Turner', email: 's.turner@learnhub.co', role: 'Learner', status: 'Inactive', joined: 'Mar 2, 2026', avatar: 'ST', avatarColor: '#D97706', lastSeen: '12d ago' },
-  { id: 6, name: 'Marcus Davis', email: 'm.davis@edtech.io', role: 'Course Provider', status: 'Active', joined: 'Mar 14, 2026', avatar: 'MD', avatarColor: '#0891B2', lastSeen: '5h ago' },
-  { id: 7, name: 'Priya Nair', email: 'p.nair@techacademy.org', role: 'Learner', status: 'Pending', joined: 'Apr 1, 2026', avatar: 'PN', avatarColor: '#DB2777', lastSeen: '2d ago' },
-  { id: 8, name: 'Carlos Rivera', email: 'c.rivera@institution.co', role: 'Course Provider', status: 'Suspended', joined: 'Apr 9, 2026', avatar: 'CR', avatarColor: '#9333EA', lastSeen: '8d ago' },
-  { id: 9, name: 'Lena Park', email: 'l.park@company.com', role: 'Admin', status: 'Active', joined: 'Apr 22, 2026', avatar: 'LP', avatarColor: '#059669', lastSeen: '30m ago' },
-  { id: 10, name: 'Derek Foster', email: 'd.foster@learnspace.net', role: 'Learner', status: 'Active', joined: 'May 3, 2026', avatar: 'DF', avatarColor: '#EA580C', lastSeen: '4h ago' },
-  { id: 11, name: 'Yasmin Al-Hassan', email: 'y.hassan@pathways.edu', role: 'Academic Manager', status: 'Active', joined: 'May 10, 2026', avatar: 'YH', avatarColor: '#0284C7', lastSeen: '1h ago' },
-  { id: 12, name: 'Thomas Klein', email: 't.klein@enterprise.de', role: 'Learner', status: 'Inactive', joined: 'May 18, 2026', avatar: 'TK', avatarColor: '#6B7280', lastSeen: '20d ago' },
-];
+
 
 /* ─── Config maps ─── */
 const roleConfig: Record<Role, { label: string; icon: React.ReactNode; cls: string }> = {
@@ -50,13 +37,11 @@ const roleConfig: Record<Role, { label: string; icon: React.ReactNode; cls: stri
 
 const statusConfig: Record<Status, { icon: React.ReactNode; cls: string }> = {
   'Active': { icon: <Check className="w-2.5 h-2.5" />, cls: 'bg-[#F0FDF4] text-[#16A34A] border-[#BBF7D0]' },
-  'Pending': { icon: <Clock className="w-2.5 h-2.5" />, cls: 'bg-[#FFFBEB] text-[#D97706] border-[#FDE68A]' },
-  'Suspended': { icon: <Ban className="w-2.5 h-2.5" />, cls: 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]' },
   'Inactive': { icon: <AlertCircle className="w-2.5 h-2.5" />, cls: 'bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB]' },
 };
 
 const ROLES: ('All Roles' | Role)[] = ['All Roles', 'Admin', 'Learner', 'Academic Manager', 'Course Provider'];
-const STATUSES: ('All Status' | Status)[] = ['All Status', 'Active', 'Pending', 'Suspended', 'Inactive'];
+const STATUSES: ('All Status' | Status)[] = ['All Status', 'Active', 'Inactive'];
 
 /* ─── Sub-components ─── */
 function RoleBadge({ role }: { role: Role }) {
@@ -99,7 +84,7 @@ function FilterSelect({ value, options, onChange }: {
 interface UserModalProps {
   user?: User;
   onClose: () => void;
-  onSave: (userData: { name: string; email: string; role: Role; status: Status; avatar: string; avatarColor: string }) => void;
+  onSave: (userData: { name: string; email: string; role: Role; status: Status; avatar: string; avatarColor: string; password?: string }) => void;
 }
 
 function UserModal({ user, onClose, onSave }: UserModalProps) {
@@ -142,6 +127,7 @@ function UserModal({ user, onClose, onSave }: UserModalProps) {
       status: formStatus,
       avatar: avatar || name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
       avatarColor,
+      password: user ? undefined : password,
     });
   };
 
@@ -223,8 +209,8 @@ function UserModal({ user, onClose, onSave }: UserModalProps) {
                 placeholder="name@company.com"
                 disabled={!!user}
                 className={`w-full pl-9 pr-4 py-2.5 border rounded-xl text-sm transition-colors ${user
-                    ? 'bg-[#F3F4F6] text-[#9CA3AF] border-[#E5E7EB] cursor-not-allowed'
-                    : 'bg-white border-[#E5E7EB] text-[#111827] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15'
+                  ? 'bg-[#F3F4F6] text-[#9CA3AF] border-[#E5E7EB] cursor-not-allowed'
+                  : 'bg-white border-[#E5E7EB] text-[#111827] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15'
                   }`}
               />
             </div>
@@ -240,8 +226,8 @@ function UserModal({ user, onClose, onSave }: UserModalProps) {
                   onChange={e => setFormRole(e.target.value as Role)}
                   disabled={!!user}
                   className={`w-full appearance-none pl-3 pr-8 py-2.5 border rounded-xl text-sm transition-colors ${user
-                      ? 'bg-[#F3F4F6] text-[#9CA3AF] border-[#E5E7EB] cursor-not-allowed'
-                      : 'bg-white border-[#E5E7EB] text-[#111827] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15'
+                    ? 'bg-[#F3F4F6] text-[#9CA3AF] border-[#E5E7EB] cursor-not-allowed'
+                    : 'bg-white border-[#E5E7EB] text-[#111827] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15'
                     }`}
                 >
                   {(['Admin', 'Learner', 'Academic Manager', 'Course Provider'] as Role[]).map(r => (
@@ -259,7 +245,7 @@ function UserModal({ user, onClose, onSave }: UserModalProps) {
                   onChange={e => setFormStatus(e.target.value as Status)}
                   className="w-full appearance-none pl-3 pr-8 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15"
                 >
-                  {(['Active', 'Pending', 'Suspended', 'Inactive'] as Status[]).map(s => (
+                  {(['Active', 'Inactive'] as Status[]).map(s => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
@@ -317,16 +303,182 @@ function UserModal({ user, onClose, onSave }: UserModalProps) {
   );
 }
 
+interface ViewUserModalProps {
+  user: User;
+  onClose: () => void;
+}
+
+function ViewUserModal({ user, onClose }: ViewUserModalProps) {
+  const isImg = user.avatar && (user.avatar.startsWith('http') || user.avatar.startsWith('data:'));
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-[#111827]/25 backdrop-blur-[2px]" onClick={onClose} />
+
+      {/* Modal */}
+      <div className="relative bg-white rounded-2xl shadow-2xl w-[440px] mx-4 overflow-hidden">
+        {/* Header */}
+        <div className="px-6 py-5 border-b border-[#F3F4F6] flex items-start justify-between">
+          <div>
+            <h2 className="text-[#111827]" style={{ fontSize: '17px', fontWeight: 700 }}>
+              User Details
+            </h2>
+            <p className="text-xs text-[#6B7280] mt-0.5">
+              Detailed profile information.
+            </p>
+          </div>
+          <button onClick={onClose} className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors">
+            <X className="w-4 h-4 text-[#6B7280]" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5 flex flex-col gap-4">
+          {/* Avatar Section */}
+          <div className="flex items-center gap-4 py-2 border-b border-[#F3F4F6]">
+            {isImg ? (
+              <img src={user.avatar} alt="Avatar" className="w-16 h-16 rounded-full object-cover border-2 border-[#E11D48]/20" />
+            ) : (
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center text-white text-lg font-bold"
+                style={{ backgroundColor: user.avatarColor }}
+              >
+                {user.avatar}
+              </div>
+            )}
+            <div>
+              <h3 className="text-base text-[#111827] font-semibold">{user.name}</h3>
+              <p className="text-xs text-[#6B7280]">User ID: {user.id}</p>
+            </div>
+          </div>
+
+          {/* Details Grid */}
+          <div className="flex flex-col gap-3.5 text-sm">
+            {/* Email */}
+            <div className="flex justify-between items-center py-1 border-b border-[#F9FAFB]">
+              <span className="text-[#6B7280]" style={{ fontWeight: 500 }}>Email Address</span>
+              <span className="text-[#111827]">{user.email}</span>
+            </div>
+
+            {/* Role */}
+            <div className="flex justify-between items-center py-1 border-b border-[#F9FAFB]">
+              <span className="text-[#6B7280]" style={{ fontWeight: 500 }}>Role</span>
+              <RoleBadge role={user.role} />
+            </div>
+
+            {/* Status */}
+            <div className="flex justify-between items-center py-1 border-b border-[#F9FAFB]">
+              <span className="text-[#6B7280]" style={{ fontWeight: 500 }}>Status</span>
+              <StatusBadge status={user.status} />
+            </div>
+
+            {/* Joined */}
+            <div className="flex justify-between items-center py-1 border-b border-[#F9FAFB]">
+              <span className="text-[#6B7280]" style={{ fontWeight: 500 }}>Joined Date</span>
+              <span className="text-[#111827]">{user.joined}</span>
+            </div>
+
+            {/* Last Updated */}
+            <div className="flex justify-between items-center py-1 border-b border-[#F9FAFB]">
+              <span className="text-[#6B7280]" style={{ fontWeight: 500 }}>Last Updated</span>
+              <span className="text-[#111827]">{user.updatedAt || '—'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-[#F3F4F6] flex justify-end bg-[#FAFAFA]">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors"
+            style={{ fontWeight: 500 }}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Main component ─── */
 export function UserManagement() {
-  const [users, setUsers] = useState<User[]>(MOCK_USERS);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('All Roles');
   const [statusFilter, setStatusFilter] = useState<string>('All Status');
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | undefined>(undefined);
   const [sortField, setSortField] = useState<'name' | 'joined'>('joined');
   const [sortAsc, setSortAsc] = useState(false);
+
+  const mapBackendUserToFrontend = (u: any): User => {
+    let role: Role = 'Learner';
+    if (u.role?.roleName === 'admin') role = 'Admin';
+    else if (u.role?.roleName === 'course provider') role = 'Course Provider';
+    else if (u.role?.roleName === 'academic manager') role = 'Academic Manager';
+
+    const status: Status = u.isEmailVerified ? 'Active' : 'Inactive';
+
+    const joinedDate = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    }) : '—';
+
+    const colors = ['#E11D48', '#7C3AED', '#2563EB', '#16A34A', '#D97706', '#0891B2'];
+    const avatarColor = colors[u.userId % colors.length];
+
+    const updatedAtDate = u.updatedAt ? new Date(u.updatedAt).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    }) + ' ' + new Date(u.updatedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : undefined;
+
+    return {
+      id: u.userId,
+      name: u.fullName || 'No Name',
+      email: u.email,
+      role,
+      status,
+      joined: joinedDate,
+      avatar: u.avatar || (u.fullName ? u.fullName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) : 'U'),
+      avatarColor,
+      lastSeen: '—',
+      updatedAt: updatedAtDate,
+    };
+  };
+
+  const mapFrontendRoleToBackend = (role: Role): string => {
+    switch (role) {
+      case 'Admin': return 'admin';
+      case 'Learner': return 'learner';
+      case 'Academic Manager': return 'academic manager';
+      case 'Course Provider': return 'course provider';
+      default: return 'learner';
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getUsers();
+      setUsers(data.map(mapBackendUserToFrontend));
+    } catch (err: any) {
+      console.error('Failed to fetch users', err);
+      setError('Failed to load users list.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const filtered = useMemo(() => {
     return users
@@ -345,41 +497,54 @@ export function UserManagement() {
       });
   }, [users, search, roleFilter, statusFilter, sortField, sortAsc]);
 
-
-
   const toggleSort = (field: 'name' | 'joined') => {
     if (sortField === field) setSortAsc(a => !a);
     else { setSortField(field); setSortAsc(true); }
   };
 
-  const handleSaveUser = (userData: { name: string; email: string; role: Role; status: Status; avatar: string; avatarColor: string }) => {
-    if (selectedUser) {
-      setUsers(users.map(u => u.id === selectedUser.id ? { 
-        ...u, 
-        ...userData, 
-        updatedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-      } : u));
-    } else {
-      // Create mode
-      const newUser: User = {
-        id: Math.max(0, ...users.map(u => u.id)) + 1,
-        name: userData.name,
-        email: userData.email,
-        role: userData.role,
-        status: userData.status,
-        avatar: userData.avatar,
-        avatarColor: userData.avatarColor,
-        joined: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        lastSeen: 'Just now'
-      };
-      setUsers([...users, newUser]);
+  const handleSaveUser = async (userData: {
+    name: string;
+    email: string;
+    role: Role;
+    status: Status;
+    avatar: string;
+    avatarColor: string;
+    password?: string;
+  }) => {
+    try {
+      if (selectedUser) {
+        // Edit mode
+        await updateUser(selectedUser.id, {
+          fullName: userData.name,
+          avatar_url: userData.avatar,
+          isEmailVerified: userData.status === 'Active',
+        });
+      } else {
+        // Create mode
+        await createUser({
+          fullName: userData.name,
+          email: userData.email,
+          password: userData.password,
+          roleName: mapFrontendRoleToBackend(userData.role),
+          avatar_url: userData.avatar,
+          isEmailVerified: userData.status === 'Active',
+        });
+      }
+      setShowModal(false);
+      await fetchUsers();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to save user. Please try again.');
     }
-    setShowModal(false);
   };
 
-  const handleDeleteUser = (id: number) => {
+  const handleDeleteUser = async (id: number) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-      setUsers(users.filter(u => u.id !== id));
+      try {
+        await deleteUser(id);
+        await fetchUsers();
+      } catch (err: any) {
+        alert(err.response?.data?.message || 'Failed to delete user.');
+      }
     }
   };
 
@@ -484,7 +649,24 @@ export function UserManagement() {
 
               {/* Table */}
               <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
-                {filtered.length === 0 ? (
+                {loading ? (
+                  <div className="flex flex-col items-center justify-center py-16">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#E11D48] mb-3"></div>
+                    <p className="text-sm text-[#6B7280]">Loading users...</p>
+                  </div>
+                ) : error ? (
+                  <div className="flex flex-col items-center justify-center py-16">
+                    <AlertCircle className="w-8 h-8 text-[#DC2626] mb-3" />
+                    <p className="text-sm text-[#111827]" style={{ fontWeight: 600 }}>{error}</p>
+                    <button
+                      onClick={fetchUsers}
+                      className="mt-3 px-3.5 py-2 bg-[#F8FAFC] border border-[#E5E7EB] text-[#374151] rounded-lg text-xs hover:bg-[#F3F4F6]"
+                      style={{ fontWeight: 500 }}
+                    >
+                      Retry
+                    </button>
+                  </div>
+                ) : filtered.length === 0 ? (
                   /* Inline empty state when filters yield no results */
                   <div className="flex flex-col items-center justify-center py-16">
                     <div className="w-12 h-12 bg-[#F3F4F6] rounded-2xl flex items-center justify-center mb-3">
@@ -576,7 +758,11 @@ export function UserManagement() {
                             {/* Actions */}
                             <td className="px-5 py-3.5">
                               <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button className="p-1.5 hover:bg-[#EFF6FF] rounded-lg transition-colors" title="View">
+                                <button
+                                  onClick={() => { setSelectedUser(user); setShowViewModal(true); }}
+                                  className="p-1.5 hover:bg-[#EFF6FF] rounded-lg transition-colors"
+                                  title="View"
+                                >
                                   <Eye className="w-3.5 h-3.5 text-[#2563EB]" />
                                 </button>
                                 <button
@@ -782,6 +968,9 @@ export function UserManagement() {
 
       {/* ── User Modal (Create/Edit) ── */}
       {showModal && <UserModal user={selectedUser} onClose={() => setShowModal(false)} onSave={handleSaveUser} />}
+
+      {/* ── View User Modal ── */}
+      {showViewModal && selectedUser && <ViewUserModal user={selectedUser} onClose={() => setShowViewModal(false)} />}
     </>
   );
 }
