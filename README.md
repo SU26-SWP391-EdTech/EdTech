@@ -19,7 +19,8 @@ cp .env.example .env
 ```
 ## chạy docker database
 ```
-docker compose up -d
+docker compose up -d db phpmyadmin
+#docker compose up -d
 ```
 ## truy cập vào trong backend 
 ```
