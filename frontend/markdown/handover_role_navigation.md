@@ -113,3 +113,17 @@ src/
   Hàm `logout` trong `auth.stores.ts` được kích hoạt sẽ thực hiện gọi API `POST /auth/logout` để báo cho Backend xóa cookie, đồng thời xóa token ở `localStorage` và đặt lại Zustand State của user về `null`.
 * **Khi Tài khoản bị xóa hoặc Token hết hạn (Lỗi 401):**
   Axios Interceptor ở `lib/axios.ts` phát hiện mã lỗi `401 Unauthorized` từ API -> Tự động phát ra một sự kiện toàn cục `auth:logout` -> `auth.stores.ts` lắng nghe sự kiện này và reset ngay lập tức Zustand State về trạng thái chưa đăng nhập, giúp các Route Guards kích hoạt chuyển hướng tức thì và an toàn về `/login`.
+
+### 3.3. Luồng Điều hướng & Tùy biến Hồ sơ theo Vai trò (Role-based Profile Workflow)
+* **Kích hoạt:** Khi nhấp vào nút "My Profile" trong dropdown của Header tại trang Dashboard.
+* **Xử lý Điều hướng:**
+  1. **Học viên (Learner):** `LearnerHeader` điều hướng đến `/learner/learnerprofile` (tương ứng với `<LearnerProfile />`).
+  2. **Quản trị viên (Admin):** `AdminHeader` điều hướng đến `/admin/adminprofile` (tương ứng với `<AdminProfile />`).
+  3. **Giảng viên (Course Provider) & Quản lý Học thuật (Academic Manager):** `ProviderHeader` và `AcademicManagerHeader` điều hướng đến tuyến chung `/provider/userprofile` hoặc `/academic/userprofile` (tương ứng với `<UserProfile />`).
+* **Hiển thị & Chỉnh sửa hồ sơ:**
+  * **Chung cho mọi vai trò:** Form chỉnh sửa (`EditProfileModal`) hiển thị trường **Email** ở chế độ chỉ đọc (`disabled`, read-only) phục vụ mục đích xác thực, không cho phép chỉnh sửa.
+  * **Learner (Học viên):** Trang cá nhân hiển thị mục tiêu học tập (Learning Goal), trình độ (Level), giới thiệu bản thân (Bio), các lộ trình (Learning Paths) và lịch sử học tập. Modal chỉnh sửa hỗ trợ cập nhật trực tiếp Goal, Level và Bio.
+  * **Academic Users (Provider / Manager):** Trang cá nhân hiển thị Expertise và Experience Years. Phần thống kê (Stats Card) và bảng danh sách khóa học bên dưới tự động thích ứng:
+    * *Course Provider:* Hiển thị các thông số giảng dạy (Khóa học đã đăng, tổng học viên, rating) và bảng danh sách các khóa học đã xuất bản (Published Courses).
+    * *Academic Manager:* Hiển thị thông số quản trị (Số khóa quản lý, giảng viên hoạt động, yêu cầu duyệt) và bảng giám sát chương trình khung (Curriculum Courses Overview).
+
