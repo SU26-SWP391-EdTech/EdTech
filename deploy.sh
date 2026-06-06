@@ -18,9 +18,9 @@ echo "🧹 Removing unused containers..."
 
 echo "npm install all dependencies"
 cd /home/deploy/app/app/backend/monolithic
-npm i
+#npm i
 cd /home/deploy/app/app/frontend
-npm i
+#npm i
 cd /home/deploy/app/app
 
 echo "🔨 Rebuilding and starting containers..."
