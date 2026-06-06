@@ -21,6 +21,7 @@ import { MailService } from '../mail/mail.service';
 import { JwtService } from '@nestjs/jwt';
 import { VerifyEmailDto } from '../mail/dto/verifyEmail.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
+import { PlatformSettingsService } from '../platform-settings/platform-settings.service';
 
 @Injectable()
 export class AuthService {
@@ -35,6 +36,7 @@ export class AuthService {
 
     private mailService: MailService,
     private jwtService: JwtService,
+    private platformSettingsService: PlatformSettingsService,
   ) { }
 
   //validate fields
@@ -118,11 +120,18 @@ export class AuthService {
     // Tạo token và set cookie
     const token = setTokenCookie(res, userData);
 
+    let requiresPlatformSetup = false;
+    if (user.role.roleName === RoleEnum.ADMIN) {
+      const configured = await this.platformSettingsService.isConfigured();
+      requiresPlatformSetup = !configured;
+    }
+
     return {
       success: true,
       message: 'Login succesfully',
       token: token,
       user: userData,
+      requiresPlatformSetup,
     };
   }
 

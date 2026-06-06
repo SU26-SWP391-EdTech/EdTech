@@ -10,12 +10,14 @@ import { Learner } from '../learners/entities/learner.entity';
 import { jwtConstants } from '../../common/constants/jwt.constants';
 import { UserProfile } from '../users/entities/user-profile.entity';
 import { MailModule } from '../mail/mail.module';
+import { PlatformSettingsModule } from '../platform-settings/platform-settings.module';
 
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Role, Learner, UserProfile]),
     MailModule,
+    PlatformSettingsModule,
     PassportModule,
     JwtModule.register({
       secret: jwtConstants.secret,
