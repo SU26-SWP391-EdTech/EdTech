@@ -1,0 +1,20 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Show runner info
+        run: |
+          whoami
+          pwd
+          echo "Deploying staging..."
+
+      - name: Run deploy script
+        run: /home/deploy/app/scripts/deploy.sh
