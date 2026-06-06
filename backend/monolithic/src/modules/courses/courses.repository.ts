@@ -18,7 +18,7 @@ export class CoursesRepository extends Repository<Course> {
 
     public async findAllCourses(): Promise<Course[]> {
         return await this.find({
-            relations: ['user', 'organization'],
+            relations: ['user'],
         });
     }
 

@@ -27,8 +27,16 @@ export class CoursesController {
         return this.coursesService.create(createCourseDto, req.user.id, file);
     }
 
-    // Endpoint: GET /courses (Ví dụ: GET /courses?search=javascript&page=1&limit=5)
     @Get()
+    @ApiOperation({ summary: 'Search courses' })
+    @ApiResponse({ status: 200, description: 'All Courses returned successfully' })
+    async findAllCourse(){
+        return this.coursesService.findAll();
+    }
+
+    // Endpoint: GET /courses (Ví dụ: GET /courses?search=javascript&page=1&limit=5)
+
+    @Get('search')
     @ApiOperation({ summary: 'Search courses' })
     @ApiResponse({ status: 200, description: 'Courses returned successfully' })
     async search(@Query() query: SearchCourseDto) {

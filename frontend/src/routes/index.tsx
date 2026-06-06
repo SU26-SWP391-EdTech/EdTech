@@ -11,6 +11,7 @@ import { VerifyEmail } from '../pages/auth/VerifyEmail';
 //Role navigation pages 
 import { GuestLayout } from '../layouts/Dashboard/GuestLayout';
 import { DashboardLayout } from '../layouts/Dashboard/Dashboard';
+import { CourseManagement } from '../pages/course/CourseManagement';
 
 export const router = createBrowserRouter([
     // ==========================================
@@ -119,4 +120,19 @@ export const router = createBrowserRouter([
             }
         ]
     },
-]);
+    // --- CHO QUẢN LÝ CÁC KHÓA HỌC (COURSE MMANAGER) ---
+    {
+        path: "/provider/courses",
+        element: (
+            <ProviderGuard>
+                <DashboardLayout role="provider"/>
+            </ProviderGuard>
+        ),
+        children: [
+            {
+                index: true,
+                element: <CourseManagement/>,
+            }
+        ]
+    },
+]);
