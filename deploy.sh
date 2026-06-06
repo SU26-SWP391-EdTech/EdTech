@@ -16,6 +16,13 @@ git reset --hard origin/staging
 echo "🧹 Removing unused containers..."
 #docker-compose down
 
+echo "npm install all dependencies"
+cd /home/deploy/app/app/backend/monolithic
+npm i
+cd /home/deploy/app/app/frontend
+npm i
+cd /home/deploy/app/app
+
 echo "🔨 Rebuilding and starting containers..."
 #docker-compose up -d --build --force-recreate
 docker-compose up -d --build --remove-orphans
