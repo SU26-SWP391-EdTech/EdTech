@@ -44,4 +44,10 @@ export class CreateUserDto {
     @IsNotEmpty()
     roleName!: string;
 
+    @ApiPropertyOptional({
+        example: true,
+        description: 'Trạng thái xác thực email (Active/Inactive)',
+    })
+    @IsOptional()
+    isEmailVerified?: boolean;
 }

@@ -1,17 +1,28 @@
-import { createBrowserRouter } from 'react-router-dom';
-//Landing pages
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+
+// Landing pages
 import { LandingPage } from '../pages/LandingPage/LandingPage';
-//Auth pages
+
+// Auth pages
 import { SignIn } from '../pages/auth/SignIn';
-//Role Guards
-import { GuestGuard, LearnerGuard, ProviderGuard, AdminGuard, AcademicGuard } from '../components/auth/RoleGuards';
 import { SignUp } from '../pages/auth/SignUp';
 import { ForgotPassword } from '../pages/auth/ForgotPassword';
 import { VerifyEmail } from '../pages/auth/VerifyEmail';
-//Role navigation pages 
+
+// Admin pages
+import { UserManagement } from '../pages/admin/UserManagement';
+
+// User Profile page
+import { LearnerProfile } from '../pages/Users/LearnerProfile';
+import { UserProfile } from '../pages/Users/UserProfile';
+
+// Role navigation pages 
 import { GuestLayout } from '../layouts/Dashboard/GuestLayout';
 import { DashboardLayout } from '../layouts/Dashboard/Dashboard';
-import { CourseManagement } from '../pages/course/CourseManagement';
+
+// Role Guards
+import { GuestGuard, LearnerGuard, ProviderGuard, AdminGuard, AcademicGuard } from '../components/auth/RoleGuards';
+import { AdminProfile } from '../pages/admin/AdminProfile';
 
 export const router = createBrowserRouter([
     // ==========================================
@@ -19,7 +30,7 @@ export const router = createBrowserRouter([
     // ==========================================
     {
         path: "/",
-        element: <GuestLayout />, // Tự động có GuestHeader ở trên
+        element: <GuestLayout />, // Sử dụng GuestLayout cho các trang công khai
         children: [
             {
                 index: true,
@@ -35,7 +46,7 @@ export const router = createBrowserRouter([
     // 🔐 NHÓM 2: Giao diện đăng nhập/đăng ký (AUTH LAYOUT)
     // ==========================================
     {
-        element: <GuestGuard />, // Chỉ cho phép khách chưa đăng nhập truy cập trang login/register
+        element: <GuestGuard />, // Chỉ cho phép khách chưa đăng nhập truy cập
         children: [
             {
                 path: "/login",
@@ -58,7 +69,6 @@ export const router = createBrowserRouter([
     // ==========================================
     // 📊 NHÓM 3: Giao diện bảo mật theo vai trò (DASHBOARD LAYOUT)
     // ==========================================
-    // Bạn truyền trực tiếp prop `role` tương ứng vào DashboardLayout!
 
     // --- CHO HỌC VIÊN ---
     {
@@ -67,11 +77,15 @@ export const router = createBrowserRouter([
             <LearnerGuard>
                 <DashboardLayout role="learner" />
             </LearnerGuard>
-        ), // Tự động có LearnerHeader với màu Crimson
+        ),
         children: [
             {
                 index: true,
                 element: <h1>Home learner</h1>
+            },
+            {
+                path: 'learnerprofile',
+                element: <LearnerProfile />
             }
         ]
     },
@@ -82,11 +96,15 @@ export const router = createBrowserRouter([
             <ProviderGuard>
                 <DashboardLayout role="provider" />
             </ProviderGuard>
-        ), // Tự động có ProviderHeader với màu Sky Blue
+        ),
         children: [
             {
                 index: true,
                 element: <h1>Home Provider</h1>
+            },
+            {
+                path: 'userprofile',
+                element: <UserProfile />
             }
         ]
     },
@@ -102,6 +120,18 @@ export const router = createBrowserRouter([
             {
                 index: true,
                 element: <h1>Home Admin</h1>
+            },
+            {
+                path: 'usermanagement',
+                element: <UserManagement />
+            },
+            {
+                path: 'analytics',
+                element: <h1>Analytics Admin</h1>
+            },
+            {
+                path: 'adminprofile',
+                element: <AdminProfile />
             }
         ]
     },
@@ -117,22 +147,16 @@ export const router = createBrowserRouter([
             {
                 index: true,
                 element: <h1>Home Academic</h1>
-            }
-        ]
-    },
-    // --- CHO QUẢN LÝ CÁC KHÓA HỌC (COURSE MMANAGER) ---
-    {
-        path: "/provider/courses",
-        element: (
-            <ProviderGuard>
-                <DashboardLayout role="provider"/>
-            </ProviderGuard>
-        ),
-        children: [
+            },
             {
-                index: true,
-                element: <CourseManagement/>,
+                path: 'userprofile',
+                element: <UserProfile />
             }
         ]
     },
+    // --- FALLBACK ---
+    {
+        path: "*",
+        element: <Navigate to="/" replace />
+    }
 ]);

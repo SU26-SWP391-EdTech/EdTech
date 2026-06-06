@@ -31,7 +31,7 @@ export class UsersService implements OnApplicationBootstrap{
     @InjectRepository(UserProfile)
     private userProfileRepo: Repository<UserProfile>,
     private cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   private readonly logger = new Logger(UsersService.name);
 
@@ -61,12 +61,19 @@ export class UsersService implements OnApplicationBootstrap{
 
     const hashPassword = await bcrypt.hash(dto.password, 10);
 
+    let avatar = dto.avatar_url;
+    if (dto.avatar_url && dto.avatar_url.startsWith('data:image/')) {
+      const uploaded = await this.cloudinaryService.uploadBase64(dto.avatar_url);
+      avatar = uploaded.secure_url;
+    }
+
     const newUser = this.userRepo.create({
       email: dto.email,
       password: hashPassword,
       fullName: dto.fullName,
-      avatar: dto.avatar_url,
+      avatar: avatar,
       role: role,
+      isEmailVerified: dto.isEmailVerified !== undefined ? dto.isEmailVerified : false,
     });
     return await this.userRepo.save(newUser);
   }
@@ -102,7 +109,15 @@ export class UsersService implements OnApplicationBootstrap{
       user.fullName = dto.fullName;
     }
     if (dto.avatar_url) {
-      user.avatar = dto.avatar_url;
+      if (dto.avatar_url.startsWith('data:image/')) {
+        const uploaded = await this.cloudinaryService.uploadBase64(dto.avatar_url);
+        user.avatar = uploaded.secure_url;
+      } else {
+        user.avatar = dto.avatar_url;
+      }
+    }
+    if (dto.isEmailVerified !== undefined) {
+      user.isEmailVerified = dto.isEmailVerified;
     }
     const updatedUser = await this.userRepo.save(user);
 
@@ -164,6 +179,7 @@ export class UsersService implements OnApplicationBootstrap{
       where: {
         userId: id,
       },
+      relations: ['userProfile'],
     });
 
     if (!academicUser) {
@@ -172,11 +188,31 @@ export class UsersService implements OnApplicationBootstrap{
 
     if (file) {
       const uploaded = await this.cloudinaryService.uploadFile(file);
-
-      dto.avatarUrl = uploaded.secure_url;
+      academicUser.avatar = uploaded.secure_url;
+    } else if (dto.avatarUrl) {
+      academicUser.avatar = dto.avatarUrl;
     }
 
-    Object.assign(academicUser, dto);
+    if (dto.fullName) {
+      academicUser.fullName = dto.fullName;
+    }
+
+    if (dto.expertise !== undefined || dto.experienceYears !== undefined) {
+      let profile = academicUser.userProfile;
+      if (!profile) {
+        profile = this.userProfileRepo.create({
+          userId: id,
+        });
+      }
+      if (dto.expertise !== undefined) {
+        profile.expertise = dto.expertise;
+      }
+      if (dto.experienceYears !== undefined) {
+        profile.experienceYears = dto.experienceYears;
+      }
+      profile.user = academicUser;
+      academicUser.userProfile = await this.userProfileRepo.save(profile);
+    }
 
     return await this.userRepo.save(academicUser);
   }

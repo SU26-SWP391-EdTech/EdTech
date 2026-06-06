@@ -13,7 +13,6 @@ export function AcademicManagerHeader() {
     const navigate = useNavigate();
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
-
     const [active, setActive] = useState('dashboard');
     const [open, setOpen] = useState(false);
 
@@ -87,12 +86,17 @@ export function AcademicManagerHeader() {
                                 </div>
 
                                 {[
+                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/academic/userprofile') },
                                     { icon: <UserCircle className="w-4 h-4" />, label: 'My Dashboard' },
                                     { icon: <BarChart2 className="w-4 h-4" />, label: 'Analytics' },
                                     { icon: <Settings className="w-4 h-4" />, label: 'Review Rules' },
                                 ].map((item) => (
                                     <button
                                         key={item.label}
+                                        onClick={() => {
+                                            if (item.onClick) item.onClick();
+                                            setOpen(false);
+                                        }}
                                         className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F8FAFC] transition-colors"
                                     >
                                         <span className="text-[#9CA3AF]">{item.icon}</span>

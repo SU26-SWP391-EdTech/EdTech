@@ -28,17 +28,17 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use((response) => response, (error) => {
     if (error.response && error.response.status === 401) {
         localStorage.removeItem('edtech-auth-storage');
-        
+
         // Phát sự kiện logout để đồng bộ với Zustand store
         if (typeof window !== 'undefined') {
             window.dispatchEvent(new Event('auth:logout'));
         }
-        
+
         // Chỉ chuyển hướng nếu người dùng KHÔNG ở trang login, register hoặc verify-email
         const currentPath = window.location.pathname;
         if (
-            currentPath !== '/login' && 
-            currentPath !== '/register' && 
+            currentPath !== '/login' &&
+            currentPath !== '/register' &&
             currentPath !== '/verify-email'
         ) {
             window.location.href = '/login';
