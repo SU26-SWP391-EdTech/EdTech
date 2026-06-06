@@ -19,6 +19,8 @@ adduser deploy
 
 ```bash id="u2"
 usermod -aG docker deploy
+#for allow sudo
+usermod -aG sudo deploy
 ```
 
 ---
@@ -43,8 +45,10 @@ mkdir -p ~/app/scripts
 # 📦 5. Clone repository
 
 ```bash id="u5"
-cd ~/app/app
+cd ~/app/
 git clone <YOUR_REPO_URL> .
+mv EdTech/ app
+cd app
 git checkout staging
 ```
 
