@@ -15,6 +15,7 @@ git reset --hard origin/staging
 
 echo "🧹 Removing unused containers..."
 #docker-compose down
+docker-compose down --remove-orphans
 
 echo "npm install all dependencies"
 cd /home/deploy/app/app/backend/monolithic
