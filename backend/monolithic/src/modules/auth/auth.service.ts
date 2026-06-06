@@ -20,6 +20,7 @@ import { BaseRegisterDto } from './dto/base-register.dto';
 import { MailService } from '../mail/mail.service';
 import { JwtService } from '@nestjs/jwt';
 import { VerifyEmailDto } from '../mail/dto/verifyEmail.dto';
+import { RoleEnum } from 'src/common/enums/role.enum';
 
 @Injectable()
 export class AuthService {
@@ -140,6 +141,10 @@ export class AuthService {
 
     if (!role) {
       throw new NotFoundException("Role doesn't exist");
+    }
+
+    if(role.roleName==RoleEnum.ADMIN||role.roleName==RoleEnum.ACADEMIC_MANAGER){
+      throw new BadRequestException('You do not have permission to set admin and academic manager role');
     }
 
     if (password.length < 8) throw new BadRequestException("Password length must more than 8 characters");
