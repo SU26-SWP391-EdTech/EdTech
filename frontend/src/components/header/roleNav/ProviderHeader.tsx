@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDown, LogOut, UserCircle, Settings, Plus, BarChart2 } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
@@ -11,10 +11,23 @@ import { useAuthStore } from '../../../stores/auth.stores';
 
 export function ProviderHeader() {
     const navigate = useNavigate();
+    const location = useLocation();
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
     const [active, setActive] = useState('dashboard');
     const [open, setOpen] = useState(false);
+
+    useEffect(() => {
+        if (location.pathname.includes('/explore')) {
+            setActive('explore');
+        } else if (location.pathname.includes('/courses')) {
+            setActive('courses');
+        } else if (location.pathname.includes('/students')) {
+            setActive('students');
+        } else {
+            setActive('dashboard');
+        }
+    }, [location.pathname]);
 
     const ACC = '#0EA5E9'; // Provider Accent: Sky Blue
     const ACTIVE_BG = '#E0F2FE';
@@ -38,7 +51,16 @@ export function ProviderHeader() {
                             activeBg={ACTIVE_BG}
                             badge={(item as any).badge}
                             count={(item as any).count}
-                            onClick={() => setActive(item.id)}
+                            onClick={() => {
+                                setActive(item.id);
+                                if (item.id === 'dashboard') {
+                                    navigate('/provider');
+                                } else if (item.id === 'explore') {
+                                    navigate('/provider/explore');
+                                } else if (item.id === 'courses') {
+                                    // Navigate to courses if defined
+                                }
+                            }}
                         />
                     ))}
                 </nav>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../stores/auth.stores';
-import { getLearnerProfile, editLearnerProfile } from '../../services/user.service';
+import { getLearnerProfile, editLearnerProfile } from '../../services/learner/learner.services';
 import {
   MapPin, Mail, Edit3, Share2, BookOpen, GraduationCap, Award,
   Clock, Zap, Download, X, Check,
@@ -429,7 +429,7 @@ export function LearnerProfile() {
 
             if (updated.avatarFile) {
               formData.append('avatarUrl', updated.avatarFile);
-            } else if (updated.avatar) {
+            } else if (updated.avatar && (updated.avatar.startsWith('http') || updated.avatar.startsWith('data:'))) {
               formData.append('avatarUrl', updated.avatar);
             }
 

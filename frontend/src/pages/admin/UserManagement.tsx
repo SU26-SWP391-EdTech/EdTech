@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { getUsers, createUser, updateUser, deleteUser } from '../../services/user.service';
+import { getUsers, createUser, updateUser, deleteUser } from '../../services/user/user.service';
 import {
   Search, Download, Eye, Edit2, Trash2,
   Plus, X, ChevronDown,

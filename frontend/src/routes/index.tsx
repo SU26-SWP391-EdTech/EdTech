@@ -12,8 +12,13 @@ import { VerifyEmail } from '../pages/auth/VerifyEmail';
 // Admin pages
 import { UserManagement } from '../pages/admin/UserManagement';
 
-// User Profile page
+// Learner page
 import { LearnerProfile } from '../pages/Users/LearnerProfile';
+import { MyLearning } from '../pages/learner/MyLearning';
+import { LearnerDashboard } from '../pages/learner/LearnerDashboard';
+import { ExplorePage } from '../pages/Users/ExplorePage';
+
+// User Profile page
 import { UserProfile } from '../pages/Users/UserProfile';
 
 // Role navigation pages 
@@ -23,6 +28,30 @@ import { DashboardLayout } from '../layouts/Dashboard/Dashboard';
 // Role Guards
 import { GuestGuard, LearnerGuard, ProviderGuard, AdminGuard, AcademicGuard } from '../components/auth/RoleGuards';
 import { AdminProfile } from '../pages/admin/AdminProfile';
+
+
+import { useAuthStore } from '../stores/auth.stores';
+
+function HomeRedirect() {
+    const user = useAuthStore((state) => state.user);
+
+    if (!user) {
+        return <LandingPage />;
+    }
+
+    switch (user.roleName?.toLowerCase()) {
+        case 'admin':
+            return <Navigate to="/admin" replace />;
+        case 'learner':
+            return <Navigate to="/learner" replace />;
+        case 'course provider':
+            return <Navigate to="/provider" replace />;
+        case 'academic manager':
+            return <Navigate to="/academic" replace />;
+        default:
+            return <LandingPage />;
+    }
+}
 
 export const router = createBrowserRouter([
     // ==========================================
@@ -34,11 +63,11 @@ export const router = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <LandingPage />
+                element: <HomeRedirect />
             },
             {
                 path: "explore",
-                element: <div>Trang tìm kiếm khóa học công khai</div>
+                element: <ExplorePage />
             }
         ]
     },
@@ -81,11 +110,20 @@ export const router = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <h1>Home learner</h1>
+                element: <LearnerDashboard />
             },
             {
                 path: 'learnerprofile',
                 element: <LearnerProfile />
+            },
+            {
+                path: 'my-learning',
+                element: <MyLearning />
+
+            },
+            {
+                path: 'explore',
+                element: <ExplorePage />
             }
         ]
     },
@@ -105,6 +143,10 @@ export const router = createBrowserRouter([
             {
                 path: 'userprofile',
                 element: <UserProfile />
+            },
+            {
+                path: 'explore',
+                element: <ExplorePage />
             }
         ]
     },

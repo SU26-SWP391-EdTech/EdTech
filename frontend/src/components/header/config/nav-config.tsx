@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 
 export const LEARNER_NAV = [
-    { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
     { id: 'my-learning', label: 'My Learning', icon: <BookOpen className="w-3.5 h-3.5" />, badge: '3' },
     { id: 'explore', label: 'Explore', icon: <Compass className="w-3.5 h-3.5" /> },
     { id: 'paths', label: 'Learning Paths', icon: <GraduationCap className="w-3.5 h-3.5" /> },
@@ -24,6 +23,7 @@ export const ADMIN_NAV = [
 
 export const PROVIDER_NAV = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
+    { id: 'explore', label: 'Explore', icon: <Compass className="w-3.5 h-3.5" /> },
     { id: 'courses', label: 'My Courses', icon: <BookOpen className="w-3.5 h-3.5" />, count: 12 },
     { id: 'students', label: 'Students', icon: <Users className="w-3.5 h-3.5" /> },
 ];

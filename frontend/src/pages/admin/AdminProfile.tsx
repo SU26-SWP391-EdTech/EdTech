@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../stores/auth.stores';
-import { getAcademicProfile, editAcademicProfile, updateUser } from '../../services/user.service';
+import { getAcademicProfile, editAcademicProfile, updateUser } from '../../services/user/user.service';
 import {
     MapPin, Mail, Edit3, Share2, BookOpen, GraduationCap, Award,
     Clock, Zap, Download, X, Check,

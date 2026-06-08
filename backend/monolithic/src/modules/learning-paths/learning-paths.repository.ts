@@ -76,4 +76,11 @@ export class LearningPathsRepository {
       order: { position: 'ASC' },
     });
   }
+
+  public async findAll(): Promise<LearningPath[]> {
+    return await this.learningPathRepo.find({
+      relations: ['learningPathCourses', 'learningPathCourses.course'],
+      order: { learningPathId: 'ASC' },
+    });
+  }
 }

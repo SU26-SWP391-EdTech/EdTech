@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { MessageSquare, Play, Flame, ChevronDown, LogOut, UserCircle, BookOpen, Settings } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
@@ -11,10 +11,23 @@ import { useAuthStore } from '../../../stores/auth.stores';
 
 export function LearnerHeader() {
     const navigate = useNavigate();
+    const location = useLocation();
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
-    const [active, setActive] = useState('dashboard');
+    const [active, setActive] = useState('');
     const [open, setOpen] = useState(false);
+
+    useEffect(() => {
+        if (location.pathname.includes('/my-learning')) {
+            setActive('my-learning');
+        } else if (location.pathname.includes('/explore')) {
+            setActive('explore');
+        } else if (location.pathname.includes('/paths')) {
+            setActive('paths');
+        } else {
+            setActive('');
+        }
+    }, [location.pathname]);
 
     const ACC = '#E11D48';
     const ACTIVE_BG = '#FFF1F3';
@@ -37,7 +50,16 @@ export function LearnerHeader() {
                             accentColor={ACC}
                             activeBg={ACTIVE_BG}
                             badge={item.badge}
-                            onClick={() => setActive(item.id)}
+                            onClick={() => {
+                                setActive(item.id);
+                                if (item.id === 'my-learning') {
+                                    navigate('/learner/my-learning');
+                                } else if (item.id === 'explore') {
+                                    navigate('/learner/explore');
+                                } else if (item.id === 'paths') {
+                                    navigate('/learner/explore');
+                                }
+                            }}
                         />
                     ))}
                 </nav>
@@ -60,6 +82,7 @@ export function LearnerHeader() {
                 <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
 
                 <button
+                    onClick={() => navigate('/learner/my-learning')}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm flex-shrink-0 transition-all hover:scale-[1.02] active:scale-[0.98]"
                     style={{
                         backgroundColor: ACC,
@@ -107,7 +130,7 @@ export function LearnerHeader() {
 
                                 {[
                                     { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/learner/learnerprofile') },
-                                    { icon: <BookOpen className="w-4 h-4" />, label: 'My Learning' },
+                                    { icon: <BookOpen className="w-4 h-4" />, label: 'My Learning', onClick: () => navigate('/learner/my-learning') },
                                     { icon: <Settings className="w-4 h-4" />, label: 'Settings' },
                                 ].map((item) => (
                                     <button
@@ -124,7 +147,7 @@ export function LearnerHeader() {
                                 ))}
 
                                 <div className="border-t border-[#F3F4F6] mt-1">
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             logout();
                                             navigate('/login');
