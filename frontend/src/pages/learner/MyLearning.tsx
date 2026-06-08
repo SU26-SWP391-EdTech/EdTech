@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Search, Bell, Flame, ChevronRight, BookOpen, Route, Award, GraduationCap,
     Play, Clock, TrendingUp, CheckCircle2, Circle, Bookmark, BookmarkX,
@@ -14,6 +15,7 @@ import type { LearningPath } from '../../services/learning-path/learning-path.se
 type Tab = 'all' | 'in-progress' | 'completed' | 'saved' | 'archived';
 
 export function MyLearning() {
+    const navigate = useNavigate();
     const [tab, setTab] = useState<Tab>('all');
     const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
     const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
@@ -151,7 +153,11 @@ export function MyLearning() {
                         </p>
                     </div>
                     <div className="flex items-center gap-2.5">
-                        <button className="px-4 py-2.5 bg-white border border-[#E5E7EB] text-[#111827] rounded-lg text-sm hover:bg-[#F8FAFC] transition-colors" style={{ fontWeight: 500 }}>
+                        <button 
+                            onClick={() => navigate('/learner/explore')}
+                            className="px-4 py-2.5 bg-white border border-[#E5E7EB] text-[#111827] rounded-lg text-sm hover:bg-[#F8FAFC] transition-colors" 
+                            style={{ fontWeight: 500 }}
+                        >
                             Explore More
                         </button>
                         {displayEnrollment && (
@@ -285,7 +291,10 @@ export function MyLearning() {
                                     <p className="text-sm text-[#6B7280] max-w-md mb-6">
                                         You are not enrolled in any courses yet. Explore our curated courses and roadmap to begin learning.
                                     </p>
-                                    <button className="px-6 py-2.5 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors font-medium">
+                                    <button 
+                                        onClick={() => navigate('/learner/explore')}
+                                        className="px-6 py-2.5 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors font-medium"
+                                    >
                                         Browse Courses
                                     </button>
                                 </div>
