@@ -246,9 +246,19 @@ export function LearnerDashboard() {
     const user = useAuthStore((state) => state.user);
     const [profile, setProfile] = useState<any>(null);
     useEffect(() => {
+        // ── MOCK PROFILE LOADING (TRÁNH LỖI 429 VÀ PHỤ THUỘC API) ───────────────────────
+        // Trực tiếp nạp thông tin học viên giả lập để đảm bảo hiển thị dashboard hoạt động
+        // mượt mà và ổn định.
+        /* Tạm thời comment API để tránh lỗi 429
         if (user?.userId) {
             getLearnerProfile(user.userId).then((data) => setProfile(data)).catch((error) => console.log(error))
         }
+        */
+        
+        // Thay thế bằng Mock Profile
+        import('../../db/data').then(({ MOCK_PROFILE }) => {
+            setProfile(MOCK_PROFILE);
+        });
     }, [user])
 
     const [savedRecs, setSavedRecs] = useState<Set<number>>(new Set());

@@ -27,12 +27,26 @@ export function MyLearning() {
             try {
                 setIsLoading(true);
                 setError(null);
+                // ── MOCK PROGRESS FETCHING (TRÁNH LỖI 429 VÀ ĐỒC LẬP BACKEND) ─────────────────
+                // Để loại bỏ các cuộc gọi API liên tiếp khi chuyển trang gây lỗi 429,
+                // chúng ta lấy dữ liệu lộ trình học mặc định từ data.ts và đồng bộ danh sách khóa học
+                // đã đăng ký từ sessionStorage (được cập nhật khi người dùng nhấn Đăng ký ở ExplorePage).
+                /* Tạm thời comment API để tránh lỗi 429
                 const [enrollmentData, pathData] = await Promise.all([
                     getMyEnrollments(),
                     getLearningPaths(),
                 ]);
                 setEnrollments(enrollmentData);
                 setLearningPaths(pathData);
+                */
+
+                // Thay thế bằng Mock Data
+                const { MOCK_LEARNING_PATHS, MOCK_ENROLLMENTS } = await import('../../db/data');
+                const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
+                
+                setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : MOCK_ENROLLMENTS);
+                setLearningPaths(MOCK_LEARNING_PATHS);
+
             } catch (err: any) {
                 console.error('Failed to fetch learning progress:', err);
                 setError('Failed to load learning progress. Please try again later.');

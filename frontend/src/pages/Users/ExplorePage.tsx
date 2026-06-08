@@ -37,6 +37,11 @@ export function ExplorePage() {
     async function loadData() {
         try {
             setIsLoading(true);
+            
+            // ── MOCK EXPLORE DATA FETCHING (TRÁNH LỖI 429) ───────────────────────────────────
+            // Thay vì gọi API lấy danh sách khóa học và lộ trình học từ server, hệ thống sẽ
+            // dùng mock data trực tiếp và nạp các bản đăng ký học viên từ sessionStorage.
+            /* Tạm thời comment API để tránh lỗi 429
             const [allCourses, paths] = await Promise.all([
                 searchCourses(),
                 getLearningPaths()
@@ -48,6 +53,19 @@ export function ExplorePage() {
                 const myEnrollments = await getMyEnrollments();
                 setEnrollments(myEnrollments);
             }
+            */
+
+            // Thay thế bằng Mock Data
+            const { MOCK_COURSES, MOCK_LEARNING_PATHS, MOCK_ENROLLMENTS } = await import('../../db/data');
+            setCourses(MOCK_COURSES);
+            setLearningPaths(MOCK_LEARNING_PATHS);
+            if (user) {
+                const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
+                setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : MOCK_ENROLLMENTS);
+            } else {
+                setEnrollments([]);
+            }
+
         } catch (error) {
             console.error('Failed to load explore data:', error);
             toast.error('Failed to load courses.');
@@ -75,16 +93,42 @@ export function ExplorePage() {
 
         try {
             setEnrollingId(courseId);
+            
+            // ── MOCK ENROLLMENT ACTION (TỰ ĐĂNG KÝ KHÓA HỌC CỤC BỘ) ─────────────────────────
+            // Để tránh lỗi 429, hệ thống không gửi API đăng ký khóa học lên server.
+            // Thay vào đó, nó sẽ tạo một bản ghi Đăng ký giả lập mới và lưu trữ vào sessionStorage.
+            /* Tạm thời comment API để tránh lỗi 429
             await enrollCourse(courseId);
             toast.success('Successfully enrolled!');
 
             // Refresh enrollments
             const myEnrollments = await getMyEnrollments();
             setEnrollments(myEnrollments);
+            */
+
+            // Thay thế bằng Mock Enroll cục bộ
+            const courseToEnroll = courses.find(c => c.courseId === courseId);
+            if (!courseToEnroll) return;
+
+            const newEnrollment: Enrollment = {
+                enrollmentId: Date.now(),
+                enrolledAt: new Date().toISOString(),
+                status: 'active',
+                progress: 0,
+                lastAccessedAt: new Date().toISOString(),
+                completedAt: null,
+                expiresAt: null,
+                course: courseToEnroll,
+            };
+
+            const updated = [...enrollments, newEnrollment];
+            setEnrollments(updated);
+            sessionStorage.setItem('explore_cache_enrollments', JSON.stringify(updated));
+            toast.success('Successfully enrolled! (Mock)');
+
         } catch (error: any) {
             console.error('Enrollment error:', error);
-            const msg = error?.response?.data?.message || 'Failed to enroll. Please try again.';
-            toast.error(msg);
+            toast.error('Failed to enroll.');
         } finally {
             setEnrollingId(null);
         }
