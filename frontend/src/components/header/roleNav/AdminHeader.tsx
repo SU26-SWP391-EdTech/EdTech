@@ -24,6 +24,7 @@ export function AdminHeader() {
     const getActiveTab = () => {
         if (location.pathname.includes('/usermanagement')) return 'users';
         if (location.pathname.includes('/analytics')) return 'analytics';
+        if (location.pathname.includes('/courses')) return 'courses';
         return 'dashboard';
     };
 
@@ -56,6 +57,8 @@ export function AdminHeader() {
                                     navigate('/admin');
                                 } else if (item.id === 'analytics') {
                                     navigate('/admin/analytics');
+                                } else if (item.id === 'courses') {
+                                    navigate('/admin/courses');
                                 }
                             }}
                         />

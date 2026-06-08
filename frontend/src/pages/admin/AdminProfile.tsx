@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../stores/auth.stores';
 import { getAcademicProfile, editAcademicProfile, updateUser } from '../../services/user/user.service';
 import {
-    MapPin, Mail, Edit3, Share2, BookOpen, GraduationCap, Award,
-    Clock, Zap, Download, X, Check,
-    Flame, Calendar,
-    ExternalLink, ArrowUpRight, Shield, Bookmark, Briefcase
+    MapPin, Mail, Edit3,
+    Clock, X, Check,
+    Calendar,
+    Briefcase
 } from 'lucide-react';
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
@@ -42,14 +42,14 @@ import {
 //     },
 // ];
 
-type CourseStatus = 'Completed' | 'In Progress' | 'Not Started';
-const COURSE_HISTORY: { name: string; provider: string; status: CourseStatus; pct: number; date: string }[] = [
-    { name: 'React Fundamentals', provider: 'FPT University', status: 'In Progress', pct: 68, date: '—' },
-    { name: 'UI/UX Design Basics', provider: 'Coursera', status: 'Completed', pct: 100, date: 'Apr 2, 2026' },
-    { name: 'Data Analytics Foundation', provider: 'FPT University', status: 'Completed', pct: 100, date: 'May 15, 2026' },
-    { name: 'Java Spring Boot', provider: 'Udemy', status: 'In Progress', pct: 45, date: '—' },
-    { name: 'SQL Mastery', provider: 'DataCamp', status: 'Not Started', pct: 0, date: '—' },
-];
+// type CourseStatus = 'Completed' | 'In Progress' | 'Not Started';
+// const COURSE_HISTORY: { name: string; provider: string; status: CourseStatus; pct: number; date: string }[] = [
+//     { name: 'React Fundamentals', provider: 'FPT University', status: 'In Progress', pct: 68, date: '—' },
+//     { name: 'UI/UX Design Basics', provider: 'Coursera', status: 'Completed', pct: 100, date: 'Apr 2, 2026' },
+//     { name: 'Data Analytics Foundation', provider: 'FPT University', status: 'Completed', pct: 100, date: 'May 15, 2026' },
+//     { name: 'Java Spring Boot', provider: 'Udemy', status: 'In Progress', pct: 45, date: '—' },
+//     { name: 'SQL Mastery', provider: 'DataCamp', status: 'Not Started', pct: 0, date: '—' },
+// ];
 
 
 
@@ -272,21 +272,21 @@ function EditProfileModal({ onClose, profile, onSave }: EditProfileModalProps) {
 
 // ─── STATUS PILL ──────────────────────────────────────────────────────────────
 
-function StatusPill({ status }: { status: CourseStatus }) {
-    const cfg: Record<CourseStatus, { bg: string; color: string; dot: string }> = {
-        Completed: { bg: '#ECFDF5', color: '#065F46', dot: '#10B981' },
-        'In Progress': { bg: '#EFF6FF', color: '#1D4ED8', dot: '#3B82F6' },
-        'Not Started': { bg: '#F3F4F6', color: '#4B5563', dot: '#9CA3AF' },
-    };
-    const s = cfg[status];
-    return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px]"
-            style={{ backgroundColor: s.bg, color: s.color, fontWeight: 500 }}>
-            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }} />
-            {status}
-        </span>
-    );
-}
+// function StatusPill({ status }: { status: CourseStatus }) {
+//     const cfg: Record<CourseStatus, { bg: string; color: string; dot: string }> = {
+//         Completed: { bg: '#ECFDF5', color: '#065F46', dot: '#10B981' },
+//         'In Progress': { bg: '#EFF6FF', color: '#1D4ED8', dot: '#3B82F6' },
+//         'Not Started': { bg: '#F3F4F6', color: '#4B5563', dot: '#9CA3AF' },
+//     };
+//     const s = cfg[status];
+//     return (
+//         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px]"
+//             style={{ backgroundColor: s.bg, color: s.color, fontWeight: 500 }}>
+//             <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: s.dot }} />
+//             {status}
+//         </span>
+//     );
+// }
 
 // ─── MAIN COMPONENT ──────────────────────────────────────────────────────────
 
@@ -377,14 +377,14 @@ export function AdminProfile() {
         fetchProfileData();
     }, [loggedInUser]);
 
-    const STATS = [
-        { label: 'Courses Completed', value: '12', change: '+2 this month', icon: BookOpen, color: '#6366F1', bg: '#F5F3FF' },
-        { label: 'Paths Completed', value: '2', change: '1 in progress', icon: GraduationCap, color: '#10B981', bg: '#ECFDF5' },
-        // { label: 'Certificates Earned', value: '2', change: 'Next: Path Finisher', icon: Award, color: '#E11D48', bg: '#FFF1F2' },
-        { label: 'Learning Hours', value: '148', change: '+12 this week', icon: Clock, color: '#F59E0B', bg: '#FFFBEB' },
-    ];
+    // const STATS = [
+    //     { label: 'Courses Completed', value: '12', change: '+2 this month', icon: BookOpen, color: '#6366F1', bg: '#F5F3FF' },
+    //     { label: 'Paths Completed', value: '2', change: '1 in progress', icon: GraduationCap, color: '#10B981', bg: '#ECFDF5' },
+    //     // { label: 'Certificates Earned', value: '2', change: 'Next: Path Finisher', icon: Award, color: '#E11D48', bg: '#FFF1F2' },
+    //     { label: 'Learning Hours', value: '148', change: '+12 this week', icon: Clock, color: '#F59E0B', bg: '#FFFBEB' },
+    // ];
 
-    const xpTotal = 375;
+    // const xpTotal = 375;
     // const xpNext = 500;
 
     const isImg = profile.avatar && (profile.avatar.startsWith('http') || profile.avatar.startsWith('data:image'));

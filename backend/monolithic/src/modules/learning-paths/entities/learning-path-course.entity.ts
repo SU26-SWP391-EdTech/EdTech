@@ -21,6 +21,7 @@ export class LearningPathCourse {
 
   @ManyToOne(() => Course, (course) => course.learningPathCourses, {
     nullable: false,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'course_id' })
   course!: Course;

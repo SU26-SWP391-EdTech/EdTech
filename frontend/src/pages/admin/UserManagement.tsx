@@ -5,7 +5,7 @@ import {
   Plus, X, ChevronDown,
   ArrowUpDown, Mail,
   Shield, GraduationCap, Building2, BookOpen,
-  Check, AlertCircle, Clock, Ban
+  Check, AlertCircle
 } from 'lucide-react';
 
 /* ─── Types ─── */
@@ -465,6 +465,7 @@ export function UserManagement() {
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   const [selectedUser, setSelectedUser] = useState<User | undefined>(undefined);
   const [userToDelete, setUserToDelete] = useState<User | undefined>(undefined);
   const [sortField, setSortField] = useState<'name' | 'joined'>('joined');

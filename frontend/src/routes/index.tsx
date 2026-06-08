@@ -21,6 +21,9 @@ import { ExplorePage } from '../pages/Users/ExplorePage';
 // User Profile page
 import { UserProfile } from '../pages/Users/UserProfile';
 
+// Course pages
+import { CourseManagement } from '../pages/auth/Course/CourseManagement';
+
 // Role navigation pages 
 import { GuestLayout } from '../layouts/Dashboard/GuestLayout';
 import { DashboardLayout } from '../layouts/Dashboard/Dashboard';
@@ -119,7 +122,6 @@ export const router = createBrowserRouter([
             {
                 path: 'my-learning',
                 element: <MyLearning />
-
             },
             {
                 path: 'explore',
@@ -143,6 +145,18 @@ export const router = createBrowserRouter([
             {
                 path: 'userprofile',
                 element: <UserProfile />
+            },
+            {
+                path: 'courses',
+                element: <CourseManagement />
+            },
+            {
+                path: 'courses/detail',
+                element: <CourseManagement />
+            },
+            {
+                path: 'courses/lessons',
+                element: <CourseManagement />
             },
             {
                 path: 'explore',
@@ -174,6 +188,18 @@ export const router = createBrowserRouter([
             {
                 path: 'adminprofile',
                 element: <AdminProfile />
+            },
+            {
+                path: 'courses',
+                element: <CourseManagement />
+            },
+            {
+                path: 'courses/detail',
+                element: <CourseManagement />
+            },
+            {
+                path: 'courses/lessons',
+                element: <CourseManagement />
             }
         ]
     },
@@ -193,6 +219,22 @@ export const router = createBrowserRouter([
             {
                 path: 'userprofile',
                 element: <UserProfile />
+            },
+            {
+                path: 'courses',
+                element: <CourseManagement />
+            },
+            {
+                path: 'pending-courses',
+                element: <CourseManagement />
+            },
+            {
+                path: 'courses/detail',
+                element: <CourseManagement />
+            },
+            {
+                path: 'courses/lessons',
+                element: <CourseManagement />
             }
         ]
     },

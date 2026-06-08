@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronDown, LogOut, UserCircle, Settings, Plus, BarChart2 } from 'lucide-react';
+import { ChevronDown, LogOut, UserCircle, Settings, BarChart2 } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
 import { SearchBar } from '../shared/SearchBar';
@@ -14,20 +14,17 @@ export function ProviderHeader() {
     const location = useLocation();
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
-    const [active, setActive] = useState('dashboard');
     const [open, setOpen] = useState(false);
 
-    useEffect(() => {
-        if (location.pathname.includes('/explore')) {
-            setActive('explore');
-        } else if (location.pathname.includes('/courses')) {
-            setActive('courses');
-        } else if (location.pathname.includes('/students')) {
-            setActive('students');
-        } else {
-            setActive('dashboard');
-        }
-    }, [location.pathname]);
+    // Determine active item based on current URL path
+    const getActiveTab = () => {
+        if (location.pathname.includes('/explore')) return 'explore';
+        if (location.pathname.includes('/courses')) return 'courses';
+        if (location.pathname.includes('/students')) return 'students';
+        return 'dashboard';
+    };
+
+    const active = getActiveTab();
 
     const ACC = '#0EA5E9'; // Provider Accent: Sky Blue
     const ACTIVE_BG = '#E0F2FE';
@@ -52,13 +49,14 @@ export function ProviderHeader() {
                             badge={(item as any).badge}
                             count={(item as any).count}
                             onClick={() => {
-                                setActive(item.id);
-                                if (item.id === 'dashboard') {
+                                if (item.id === 'courses') {
+                                    navigate('/provider/courses');
+                                } else if (item.id === 'dashboard') {
                                     navigate('/provider');
                                 } else if (item.id === 'explore') {
                                     navigate('/provider/explore');
-                                } else if (item.id === 'courses') {
-                                    // Navigate to courses if defined
+                                } else if (item.id === 'students') {
+                                    navigate('/provider');
                                 }
                             }}
                         />
@@ -72,18 +70,6 @@ export function ProviderHeader() {
                 <NotifBell count={5} accentColor={ACC} />
 
                 <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
-
-                <button
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-sm flex-shrink-0 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                    style={{
-                        backgroundColor: ACC,
-                        fontWeight: 500,
-                        boxShadow: `0 2px 8px ${ACC}35`,
-                    }}
-                >
-                    <Plus className="w-4 h-4" />
-                    New Course
-                </button>
 
                 <div className="relative flex-shrink-0">
                     <button

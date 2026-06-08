@@ -9,6 +9,9 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { Repository } from 'typeorm';
+import { Lesson } from 'src/modules/lessons/entities/lesson.entity';
+import { Enrollment } from 'src/modules/enrollments/entities/enrollment.entity';
+import { LearningPathCourse } from 'src/modules/learning-paths/entities/learning-path-course.entity';
 
 @Injectable()
 export class CoursesService {
@@ -54,8 +57,12 @@ export class CoursesService {
         return course;
     }
 
-    async update(id: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
+    async update(id: number, updateCourseDto: UpdateCourseDto, file?: Express.Multer.File): Promise<Course> {
         const course = await this.findOne(id);
+        if (file) {
+            const uploaded = await this.cloudinaryService.uploadFile(file);
+            updateCourseDto.thumbnailUrl = uploaded.secure_url;
+        }
         const { ...otherUpdates } = updateCourseDto;
         Object.assign(course, otherUpdates);
 
@@ -64,8 +71,32 @@ export class CoursesService {
 
     async remove(id: number): Promise<{ message: string }> {
         const course = await this.findOne(id);
-        const message = await this.coursesRepository.removeCourse(course);
-        return { message };
+        await this.coursesRepository.manager.transaction(async (transactionalEntityManager) => {
+            // Delete lessons
+            await transactionalEntityManager.createQueryBuilder()
+                .delete()
+                .from(Lesson)
+                .where('course_id = :id', { id })
+                .execute();
+
+            // Delete enrollments
+            await transactionalEntityManager.createQueryBuilder()
+                .delete()
+                .from(Enrollment)
+                .where('course_id = :id', { id })
+                .execute();
+
+            // Delete learning path course relations
+            await transactionalEntityManager.createQueryBuilder()
+                .delete()
+                .from(LearningPathCourse)
+                .where('course_id = :id', { id })
+                .execute();
+
+            // Finally delete the course itself
+            await transactionalEntityManager.remove(course);
+        });
+        return { message: `Course ID ${id} has been deleted` };
     }
 
     public async approveCourse(id: number, reviewerId: number): Promise<Course> {

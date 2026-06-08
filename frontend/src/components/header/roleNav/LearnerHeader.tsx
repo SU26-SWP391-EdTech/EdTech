@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MessageSquare, Play, Flame, ChevronDown, LogOut, UserCircle, BookOpen, Settings } from 'lucide-react';
 
@@ -14,20 +14,17 @@ export function LearnerHeader() {
     const location = useLocation();
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
-    const [active, setActive] = useState('');
     const [open, setOpen] = useState(false);
 
-    useEffect(() => {
-        if (location.pathname.includes('/my-learning')) {
-            setActive('my-learning');
-        } else if (location.pathname.includes('/explore')) {
-            setActive('explore');
-        } else if (location.pathname.includes('/paths')) {
-            setActive('paths');
-        } else {
-            setActive('');
-        }
-    }, [location.pathname]);
+    // Determine active item based on current URL path
+    const getActiveTab = () => {
+        if (location.pathname.includes('/my-learning')) return 'my-learning';
+        if (location.pathname.includes('/explore')) return 'explore';
+        if (location.pathname.includes('/paths')) return 'paths';
+        return 'dashboard';
+    };
+
+    const active = getActiveTab();
 
     const ACC = '#E11D48';
     const ACTIVE_BG = '#FFF1F3';
@@ -51,7 +48,6 @@ export function LearnerHeader() {
                             activeBg={ACTIVE_BG}
                             badge={item.badge}
                             onClick={() => {
-                                setActive(item.id);
                                 if (item.id === 'my-learning') {
                                     navigate('/learner/my-learning');
                                 } else if (item.id === 'explore') {

@@ -16,6 +16,8 @@ import { Public } from 'src/common/decorators/public.decorator';
 export class CoursesController {
     constructor(private readonly coursesService: CoursesService) { }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(RoleEnum.COURSE_PROVIDER)
     @Post()
     @UseInterceptors(FileInterceptor('thumbnailUrl'))
     @ApiOperation({ summary: 'Create a course' })
@@ -25,7 +27,7 @@ export class CoursesController {
     @ApiResponse({ status: 400, description: 'Invalid request data' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     create(@Req() req, @Body() createCourseDto: CreateCourseDto, @UploadedFile() file?: Express.Multer.File) {
-        return this.coursesService.create(createCourseDto, req.user.id, file);
+        return this.coursesService.create(createCourseDto, req.user.userId, file);
     }
 
     // Endpoint: GET /courses (Ví dụ: GET /courses?search=javascript&page=1&limit=5)
@@ -47,16 +49,22 @@ export class CoursesController {
         return this.coursesService.findOne(id);
     }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(RoleEnum.COURSE_PROVIDER, RoleEnum.ADMIN)
     @Patch(':id')
+    @UseInterceptors(FileInterceptor('thumbnailUrl'))
     @ApiOperation({ summary: 'Update a course' })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({ type: UpdateCourseDto })
     @ApiResponse({ status: 200, description: 'Course updated successfully' })
     @ApiResponse({ status: 400, description: 'Invalid request data' })
     @ApiResponse({ status: 404, description: 'Course not found' })
     update(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateCourseDto: UpdateCourseDto,
+        @UploadedFile() file?: Express.Multer.File,
     ) {
-        return this.coursesService.update(id, updateCourseDto);
+        return this.coursesService.update(id, updateCourseDto, file);
     }
 
     @Delete(':id')
