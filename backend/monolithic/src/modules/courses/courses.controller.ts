@@ -9,6 +9,7 @@ import { Roles } from 'src/common/decorators/roles/roles.decorator';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Courses')
 @Controller('courses')
@@ -30,6 +31,7 @@ export class CoursesController {
     }
 
     // Endpoint: GET /courses (Ví dụ: GET /courses?search=javascript&page=1&limit=5)
+    @Public()
     @Get()
     @ApiOperation({ summary: 'Search courses' })
     @ApiResponse({ status: 200, description: 'Courses returned successfully' })
@@ -38,6 +40,7 @@ export class CoursesController {
     }
 
     // Endpoint: GET /courses/:id
+    @Public()
     @Get(':id')
     @ApiOperation({ summary: 'Get course detail' })
     @ApiResponse({ status: 200, description: 'Course returned successfully' })

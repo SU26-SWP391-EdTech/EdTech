@@ -8,6 +8,7 @@ import { RoleEnum } from 'src/common/enums/role.enum';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AddCourseToLearningPathDto } from './dto/add-course-to-learning-path.dto';
 import { User } from '../users/entities/user.entity';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Learning paths')
 @Controller('learning-paths')
@@ -82,7 +83,7 @@ export class LearningPathsController {
     return this.learningPathsService.removeCourse(learningPathId, courseId);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Public()
   @Get(':id/courses')
   @ApiOperation({
     summary: 'Get courses in a learning path',
@@ -99,5 +100,18 @@ export class LearningPathsController {
     @Param('id', ParseIntPipe) learningPathId: number,
   ) {
     return this.learningPathsService.getCoursesInLearningPath(learningPathId);
+  }
+
+  @Public()
+  @Get()
+  @ApiOperation({
+    summary: 'Get all learning paths',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all learning paths',
+  })
+  public async findAll() {
+    return this.learningPathsService.findAll();
   }
 }

@@ -18,6 +18,7 @@ export function ProviderHeader() {
 
     // Determine active item based on current URL path
     const getActiveTab = () => {
+        if (location.pathname.includes('/explore')) return 'explore';
         if (location.pathname.includes('/courses')) return 'courses';
         if (location.pathname.includes('/students')) return 'students';
         return 'dashboard';
@@ -52,6 +53,8 @@ export function ProviderHeader() {
                                     navigate('/provider/courses');
                                 } else if (item.id === 'dashboard') {
                                     navigate('/provider');
+                                } else if (item.id === 'explore') {
+                                    navigate('/provider/explore');
                                 } else if (item.id === 'students') {
                                     navigate('/provider');
                                 }

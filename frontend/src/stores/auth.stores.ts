@@ -32,6 +32,64 @@ export const useAuthStore = create<AuthState>()(
             login: async (credentials) => {
                 set({ isLoading: true, error: null });
                 try {
+                    // ── MOCK LOGIN LOGIC (TRÁNH LỖI 429 VÀ ĐỘC LẬP BACKEND) ────────────────────────
+                    // Kiểm tra email đăng nhập. Nếu khớp với một trong các tài khoản mock,
+                    // hệ thống sẽ tự động đăng nhập và gán thông tin vai trò tương ứng mà không gọi API backend.
+                    const emailLower = credentials.email.toLowerCase().trim();
+                    let mockUser = null;
+
+                    if (emailLower === 'learner@edtech.com') {
+                        mockUser = {
+                            userId: 1,
+                            email: 'learner@edtech.com',
+                            fullName: 'Nguyễn Văn Learner',
+                            roleId: 1,
+                            roleName: 'learner' as const,
+                            avatarUrl: null,
+                        };
+                    } else if (emailLower === 'provider@edtech.com') {
+                        mockUser = {
+                            userId: 2,
+                            email: 'provider@edtech.com',
+                            fullName: 'Trần Thị Provider',
+                            roleId: 2,
+                            roleName: 'course provider' as const,
+                            avatarUrl: null,
+                        };
+                    } else if (emailLower === 'manager@edtech.com') {
+                        mockUser = {
+                            userId: 3,
+                            email: 'manager@edtech.com',
+                            fullName: 'Lê Văn Manager',
+                            roleId: 3,
+                            roleName: 'academic manager' as const,
+                            avatarUrl: null,
+                        };
+                    } else if (emailLower === 'admin@edtech.com') {
+                        mockUser = {
+                            userId: 4,
+                            email: 'admin@edtech.com',
+                            fullName: 'Phạm Hồng Admin',
+                            roleId: 4,
+                            roleName: 'admin' as const,
+                            avatarUrl: null,
+                        };
+                    }
+
+                    // Nếu khớp tài khoản mock, cập nhật trạng thái đăng nhập vào store và lưu token giả lập.
+                    if (mockUser) {
+                        set({
+                            token: 'mock-jwt-token-xyz',
+                            user: mockUser,
+                            isAuthenticated: true,
+                            isLoading: false,
+                        });
+                        return mockUser;
+                    }
+
+                    // ── FALLBACK BACKEND API ────────────────────────────────────────────────────────
+                    // Nếu không phải là tài khoản mock, hệ thống sẽ tiến hành gửi request thật lên backend.
+
                     const data = await loginApi(credentials);
                     const { token, user } = data;
 

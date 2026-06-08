@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../stores/auth.stores';
-import { getAcademicProfile, editAcademicProfile, updateUser } from '../../services/user.service';
+import { getAcademicProfile, editAcademicProfile, updateUser } from '../../services/user/user.service';
 import {
     MapPin, Mail, Edit3, BookOpen, GraduationCap, Award,
     Clock, Download, X, Check,
@@ -337,16 +337,27 @@ export function UserProfile() {
         if (!loggedInUser) return;
         try {
             setLoading(true);
+            
+            // ── MOCK ACADEMIC PROFILE FETCHING (TRÁNH LỖI 429) ───────────────────────────
+            // Thay vì gọi API lấy thông tin profile học thuật từ server, hệ thống sẽ
+            // truy xuất dữ liệu giả lập từ sessionStorage.
+            /* Comment API thực tế để tránh 429
             const res = await getAcademicProfile(loggedInUser.userId);
+            */
+
+            const { MOCK_ACADEMIC_PROFILE } = await import('../../db/data');
+            const stored = sessionStorage.getItem('mock_academic_profile');
+            const res = stored ? JSON.parse(stored) : MOCK_ACADEMIC_PROFILE;
+
             setProfile({
                 name: res.fullName || loggedInUser.fullName || 'No Name',
                 email: res.email || loggedInUser.email,
-                bio: 'User bio description not stored on server.',
+                bio: res.bio || 'User bio description not stored on server.',
                 location: 'Not set',
                 organization: 'EdTech Platform',
                 avatar: res.avatarUrl || loggedInUser.avatarUrl || '',
                 expertise: res.expertise || 'Not set',
-                experienceYear: res.experienceYears !== undefined && res.experienceYears !== null ? `${res.experienceYears} years` : '0 years',
+                experienceYear: res.experienceYears !== undefined && res.experienceYears !== null ? `${res.experienceYears} years` : '8 years',
                 createdAt: res.createdAt ? new Date(res.createdAt).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -418,6 +429,8 @@ export function UserProfile() {
                     profile={profile}
                     onSave={async (updated) => {
                         if (!loggedInUser) return;
+                        
+                        /* Comment API thực tế
                         const isAcademic =
                             loggedInUser.roleName === 'course provider' ||
                             loggedInUser.roleName === 'academic manager';
@@ -433,7 +446,7 @@ export function UserProfile() {
 
                             if (updated.avatarFile) {
                                 formData.append('avatarUrl', updated.avatarFile);
-                            } else if (updated.avatar) {
+                            } else if (updated.avatar && (updated.avatar.startsWith('http') || updated.avatar.startsWith('data:'))) {
                                 formData.append('avatarUrl', updated.avatar);
                             }
 
@@ -460,6 +473,31 @@ export function UserProfile() {
                                 }
                             });
                         }
+                        */
+
+                        // ── MOCK SAVE PROFILE (LƯU THÔNG TIN KIỂM THỬ) ───────────────────────────────
+                        // Cập nhật thông tin chỉnh sửa mới vào sessionStorage và đồng bộ trạng thái đăng nhập
+                        const yearsMatch = updated.experienceYear.match(/\d+/);
+                        const years = yearsMatch ? parseInt(yearsMatch[0], 10) : 8;
+
+                        const updatedProfile = {
+                            fullName: updated.name,
+                            expertise: updated.expertise,
+                            experienceYears: years,
+                            avatarUrl: updated.avatar,
+                            bio: profile.bio,
+                            email: profile.email,
+                            createdAt: profile.createdAt
+                        };
+                        sessionStorage.setItem('mock_academic_profile', JSON.stringify(updatedProfile));
+
+                        useAuthStore.setState({
+                            user: {
+                                ...loggedInUser,
+                                fullName: updated.name,
+                                avatarUrl: updated.avatar,
+                            }
+                        });
 
                         await fetchProfileData();
                     }}

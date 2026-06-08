@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../stores/auth.stores';
-import { getLearnerProfile, editLearnerProfile } from '../../services/user.service';
+import { getLearnerProfile, editLearnerProfile } from '../../services/learner/learner.services';
 import {
   MapPin, Mail, Edit3, BookOpen, GraduationCap, Award,
   Clock, Zap, Download, X, Check,
@@ -349,7 +349,18 @@ export function LearnerProfile() {
     if (!loggedInUser) return;
     try {
       setLoading(true);
+      
+      // ── MOCK LEARNER PROFILE FETCHING (TRÁNH LỖI 429 VÀ ĐỘC LẬP BACKEND) ────────────────────────
+      // Lấy thông tin hồ sơ học viên từ local sessionStorage để đảm bảo chỉnh sửa được ghi nhận
+      // mà không phải gọi API và gặp lỗi 429.
+      /* Comment API thực tế để tránh 429
       const res = await getLearnerProfile(loggedInUser.userId);
+      */
+      
+      const { MOCK_LEARNER_PROFILE_FULL } = await import('../../db/data');
+      const stored = sessionStorage.getItem('mock_learner_profile');
+      const res = stored ? JSON.parse(stored) : MOCK_LEARNER_PROFILE_FULL;
+
       setProfile({
         name: res.fullName || loggedInUser.fullName || 'No Name',
         email: res.email || loggedInUser.email,
@@ -420,6 +431,7 @@ export function LearnerProfile() {
           onSave={async (updated) => {
             if (!loggedInUser) return;
 
+            /* Comment API thực tế
             const formData = new FormData();
             formData.append('fullName', updated.name);
             formData.append('learningGoal', updated.learningGoal);
@@ -428,17 +440,31 @@ export function LearnerProfile() {
 
             if (updated.avatarFile) {
               formData.append('avatarUrl', updated.avatarFile);
-            } else if (updated.avatar) {
+            } else if (updated.avatar && (updated.avatar.startsWith('http') || updated.avatar.startsWith('data:'))) {
               formData.append('avatarUrl', updated.avatar);
             }
 
             const res = await editLearnerProfile(loggedInUser.userId, formData);
+            */
+
+            // ── MOCK SAVE PROFILE (LƯU HỒ SƠ HỌC VIÊN DƯỚI LOCAL) ───────────────────────────────
+            // Lưu dữ liệu cập nhật vào sessionStorage để duy trì hiển thị giữa các lần chuyển trang
+            const updatedProfile = {
+              fullName: updated.name,
+              learningGoal: updated.learningGoal,
+              level: updated.level,
+              bio: updated.bio,
+              avatarUrl: updated.avatar,
+              createdAt: profile.createdAt,
+              email: profile.email
+            };
+            sessionStorage.setItem('mock_learner_profile', JSON.stringify(updatedProfile));
 
             useAuthStore.setState({
               user: {
                 ...loggedInUser,
-                fullName: res.fullName,
-                avatarUrl: res.avatarUrl || res.avatar,
+                fullName: updated.name,
+                avatarUrl: updated.avatar,
               }
             });
 

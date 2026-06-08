@@ -50,12 +50,10 @@ export function LearnerHeader() {
                             onClick={() => {
                                 if (item.id === 'my-learning') {
                                     navigate('/learner/my-learning');
-                                } else if (item.id === 'dashboard') {
-                                    navigate('/learner');
                                 } else if (item.id === 'explore') {
-                                    navigate('/explore');
+                                    navigate('/learner/explore');
                                 } else if (item.id === 'paths') {
-                                    navigate('/explore');
+                                    navigate('/learner/explore');
                                 }
                             }}
                         />
@@ -80,7 +78,7 @@ export function LearnerHeader() {
                 <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
 
                 <button
-                    onClick={() => navigate('/learner/lessons')}
+                    onClick={() => navigate('/learner/my-learning')}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm flex-shrink-0 transition-all hover:scale-[1.02] active:scale-[0.98]"
                     style={{
                         backgroundColor: ACC,
@@ -128,7 +126,7 @@ export function LearnerHeader() {
 
                                 {[
                                     { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/learner/learnerprofile') },
-                                    { icon: <BookOpen className="w-4 h-4" />, label: 'My Learning' },
+                                    { icon: <BookOpen className="w-4 h-4" />, label: 'My Learning', onClick: () => navigate('/learner/my-learning') },
                                     { icon: <Settings className="w-4 h-4" />, label: 'Settings' },
                                 ].map((item) => (
                                     <button
@@ -145,7 +143,7 @@ export function LearnerHeader() {
                                 ))}
 
                                 <div className="border-t border-[#F3F4F6] mt-1">
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             logout();
                                             navigate('/login');

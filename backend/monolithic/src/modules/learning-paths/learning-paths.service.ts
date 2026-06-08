@@ -128,4 +128,8 @@ export class LearningPathsService {
       learningPathId,
     );
   }
+
+  public async findAll(): Promise<LearningPath[]> {
+    return await this.learningPathsRepository.findAll();
+  }
 }

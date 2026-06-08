@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Play } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
@@ -7,7 +8,21 @@ import { NavItem } from '../shared/NavItem';
 import { GUEST_NAV } from '../config/nav-config';
 
 export function GuestHeader() {
+    const navigate = useNavigate();
+    const location = useLocation();
     const [active, setActive] = useState('explore');
+
+    useEffect(() => {
+        if (location.pathname.includes('/explore')) {
+            setActive('explore');
+        } else if (location.pathname.includes('/paths')) {
+            setActive('paths');
+        } else if (location.pathname.includes('/courses')) {
+            setActive('courses');
+        } else if (location.pathname.includes('/about')) {
+            setActive('about');
+        }
+    }, [location.pathname]);
 
     const ACC = '#E11D48'; // Guest/Default Accent: Crimson
     const ACTIVE_BG = '#FFF1F3';
@@ -29,7 +44,12 @@ export function GuestHeader() {
                             active={active === item.id}
                             accentColor={ACC}
                             activeBg={ACTIVE_BG}
-                            onClick={() => setActive(item.id)}
+                            onClick={() => {
+                                setActive(item.id);
+                                if (item.id === 'explore') {
+                                    navigate('/explore');
+                                }
+                            }}
                         />
                     ))}
                 </nav>

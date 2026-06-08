@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { getUsers, createUser, updateUser } from '../../services/user.service';
+import { getUsers, createUser, updateUser, deleteUser } from '../../services/user/user.service';
 import {
   Search, Download, Eye, Edit2, Trash2,
   Plus, X, ChevronDown,
@@ -401,41 +401,34 @@ function ViewUserModal({ user, onClose }: ViewUserModalProps) {
   );
 }
 
-interface DeleteConfirmModalProps {
+/* ─── Delete Confirmation Modal ─── */
+interface DeleteConfirmationModalProps {
   user: User;
   onClose: () => void;
   onConfirm: () => void;
-  loading?: boolean;
 }
 
-function DeleteConfirmModal({ user, onClose, onConfirm, loading }: DeleteConfirmModalProps) {
+function DeleteConfirmationModal({ user, onClose, onConfirm }: DeleteConfirmationModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-[#111827]/25 backdrop-blur-[2px]" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-[400px] mx-4 overflow-hidden">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-[400px] mx-4 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-[#F3F4F6] flex items-start justify-between">
-          <div>
-            <h2 className="text-[#111827]" style={{ fontSize: '17px', fontWeight: 700 }}>
-              Delete User
-            </h2>
-            <p className="text-xs text-[#6B7280] mt-0.5">
-              Confirm user deactivation.
-            </p>
+        <div className="px-6 py-5 flex flex-col items-center text-center">
+          <div className="w-12 h-12 bg-[#FFF1F2] border border-[#FECDD3] rounded-full flex items-center justify-center mb-3">
+            <Trash2 className="w-6 h-6 text-[#E11D48]" />
           </div>
-          <button onClick={onClose} className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors">
-            <X className="w-4 h-4 text-[#6B7280]" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="px-6 py-5 text-sm text-[#374151]">
-          Are you sure want to delete <span className="font-semibold text-[#111827]">{user.name}</span>?
-          <p className="text-xs text-[#6B7280] mt-2">
-            This action will mark the user as <span className="font-medium text-[#DC2626]">Inactive</span>.
+          <h2 className="text-[#111827] text-base" style={{ fontWeight: 700 }}>
+            Confirm Deactivation
+          </h2>
+          <p className="text-sm text-[#6B7280] mt-2">
+            Are you sure you want to delete user <span className="font-semibold text-[#111827]">{user.name}</span>?
+          </p>
+          <p className="text-xs text-[#9CA3AF] mt-1.5 leading-relaxed">
+            This action will change the user's status from <span className="text-[#16A34A] font-semibold">Active</span> to <span className="text-[#6B7280] font-semibold">Inactive</span> instead of permanently removing them from the list.
           </p>
         </div>
 
@@ -445,27 +438,15 @@ function DeleteConfirmModal({ user, onClose, onConfirm, loading }: DeleteConfirm
             onClick={onClose}
             className="px-4 py-2 bg-white border border-[#E5E7EB] text-[#374151] rounded-lg text-sm hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-colors"
             style={{ fontWeight: 500 }}
-            disabled={loading}
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors disabled:opacity-60"
+            className="px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors"
             style={{ fontWeight: 500 }}
-            disabled={loading}
           >
-            {loading ? (
-              <>
-                <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Processing…
-              </>
-            ) : (
-              'Deactivate'
-            )}
+            Confirm
           </button>
         </div>
       </div>
@@ -484,8 +465,9 @@ export function UserManagement() {
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+
   const [selectedUser, setSelectedUser] = useState<User | undefined>(undefined);
+  const [userToDelete, setUserToDelete] = useState<User | undefined>(undefined);
   const [sortField, setSortField] = useState<'name' | 'joined'>('joined');
   const [sortAsc, setSortAsc] = useState(false);
 
@@ -540,7 +522,23 @@ export function UserManagement() {
     try {
       setLoading(true);
       setError(null);
+      
+      // ── MOCK DATA FETCHING (TRÁNH LỖI 429 VÀ ĐỘC LẬP BACKEND) ────────────────────────
+      // Thay vì gửi request GET tới server, hệ thống sẽ lấy dữ liệu từ sessionStorage.
+      // Nếu là lần chạy đầu tiên, dữ liệu mặc định MOCK_USERS_BACKEND từ data.ts sẽ được nạp.
+      /* Comment API thực tế để tránh 429
       const data = await getUsers();
+      */
+
+      const { MOCK_USERS_BACKEND } = await import('../../db/data');
+      const stored = sessionStorage.getItem('mock_users');
+      const data = stored ? JSON.parse(stored) : MOCK_USERS_BACKEND;
+      
+      // Khởi tạo lưu trữ trong sessionStorage để duy trì trạng thái thay đổi ở các lần thao tác sau
+      if (!stored) {
+        sessionStorage.setItem('mock_users', JSON.stringify(MOCK_USERS_BACKEND));
+      }
+
       setUsers(data.map(mapBackendUserToFrontend));
     } catch (err: any) {
       console.error('Failed to fetch users', err);
@@ -586,15 +584,36 @@ export function UserManagement() {
     password?: string;
   }) => {
     try {
+      const { MOCK_USERS_BACKEND } = await import('../../db/data');
+      const stored = sessionStorage.getItem('mock_users');
+      let currentList = stored ? JSON.parse(stored) : [...MOCK_USERS_BACKEND];
+
       if (selectedUser) {
-        // Edit mode
+        // ── MOCK UPDATE USER (CHỈNH SỬA NGƯỜI DÙNG) ──────────────────────────────────
+        // Tìm và cập nhật thông tin của người dùng được chọn trong danh sách local
+        /* Comment API thực tế
         await updateUser(selectedUser.id, {
           fullName: userData.name,
           avatar_url: userData.avatar,
           isEmailVerified: userData.status === 'Active',
         });
+        */
+        currentList = currentList.map((u: any) => {
+          if (u.userId === selectedUser.id) {
+            return {
+              ...u,
+              fullName: userData.name,
+              avatar: userData.avatar || u.avatar,
+              isEmailVerified: userData.status === 'Active',
+              updatedAt: new Date().toISOString()
+            };
+          }
+          return u;
+        });
       } else {
-        // Create mode
+        // ── MOCK CREATE USER (TẠO NGƯỜI DÙNG MỚI) ──────────────────────────────────────
+        // Sinh ID tự động (max + 1) và đẩy đối tượng người dùng mới vào danh sách local
+        /* Comment API thực tế
         await createUser({
           fullName: userData.name,
           email: userData.email,
@@ -603,7 +622,23 @@ export function UserManagement() {
           avatar_url: userData.avatar,
           isEmailVerified: userData.status === 'Active',
         });
+        */
+        const newId = currentList.length ? Math.max(...currentList.map((u: any) => u.userId)) + 1 : 1;
+        const newUser = {
+          userId: newId,
+          fullName: userData.name,
+          email: userData.email,
+          role: { roleName: mapFrontendRoleToBackend(userData.role) },
+          isEmailVerified: userData.status === 'Active',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          avatar: userData.avatar || null
+        };
+        currentList.push(newUser);
       }
+      
+      // Đồng bộ danh sách mới đã sửa/thêm vào sessionStorage
+      sessionStorage.setItem('mock_users', JSON.stringify(currentList));
       setShowModal(false);
       await fetchUsers();
     } catch (err: any) {
@@ -611,24 +646,32 @@ export function UserManagement() {
     }
   };
 
-  const handleDeleteClick = (user: User) => {
-    setSelectedUser(user);
-    setShowDeleteModal(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!selectedUser) return;
+  const handleDeleteUser = async (id: number) => {
     try {
-      setDeleteLoading(true);
-      await updateUser(selectedUser.id, {
-        isEmailVerified: false,
+      // ── MOCK INACTIVATE USER (VÔ HIỆU HÓA NGƯỜI DÙNG) ──────────────────────────────────
+      // Thay vì xóa khỏi danh sách, cập nhật trạng thái hoạt động thành Inactive (isEmailVerified = false)
+      /* Comment API thực tế
+      await deleteUser(id);
+      */
+      const { MOCK_USERS_BACKEND } = await import('../../db/data');
+      const stored = sessionStorage.getItem('mock_users');
+      let currentList = stored ? JSON.parse(stored) : [...MOCK_USERS_BACKEND];
+      
+      currentList = currentList.map((u: any) => {
+        if (u.userId === id) {
+          return {
+            ...u,
+            isEmailVerified: false,
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return u;
       });
-      setShowDeleteModal(false);
+      sessionStorage.setItem('mock_users', JSON.stringify(currentList));
+
       await fetchUsers();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to deactivate user.');
-    } finally {
-      setDeleteLoading(false);
     }
   };
 
@@ -857,7 +900,7 @@ export function UserManagement() {
                                   <Edit2 className="w-3.5 h-3.5 text-[#6B7280]" />
                                 </button>
                                 <button
-                                  onClick={() => handleDeleteClick(user)}
+                                  onClick={() => { setUserToDelete(user); setShowDeleteModal(true); }}
                                   className="p-1.5 hover:bg-[#FEF2F2] rounded-lg transition-colors"
                                   title="Delete"
                                 >
@@ -1056,13 +1099,16 @@ export function UserManagement() {
       {/* ── View User Modal ── */}
       {showViewModal && selectedUser && <ViewUserModal user={selectedUser} onClose={() => setShowViewModal(false)} />}
 
-      {/* ── Delete Confirm Modal ── */}
-      {showDeleteModal && selectedUser && (
-        <DeleteConfirmModal
-          user={selectedUser}
-          loading={deleteLoading}
-          onClose={() => setShowDeleteModal(false)}
-          onConfirm={handleConfirmDelete}
+      {/* ── Delete Confirmation Modal ── */}
+      {showDeleteModal && userToDelete && (
+        <DeleteConfirmationModal
+          user={userToDelete}
+          onClose={() => { setShowDeleteModal(false); setUserToDelete(undefined); }}
+          onConfirm={async () => {
+            await handleDeleteUser(userToDelete.id);
+            setShowDeleteModal(false);
+            setUserToDelete(undefined);
+          }}
         />
       )}
     </>

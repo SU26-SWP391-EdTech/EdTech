@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../stores/auth.stores';
-import { getAcademicProfile, editAcademicProfile, updateUser } from '../../services/user.service';
+import { getAcademicProfile, editAcademicProfile, updateUser } from '../../services/user/user.service';
 import {
     MapPin, Mail, Edit3,
     Clock, X, Check,
@@ -325,16 +325,27 @@ export function AdminProfile() {
         if (!loggedInUser) return;
         try {
             setLoading(true);
+            
+            // ── MOCK PROFILE FETCHING (TRÁNH LỖI 429) ────────────────────────────────────
+            // Lấy thông tin profile của Admin từ sessionStorage. Nếu chưa có dữ liệu lưu trữ local,
+            // hệ thống sẽ khởi tạo mặc định bằng thông tin giả lập.
+            /* Comment API thực tế để tránh 429
             const res = await getAcademicProfile(loggedInUser.userId);
+            */
+
+            const { MOCK_ACADEMIC_PROFILE } = await import('../../db/data');
+            const stored = sessionStorage.getItem('mock_admin_profile');
+            const res = stored ? JSON.parse(stored) : { ...MOCK_ACADEMIC_PROFILE, fullName: 'Phạm Hồng Admin', email: 'admin@edtech.com', bio: 'dang cap vcl' };
+
             setProfile({
                 name: res.fullName || loggedInUser.fullName || 'No Name',
                 email: res.email || loggedInUser.email,
-                bio: 'dang cap vcl',
+                bio: res.bio || 'dang cap vcl',
                 location: 'Not set',
                 organization: 'EdTech Platform',
                 avatar: res.avatarUrl || loggedInUser.avatarUrl || '',
                 expertise: res.expertise || 'Not set',
-                experienceYear: res.experienceYears !== undefined && res.experienceYears !== null ? `${res.experienceYears} years` : '0 years',
+                experienceYear: res.experienceYears !== undefined && res.experienceYears !== null ? `${res.experienceYears} years` : '10 years',
                 createdAt: res.createdAt ? new Date(res.createdAt).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -395,6 +406,8 @@ export function AdminProfile() {
                     profile={profile}
                     onSave={async (updated) => {
                         if (!loggedInUser) return;
+                        
+                        /* Comment API thực tế
                         const isAcademic =
                             loggedInUser.roleName === 'course provider' ||
                             loggedInUser.roleName === 'academic manager';
@@ -437,6 +450,31 @@ export function AdminProfile() {
                                 }
                             });
                         }
+                        */
+
+                        // ── MOCK SAVE PROFILE (LƯU THÔNG TIN KIỂM THỬ) ──────────────────────────────────
+                        // Lưu thông tin chỉnh sửa mới vào sessionStorage và cập nhật State Auth của ứng dụng
+                        const yearsMatch = updated.experienceYear.match(/\d+/);
+                        const years = yearsMatch ? parseInt(yearsMatch[0], 10) : 10;
+
+                        const updatedProfile = {
+                            fullName: updated.name,
+                            expertise: updated.expertise,
+                            experienceYears: years,
+                            avatarUrl: updated.avatar,
+                            bio: profile.bio,
+                            email: profile.email,
+                            createdAt: profile.createdAt
+                        };
+                        sessionStorage.setItem('mock_admin_profile', JSON.stringify(updatedProfile));
+
+                        useAuthStore.setState({
+                            user: {
+                                ...loggedInUser,
+                                fullName: updated.name,
+                                avatarUrl: updated.avatar,
+                            }
+                        });
 
                         await fetchProfileData();
                     }}

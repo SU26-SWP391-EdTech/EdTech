@@ -36,7 +36,7 @@ export class EnrollmentsRepository {
             where: {
                 user: { userId },
             },
-            relations: ['course'],
+            relations: ['course', 'course.user'],
             order: {
                 enrolledAt: 'DESC',
             },
