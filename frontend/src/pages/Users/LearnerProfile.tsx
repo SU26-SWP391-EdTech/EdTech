@@ -2,10 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../stores/auth.stores';
 import { getLearnerProfile, editLearnerProfile } from '../../services/user.service';
 import {
-  MapPin, Mail, Edit3, Share2, BookOpen, GraduationCap, Award,
+  MapPin, Mail, Edit3, BookOpen, GraduationCap, Award,
   Clock, Zap, Download, X, Check,
-  Flame, Calendar,
-  ExternalLink, ArrowUpRight, Shield, Bookmark, Briefcase
+  ExternalLink, ArrowUpRight, Bookmark
 } from 'lucide-react';
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
@@ -398,7 +397,7 @@ export function LearnerProfile() {
     { label: 'Learning Hours', value: '148', change: '+12 this week', icon: Clock, color: '#F59E0B', bg: '#FFFBEB' },
   ];
 
-  const xpTotal = 375;
+  // const xpTotal = 375;
   // const xpNext = 500;
 
   const isImg = profile.avatar && (profile.avatar.startsWith('http') || profile.avatar.startsWith('data:image'));

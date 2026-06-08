@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../stores/auth.stores';
 import { getAcademicProfile, editAcademicProfile, updateUser } from '../../services/user.service';
 import {
-    MapPin, Mail, Edit3, Share2, BookOpen, GraduationCap, Award,
-    Clock, Zap, Download, X, Check,
-    Flame, Calendar,
-    ExternalLink, ArrowUpRight, Shield, Bookmark, Briefcase
+    MapPin, Mail, Edit3, BookOpen, GraduationCap, Award,
+    Clock, Download, X, Check,
+    Calendar,
+    ExternalLink, ArrowUpRight, Bookmark, Briefcase
 } from 'lucide-react';
 
 // ─── DATA ─────────────────────────────────────────────────────────────────────
@@ -383,20 +383,20 @@ export function UserProfile() {
             { label: 'Courses Published', value: '4', change: '+1 this month', icon: BookOpen, color: '#6366F1', bg: '#F5F3FF' },
             { label: 'Total Enrolled Students', value: '1,420', change: '+124 this week', icon: GraduationCap, color: '#10B981', bg: '#ECFDF5' },
             { label: 'Average Course Rating', value: '4.8', change: '420 reviews', icon: Award, color: '#E11D48', bg: '#FFF1F2' },
-          ]
+        ]
         : profile.role === 'Academic Manager'
-        ? [
-            { label: 'Managed Courses', value: '48', change: 'All active', icon: BookOpen, color: '#6366F1', bg: '#F5F3FF' },
-            { label: 'Active Providers', value: '14', change: '+2 new providers', icon: Briefcase, color: '#10B981', bg: '#ECFDF5' },
-            { label: 'Pending Reviews', value: '3', change: 'Requires action', icon: Clock, color: '#F59E0B', bg: '#FFFBEB' },
-          ]
-        : [
-            { label: 'Courses Completed', value: '12', change: '+2 this month', icon: BookOpen, color: '#6366F1', bg: '#F5F3FF' },
-            { label: 'Paths Completed', value: '2', change: '1 in progress', icon: GraduationCap, color: '#10B981', bg: '#ECFDF5' },
-            { label: 'Learning Hours', value: '148', change: '+12 this week', icon: Clock, color: '#F59E0B', bg: '#FFFBEB' },
-          ];
+            ? [
+                { label: 'Managed Courses', value: '48', change: 'All active', icon: BookOpen, color: '#6366F1', bg: '#F5F3FF' },
+                { label: 'Active Providers', value: '14', change: '+2 new providers', icon: Briefcase, color: '#10B981', bg: '#ECFDF5' },
+                { label: 'Pending Reviews', value: '3', change: 'Requires action', icon: Clock, color: '#F59E0B', bg: '#FFFBEB' },
+            ]
+            : [
+                { label: 'Courses Completed', value: '12', change: '+2 this month', icon: BookOpen, color: '#6366F1', bg: '#F5F3FF' },
+                { label: 'Paths Completed', value: '2', change: '1 in progress', icon: GraduationCap, color: '#10B981', bg: '#ECFDF5' },
+                { label: 'Learning Hours', value: '148', change: '+12 this week', icon: Clock, color: '#F59E0B', bg: '#FFFBEB' },
+            ];
 
-    const xpTotal = 375;
+    // const xpTotal = 375;
     // const xpNext = 500;
 
     const isImg = profile.avatar && (profile.avatar.startsWith('http') || profile.avatar.startsWith('data:image'));
@@ -616,8 +616,8 @@ export function UserProfile() {
                                 {profile.role === 'Course Provider'
                                     ? 'Professional educator providing high-quality courses and instructional resources on the EdTech Platform.'
                                     : profile.role === 'Academic Manager'
-                                    ? 'Academic program administrator managing curricula, quality assurance, and educational standards on the EdTech Platform.'
-                                    : '3rd year CS student at FPT University. I love building full-stack apps and exploring data-driven solutions.'}
+                                        ? 'Academic program administrator managing curricula, quality assurance, and educational standards on the EdTech Platform.'
+                                        : '3rd year CS student at FPT University. I love building full-stack apps and exploring data-driven solutions.'}
                             </p>
                         </div>
                     </div>
@@ -629,23 +629,23 @@ export function UserProfile() {
                                 {profile.role === 'Course Provider'
                                     ? 'Teaching Paths'
                                     : profile.role === 'Academic Manager'
-                                    ? 'Managed Learning Paths'
-                                    : 'Learning Paths'
+                                        ? 'Managed Learning Paths'
+                                        : 'Learning Paths'
                                 }
                             </p>
                             <div className="space-y-3">
-                                {(profile.role === 'Course Provider'
+                                {((profile.role === 'Course Provider'
                                     ? [
                                         { title: 'Frontend Developer Path', count: '3 courses', date: 'Active', skills: ['React', 'TypeScript', 'CSS'], color: '#E11D48', bg: 'from-[#E11D48] to-[#7C3AED]' },
                                         { title: 'Java Backend Roadmap', count: '1 course', date: 'Active', skills: ['Java', 'Spring Boot', 'REST APIs'], color: '#F59E0B', bg: 'from-[#F59E0B] to-[#EF4444]' }
-                                      ]
+                                    ]
                                     : profile.role === 'Academic Manager'
-                                    ? [
-                                        { title: 'Computer Science Curriculum', count: '15 courses', date: 'Managed', skills: ['Algorithms', 'Databases', 'OS'], color: '#6366F1', bg: 'from-[#6366F1] to-[#0EA5E9]' },
-                                        { title: 'Business Analyst Path', count: '8 courses', date: 'Managed', skills: ['Requirements', 'Agile', 'SQL'], color: '#10B981', bg: 'from-[#10B981] to-[#059669]' }
-                                      ]
-                                    : COMPLETED_PATHS.map(p => ({ ...p, count: undefined }))
-                                ).map(p => (
+                                        ? [
+                                            { title: 'Computer Science Curriculum', count: '15 courses', date: 'Managed', skills: ['Algorithms', 'Databases', 'OS'], color: '#6366F1', bg: 'from-[#6366F1] to-[#0EA5E9]' },
+                                            { title: 'Business Analyst Path', count: '8 courses', date: 'Managed', skills: ['Requirements', 'Agile', 'SQL'], color: '#10B981', bg: 'from-[#10B981] to-[#059669]' }
+                                        ]
+                                        : COMPLETED_PATHS.map(p => ({ ...p, count: undefined }))
+                                ) as any[]).map(p => (
                                     <div key={p.title} className="border border-[#E5E7EB] rounded-xl overflow-hidden">
                                         {/* Mini banner */}
                                         <div className={`h-10 bg-gradient-to-r ${p.bg || 'from-slate-500 to-slate-700'} relative`}>
@@ -671,7 +671,7 @@ export function UserProfile() {
                                             )}
                                             <div className="flex items-center justify-between">
                                                 <div className="flex flex-wrap gap-1">
-                                                    {p.skills.slice(0, 3).map(s => (
+                                                    {p.skills.slice(0, 3).map((s: string) => (
                                                         <span key={s} className="px-2 py-0.5 bg-[#F3F4F6] text-[#6B7280] text-[10px] rounded-full">{s}</span>
                                                     ))}
                                                     {p.skills.length > 3 && <span className="text-[#9CA3AF] text-[10px]">+{p.skills.length - 3}</span>}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { MessageSquare, Play, Flame, ChevronDown, LogOut, UserCircle, BookOpen, Settings } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
@@ -11,10 +11,20 @@ import { useAuthStore } from '../../../stores/auth.stores';
 
 export function LearnerHeader() {
     const navigate = useNavigate();
+    const location = useLocation();
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
-    const [active, setActive] = useState('dashboard');
     const [open, setOpen] = useState(false);
+
+    // Determine active item based on current URL path
+    const getActiveTab = () => {
+        if (location.pathname.includes('/my-learning')) return 'my-learning';
+        if (location.pathname.includes('/explore')) return 'explore';
+        if (location.pathname.includes('/paths')) return 'paths';
+        return 'dashboard';
+    };
+
+    const active = getActiveTab();
 
     const ACC = '#E11D48';
     const ACTIVE_BG = '#FFF1F3';
@@ -37,7 +47,17 @@ export function LearnerHeader() {
                             accentColor={ACC}
                             activeBg={ACTIVE_BG}
                             badge={item.badge}
-                            onClick={() => setActive(item.id)}
+                            onClick={() => {
+                                if (item.id === 'my-learning') {
+                                    navigate('/learner/my-learning');
+                                } else if (item.id === 'dashboard') {
+                                    navigate('/learner');
+                                } else if (item.id === 'explore') {
+                                    navigate('/explore');
+                                } else if (item.id === 'paths') {
+                                    navigate('/explore');
+                                }
+                            }}
                         />
                     ))}
                 </nav>
@@ -60,6 +80,7 @@ export function LearnerHeader() {
                 <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
 
                 <button
+                    onClick={() => navigate('/learner/lessons')}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm flex-shrink-0 transition-all hover:scale-[1.02] active:scale-[0.98]"
                     style={{
                         backgroundColor: ACC,

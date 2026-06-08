@@ -1,11 +1,11 @@
 import { useState, useMemo, useEffect } from 'react';
-import { getUsers, createUser, updateUser, deleteUser } from '../../services/user.service';
+import { getUsers, createUser, updateUser } from '../../services/user.service';
 import {
   Search, Download, Eye, Edit2, Trash2,
   Plus, X, ChevronDown,
   ArrowUpDown, Mail,
   Shield, GraduationCap, Building2, BookOpen,
-  Check, AlertCircle, Clock, Ban
+  Check, AlertCircle
 } from 'lucide-react';
 
 /* ─── Types ─── */
@@ -401,6 +401,78 @@ function ViewUserModal({ user, onClose }: ViewUserModalProps) {
   );
 }
 
+interface DeleteConfirmModalProps {
+  user: User;
+  onClose: () => void;
+  onConfirm: () => void;
+  loading?: boolean;
+}
+
+function DeleteConfirmModal({ user, onClose, onConfirm, loading }: DeleteConfirmModalProps) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-[#111827]/25 backdrop-blur-[2px]" onClick={onClose} />
+
+      {/* Modal */}
+      <div className="relative bg-white rounded-2xl shadow-2xl w-[400px] mx-4 overflow-hidden">
+        {/* Header */}
+        <div className="px-6 py-5 border-b border-[#F3F4F6] flex items-start justify-between">
+          <div>
+            <h2 className="text-[#111827]" style={{ fontSize: '17px', fontWeight: 700 }}>
+              Delete User
+            </h2>
+            <p className="text-xs text-[#6B7280] mt-0.5">
+              Confirm user deactivation.
+            </p>
+          </div>
+          <button onClick={onClose} className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors">
+            <X className="w-4 h-4 text-[#6B7280]" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5 text-sm text-[#374151]">
+          Are you sure want to delete <span className="font-semibold text-[#111827]">{user.name}</span>?
+          <p className="text-xs text-[#6B7280] mt-2">
+            This action will mark the user as <span className="font-medium text-[#DC2626]">Inactive</span>.
+          </p>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-[#F3F4F6] flex items-center justify-end gap-2.5 bg-[#FAFAFA]">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-white border border-[#E5E7EB] text-[#374151] rounded-lg text-sm hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-colors"
+            style={{ fontWeight: 500 }}
+            disabled={loading}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors disabled:opacity-60"
+            style={{ fontWeight: 500 }}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <svg className="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Processing…
+              </>
+            ) : (
+              'Deactivate'
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Main component ─── */
 export function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
@@ -411,6 +483,8 @@ export function UserManagement() {
   const [statusFilter, setStatusFilter] = useState<string>('All Status');
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | undefined>(undefined);
   const [sortField, setSortField] = useState<'name' | 'joined'>('joined');
   const [sortAsc, setSortAsc] = useState(false);
@@ -537,14 +611,24 @@ export function UserManagement() {
     }
   };
 
-  const handleDeleteUser = async (id: number) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-      try {
-        await deleteUser(id);
-        await fetchUsers();
-      } catch (err: any) {
-        alert(err.response?.data?.message || 'Failed to delete user.');
-      }
+  const handleDeleteClick = (user: User) => {
+    setSelectedUser(user);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedUser) return;
+    try {
+      setDeleteLoading(true);
+      await updateUser(selectedUser.id, {
+        isEmailVerified: false,
+      });
+      setShowDeleteModal(false);
+      await fetchUsers();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to deactivate user.');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -773,7 +857,7 @@ export function UserManagement() {
                                   <Edit2 className="w-3.5 h-3.5 text-[#6B7280]" />
                                 </button>
                                 <button
-                                  onClick={() => handleDeleteUser(user.id)}
+                                  onClick={() => handleDeleteClick(user)}
                                   className="p-1.5 hover:bg-[#FEF2F2] rounded-lg transition-colors"
                                   title="Delete"
                                 >
@@ -971,6 +1055,16 @@ export function UserManagement() {
 
       {/* ── View User Modal ── */}
       {showViewModal && selectedUser && <ViewUserModal user={selectedUser} onClose={() => setShowViewModal(false)} />}
+
+      {/* ── Delete Confirm Modal ── */}
+      {showDeleteModal && selectedUser && (
+        <DeleteConfirmModal
+          user={selectedUser}
+          loading={deleteLoading}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleConfirmDelete}
+        />
+      )}
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDown, LogOut, UserCircle, Settings, BarChart2 } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
@@ -11,10 +11,21 @@ import { useAuthStore } from '../../../stores/auth.stores';
 
 export function AcademicManagerHeader() {
     const navigate = useNavigate();
+    const location = useLocation();
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
-    const [active, setActive] = useState('dashboard');
     const [open, setOpen] = useState(false);
+
+    // Determine active item based on current URL path
+    const getActiveTab = () => {
+        if (location.pathname.includes('/pending-courses')) return 'pending-courses';
+        if (location.pathname.includes('/courses')) return 'courses';
+        if (location.pathname.includes('/learning-paths')) return 'learning-paths';
+        if (location.pathname.includes('/providers')) return 'providers';
+        return 'dashboard';
+    };
+
+    const active = getActiveTab();
 
     const ACC = '#D97706'; // Academic Manager Accent: Amber
     const ACTIVE_BG = '#FEF3C7';
@@ -38,7 +49,19 @@ export function AcademicManagerHeader() {
                             activeBg={ACTIVE_BG}
                             badge={(item as any).badge}
                             count={(item as any).count}
-                            onClick={() => setActive(item.id)}
+                            onClick={() => {
+                                if (item.id === 'courses') {
+                                    navigate('/academic/courses');
+                                } else if (item.id === 'pending-courses') {
+                                    navigate('/academic/pending-courses');
+                                } else if (item.id === 'dashboard') {
+                                    navigate('/academic');
+                                } else if (item.id === 'learning-paths') {
+                                    navigate('/academic');
+                                } else if (item.id === 'providers') {
+                                    navigate('/academic');
+                                }
+                            }}
                         />
                     ))}
                 </nav>
