@@ -21,10 +21,13 @@ export function MyLearning() {
     const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [sortBy, setSortBy] = useState<'recent' | 'progress-high' | 'progress-low'>('recent');
+    const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
     const user = useAuthStore((state) => state.user);
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         async function fetchData() {
             try {
                 setIsLoading(true);
@@ -45,7 +48,7 @@ export function MyLearning() {
                 // Thay thế bằng Mock Data
                 const { MOCK_LEARNING_PATHS, MOCK_ENROLLMENTS } = await import('../../db/data');
                 const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
-                
+
                 setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : MOCK_ENROLLMENTS);
                 setLearningPaths(MOCK_LEARNING_PATHS);
 
@@ -121,6 +124,19 @@ export function MyLearning() {
         return true; // fallback for 'saved'
     });
 
+    const sortedEnrollments = [...filteredEnrollments].sort((a, b) => {
+        if (sortBy === 'progress-high') {
+            return b.progress - a.progress;
+        }
+        if (sortBy === 'progress-low') {
+            return a.progress - b.progress;
+        }
+        // Default to 'recent' (lastAccessedAt)
+        const dateA = a.lastAccessedAt ? new Date(a.lastAccessedAt).getTime() : 0;
+        const dateB = b.lastAccessedAt ? new Date(b.lastAccessedAt).getTime() : 0;
+        return dateB - dateA;
+    });
+
     const getPathAccent = (level: string) => {
         const lvl = level.toLowerCase();
         if (lvl === 'beginner') return '#F59E0B'; // Amber
@@ -153,9 +169,9 @@ export function MyLearning() {
                         </p>
                     </div>
                     <div className="flex items-center gap-2.5">
-                        <button 
+                        <button
                             onClick={() => navigate('/learner/explore')}
-                            className="px-4 py-2.5 bg-white border border-[#E5E7EB] text-[#111827] rounded-lg text-sm hover:bg-[#F8FAFC] transition-colors" 
+                            className="px-4 py-2.5 bg-white border border-[#E5E7EB] text-[#111827] rounded-lg text-sm hover:bg-[#F8FAFC] transition-colors"
                             style={{ fontWeight: 500 }}
                         >
                             Explore More
@@ -203,10 +219,39 @@ export function MyLearning() {
                         <FilterChip label="Category" />
                         <FilterChip label="Difficulty" />
                         <FilterChip label="Last accessed" />
-                        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#6B7280] hover:text-[#111827]" style={{ fontWeight: 500 }}>
-                            <BarChart3 className="w-3.5 h-3.5" />
-                            Sort by progress
-                        </button>
+                        <div className="relative">
+                            <button 
+                                onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#6B7280] hover:text-[#111827] transition-colors" 
+                                style={{ fontWeight: 500 }}
+                            >
+                                <BarChart3 className="w-3.5 h-3.5" />
+                                Sort: {sortBy === 'recent' ? 'Recent' : sortBy === 'progress-high' ? 'Highest Progress' : 'Lowest Progress'}
+                                <ChevronDown className="w-3.5 h-3.5 ml-1" />
+                            </button>
+                            {isSortDropdownOpen && (
+                                <div className="absolute right-0 mt-1.5 w-48 bg-white border border-[#E5E7EB] rounded-lg shadow-lg py-1 z-20">
+                                    <button
+                                        onClick={() => { setSortBy('recent'); setIsSortDropdownOpen(false); }}
+                                        className={`w-full text-left px-4 py-2 text-xs hover:bg-[#F8FAFC] transition-colors ${sortBy === 'recent' ? 'text-[#E11D48] font-semibold' : 'text-[#4B5563]'}`}
+                                    >
+                                        Last Accessed (Recent)
+                                    </button>
+                                    <button
+                                        onClick={() => { setSortBy('progress-high'); setIsSortDropdownOpen(false); }}
+                                        className={`w-full text-left px-4 py-2 text-xs hover:bg-[#F8FAFC] transition-colors ${sortBy === 'progress-high' ? 'text-[#E11D48] font-semibold' : 'text-[#4B5563]'}`}
+                                    >
+                                        Highest Progress
+                                    </button>
+                                    <button
+                                        onClick={() => { setSortBy('progress-low'); setIsSortDropdownOpen(false); }}
+                                        className={`w-full text-left px-4 py-2 text-xs hover:bg-[#F8FAFC] transition-colors ${sortBy === 'progress-low' ? 'text-[#E11D48] font-semibold' : 'text-[#4B5563]'}`}
+                                    >
+                                        Lowest Progress
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -291,7 +336,7 @@ export function MyLearning() {
                                     <p className="text-sm text-[#6B7280] max-w-md mb-6">
                                         You are not enrolled in any courses yet. Explore our curated courses and roadmap to begin learning.
                                     </p>
-                                    <button 
+                                    <button
                                         onClick={() => navigate('/learner/explore')}
                                         className="px-6 py-2.5 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors font-medium"
                                     >
@@ -303,7 +348,12 @@ export function MyLearning() {
 
                         {/* My Learning Paths */}
                         <section>
-                            <SectionHeader title="My Learning Paths" subtitle={`${learningPaths.length} paths available`} actionLabel="View all" />
+                            <SectionHeader 
+                                title="My Learning Paths" 
+                                subtitle={`${learningPaths.length} paths available`} 
+                                actionLabel="View all" 
+                                onAction={() => navigate('/learner/explore?tab=paths')}
+                            />
                             <div className="grid grid-cols-3 gap-4">
                                 {learningPaths.slice(0, 3).map((path) => {
                                     const pathCourses = path.learningPathCourses || [];
@@ -316,7 +366,7 @@ export function MyLearning() {
                                     const remainingHours = pathCourses
                                         .filter(pc => !completedCourses.some(e => e.course.courseId === pc.courseId))
                                         .reduce((sum, pc) => sum + (pc.course?.duration || 0), 0);
-                                    
+
                                     const isAnyStarted = pathCourses.some(pc =>
                                         enrollments.some(e => e.course.courseId === pc.courseId)
                                     );
@@ -334,6 +384,7 @@ export function MyLearning() {
                                             difficulty={path.level.charAt(0).toUpperCase() + path.level.slice(1)}
                                             status={status}
                                             accent={getPathAccent(path.level)}
+                                            onClick={() => navigate(`/learner/learning-path/${path.learningPathId}`)}
                                         />
                                     );
                                 })}
@@ -342,16 +393,21 @@ export function MyLearning() {
 
                         {/* Enrolled Courses */}
                         <section>
-                            <SectionHeader title="Enrolled Courses" subtitle={`${filteredEnrollments.length} courses`} actionLabel="See all courses" />
+                            <SectionHeader 
+                                title="Enrolled Courses" 
+                                subtitle={`${filteredEnrollments.length} courses`} 
+                                actionLabel="See all courses" 
+                                onAction={() => navigate('/learner/explore?tab=courses')}
+                            />
                             <div className="grid grid-cols-2 gap-4">
-                                {filteredEnrollments.length > 0 ? (
-                                    filteredEnrollments.map((enrollment, index) => {
+                                {sortedEnrollments.length > 0 ? (
+                                    sortedEnrollments.map((enrollment, index) => {
                                         const total = enrollment.course.totalLessons;
                                         const done = Math.round(total * (enrollment.progress / 100));
                                         const status = enrollment.status === 'completed' || enrollment.progress === 100
                                             ? 'completed'
                                             : (enrollment.status === 'active' ? 'in-progress' : 'archived');
-                                        
+
                                         return (
                                             <CourseCard
                                                 key={enrollment.enrollmentId}
@@ -615,14 +671,14 @@ function FilterChip({ label }: { label: string }) {
     );
 }
 
-function SectionHeader({ title, subtitle, actionLabel }: { title: string; subtitle: string; actionLabel: string }) {
+function SectionHeader({ title, subtitle, actionLabel, onAction }: { title: string; subtitle: string; actionLabel: string; onAction?: () => void }) {
     return (
         <div className="flex items-end justify-between mb-4">
             <div>
                 <h2 className="text-[18px] text-[#111827]" style={{ fontWeight: 600, letterSpacing: '-0.01em' }}>{title}</h2>
                 <p className="text-xs text-[#6B7280] mt-0.5">{subtitle}</p>
             </div>
-            <button className="flex items-center gap-1 text-sm text-[#6B7280] hover:text-[#E11D48] transition-colors" style={{ fontWeight: 500 }}>
+            <button onClick={onAction} className="flex items-center gap-1 text-sm text-[#6B7280] hover:text-[#E11D48] transition-colors" style={{ fontWeight: 500 }}>
                 {actionLabel}
                 <ChevronRight className="w-4 h-4" />
             </button>
@@ -631,8 +687,8 @@ function SectionHeader({ title, subtitle, actionLabel }: { title: string; subtit
 }
 
 type PathStatus = 'in-progress' | 'completed' | 'saved' | 'not-started';
-function PathCard({ title, description, progress, coursesDone, coursesTotal, remaining, difficulty, status, accent }: {
-    title: string; description: string; progress: number; coursesDone: number; coursesTotal: number; remaining: string; difficulty: string; status: PathStatus; accent: string;
+function PathCard({ title, description, progress, coursesDone, coursesTotal, remaining, difficulty, status, accent, onClick }: {
+    title: string; description: string; progress: number; coursesDone: number; coursesTotal: number; remaining: string; difficulty: string; status: PathStatus; accent: string; onClick?: () => void;
 }) {
     const statusMap: Record<PathStatus, { label: string; tint: string; color: string }> = {
         'in-progress': { label: 'In Progress', tint: '#FFFBEB', color: '#B45309' },
@@ -642,7 +698,7 @@ function PathCard({ title, description, progress, coursesDone, coursesTotal, rem
     };
     const s = statusMap[status];
     return (
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md hover:border-[#E11D48]/20 transition-all">
+        <div onClick={onClick} className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md hover:border-[#E11D48]/20 transition-all cursor-pointer">
             <div className="h-20 relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${accent}, ${accent}cc)` }}>
                 <div className="absolute inset-0 flex items-center justify-center gap-2 px-4">
                     {[0, 1, 2, 3].map((i) => (
@@ -659,7 +715,7 @@ function PathCard({ title, description, progress, coursesDone, coursesTotal, rem
             <div className="p-4">
                 <div className="flex items-center justify-between mb-2">
                     <span className="px-1.5 py-0.5 text-[10px] rounded" style={{ background: s.tint, color: s.color, fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}>{s.label}</span>
-                    <button className="p-1 -m-1 text-[#9CA3AF] hover:text-[#111827]"><MoreHorizontal className="w-4 h-4" /></button>
+                    <button onClick={(e) => { e.stopPropagation(); }} className="p-1 -m-1 text-[#9CA3AF] hover:text-[#111827]"><MoreHorizontal className="w-4 h-4" /></button>
                 </div>
                 <h3 className="text-[15px] text-[#111827] mb-1" style={{ fontWeight: 600 }}>{title}</h3>
                 <p className="text-xs text-[#6B7280] mb-3 line-clamp-2">{description}</p>
@@ -677,10 +733,10 @@ function PathCard({ title, description, progress, coursesDone, coursesTotal, rem
                     {remaining} remaining
                 </div>
                 <div className="flex items-center gap-2">
-                    <button className="flex-1 py-1.5 bg-[#111827] text-white rounded-lg text-xs hover:bg-black transition-colors" style={{ fontWeight: 500 }}>
+                    <button onClick={(e) => { e.stopPropagation(); onClick?.(); }} className="flex-1 py-1.5 bg-[#111827] text-white rounded-lg text-xs hover:bg-black transition-colors" style={{ fontWeight: 500 }}>
                         {status === 'saved' || status === 'not-started' ? 'Start Path' : 'Continue Path'}
                     </button>
-                    <button className="px-2.5 py-1.5 bg-white border border-[#E5E7EB] text-[#111827] rounded-lg text-xs hover:bg-[#F8FAFC] transition-colors" style={{ fontWeight: 500 }}>
+                    <button onClick={(e) => { e.stopPropagation(); onClick?.(); }} className="px-2.5 py-1.5 bg-white border border-[#E5E7EB] text-[#111827] rounded-lg text-xs hover:bg-[#F8FAFC] transition-colors" style={{ fontWeight: 500 }}>
                         Roadmap
                     </button>
                 </div>

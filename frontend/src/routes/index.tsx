@@ -170,6 +170,10 @@ export const router = createBrowserRouter([
             {
                 path: 'explore',
                 element: <ExplorePage />
+            },
+            {
+                path: 'learning-path/:id',
+                element: <LearningPathDetail />
             }
         ]
     },
@@ -209,6 +213,10 @@ export const router = createBrowserRouter([
             {
                 path: 'courses/lessons',
                 element: <CourseManagement />
+            },
+            {
+                path: 'learning-path/:id',
+                element: <LearningPathDetail />
             }
         ]
     },
@@ -244,6 +252,10 @@ export const router = createBrowserRouter([
             {
                 path: 'courses/lessons',
                 element: <CourseManagement />
+            },
+            {
+                path: 'learning-path/:id',
+                element: <LearningPathDetail />
             }
         ]
     },

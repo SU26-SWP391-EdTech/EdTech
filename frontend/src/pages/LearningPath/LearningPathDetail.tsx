@@ -262,6 +262,7 @@ export function LearningPathDetail() {
   const [activeCourseId, setActiveCourseId] = useState<number | null>(null);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     async function loadPathData() {
       try {
         setIsLoading(true);
@@ -277,8 +278,11 @@ export function LearningPathDetail() {
 
         setPath(targetPath);
 
+        const isLearner = user?.roleName?.toLowerCase() === 'learner';
         const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
-        const activeEnrollments = storedEnrollments ? JSON.parse(storedEnrollments) : MOCK_ENROLLMENTS;
+        const activeEnrollments = isLearner
+          ? (storedEnrollments ? JSON.parse(storedEnrollments) : MOCK_ENROLLMENTS)
+          : [];
         setEnrollments(activeEnrollments);
 
         // Find active/current course in path to display details first
@@ -300,7 +304,7 @@ export function LearningPathDetail() {
     }
 
     loadPathData();
-  }, [id, navigate]);
+  }, [id, navigate, user]);
 
   if (isLoading || !path) {
     return (
@@ -427,6 +431,12 @@ export function LearningPathDetail() {
       return;
     }
 
+    const role = user.roleName?.toLowerCase();
+    if (role !== 'learner') {
+      toast.error(`As a ${user.roleName}, you cannot enroll in courses.`);
+      return;
+    }
+
     try {
       setIsLoading(true);
       const newEnrollment: Enrollment = {
@@ -455,6 +465,12 @@ export function LearningPathDetail() {
     if (!user) {
       toast.error('Please sign in to enroll.');
       navigate('/login');
+      return;
+    }
+
+    const role = user.roleName?.toLowerCase();
+    if (role !== 'learner') {
+      toast.error(`As a ${user.roleName}, you cannot enroll in paths.`);
       return;
     }
 
@@ -491,6 +507,17 @@ export function LearningPathDetail() {
   };
 
   const handleStartLesson = (lessonTitle: string) => {
+    if (!user) {
+      toast.error('Please sign in to study.');
+      navigate('/login');
+      return;
+    }
+
+    const role = user.roleName?.toLowerCase();
+    if (role !== 'learner') {
+      toast.error(`As a ${user.roleName}, you cannot study.`);
+      return;
+    }
     // Dynamically simulate progress increment when they start a lesson
     if (!activeCourseId) return;
     

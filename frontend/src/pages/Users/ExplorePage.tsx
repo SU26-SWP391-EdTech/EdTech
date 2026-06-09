@@ -60,7 +60,8 @@ export function ExplorePage() {
             const { MOCK_COURSES, MOCK_LEARNING_PATHS, MOCK_ENROLLMENTS, MOCK_LEARNER_PROFILE_FULL } = await import('../../db/data');
             setCourses(MOCK_COURSES);
             setLearningPaths(MOCK_LEARNING_PATHS);
-            if (user) {
+            const isLearner = user?.roleName?.toLowerCase() === 'learner';
+            if (user && isLearner) {
                 const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
                 setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : MOCK_ENROLLMENTS);
                 setProfile(MOCK_LEARNER_PROFILE_FULL);
@@ -78,6 +79,7 @@ export function ExplorePage() {
     }
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         loadData();
     }, [user]);
 
@@ -318,9 +320,8 @@ export function ExplorePage() {
                     <div className="flex items-center gap-1 p-1 bg-white border border-[#E5E7EB] rounded-lg">
                         {([
                             { id: 'all', label: 'All' },
-                            { id: 'courses', label: 'Courses' },
                             { id: 'paths', label: 'Learning Paths' },
-                            { id: 'recommended', label: 'Recommended' },
+                            { id: 'courses', label: 'Courses' },
                         ] as { id: Tab; label: string }[]).map((t) => (
                             <button
                                 key={t.id}
@@ -337,53 +338,15 @@ export function ExplorePage() {
 
                 {/* Main Content */}
                 <div className="space-y-9">
-                    {/* Recommended / Featured Courses Section */}
-                    {(tab === 'all' || tab === 'recommended') && (
-                        <section>
-                            <SectionHeader title="Recommended for You" subtitle="Personalized based on current catalog" actionLabel="" />
-                            {isLoading ? (
-                                <div className="grid grid-cols-5 gap-4 animate-pulse">
-                                    {[1, 2, 3, 4, 5].map(i => (
-                                        <div key={i} className="h-48 bg-slate-100 rounded-2xl" />
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-5 gap-4">
-                                    {filteredCourses.slice(0, 5).map((course, index) => {
-                                        const matchRate = calculateMatchPercentage(course, profile);
-                                        const difficultyLevel = getCourseLevel(course);
-                                        return (
-                                            <RecommendCard
-                                                key={course.courseId}
-                                                courseId={course.courseId}
-                                                title={course.title}
-                                                type="Course"
-                                                match={matchRate}
-                                                reason={course.description || "Top rated curriculum match."}
-                                                difficulty={difficultyLevel}
-                                                duration={`${course.duration || 10}h · ${course.totalLessons} lessons`}
-                                                accent="#E11D48"
-                                                Icon={BookOpen}
-                                                isEnrolled={isEnrolled(course.courseId)}
-                                                onEnroll={() => handleEnroll(course.courseId)}
-                                                enrolling={enrollingId === course.courseId}
-                                            />
-                                        );
-                                    })}
-                                    {filteredCourses.length === 0 && (
-                                        <p className="text-sm text-slate-500 col-span-5 py-6 text-center">No recommended courses available.</p>
-                                    )}
-                                </div>
-                            )}
-                        </section>
-                    )}
-
-
-
                     {/* Featured Paths */}
                     {(tab === 'all' || tab === 'paths') && (
                         <section>
-                            <SectionHeader title="Featured Learning Paths" subtitle="Curated career-focused journeys" actionLabel="" />
+                            <SectionHeader 
+                                title="Featured Learning Paths" 
+                                subtitle="Curated career-focused journeys" 
+                                actionLabel={tab === 'all' ? "View All" : ""} 
+                                onAction={() => setTab('paths')}
+                            />
                             {isLoading ? (
                                 <div className="grid grid-cols-3 gap-4 animate-pulse">
                                     {[1, 2, 3].map(i => (
@@ -392,7 +355,7 @@ export function ExplorePage() {
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-3 gap-4">
-                                    {learningPaths.map((path, index) => {
+                                    {(tab === 'all' ? learningPaths.slice(0, 3) : learningPaths).map((path, index) => {
                                         const colors = ['#E11D48', '#6366F1', '#8B5CF6', '#10B981'];
                                         const pathCourses = path.learningPathCourses || [];
                                         
@@ -436,7 +399,12 @@ export function ExplorePage() {
                     {/* Trending Courses / Catalog */}
                     {(tab === 'all' || tab === 'courses') && (
                         <section>
-                            <SectionHeader title="Trending Courses" subtitle="What learners are taking this week" actionLabel="" />
+                            <SectionHeader 
+                                title="Trending Courses" 
+                                subtitle="What learners are taking this week" 
+                                actionLabel={tab === 'all' ? "View All" : ""} 
+                                onAction={() => setTab('courses')}
+                            />
                             {isLoading ? (
                                 <div className="grid grid-cols-5 gap-4 animate-pulse">
                                     {[1, 2, 3, 4, 5].map(i => (
@@ -445,7 +413,7 @@ export function ExplorePage() {
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-5 gap-4">
-                                    {filteredCourses.map((course, index) => {
+                                    {(tab === 'all' ? filteredCourses.slice(0, 5) : filteredCourses).map((course, index) => {
                                         const difficultyLevel = getCourseLevel(course);
                                         return (
                                             <CourseCard
@@ -487,7 +455,7 @@ export function ExplorePage() {
     );
 }
 
-function SectionHeader({ title, subtitle, actionLabel }: { title: string; subtitle: string; actionLabel: string }) {
+function SectionHeader({ title, subtitle, actionLabel, onAction }: { title: string; subtitle: string; actionLabel: string; onAction?: () => void }) {
     return (
         <div className="flex items-end justify-between mb-4">
             <div>
@@ -495,7 +463,7 @@ function SectionHeader({ title, subtitle, actionLabel }: { title: string; subtit
                 <p className="text-xs text-[#6B7280] mt-0.5">{subtitle}</p>
             </div>
             {actionLabel && (
-                <button className="flex items-center gap-1 text-sm text-[#6B7280] hover:text-[#E11D48] transition-colors" style={{ fontWeight: 500 }}>
+                <button onClick={onAction} className="flex items-center gap-1 text-sm text-[#6B7280] hover:text-[#E11D48] transition-colors" style={{ fontWeight: 500 }}>
                     {actionLabel}
                     <ChevronRight className="w-4 h-4" />
                 </button>
@@ -571,12 +539,18 @@ function PathCard({ learningPathId, title, description, courses, duration, diffi
     const showProgress = isPathEnrolled ? personalProgress : completion;
     const progressLabel = isPathEnrolled ? 'My Progress' : 'Avg. Completion';
 
-    const detailUrl = window.location.pathname.startsWith('/learner')
-        ? `/learner/learning-path/${learningPathId}`
+    const segments = window.location.pathname.split('/');
+    const rolePrefix = segments[1];
+    const isDashboardRoute = ['learner', 'provider', 'admin', 'academic'].includes(rolePrefix);
+    const detailUrl = isDashboardRoute
+        ? `/${rolePrefix}/learning-path/${learningPathId}`
         : `/learning-path/${learningPathId}`;
 
     return (
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md hover:border-[#E11D48]/20 transition-all flex flex-col justify-between">
+        <div 
+            onClick={() => navigate(detailUrl)} 
+            className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md hover:border-[#E11D48]/20 transition-all flex flex-col justify-between cursor-pointer"
+        >
             <div>
                 <div className="h-24 relative" style={{ background: `linear-gradient(135deg, ${accent}, ${accent}cc)` }}>
                     <div className="absolute inset-0 flex items-center justify-center gap-2 px-6">
@@ -616,18 +590,18 @@ function PathCard({ learningPathId, title, description, courses, duration, diffi
             </div>
             <div className="p-4 pt-0 flex gap-2">
                 <button 
-                    onClick={() => navigate(detailUrl)}
+                    onClick={(e) => { e.stopPropagation(); navigate(detailUrl); }}
                     className="flex-1 py-2 bg-white border border-[#E5E7EB] text-[#374151] hover:bg-[#F8FAFC] text-xs font-semibold rounded-lg transition-colors text-center"
                 >
                     View Detail
                 </button>
                 {isPathEnrolled && personalProgress === 100 ? (
-                    <div className="flex-1 py-2 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-100 text-center flex items-center justify-center">
+                    <div className="flex-1 py-2 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-100 text-center flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
                         Completed ✓
                     </div>
                 ) : (
                     <button
-                        onClick={onEnroll}
+                        onClick={(e) => { e.stopPropagation(); onEnroll(); }}
                         className="flex-1 py-2 bg-[#E11D48] text-white hover:bg-[#BE123C] text-xs font-semibold rounded-lg transition-colors text-center"
                     >
                         {isPathEnrolled ? 'Resume Path' : 'Enroll Path'}
