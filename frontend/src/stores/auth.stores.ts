@@ -135,18 +135,24 @@ export const useAuthStore = create<AuthState>()(
 
             // Action 3: Đăng xuất
             logout: async () => {
+                // ── BACKEND API LOGOUT (TẠM THỜI COMMENT LẠI KHI DÙNG MOCKDATA) ──────────────────
+                /*
                 try {
                     await logoutApi();
                 } catch (e) {
                     console.error('Failed to logout from backend:', e);
-                } finally {
-                    set({
-                        user: null,
-                        token: null,
-                        isAuthenticated: false,
-                        error: null,
-                    });
                 }
+                */
+
+                // ── MOCK LOGOUT LOGIC (HỖ TRỢ CHẠY MOCKDATA ĐỘC LẬP VÀ TRÁNH LỖI PHẢI BẤM 2 LẦN) ─
+                // Clear state lập tức và đồng bộ ở Client để UI chuyển hướng ngay về trang login,
+                // không bị treo/đợi phản hồi từ API Backend (tránh lỗi race condition giữa route guard và store).
+                set({
+                    user: null,
+                    token: null,
+                    isAuthenticated: false,
+                    error: null,
+                });
             },
         }),
         {

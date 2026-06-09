@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 
 export const LEARNER_NAV = [
-    { id: 'my-learning', label: 'My Learning', icon: <BookOpen className="w-3.5 h-3.5" />, badge: '3' },
+    { id: 'my-learning', label: 'My Learning', icon: <BookOpen className="w-3.5 h-3.5" /> },
     { id: 'explore', label: 'Explore', icon: <Compass className="w-3.5 h-3.5" /> },
     { id: 'paths', label: 'Learning Paths', icon: <GraduationCap className="w-3.5 h-3.5" /> },
 ];
