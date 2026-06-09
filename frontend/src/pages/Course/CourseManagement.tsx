@@ -1,47 +1,28 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
-    Search, Download, Edit2, Trash2,
-    ChevronRight, Home, Plus, X, ChevronDown, ArrowUpDown,
-    BookOpen, Users, Star, Clock, PlayCircle,
-    CheckCircle2, FileText, Globe,
+    Search, Plus, X, ArrowUpDown,
+    BookOpen, Users, CheckCircle2, FileText,
     Monitor, Database, Palette, Megaphone, Briefcase,
-    Settings, Image, Check, AlertCircle, Ban, Inbox
+    Settings, Inbox, Edit2, Trash2
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth.stores';
-import { searchCourses, createCourse, updateCourse, deleteCourse } from '../../services/course.service';
+import { searchCourses, deleteCourse } from '../../services/course.service';
 import type { BackendCourse } from '../../services/course.service';
 import toast from 'react-hot-toast';
 
-/* ─── Types ─── */
-type CourseStatus = 'Published' | 'Draft' | 'Pending Review' | 'Rejected';
-type Category = 'Web Development' | 'Data Science' | 'Design' | 'Marketing' | 'Business' | 'DevOps';
-
-interface Course {
-    id: number;
-    title: string;
-    description: string;
-    provider: string;
-    providerInitials: string;
-    providerColor: string;
-    category: Category;
-    status: CourseStatus;
-    students: number;
-    rating: number;
-    duration: string;
-    lessons: number;
-    created: string;
-    updated: string;
-    thumbBg: string;
-    thumbIcon: React.ReactNode;
-    progress: number;
-    language: string;
-    thumbnailUrl?: string | null;
-    projectUrl?: string | null;
-}
+import type { Course, CourseStatus, Category } from '../../components/CourseManagement/types';
+import { StatusBadge } from '../../components/CourseManagement/StatusBadge';
+import { CategoryBadge } from '../../components/CourseManagement/CategoryBadge';
+import { CourseThumbnail } from '../../components/CourseManagement/CourseThumbnail';
+import { StarRating } from '../../components/CourseManagement/StarRating';
+import { FilterSelect } from '../../components/CourseManagement/FilterSelect';
+import { CoursePreviewPanel } from '../../components/CourseManagement/CoursePreviewPanel';
+import { CourseModal } from '../../components/CourseManagement/CourseModal';
+import { DeleteCourseConfirmModal } from '../../components/CourseManagement/DeleteCourseConfirmModal';
 
 /* ─── Mock data ─── */
-const MOCK_COURSES: Course[] = [
+export const MOCK_COURSES: Course[] = [
     {
         id: 1, title: 'React & TypeScript Mastery',
         description: 'Build production-ready apps with modern React patterns',
@@ -134,16 +115,8 @@ const MOCK_COURSES: Course[] = [
     },
 ];
 
-const CATEGORIES: string[] = ['All Categories', 'Web Development', 'Data Science', 'Design', 'Marketing', 'Business', 'DevOps'];
-const STATUSES: string[] = ['All Status', 'Published', 'Draft', 'Pending Review', 'Rejected'];
-
-/* ─── Config maps ─── */
-const statusCfg: Record<CourseStatus, { cls: string; dot: string; icon: React.ReactNode }> = {
-    'Published': { cls: 'bg-[#F0FDF4] text-[#16A34A] border-[#BBF7D0]', dot: '#16A34A', icon: <Check className="w-2.5 h-2.5" /> },
-    'Draft': { cls: 'bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB]', dot: '#9CA3AF', icon: <FileText className="w-2.5 h-2.5" /> },
-    'Pending Review': { cls: 'bg-[#FFFBEB] text-[#D97706] border-[#FDE68A]', dot: '#D97706', icon: <AlertCircle className="w-2.5 h-2.5" /> },
-    'Rejected': { cls: 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]', dot: '#DC2626', icon: <Ban className="w-2.5 h-2.5" /> },
-};
+const CATEGORIES = ['All Categories', 'Web Development', 'Data Science', 'Design', 'Marketing', 'Business', 'DevOps'];
+const STATUSES = ['All Status', 'Published', 'Draft', 'Pending Review', 'Rejected'];
 
 const categoryCfg: Record<Category, { cls: string; icon: React.ReactNode }> = {
     'Web Development': { cls: 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]', icon: <Monitor className="w-3 h-3" /> },
@@ -154,539 +127,6 @@ const categoryCfg: Record<Category, { cls: string; icon: React.ReactNode }> = {
     'DevOps': { cls: 'bg-[#F0F9FF] text-[#0891B2] border-[#BAE6FD]', icon: <Settings className="w-3 h-3" /> },
 };
 
-/* ─── Sub-components ─── */
-function StatusBadge({ status }: { status: CourseStatus }) {
-    const cfg = statusCfg[status];
-    return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border ${cfg.cls}`} style={{ fontWeight: 500 }}>
-            {cfg.icon}{status}
-        </span>
-    );
-}
-
-function CategoryBadge({ category }: { category: Category }) {
-    const cfg = categoryCfg[category];
-    return (
-        <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs border ${cfg.cls}`} style={{ fontWeight: 500 }}>
-            {cfg.icon}{category}
-        </span>
-    );
-}
-
-function CourseThumbnail({ course, size = 'sm' }: { course: Course; size?: 'sm' | 'lg' }) {
-    const dim = size === 'sm' ? 'w-12 h-9 rounded-lg' : 'w-full h-36 rounded-xl';
-    return (
-        <div
-            className={`${dim} flex items-center justify-center shrink-0 overflow-hidden`}
-            style={{ background: course.thumbBg }}
-        >
-            {course.thumbnailUrl ? (
-                <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
-            ) : (
-                course.thumbIcon
-            )}
-        </div>
-    );
-}
-
-function StarRating({ rating }: { rating: number }) {
-    if (!rating) return <span className="text-xs text-[#9CA3AF]">—</span>;
-    return (
-        <div className="flex items-center gap-1">
-            <Star className="w-3.5 h-3.5 text-[#F59E0B] fill-[#F59E0B]" />
-            <span className="text-xs text-[#374151]" style={{ fontWeight: 600 }}>{rating.toFixed(1)}</span>
-        </div>
-    );
-}
-
-function FilterSelect({ value, options, onChange }: { value: string; options: string[]; onChange: (v: string) => void }) {
-    return (
-        <div className="relative">
-            <select
-                value={value}
-                onChange={e => onChange(e.target.value)}
-                className="appearance-none pl-3 pr-8 py-2 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#374151] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 cursor-pointer hover:border-[#D1D5DB] transition-colors"
-            >
-                {options.map(o => <option key={o} value={o}>{o}</option>)}
-            </select>
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#9CA3AF] pointer-events-none" />
-        </div>
-    );
-}
-
-/* ─── Course Preview Panel ─── */
-function CoursePreviewPanel({ course, onViewDetails }: { course: Course; onViewDetails?: () => void }) {
-    const navigate = useNavigate();
-    const location = useLocation();
-
-    const handleViewDetails = () => {
-        if (onViewDetails) {
-            onViewDetails();
-        } else {
-            const basePath = location.pathname.endsWith('/courses')
-                ? `${location.pathname}/detail`
-                : location.pathname.endsWith('/pending-courses')
-                    ? `${location.pathname.replace('/pending-courses', '/courses')}/detail`
-                    : `${location.pathname}/courses/detail`;
-            navigate(basePath);
-        }
-    };
-
-    return (
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
-            {/* Thumbnail */}
-            <div className="relative">
-                <div className="w-full h-36 flex items-center justify-center overflow-hidden" style={{ background: course.thumbBg }}>
-                    {course.thumbnailUrl ? (
-                        <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
-                    ) : (
-                        <div className="flex flex-col items-center gap-2 opacity-80">
-                            {course.thumbIcon}
-                            <span className="text-white/70 text-xs" style={{ fontWeight: 500 }}>{course.category}</span>
-                        </div>
-                    )}
-                </div>
-                <div className="absolute top-3 right-3">
-                    <StatusBadge status={course.status} />
-                </div>
-            </div>
-
-            {/* Content */}
-            <div className="p-5">
-                <h3 className="text-[#111827] mb-1" style={{ fontSize: '15px', fontWeight: 700, lineHeight: 1.3 }}>{course.title}</h3>
-                <p className="text-xs text-[#6B7280] mb-4" style={{ lineHeight: 1.5 }}>{course.description}</p>
-
-                {/* Provider */}
-                <div className="flex items-center gap-2 mb-4 pb-4 border-b border-[#F3F4F6]">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white shrink-0"
-                        style={{ backgroundColor: course.providerColor, fontSize: '10px', fontWeight: 700 }}>
-                        {course.providerInitials}
-                    </div>
-                    <div>
-                        <p className="text-xs text-[#111827]" style={{ fontWeight: 500 }}>{course.provider}</p>
-                        <p className="text-[10px] text-[#9CA3AF]">Course Provider</p>
-                    </div>
-                    <StarRating rating={course.rating} />
-                </div>
-
-                {/* Stats grid */}
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                    {[
-                        { icon: <Clock className="w-3.5 h-3.5 text-[#9CA3AF]" />, label: 'Duration', val: course.duration },
-                        { icon: <PlayCircle className="w-3.5 h-3.5 text-[#9CA3AF]" />, label: 'Lessons', val: `${course.lessons} lessons` },
-                        { icon: <Users className="w-3.5 h-3.5 text-[#9CA3AF]" />, label: 'Students', val: course.students > 0 ? course.students.toLocaleString() : '—' },
-                        { icon: <Globe className="w-3.5 h-3.5 text-[#9CA3AF]" />, label: 'Language', val: course.language },
-                    ].map(s => (
-                        <div key={s.label} className="bg-[#F8FAFC] border border-[#F3F4F6] rounded-xl p-2.5">
-                            <div className="flex items-center gap-1.5 mb-1">{s.icon}<span className="text-[10px] text-[#9CA3AF]">{s.label}</span></div>
-                            <p className="text-xs text-[#111827]" style={{ fontWeight: 600 }}>{s.val}</p>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Progress */}
-                {course.progress > 0 && (
-                    <div className="mb-4">
-                        <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-xs text-[#6B7280]">Completion rate</span>
-                            <span className="text-xs text-[#E11D48]" style={{ fontWeight: 600 }}>{course.progress}%</span>
-                        </div>
-                        <div className="h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
-                            <div className="h-full bg-[#E11D48] rounded-full transition-all" style={{ width: `${course.progress}%` }} />
-                        </div>
-                    </div>
-                )}
-
-                {/* View Details Button */}
-                <button
-                    onClick={handleViewDetails}
-                    className="w-full mt-2 py-2 border border-[#E5E7EB] text-[#374151] rounded-xl text-xs hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-colors flex items-center justify-center gap-1.5"
-                    style={{ fontWeight: 600 }}
-                >
-                    View Course Details
-                </button>
-
-            </div>
-        </div>
-    );
-}
-
-/* ─── Course Modal ─── */
-function CourseModal({ course, onClose, onSuccess, isViewOnly = false }: { course?: Course; onClose: () => void; onSuccess: () => void; isViewOnly?: boolean }) {
-    const [dragOver, setDragOver] = useState(false);
-    const [title, setTitle] = useState(course?.title || '');
-    const [description, setDescription] = useState(course?.description || '');
-    const [category, setCategory] = useState<Category>(course?.category || 'Web Development');
-    const [status, setStatus] = useState<CourseStatus>(course?.status || 'Draft');
-    const [duration, setDuration] = useState(course?.duration || '');
-    const [language, setLanguage] = useState(course?.language || 'English');
-    const [projectUrl, setProjectUrl] = useState(course?.projectUrl || '');
-    const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-    const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(course?.thumbnailUrl || null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [errorMsg, setErrorMsg] = useState('');
-
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const handleFileChange = (file: File) => {
-        if (file.size > 2 * 1024 * 1024) {
-            setErrorMsg('File is too large. Max size is 2MB.');
-            return;
-        }
-        setErrorMsg('');
-        setThumbnailFile(file);
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setThumbnailPreview(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-    };
-
-    const parseDurationToMinutes = (durationStr: string): number => {
-        if (!durationStr) return 0;
-        const num = parseInt(durationStr, 10);
-        if (isNaN(num)) return 0;
-
-        if (durationStr.toLowerCase().includes('h')) {
-            const hoursPart = durationStr.toLowerCase().split('h')[0];
-            const hours = parseInt(hoursPart, 10) || 0;
-
-            let minutes = 0;
-            if (durationStr.toLowerCase().includes('m')) {
-                const minutesPart = durationStr.toLowerCase().split('h')[1].split('m')[0];
-                minutes = parseInt(minutesPart, 10) || 0;
-            }
-            return (hours * 60) + minutes;
-        }
-
-        return num;
-    };
-
-    const handleSubmit = async () => {
-        if (!title.trim()) {
-            setErrorMsg('Course Title is required.');
-            return;
-        }
-        setErrorMsg('');
-        setIsSubmitting(true);
-        try {
-            const formData = new FormData();
-            formData.append('title', title);
-            formData.append('description', description);
-
-            let statusVal = 'draft';
-            if (status === 'Published') statusVal = 'approved';
-            else if (status === 'Pending Review') statusVal = 'pending';
-            else if (status === 'Rejected') statusVal = 'rejected';
-
-            formData.append('status', statusVal);
-            formData.append('language', language);
-            formData.append('duration', String(parseDurationToMinutes(duration)));
-            formData.append('projectUrl', projectUrl);
-            if (thumbnailFile) {
-                formData.append('thumbnailUrl', thumbnailFile);
-            }
-
-            if (course) {
-                const mockIndex = MOCK_COURSES.findIndex(c => c.id === course.id);
-                if (mockIndex !== -1) {
-                    MOCK_COURSES[mockIndex] = {
-                        ...MOCK_COURSES[mockIndex],
-                        title,
-                        description,
-                        category: category as Category,
-                        status: status as CourseStatus,
-                        duration: duration,
-                        language: language,
-                        projectUrl: projectUrl,
-                        thumbnailUrl: thumbnailFile ? URL.createObjectURL(thumbnailFile) : course.thumbnailUrl,
-                        updated: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                    };
-                    toast.success('Course updated successfully');
-                } else {
-                    await updateCourse(course.id, formData);
-                }
-            } else {
-                await createCourse(formData);
-            }
-            onSuccess();
-            onClose();
-        } catch (err: any) {
-            console.error(err);
-            setErrorMsg(err.response?.data?.message || 'Failed to save course. Please try again.');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-[#111827]/25 backdrop-blur-[2px]" onClick={onClose} />
-            <div className="relative bg-white rounded-2xl shadow-2xl w-[560px] mx-4 max-h-[90vh] overflow-y-auto z-10">
-
-                {/* Header */}
-                <div className="px-6 py-5 border-b border-[#F3F4F6] flex items-start justify-between sticky top-0 bg-white z-10">
-                    <div>
-                        <h2 className="text-[#111827]" style={{ fontSize: '17px', fontWeight: 700 }}>{isViewOnly ? 'Course Details' : course ? 'Edit Course' : 'Create New Course'}</h2>
-                        <p className="text-xs text-[#6B7280] mt-0.5">{isViewOnly ? 'View course details.' : course ? 'Modify details for this course.' : 'Fill in the details to publish your course on the platform.'}</p>
-                    </div>
-                    <button onClick={onClose} className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors">
-                        <X className="w-4 h-4 text-[#6B7280]" />
-                    </button>
-                </div>
-
-                {/* Body */}
-                <div className="px-6 py-5 flex flex-col gap-4">
-                    {errorMsg && (
-                        <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4 shrink-0" />
-                            <span>{errorMsg}</span>
-                        </div>
-                    )}
-
-                    {/* Title */}
-                    <div>
-                        <label className="block text-xs text-[#374151] mb-1.5" style={{ fontWeight: 500 }}>Course Title <span className="text-[#E11D48]">*</span></label>
-                        <input
-                            type="text"
-                            value={title}
-                            onChange={e => setTitle(e.target.value)}
-                            placeholder="e.g. React & TypeScript Mastery"
-                            disabled={isViewOnly}
-                            className="w-full px-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 transition-colors disabled:bg-gray-50 disabled:text-[#6B7280]"
-                        />
-                    </div>
-
-                    {/* Description */}
-                    <div>
-                        <label className="block text-xs text-[#374151] mb-1.5" style={{ fontWeight: 500 }}>Description</label>
-                        <textarea
-                            rows={3}
-                            value={description}
-                            onChange={e => setDescription(e.target.value)}
-                            placeholder="Briefly describe what learners will gain from this course..."
-                            disabled={isViewOnly}
-                            className="w-full px-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 resize-none transition-colors disabled:bg-gray-50 disabled:text-[#6B7280]"
-                        />
-                    </div>
-
-                    {/* Category + Status row */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="block text-xs text-[#374151] mb-1.5" style={{ fontWeight: 500 }}>Category <span className="text-[#E11D48]">*</span></label>
-                            <div className="relative">
-                                <select
-                                    value={category}
-                                    onChange={e => setCategory(e.target.value as Category)}
-                                    disabled={isViewOnly}
-                                    className="appearance-none w-full px-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 cursor-pointer disabled:bg-gray-50 disabled:text-[#6B7280] disabled:cursor-not-allowed"
-                                >
-                                    {CATEGORIES.filter(c => c !== 'All Categories').map(c => <option key={c} value={c}>{c}</option>)}
-                                </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF] pointer-events-none" />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-xs text-[#374151] mb-1.5" style={{ fontWeight: 500 }}>Status <span className="text-[#E11D48]">*</span></label>
-                            <div className="relative">
-                                <select
-                                    value={status}
-                                    onChange={e => setStatus(e.target.value as CourseStatus)}
-                                    disabled={isViewOnly}
-                                    className="appearance-none w-full px-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 cursor-pointer disabled:bg-gray-50 disabled:text-[#6B7280] disabled:cursor-not-allowed"
-                                >
-                                    {STATUSES.filter(s => s !== 'All Status').map(s => <option key={s} value={s}>{s}</option>)}
-                                </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF] pointer-events-none" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Thumbnail upload */}
-                    <div>
-                        <label className="block text-xs text-[#374151] mb-1.5" style={{ fontWeight: 500 }}>Course Cover Image</label>
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={e => e.target.files?.[0] && handleFileChange(e.target.files[0])}
-                            accept="image/*"
-                            className="hidden"
-                        />
-
-                        {thumbnailPreview ? (
-                            <div className="relative rounded-2xl overflow-hidden border border-[#E5E7EB] aspect-[21/9] bg-[#F8FAFC]">
-                                <img src={thumbnailPreview} alt="Preview" className="w-full h-full object-cover" />
-                                {!isViewOnly && (
-                                    <button
-                                        type="button"
-                                        onClick={() => { setThumbnailFile(null); setThumbnailPreview(null); }}
-                                        className="absolute top-2.5 right-2.5 p-1.5 bg-[#111827]/70 text-white rounded-lg hover:bg-[#111827]/80 transition-colors"
-                                    >
-                                        <X className="w-3.5 h-3.5" />
-                                    </button>
-                                )}
-                            </div>
-                        ) : (
-                            <div
-                                onDragOver={e => { !isViewOnly && e.preventDefault(); !isViewOnly && setDragOver(true); }}
-                                onDragLeave={() => !isViewOnly && setDragOver(false)}
-                                onDrop={e => { !isViewOnly && e.preventDefault(); !isViewOnly && setDragOver(false); !isViewOnly && e.dataTransfer.files?.[0] && handleFileChange(e.dataTransfer.files[0]); }}
-                                onClick={() => !isViewOnly && fileInputRef.current?.click()}
-                                className={`border-2 border-dashed rounded-2xl aspect-[21/9] flex flex-col items-center justify-center gap-2 transition-colors ${isViewOnly ? 'border-[#E5E7EB] bg-[#F8FAFC] cursor-not-allowed' : dragOver ? 'border-[#E11D48] bg-[#FFF8F9] cursor-pointer' : 'border-[#E5E7EB] bg-[#F8FAFC] hover:bg-[#F1F5F9] cursor-pointer'}`}
-                            >
-                                <div className="p-3 bg-white rounded-xl shadow-sm border border-[#E5E7EB]">
-                                    <Image className="w-5 h-5 text-[#9CA3AF]" />
-                                </div>
-                                <div className="text-center">
-                                    <p className="text-xs text-[#111827]" style={{ fontWeight: 600 }}>{isViewOnly ? 'No cover image' : 'Click to upload cover'}</p>
-                                    {!isViewOnly && <p className="text-[10px] text-[#6B7280] mt-0.5">Drag and drop or browse files (Max 2MB)</p>}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Duration + Language row */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="block text-xs text-[#374151] mb-1.5" style={{ fontWeight: 500 }}>Duration</label>
-                            <input
-                                type="text"
-                                value={duration}
-                                onChange={e => setDuration(e.target.value)}
-                                placeholder="e.g. 14h 20m or 120 (mins)"
-                                disabled={isViewOnly}
-                                className="w-full px-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 transition-colors disabled:bg-gray-50 disabled:text-[#6B7280]"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-xs text-[#374151] mb-1.5" style={{ fontWeight: 500 }}>Language</label>
-                            <input
-                                type="text"
-                                value={language}
-                                onChange={e => setLanguage(e.target.value)}
-                                placeholder="e.g. English, Vietnamese"
-                                disabled={isViewOnly}
-                                className="w-full px-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 transition-colors disabled:bg-gray-50 disabled:text-[#6B7280]"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Project URL */}
-                    <div>
-                        <label className="block text-xs text-[#374151] mb-1.5" style={{ fontWeight: 500 }}>Project URL</label>
-                        <input
-                            type="text"
-                            value={projectUrl}
-                            onChange={e => setProjectUrl(e.target.value)}
-                            placeholder="e.g. https://github.com/your-repo"
-                            disabled={isViewOnly}
-                            className="w-full px-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 transition-colors disabled:bg-gray-50 disabled:text-[#6B7280]"
-                        />
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div className="px-6 py-4 border-t border-[#F3F4F6] flex items-center justify-between bg-[#FAFAFA] sticky bottom-0">
-                    <p className="text-xs text-[#9CA3AF]">
-                        {isViewOnly ? (
-                            <span className="text-[#3B82F6]" style={{ fontWeight: 500 }}>View Mode</span>
-                        ) : (
-                            <>Fields marked <span className="text-[#E11D48]">*</span> are required</>
-                        )}
-                    </p>
-                    <div className="flex items-center gap-2.5">
-                        <button onClick={onClose} className="px-4 py-2 bg-white border border-[#E5E7EB] text-[#374151] rounded-lg text-sm hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-colors" style={{ fontWeight: 500 }} disabled={isSubmitting}>
-                            {isViewOnly ? 'Close' : 'Cancel'}
-                        </button>
-                        {!isViewOnly && (
-                            <button
-                                onClick={handleSubmit}
-                                className="flex items-center gap-1.5 px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors disabled:opacity-50"
-                                style={{ fontWeight: 500 }}
-                                disabled={isSubmitting}
-                            >
-                                {isSubmitting ? (
-                                    <>Loading...</>
-                                ) : (
-                                    <>
-                                        <BookOpen className="w-4 h-4" /> {course ? 'Save Changes' : 'Create Course'}
-                                    </>
-                                )}
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-interface DeleteCourseConfirmModalProps {
-    course: Course;
-    onClose: () => void;
-    onConfirm: () => void;
-    loading?: boolean;
-}
-
-function DeleteCourseConfirmModal({ course, onClose, onConfirm, loading }: DeleteCourseConfirmModalProps) {
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Backdrop */}
-            <div className="absolute inset-0 bg-[#111827]/25 backdrop-blur-[2px]" onClick={onClose} />
-
-            {/* Modal */}
-            <div className="relative bg-white rounded-2xl shadow-2xl w-[400px] mx-4 overflow-hidden">
-                {/* Header */}
-                <div className="px-6 py-5 border-b border-[#F3F4F6] flex items-start justify-between">
-                    <div>
-                        <h2 className="text-[#111827]" style={{ fontSize: '17px', fontWeight: 700 }}>
-                            Delete Course
-                        </h2>
-                        <p className="text-xs text-[#6B7280] mt-0.5">
-                            Confirm course deletion.
-                        </p>
-                    </div>
-                    <button onClick={onClose} className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors">
-                        <X className="w-4 h-4 text-[#6B7280]" />
-                    </button>
-                </div>
-
-                {/* Body */}
-                <div className="px-6 py-5 text-sm text-[#374151]">
-                    Are you sure to delete this course?
-                    <p className="font-semibold text-[#111827] mt-1.5">{course.title}</p>
-                    <p className="text-xs text-[#6B7280] mt-2">
-                        This action cannot be undone. All course materials and enrollments might be affected.
-                    </p>
-                </div>
-
-                {/* Footer */}
-                <div className="px-6 py-4 border-t border-[#F3F4F6] flex justify-end gap-2 bg-[#FAFAFA]">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 bg-white border border-[#E5E7EB] text-[#374151] rounded-lg text-sm hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-colors"
-                        style={{ fontWeight: 500 }}
-                        disabled={loading}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={onConfirm}
-                        className="px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors disabled:opacity-50"
-                        style={{ fontWeight: 500 }}
-                        disabled={loading}
-                    >
-                        {loading ? 'Deleting...' : 'Delete'}
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-/* ─── Main component ─── */
 export function CourseManagement() {
     const location = useLocation();
     const isProvider = location.pathname.startsWith('/provider');
@@ -802,7 +242,6 @@ export function CourseManagement() {
         }
     };
 
-
     const filtered = useMemo(() => {
         return courses
             .filter(c => {
@@ -843,29 +282,18 @@ export function CourseManagement() {
 
                     {/* ── Page Header ── */}
                     <div className="mb-7">
-                        {/* <div className="flex items-center gap-1.5 mb-3">
-                            <Home className="w-3.5 h-3.5 text-[#9CA3AF]" />
-                            {['Platform', 'Admin', 'Courses'].map((crumb, i, arr) => (
-                                <div key={crumb} className="flex items-center gap-1.5">
-                                    <ChevronRight className="w-3.5 h-3.5 text-[#D1D5DB]" />
-                                    <span className={`text-xs ${i === arr.length - 1 ? 'text-[#111827]' : 'text-[#6B7280] hover:text-[#111827] cursor-pointer'}`} style={{ fontWeight: i === arr.length - 1 ? 500 : 400 }}>
-                                        {crumb}
-                                    </span>
-                                </div>
-                            ))}
-                        </div> */}
                         <div className="flex items-end justify-between">
-                            <div>
-                                <h1 className="text-[#111827] mb-1" style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2 }}>Course Management</h1>
-                                <p className="text-[#6B7280] text-sm">Review, publish, and organize all courses across the platform from one place.</p>
-                            </div>
-                            <div className="flex items-center gap-2.5">
-                                {isProvider && (
-                                    <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
-                                        <Plus className="w-4 h-4" /> Create Course
-                                    </button>
-                                )}
-                            </div>
+                          <div>
+                            <h1 className="text-[#111827] mb-1" style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2 }}>Course Management</h1>
+                            <p className="text-[#6B7280] text-sm">Review, publish, and organize all courses across the platform from one place.</p>
+                          </div>
+                          <div className="flex items-center gap-2.5">
+                            {isProvider && (
+                              <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
+                                <Plus className="w-4 h-4" /> Create Course
+                              </button>
+                            )}
+                          </div>
                         </div>
                     </div>
 
@@ -1033,6 +461,7 @@ export function CourseManagement() {
                                                                     onClick={e => {
                                                                         e.stopPropagation();
                                                                         setSelectedCourseForEdit(course);
+                                                                        setIsViewOnly(false);
                                                                         setShowModal(true);
                                                                     }}
                                                                     className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors"
@@ -1142,6 +571,7 @@ export function CourseManagement() {
                 <CourseModal
                     course={selectedCourseForEdit}
                     isViewOnly={isViewOnly}
+                    mockCoursesList={MOCK_COURSES}
                     onClose={() => {
                         setShowModal(false);
                         setSelectedCourseForEdit(undefined);

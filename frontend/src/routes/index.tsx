@@ -202,22 +202,6 @@ export const router = createBrowserRouter([
             {
                 path: 'adminprofile',
                 element: <AdminProfile />
-            },
-            {
-                path: 'courses',
-                element: <CourseManagement />
-            },
-            {
-                path: 'courses/detail',
-                element: <CourseManagement />
-            },
-            {
-                path: 'courses/lessons',
-                element: <CourseManagement />
-            },
-            {
-                path: 'learning-path/:id',
-                element: <LearningPathDetail />
             }
         ]
     },
