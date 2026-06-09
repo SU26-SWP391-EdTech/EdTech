@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
     Search, ChevronRight, ChevronDown, Play,
     Sparkles, TrendingUp, Star, Users, Clock, Bookmark, BookmarkCheck,
@@ -20,6 +20,10 @@ type Tab = 'all' | 'courses' | 'paths' | 'recommended' | 'saved';
 
 export function ExplorePage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const tabParam = searchParams.get('tab') as Tab | null;
+    const filterParam = searchParams.get('filter'); // 'enrolled' or null
+
     const user = useAuthStore((state) => state.user);
 
     const [tab, setTab] = useState<Tab>('all');
@@ -82,6 +86,12 @@ export function ExplorePage() {
         window.scrollTo(0, 0);
         loadData();
     }, [user]);
+
+    useEffect(() => {
+        if (tabParam && ['all', 'courses', 'paths', 'recommended', 'saved'].includes(tabParam)) {
+            setTab(tabParam);
+        }
+    }, [tabParam]);
 
     const handleEnroll = async (courseId: number) => {
         if (!user) {
@@ -203,7 +213,19 @@ export function ExplorePage() {
         const matchesLanguage = selectedLanguage === 'all' ||
             (course.language && course.language.toLowerCase() === selectedLanguage.toLowerCase());
 
-        return matchesSearch && matchesLanguage;
+        const isLearner = user?.roleName?.toLowerCase() === 'learner';
+        const enrollmentStatus = isEnrolled(course.courseId);
+        const matchesEnrollment = isLearner ? !enrollmentStatus : true;
+
+        return matchesSearch && matchesLanguage && matchesEnrollment;
+    });
+
+    const filteredPaths = learningPaths.filter((path) => {
+        const pathCourses = path.learningPathCourses || [];
+        const userEnrolledInPath = pathCourses.some(pc => isEnrolled(pc.courseId));
+
+        const isLearner = user?.roleName?.toLowerCase() === 'learner';
+        return isLearner ? !userEnrolledInPath : true;
     });
 
     const getCourseLevel = (course: Course) => {
@@ -355,7 +377,7 @@ export function ExplorePage() {
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-3 gap-4">
-                                    {(tab === 'all' ? learningPaths.slice(0, 3) : learningPaths).map((path, index) => {
+                                    {(tab === 'all' ? filteredPaths.slice(0, 3) : filteredPaths).map((path, index) => {
                                         const colors = ['#E11D48', '#6366F1', '#8B5CF6', '#10B981'];
                                         const pathCourses = path.learningPathCourses || [];
                                         
@@ -388,7 +410,7 @@ export function ExplorePage() {
                                             />
                                         );
                                     })}
-                                    {learningPaths.length === 0 && (
+                                    {filteredPaths.length === 0 && (
                                         <p className="text-sm text-slate-500 col-span-3 py-6 text-center">No learning paths found.</p>
                                     )}
                                 </div>
