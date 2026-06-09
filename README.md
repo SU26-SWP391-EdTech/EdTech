@@ -99,7 +99,7 @@ npm run start:dev
 ## 🐳 HOẶC chạy bằng Docker (full stack)
 
 > ⚠️ Chỉ dùng khi:
-> - đã có `.env.docker`
+> - đã có `.env.docker` trong backend
 > - đã chạy `npm install`
 
 ```
