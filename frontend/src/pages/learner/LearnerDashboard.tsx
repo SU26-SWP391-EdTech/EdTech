@@ -254,7 +254,7 @@ export function LearnerDashboard() {
             getLearnerProfile(user.userId).then((data) => setProfile(data)).catch((error) => console.log(error))
         }
         */
-        
+
         // Thay thế bằng Mock Profile
         import('../../db/data').then(({ MOCK_PROFILE }) => {
             setProfile(MOCK_PROFILE);
@@ -279,22 +279,13 @@ export function LearnerDashboard() {
             {/* ── Dashboard Header ──────────────────────────────────────────────────── */}
             <div className="flex items-start justify-between">
                 <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-[#FFF7ED] border border-[#FED7AA] rounded-full">
-                            <Flame className="w-3.5 h-3.5 text-[#F59E0B]" />
-                            <span className="text-xs text-[#B45309]" style={{ fontWeight: 600 }}>12-day streak — keep it up!</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-[#F0FDF4] border border-[#BBF7D0] rounded-full">
-                            <Zap className="w-3.5 h-3.5 text-[#10B981]" />
-                            <span className="text-xs text-[#065F46]" style={{ fontWeight: 600 }}>1,025 XP total</span>
-                        </div>
-                    </div>
-                    <h1 className="text-[34px] text-[#111827] mb-1" style={{ fontWeight: 700, lineHeight: 1.15 }}>
+
+                    <h1 className="text-[34px] text-[#111827] mb-5" style={{ fontWeight: 700, lineHeight: 1.15 }}>
                         Welcome back, {profile?.fullName} 👋
                     </h1>
-                    <p className="text-[#6B7280] text-base mb-5" style={{ lineHeight: 1.5 }}>
+                    {/* <p className="text-[#6B7280] text-base mb-5" style={{ lineHeight: 1.5 }}>
                         You're 52% through Advanced React — finish today's lesson to keep your streak alive.
-                    </p>
+                    </p> */}
                     <div className="flex items-center gap-3">
                         <button className="flex items-center gap-2 px-5 py-2.5 bg-[#E11D48] text-white rounded-xl text-sm hover:bg-[#BE123C] transition-colors" style={{ fontWeight: 600 }}>
                             <Play className="w-4 h-4 fill-white" />
@@ -308,7 +299,7 @@ export function LearnerDashboard() {
                 </div>
 
                 {/* Today's summary */}
-                <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 w-72 flex-shrink-0">
+                {/* <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 w-72 flex-shrink-0">
                     <p className="text-xs text-[#9CA3AF] mb-3 uppercase tracking-wide" style={{ fontWeight: 600 }}>Today's Summary</p>
                     <div className="space-y-3">
                         {[
@@ -332,7 +323,7 @@ export function LearnerDashboard() {
                         </div>
                         <ProgressBar value={83} color="#E11D48" />
                     </div>
-                </div>
+                </div> */}
             </div>
 
             {/* ── Stats ─────────────────────────────────────────────────────────────── */}
@@ -363,7 +354,7 @@ export function LearnerDashboard() {
             <div className="grid grid-cols-12 gap-6">
 
                 {/* Left — Continue Learning */}
-                <div className="col-span-4 space-y-4">
+                <div className="col-span-6 space-y-4">
                     <div className="flex items-center justify-between">
                         <h2 className="text-base text-[#111827]" style={{ fontWeight: 700 }}>Continue Learning</h2>
                         <button className="flex items-center gap-1 text-xs text-[#E11D48] hover:text-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
@@ -412,7 +403,7 @@ export function LearnerDashboard() {
                 </div>
 
                 {/* Middle — Learning Roadmap */}
-                <div className="col-span-4">
+                <div className="col-span-6">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-base text-[#111827]" style={{ fontWeight: 700 }}>Learning Roadmap</h2>
                         <span className="text-xs text-[#9CA3AF]" style={{ fontWeight: 500 }}>Frontend Mastery</span>
@@ -515,13 +506,13 @@ export function LearnerDashboard() {
                 </div>
 
                 {/* Right — Productivity Panel */}
-                <div className="col-span-4 space-y-4">
+                {/* <div className="col-span-4 space-y-4">
                     <div className="flex items-center justify-between">
                         <h2 className="text-base text-[#111827]" style={{ fontWeight: 700 }}>Productivity</h2>
                         <span className="text-xs text-[#9CA3AF]">This week</span>
                     </div>
 
-                    {/* Weekly Chart */}
+                    Weekly Chart
                     <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
                         <div className="flex items-center justify-between mb-4">
                             <div>
@@ -555,7 +546,7 @@ export function LearnerDashboard() {
                         </div>
                     </div>
 
-                    {/* Deadlines */}
+                    Deadlines
                     <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
                         <div className="flex items-center justify-between mb-3">
                             <p className="text-sm text-[#111827]" style={{ fontWeight: 700 }}>Upcoming</p>
@@ -577,7 +568,7 @@ export function LearnerDashboard() {
                         </div>
                     </div>
 
-                    {/* Skills */}
+                    Skills
                     <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
                         <p className="text-sm text-[#111827] mb-3" style={{ fontWeight: 700 }}>Your Skills</p>
                         <div className="flex flex-wrap gap-1.5">
@@ -587,7 +578,7 @@ export function LearnerDashboard() {
                         </div>
                     </div>
 
-                    {/* Next Recommended */}
+                    Next Recommended
                     <div className="bg-gradient-to-br from-[#1E40AF] to-[#7C3AED] rounded-2xl p-5 text-white">
                         <div className="flex items-center gap-1.5 mb-3">
                             <Sparkles className="w-3.5 h-3.5 text-white/70" />
@@ -599,11 +590,11 @@ export function LearnerDashboard() {
                             Preview Course →
                         </button>
                     </div>
-                </div>
+                </div> */}
             </div>
 
             {/* ── Achievements ──────────────────────────────────────────────────────── */}
-            <div>
+            {/* <div>
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                         <h2 className="text-base text-[#111827]" style={{ fontWeight: 700 }}>Achievements</h2>
@@ -635,10 +626,10 @@ export function LearnerDashboard() {
                         </div>
                     ))}
                 </div>
-            </div>
+            </div> */}
 
             {/* ── Course Recommendations ────────────────────────────────────────────── */}
-            <div>
+            {/* <div>
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                         <h2 className="text-base text-[#111827]" style={{ fontWeight: 700 }}>Recommended for You</h2>
@@ -654,7 +645,7 @@ export function LearnerDashboard() {
                 <div className="grid grid-cols-3 gap-5">
                     {RECOMMENDATIONS.map(course => (
                         <div key={course.id} className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:border-[#E11D48]/30 hover:shadow-md transition-all group">
-                            {/* Thumbnail */}
+                            Thumbnail
                             <div className="h-32 flex items-center justify-center relative" style={{ background: course.gradient }}>
                                 <span className="text-white text-2xl" style={{ fontWeight: 800, opacity: 0.9 }}>{course.initials}</span>
                                 <div className="absolute top-3 right-3 px-2.5 py-1 bg-white/20 backdrop-blur-sm rounded-full">
@@ -691,12 +682,12 @@ export function LearnerDashboard() {
                         </div>
                     ))}
                 </div>
-            </div>
+            </div> */}
 
             {/* ── Recent Activity + Empty State ─────────────────────────────────────── */}
-            <div className="grid grid-cols-12 gap-6">
+            {/* <div className="grid grid-cols-12 gap-6">
 
-                {/* Recent Activity */}
+                Recent Activity
                 <div className="col-span-8">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-base text-[#111827]" style={{ fontWeight: 700 }}>Recent Activity</h2>
@@ -723,9 +714,9 @@ export function LearnerDashboard() {
                     </div>
                 </div>
 
-                {/* Empty State + Community */}
+                Empty State + Community
                 <div className="col-span-4 space-y-4">
-                    {/* Community card */}
+                    Community card
                     <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
                         <div className="flex items-center justify-between mb-3">
                             <p className="text-sm text-[#111827]" style={{ fontWeight: 700 }}>Community</p>
@@ -755,7 +746,7 @@ export function LearnerDashboard() {
                         </button>
                     </div>
 
-                    {/* Empty state */}
+                    Empty state
                     <div className="bg-[#FAFAFA] border border-dashed border-[#E5E7EB] rounded-2xl p-6 text-center">
                         <div className="w-10 h-10 rounded-2xl bg-[#F3F4F6] flex items-center justify-center mx-auto mb-3">
                             <GraduationCap className="w-5 h-5 text-[#9CA3AF]" />
@@ -767,7 +758,7 @@ export function LearnerDashboard() {
                         </button>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
         </main>
     );

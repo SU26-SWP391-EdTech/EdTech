@@ -17,6 +17,7 @@ import { LearnerProfile } from '../pages/Users/LearnerProfile';
 import { MyLearning } from '../pages/learner/MyLearning';
 import { LearnerDashboard } from '../pages/learner/LearnerDashboard';
 import { ExplorePage } from '../pages/Users/ExplorePage';
+import { LearningPathDetail } from '../pages/LearningPath/LearningPathDetail';
 
 // User Profile page
 import { UserProfile } from '../pages/Users/UserProfile';
@@ -71,6 +72,10 @@ export const router = createBrowserRouter([
             {
                 path: "explore",
                 element: <ExplorePage />
+            },
+            {
+                path: "learning-path/:id",
+                element: <LearningPathDetail />
             }
         ]
     },
@@ -126,6 +131,10 @@ export const router = createBrowserRouter([
             {
                 path: 'explore',
                 element: <ExplorePage />
+            },
+            {
+                path: 'learning-path/:id',
+                element: <LearningPathDetail />
             }
         ]
     },
@@ -161,6 +170,10 @@ export const router = createBrowserRouter([
             {
                 path: 'explore',
                 element: <ExplorePage />
+            },
+            {
+                path: 'learning-path/:id',
+                element: <LearningPathDetail />
             }
         ]
     },
@@ -200,6 +213,10 @@ export const router = createBrowserRouter([
             {
                 path: 'courses/lessons',
                 element: <CourseManagement />
+            },
+            {
+                path: 'learning-path/:id',
+                element: <LearningPathDetail />
             }
         ]
     },
@@ -235,6 +252,10 @@ export const router = createBrowserRouter([
             {
                 path: 'courses/lessons',
                 element: <CourseManagement />
+            },
+            {
+                path: 'learning-path/:id',
+                element: <LearningPathDetail />
             }
         ]
     },

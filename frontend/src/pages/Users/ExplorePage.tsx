@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
     Search, ChevronRight, ChevronDown, Play,
     Sparkles, TrendingUp, Star, Users, Clock, Bookmark, BookmarkCheck,
@@ -20,6 +20,10 @@ type Tab = 'all' | 'courses' | 'paths' | 'recommended' | 'saved';
 
 export function ExplorePage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const tabParam = searchParams.get('tab') as Tab | null;
+    const filterParam = searchParams.get('filter'); // 'enrolled' or null
+
     const user = useAuthStore((state) => state.user);
 
     const [tab, setTab] = useState<Tab>('all');
@@ -28,6 +32,7 @@ export function ExplorePage() {
     const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [enrollingId, setEnrollingId] = useState<number | null>(null);
+    const [profile, setProfile] = useState<any>(null);
 
     // Filter states
     const [searchTerm, setSearchTerm] = useState('');
@@ -37,7 +42,7 @@ export function ExplorePage() {
     async function loadData() {
         try {
             setIsLoading(true);
-            
+
             // ── MOCK EXPLORE DATA FETCHING (TRÁNH LỖI 429) ───────────────────────────────────
             // Thay vì gọi API lấy danh sách khóa học và lộ trình học từ server, hệ thống sẽ
             // dùng mock data trực tiếp và nạp các bản đăng ký học viên từ sessionStorage.
@@ -56,14 +61,17 @@ export function ExplorePage() {
             */
 
             // Thay thế bằng Mock Data
-            const { MOCK_COURSES, MOCK_LEARNING_PATHS, MOCK_ENROLLMENTS } = await import('../../db/data');
+            const { MOCK_COURSES, MOCK_LEARNING_PATHS, MOCK_ENROLLMENTS, MOCK_LEARNER_PROFILE_FULL } = await import('../../db/data');
             setCourses(MOCK_COURSES);
             setLearningPaths(MOCK_LEARNING_PATHS);
-            if (user) {
+            const isLearner = user?.roleName?.toLowerCase() === 'learner';
+            if (user && isLearner) {
                 const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
                 setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : MOCK_ENROLLMENTS);
+                setProfile(MOCK_LEARNER_PROFILE_FULL);
             } else {
                 setEnrollments([]);
+                setProfile(null);
             }
 
         } catch (error) {
@@ -75,8 +83,15 @@ export function ExplorePage() {
     }
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         loadData();
     }, [user]);
+
+    useEffect(() => {
+        if (tabParam && ['all', 'courses', 'paths', 'recommended', 'saved'].includes(tabParam)) {
+            setTab(tabParam);
+        }
+    }, [tabParam]);
 
     const handleEnroll = async (courseId: number) => {
         if (!user) {
@@ -93,7 +108,7 @@ export function ExplorePage() {
 
         try {
             setEnrollingId(courseId);
-            
+
             // ── MOCK ENROLLMENT ACTION (TỰ ĐĂNG KÝ KHÓA HỌC CỤC BỘ) ─────────────────────────
             // Để tránh lỗi 429, hệ thống không gửi API đăng ký khóa học lên server.
             // Thay vào đó, nó sẽ tạo một bản ghi Đăng ký giả lập mới và lưu trữ vào sessionStorage.
@@ -138,6 +153,58 @@ export function ExplorePage() {
         return enrollments.some(e => e.course?.courseId === courseId);
     };
 
+    const handleEnrollPath = async (path: LearningPath) => {
+        if (!user) {
+            toast.error('Please sign in to enroll in learning paths.');
+            navigate('/login');
+            return;
+        }
+
+        const role = user.roleName?.toLowerCase();
+        if (role !== 'learner') {
+            toast.error(`As a ${user.roleName}, you cannot enroll in paths.`);
+            return;
+        }
+
+        const pathCourses = path.learningPathCourses || [];
+        if (pathCourses.length === 0) return;
+
+        const unenrolledCourses = pathCourses.filter(pc => !isEnrolled(pc.courseId));
+
+        if (unenrolledCourses.length === 0) {
+            toast.success('You are already enrolled in all courses of this path!');
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            const newEnrollments = [...enrollments];
+            
+            unenrolledCourses.forEach(pc => {
+                const newEnrollment: Enrollment = {
+                    enrollmentId: Date.now() + Math.random(),
+                    enrolledAt: new Date().toISOString(),
+                    status: 'active',
+                    progress: 0,
+                    lastAccessedAt: new Date().toISOString(),
+                    completedAt: null,
+                    expiresAt: null,
+                    course: pc.course,
+                };
+                newEnrollments.push(newEnrollment);
+            });
+
+            setEnrollments(newEnrollments);
+            sessionStorage.setItem('explore_cache_enrollments', JSON.stringify(newEnrollments));
+            toast.success(`Successfully enrolled in ${unenrolledCourses.length} course(s) on this path! (Mock)`);
+        } catch (error) {
+            console.error('Path enrollment error:', error);
+            toast.error('Failed to enroll in path.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     // Filters
     const filteredCourses = courses.filter((course) => {
         const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -146,8 +213,63 @@ export function ExplorePage() {
         const matchesLanguage = selectedLanguage === 'all' ||
             (course.language && course.language.toLowerCase() === selectedLanguage.toLowerCase());
 
-        return matchesSearch && matchesLanguage;
+        const isLearner = user?.roleName?.toLowerCase() === 'learner';
+        const enrollmentStatus = isEnrolled(course.courseId);
+        const matchesEnrollment = isLearner ? !enrollmentStatus : true;
+
+        return matchesSearch && matchesLanguage && matchesEnrollment;
     });
+
+    const filteredPaths = learningPaths.filter((path) => {
+        const pathCourses = path.learningPathCourses || [];
+        const userEnrolledInPath = pathCourses.some(pc => isEnrolled(pc.courseId));
+
+        const isLearner = user?.roleName?.toLowerCase() === 'learner';
+        return isLearner ? !userEnrolledInPath : true;
+    });
+
+    const getCourseLevel = (course: Course) => {
+        for (const path of learningPaths) {
+            if (path.learningPathCourses?.some(lpc => lpc.courseId === course.courseId)) {
+                return path.level.charAt(0).toUpperCase() + path.level.slice(1);
+            }
+        }
+        return 'Intermediate';
+    };
+
+    const calculateMatchPercentage = (course: Course, learnerProfile: any) => {
+        if (!learnerProfile) return 80;
+
+        let score = 55;
+        const goal = (learnerProfile.learningGoal || '').toLowerCase();
+        const title = course.title.toLowerCase();
+        const description = (course.description || '').toLowerCase();
+
+        const keywords = ['react', 'node', 'express', 'figma', 'ui/ux', 'typescript', 'docker', 'graphql', 'vitest', 'api'];
+        let matchedKeywords = 0;
+
+        keywords.forEach(kw => {
+            if (goal.includes(kw)) {
+                if (title.includes(kw) || description.includes(kw)) {
+                    matchedKeywords++;
+                }
+            }
+        });
+
+        score += matchedKeywords * 15;
+
+        const userLevel = (learnerProfile.level || 'Intermediate').toLowerCase();
+        const matchesLevelPath = learningPaths.some(path =>
+            path.level.toLowerCase() === userLevel &&
+            path.learningPathCourses?.some(lpc => lpc.courseId === course.courseId)
+        );
+
+        if (matchesLevelPath) {
+            score += 15;
+        }
+
+        return Math.min(score, 99);
+    };
 
     const getCourseGradient = (index: number) => {
         const gradients = [
@@ -220,9 +342,8 @@ export function ExplorePage() {
                     <div className="flex items-center gap-1 p-1 bg-white border border-[#E5E7EB] rounded-lg">
                         {([
                             { id: 'all', label: 'All' },
-                            { id: 'courses', label: 'Courses' },
                             { id: 'paths', label: 'Learning Paths' },
-                            { id: 'recommended', label: 'Recommended' },
+                            { id: 'courses', label: 'Courses' },
                         ] as { id: Tab; label: string }[]).map((t) => (
                             <button
                                 key={t.id}
@@ -239,94 +360,84 @@ export function ExplorePage() {
 
                 {/* Main Content */}
                 <div className="space-y-9">
-                        {/* Recommended / Featured Courses Section */}
-                        {(tab === 'all' || tab === 'recommended') && (
-                            <section>
-                                <SectionHeader title="Recommended for You" subtitle="Personalized based on current catalog" actionLabel="" />
-                                {isLoading ? (
-                                    <div className="grid grid-cols-5 gap-4 animate-pulse">
-                                        {[1, 2, 3, 4, 5].map(i => (
-                                            <div key={i} className="h-48 bg-slate-100 rounded-2xl" />
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="grid grid-cols-5 gap-4">
-                                        {filteredCourses.slice(0, 5).map((course, index) => (
-                                            <RecommendCard
-                                                key={course.courseId}
-                                                courseId={course.courseId}
-                                                title={course.title}
-                                                type="Course"
-                                                match={95 - index * 4}
-                                                reason={course.description || "Top rated curriculum match."}
-                                                difficulty="Intermediate"
-                                                duration={`${course.duration || 10}h · ${course.totalLessons} lessons`}
-                                                accent="#E11D48"
-                                                Icon={BookOpen}
-                                                isEnrolled={isEnrolled(course.courseId)}
-                                                onEnroll={() => handleEnroll(course.courseId)}
-                                                enrolling={enrollingId === course.courseId}
+                    {/* Featured Paths */}
+                    {(tab === 'all' || tab === 'paths') && (
+                        <section>
+                            <SectionHeader 
+                                title="Featured Learning Paths" 
+                                subtitle="Curated career-focused journeys" 
+                                actionLabel={tab === 'all' ? "View All" : ""} 
+                                onAction={() => setTab('paths')}
+                            />
+                            {isLoading ? (
+                                <div className="grid grid-cols-3 gap-4 animate-pulse">
+                                    {[1, 2, 3].map(i => (
+                                        <div key={i} className="h-64 bg-slate-100 rounded-2xl" />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-3 gap-4">
+                                    {(tab === 'all' ? filteredPaths.slice(0, 3) : filteredPaths).map((path, index) => {
+                                        const colors = ['#E11D48', '#6366F1', '#8B5CF6', '#10B981'];
+                                        const pathCourses = path.learningPathCourses || [];
+                                        
+                                        // Check if user is enrolled in at least one course in the path
+                                        const userEnrolledInPath = pathCourses.some(pc => isEnrolled(pc.courseId));
+                                        
+                                        // Calculate personal completion rate
+                                        const completedInPath = pathCourses.filter(pc =>
+                                            enrollments.some(e => e.course?.courseId === pc.courseId && (e.status === 'completed' || e.progress === 100))
+                                        ).length;
+                                        const personalProgress = pathCourses.length > 0
+                                            ? Math.round((completedInPath / pathCourses.length) * 100)
+                                            : 0;
+
+                                        return (
+                                            <PathCard
+                                                key={path.learningPathId}
+                                                learningPathId={path.learningPathId}
+                                                title={path.title}
+                                                description={path.description || 'Step-by-step master curriculum.'}
+                                                courses={pathCourses.length}
+                                                duration="35h"
+                                                difficulty={path.level}
+                                                enrolled="1,250"
+                                                completion={75}
+                                                accent={colors[index % colors.length]}
+                                                isPathEnrolled={userEnrolledInPath}
+                                                personalProgress={personalProgress}
+                                                onEnroll={() => handleEnrollPath(path)}
                                             />
-                                        ))}
-                                        {filteredCourses.length === 0 && (
-                                            <p className="text-sm text-slate-500 col-span-5 py-6 text-center">No recommended courses available.</p>
-                                        )}
-                                    </div>
-                                )}
-                            </section>
-                        )}
+                                        );
+                                    })}
+                                    {filteredPaths.length === 0 && (
+                                        <p className="text-sm text-slate-500 col-span-3 py-6 text-center">No learning paths found.</p>
+                                    )}
+                                </div>
+                            )}
+                        </section>
+                    )}
 
-
-
-                        {/* Featured Paths */}
-                        {(tab === 'all' || tab === 'paths') && (
-                            <section>
-                                <SectionHeader title="Featured Learning Paths" subtitle="Curated career-focused journeys" actionLabel="" />
-                                {isLoading ? (
-                                    <div className="grid grid-cols-3 gap-4 animate-pulse">
-                                        {[1, 2, 3].map(i => (
-                                            <div key={i} className="h-64 bg-slate-100 rounded-2xl" />
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="grid grid-cols-3 gap-4">
-                                        {learningPaths.map((path, index) => {
-                                            const colors = ['#E11D48', '#6366F1', '#8B5CF6', '#10B981'];
-                                            return (
-                                                <PathCard
-                                                    key={path.learningPathId}
-                                                    title={path.title}
-                                                    description={path.description || 'Step-by-step master curriculum.'}
-                                                    courses={path.learningPathCourses?.length || 0}
-                                                    duration="35h"
-                                                    difficulty={path.level}
-                                                    enrolled="1,250"
-                                                    completion={75}
-                                                    accent={colors[index % colors.length]}
-                                                />
-                                            );
-                                        })}
-                                        {learningPaths.length === 0 && (
-                                            <p className="text-sm text-slate-500 col-span-3 py-6 text-center">No learning paths found.</p>
-                                        )}
-                                    </div>
-                                )}
-                            </section>
-                        )}
-
-                        {/* Trending Courses / Catalog */}
-                        {(tab === 'all' || tab === 'courses') && (
-                            <section>
-                                <SectionHeader title="Trending Courses" subtitle="What learners are taking this week" actionLabel="" />
-                                {isLoading ? (
-                                    <div className="grid grid-cols-5 gap-4 animate-pulse">
-                                        {[1, 2, 3, 4, 5].map(i => (
-                                            <div key={i} className="h-56 bg-slate-100 rounded-2xl" />
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="grid grid-cols-5 gap-4">
-                                        {filteredCourses.map((course, index) => (
+                    {/* Trending Courses / Catalog */}
+                    {(tab === 'all' || tab === 'courses') && (
+                        <section>
+                            <SectionHeader 
+                                title="Trending Courses" 
+                                subtitle="What learners are taking this week" 
+                                actionLabel={tab === 'all' ? "View All" : ""} 
+                                onAction={() => setTab('courses')}
+                            />
+                            {isLoading ? (
+                                <div className="grid grid-cols-5 gap-4 animate-pulse">
+                                    {[1, 2, 3, 4, 5].map(i => (
+                                        <div key={i} className="h-56 bg-slate-100 rounded-2xl" />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-5 gap-4">
+                                    {(tab === 'all' ? filteredCourses.slice(0, 5) : filteredCourses).map((course, index) => {
+                                        const difficultyLevel = getCourseLevel(course);
+                                        return (
                                             <CourseCard
                                                 key={course.courseId}
                                                 title={course.title}
@@ -334,7 +445,7 @@ export function ExplorePage() {
                                                 rating={4.8}
                                                 students="8.5k"
                                                 duration={`${course.duration || 8}h`}
-                                                difficulty="Beginner"
+                                                difficulty={difficultyLevel}
                                                 tags={[course.language || 'English']}
                                                 thumb={getCourseGradient(index)}
                                                 badge={index === 0 ? "Popular" : index === 1 ? "Trending" : undefined}
@@ -342,30 +453,31 @@ export function ExplorePage() {
                                                 onEnroll={() => handleEnroll(course.courseId)}
                                                 enrolling={enrollingId === course.courseId}
                                             />
-                                        ))}
-                                        {filteredCourses.length === 0 && (
-                                            <div className="bg-white border border-dashed border-[#E5E7EB] rounded-2xl p-10 flex flex-col items-center text-center col-span-5">
-                                                <div className="w-14 h-14 rounded-2xl bg-[#F8FAFC] border border-[#E5E7EB] flex items-center justify-center mb-4">
-                                                    <Search className="w-6 h-6 text-[#9CA3AF]" />
-                                                </div>
-                                                <h3 className="text-[16px] text-[#111827] mb-1" style={{ fontWeight: 600 }}>No results found</h3>
-                                                <p className="text-sm text-[#6B7280] mb-5 max-w-sm">Try changing your filters or searching another keyword.</p>
-                                                <button onClick={() => { setSearchTerm(''); setSelectedLanguage('all'); }} className="px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
-                                                    Reset Filters
-                                                </button>
+                                        );
+                                    })}
+                                    {filteredCourses.length === 0 && (
+                                        <div className="bg-white border border-dashed border-[#E5E7EB] rounded-2xl p-10 flex flex-col items-center text-center col-span-5">
+                                            <div className="w-14 h-14 rounded-2xl bg-[#F8FAFC] border border-[#E5E7EB] flex items-center justify-center mb-4">
+                                                <Search className="w-6 h-6 text-[#9CA3AF]" />
                                             </div>
-                                        )}
-                                    </div>
-                                )}
-                            </section>
-                        )}
-                    </div>
+                                            <h3 className="text-[16px] text-[#111827] mb-1" style={{ fontWeight: 600 }}>No results found</h3>
+                                            <p className="text-sm text-[#6B7280] mb-5 max-w-sm">Try changing your filters or searching another keyword.</p>
+                                            <button onClick={() => { setSearchTerm(''); setSelectedLanguage('all'); }} className="px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
+                                                Reset Filters
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </section>
+                    )}
+                </div>
             </main>
         </div>
     );
 }
 
-function SectionHeader({ title, subtitle, actionLabel }: { title: string; subtitle: string; actionLabel: string }) {
+function SectionHeader({ title, subtitle, actionLabel, onAction }: { title: string; subtitle: string; actionLabel: string; onAction?: () => void }) {
     return (
         <div className="flex items-end justify-between mb-4">
             <div>
@@ -373,7 +485,7 @@ function SectionHeader({ title, subtitle, actionLabel }: { title: string; subtit
                 <p className="text-xs text-[#6B7280] mt-0.5">{subtitle}</p>
             </div>
             {actionLabel && (
-                <button className="flex items-center gap-1 text-sm text-[#6B7280] hover:text-[#E11D48] transition-colors" style={{ fontWeight: 500 }}>
+                <button onClick={onAction} className="flex items-center gap-1 text-sm text-[#6B7280] hover:text-[#E11D48] transition-colors" style={{ fontWeight: 500 }}>
                     {actionLabel}
                     <ChevronRight className="w-4 h-4" />
                 </button>
@@ -441,45 +553,82 @@ function CategoryCard({ Icon, title, courses, paths, accent }: { Icon: React.Com
     );
 }
 
-function PathCard({ title, description, courses, duration, difficulty, enrolled, completion, accent }: {
-    title: string; description: string; courses: number; duration: string; difficulty: string; enrolled: string; completion: number; accent: string;
+function PathCard({ learningPathId, title, description, courses, duration, difficulty, enrolled, completion, accent, isPathEnrolled, personalProgress, onEnroll }: {
+    learningPathId: number; title: string; description: string; courses: number; duration: string; difficulty: string; enrolled: string; completion: number; accent: string;
+    isPathEnrolled: boolean; personalProgress: number; onEnroll: () => void;
 }) {
+    const navigate = useNavigate();
+    const showProgress = isPathEnrolled ? personalProgress : completion;
+    const progressLabel = isPathEnrolled ? 'My Progress' : 'Avg. Completion';
+
+    const segments = window.location.pathname.split('/');
+    const rolePrefix = segments[1];
+    const isDashboardRoute = ['learner', 'provider', 'admin', 'academic'].includes(rolePrefix);
+    const detailUrl = isDashboardRoute
+        ? `/${rolePrefix}/learning-path/${learningPathId}`
+        : `/learning-path/${learningPathId}`;
+
     return (
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md hover:border-[#E11D48]/20 transition-all">
-            <div className="h-24 relative" style={{ background: `linear-gradient(135deg, ${accent}, ${accent}cc)` }}>
-                <div className="absolute inset-0 flex items-center justify-center gap-2 px-6">
-                    {[0, 1, 2, 3, 4].map((i) => (
-                        <div key={i} className="flex items-center gap-2">
-                            <div className="w-2.5 h-2.5 rounded-full bg-white" />
-                            {i < 4 && <div className="w-8 h-px bg-white/60" />}
-                        </div>
-                    ))}
+        <div 
+            onClick={() => navigate(detailUrl)} 
+            className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md hover:border-[#E11D48]/20 transition-all flex flex-col justify-between cursor-pointer"
+        >
+            <div>
+                <div className="h-24 relative" style={{ background: `linear-gradient(135deg, ${accent}, ${accent}cc)` }}>
+                    <div className="absolute inset-0 flex items-center justify-center gap-2 px-6">
+                        {[0, 1, 2, 3, 4].map((i) => (
+                            <div key={i} className="flex items-center gap-2">
+                                <div className="w-2.5 h-2.5 rounded-full bg-white" />
+                                {i < 4 && <div className="w-8 h-px bg-white/60" />}
+                            </div>
+                        ))}
+                    </div>
+                    <span className="absolute top-2.5 right-2.5 px-2 py-0.5 bg-white/90 backdrop-blur text-[10px] rounded capitalize" style={{ color: accent, fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}>
+                        {difficulty}
+                    </span>
                 </div>
-                <span className="absolute top-2.5 right-2.5 px-2 py-0.5 bg-white/90 backdrop-blur text-[10px] rounded capitalize" style={{ color: accent, fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}>
-                    {difficulty}
-                </span>
-            </div>
-            <div className="p-4">
-                <div className="flex items-start justify-between gap-2 mb-1">
-                    <h3 className="text-[15px] text-[#111827]" style={{ fontWeight: 600 }}>{title}</h3>
-                </div>
-                <p className="text-xs text-[#6B7280] mb-3 line-clamp-2">{description}</p>
-                <div className="flex items-center gap-3 text-[11px] text-[#6B7280] mb-3">
-                    <span className="flex items-center gap-1"><BookOpen className="w-3 h-3" />{courses} courses</span>
-                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{duration}</span>
-                    <span className="flex items-center gap-1"><Users className="w-3 h-3" />{enrolled}</span>
-                </div>
-                <div className="flex items-center justify-between mb-3">
-                    <div className="flex-1 mr-3">
-                        <div className="flex items-center justify-between mb-1">
-                            <span className="text-[10px] text-[#6B7280]" style={{ fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Completion rate</span>
-                            <span className="text-[11px] text-[#111827]" style={{ fontWeight: 600 }}>{completion}%</span>
-                        </div>
-                        <div className="h-1.5 bg-[#F1F5F9] rounded-full overflow-hidden">
-                            <div className="h-full bg-[#10B981] rounded-full" style={{ width: `${completion}%` }} />
+                <div className="p-4 pb-0">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                        <h3 className="text-[15px] text-[#111827]" style={{ fontWeight: 600 }}>{title}</h3>
+                    </div>
+                    <p className="text-xs text-[#6B7280] mb-3 line-clamp-2">{description}</p>
+                    <div className="flex items-center gap-3 text-[11px] text-[#6B7280] mb-3">
+                        <span className="flex items-center gap-1"><BookOpen className="w-3 h-3" />{courses} courses</span>
+                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{duration}</span>
+                        <span className="flex items-center gap-1"><Users className="w-3 h-3" />{enrolled}</span>
+                    </div>
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                                <span className="text-[10px] text-[#6B7280]" style={{ fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{progressLabel}</span>
+                                <span className="text-[11px] text-[#111827]" style={{ fontWeight: 600 }}>{showProgress}%</span>
+                            </div>
+                            <div className="h-1.5 bg-[#F1F5F9] rounded-full overflow-hidden">
+                                <div className={`h-full rounded-full ${isPathEnrolled ? 'bg-[#E11D48]' : 'bg-[#10B981]'}`} style={{ width: `${showProgress}%` }} />
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+            <div className="p-4 pt-0 flex gap-2">
+                <button 
+                    onClick={(e) => { e.stopPropagation(); navigate(detailUrl); }}
+                    className="flex-1 py-2 bg-white border border-[#E5E7EB] text-[#374151] hover:bg-[#F8FAFC] text-xs font-semibold rounded-lg transition-colors text-center"
+                >
+                    View Detail
+                </button>
+                {isPathEnrolled && personalProgress === 100 ? (
+                    <div className="flex-1 py-2 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-100 text-center flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                        Completed ✓
+                    </div>
+                ) : (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onEnroll(); }}
+                        className="flex-1 py-2 bg-[#E11D48] text-white hover:bg-[#BE123C] text-xs font-semibold rounded-lg transition-colors text-center"
+                    >
+                        {isPathEnrolled ? 'Resume Path' : 'Enroll Path'}
+                    </button>
+                )}
             </div>
         </div>
     );
