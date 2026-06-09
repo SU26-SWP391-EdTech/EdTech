@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { MessageSquare, Play, Flame, ChevronDown, LogOut, UserCircle, BookOpen, Settings } from 'lucide-react';
+import { Play, ChevronDown, LogOut, UserCircle, BookOpen, Settings } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
-import { SearchBar } from '../shared/SearchBar';
 import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { LEARNER_NAV } from '../config/nav-config';
@@ -18,10 +17,10 @@ export function LearnerHeader() {
 
     // Determine active item based on current URL path
     const getActiveTab = () => {
-        if (location.pathname.includes('/my-learning')) return 'my-learning';
-        if (location.pathname.includes('/explore')) return 'explore';
-        if (location.pathname.includes('/paths')) return 'paths';
-        return 'dashboard';
+        const path = location.pathname;
+        if (path === '/learner/my-learning') return 'my-learning';
+        if (path === '/learner/explore') return 'explore';
+        return '';
     };
 
     const active = getActiveTab();
@@ -52,8 +51,6 @@ export function LearnerHeader() {
                                     navigate('/learner/my-learning');
                                 } else if (item.id === 'explore') {
                                     navigate('/learner/explore');
-                                } else if (item.id === 'paths') {
-                                    navigate('/learner/explore');
                                 }
                             }}
                         />
@@ -62,18 +59,15 @@ export function LearnerHeader() {
 
                 <div className="flex-1" />
 
-                <SearchBar placeholder="Search courses, paths..." accentColor={ACC} />
-
+                {/* Streak commented out for future use */}
+                {/* 
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FEF3C7] border border-[#FDE68A] rounded-xl flex-shrink-0">
                     <Flame className="w-3.5 h-3.5 text-[#D97706]" />
                     <span className="text-xs text-[#D97706] font-bold">7</span>
                 </div>
+                */}
 
                 <NotifBell count={3} accentColor={ACC} />
-
-                <button className="p-2 rounded-xl hover:bg-[#F8FAFC] transition-colors">
-                    <MessageSquare style={{ width: 18, height: 18, color: '#6B7280' }} />
-                </button>
 
                 <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
 

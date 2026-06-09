@@ -1,28 +1,22 @@
-import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Play } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
-import { SearchBar } from '../shared/SearchBar';
 import { NavItem } from '../shared/NavItem';
 import { GUEST_NAV } from '../config/nav-config';
 
 export function GuestHeader() {
     const navigate = useNavigate();
     const location = useLocation();
-    const [active, setActive] = useState('explore');
 
-    useEffect(() => {
-        if (location.pathname.includes('/explore')) {
-            setActive('explore');
-        } else if (location.pathname.includes('/paths')) {
-            setActive('paths');
-        } else if (location.pathname.includes('/courses')) {
-            setActive('courses');
-        } else if (location.pathname.includes('/about')) {
-            setActive('about');
-        }
-    }, [location.pathname]);
+    const getActiveTab = () => {
+        const path = location.pathname;
+        if (path === '/explore') return 'explore';
+        if (path === '/about') return 'about';
+        return '';
+    };
+
+    const active = getActiveTab();
 
     const ACC = '#E11D48'; // Guest/Default Accent: Crimson
     const ACTIVE_BG = '#FFF1F3';
@@ -45,7 +39,6 @@ export function GuestHeader() {
                             accentColor={ACC}
                             activeBg={ACTIVE_BG}
                             onClick={() => {
-                                setActive(item.id);
                                 if (item.id === 'explore') {
                                     navigate('/explore');
                                 }
@@ -55,10 +48,6 @@ export function GuestHeader() {
                 </nav>
 
                 <div className="flex-1" />
-
-                <SearchBar placeholder="Search public courses..." accentColor={ACC} />
-
-                <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
 
                 <div className="flex items-center gap-2.5">
                     <button

@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDown, LogOut, UserCircle, Settings, BarChart2 } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
-import { SearchBar } from '../shared/SearchBar';
 import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { PROVIDER_NAV } from '../config/nav-config';
@@ -18,10 +17,12 @@ export function ProviderHeader() {
 
     // Determine active item based on current URL path
     const getActiveTab = () => {
-        if (location.pathname.includes('/explore')) return 'explore';
-        if (location.pathname.includes('/courses')) return 'courses';
-        if (location.pathname.includes('/students')) return 'students';
-        return 'dashboard';
+        const path = location.pathname;
+        if (path === '/provider') return 'dashboard';
+        if (path === '/provider/explore') return 'explore';
+        if (path === '/provider/courses') return 'courses';
+        if (path === '/provider/students') return 'students';
+        return '';
     };
 
     const active = getActiveTab();
@@ -55,8 +56,6 @@ export function ProviderHeader() {
                                     navigate('/provider');
                                 } else if (item.id === 'explore') {
                                     navigate('/provider/explore');
-                                } else if (item.id === 'students') {
-                                    navigate('/provider');
                                 }
                             }}
                         />
@@ -64,8 +63,6 @@ export function ProviderHeader() {
                 </nav>
 
                 <div className="flex-1" />
-
-                <SearchBar placeholder="Search courses, reviews..." accentColor={ACC} />
 
                 <NotifBell count={5} accentColor={ACC} />
 
