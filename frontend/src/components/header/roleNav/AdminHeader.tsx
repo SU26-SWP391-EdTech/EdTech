@@ -58,8 +58,6 @@ export function AdminHeader() {
                                     navigate('/admin');
                                 } else if (item.id === 'analytics') {
                                     navigate('/admin/analytics');
-                                } else if (item.id === 'courses') {
-                                    navigate('/admin/courses');
                                 }
                             }}
                         />

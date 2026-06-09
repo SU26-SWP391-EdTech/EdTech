@@ -50,7 +50,7 @@ export class CoursesController {
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(RoleEnum.COURSE_PROVIDER, RoleEnum.ADMIN)
+    @Roles(RoleEnum.COURSE_PROVIDER)
     @Patch(':id')
     @UseInterceptors(FileInterceptor('thumbnailUrl'))
     @ApiOperation({ summary: 'Update a course' })
