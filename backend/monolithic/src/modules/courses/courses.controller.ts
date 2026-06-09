@@ -24,7 +24,7 @@ export class CoursesController {
     @ApiResponse({ status: 400, description: 'Invalid request data' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     create(@Req() req, @Body() createCourseDto: CreateCourseDto, @UploadedFile() file?: Express.Multer.File) {
-        return this.coursesService.create(createCourseDto, req.user.id, file);
+        return this.coursesService.create(createCourseDto, req.user.userId, file);
     }
 
     @Get()
@@ -60,8 +60,9 @@ export class CoursesController {
     update(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateCourseDto: UpdateCourseDto,
+        @Req() req
     ) {
-        return this.coursesService.update(id, updateCourseDto);
+        return this.coursesService.update(id, updateCourseDto, req.user.userId);
     }
 
     @Delete(':id')

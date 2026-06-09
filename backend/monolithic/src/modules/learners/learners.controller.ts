@@ -42,7 +42,7 @@ export class LearnersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   async changePassword(@Req() req, @Body() dto:ChangePasswordDto){
-    return this.usersService.changePassword(req.user.id, dto);
+    return this.usersService.changePassword(req.user.userId, dto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

@@ -40,4 +40,18 @@ export class BaseRegisterDto {
   })
   @IsOptional()
   avatar_url?: string;
+
+  @ApiPropertyOptional({
+    example: 'eyq1923124i4eo1h24.....',
+    description: 'Token verify mail'
+  })
+  @IsOptional()
+  emailVerificationToken!: string;
+
+  @ApiPropertyOptional({
+    example: '22/12/2026',
+    description: 'Het han vao khi nao'
+  })
+  @IsOptional()
+  emailVerificationExpiresAt!: Date;
 }

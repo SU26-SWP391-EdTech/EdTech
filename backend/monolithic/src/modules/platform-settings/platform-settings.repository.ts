@@ -25,6 +25,8 @@ export class PlatformSettingsRepository {
             bannerUrl: data.bannerUrl,
             description: data.description
         })
+        await this.repository.save(created);
+
         return created as PlatformSetting;
     }
 

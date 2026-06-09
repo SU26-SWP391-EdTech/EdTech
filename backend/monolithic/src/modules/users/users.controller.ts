@@ -69,7 +69,7 @@ export class UsersController {
     @Req() req,
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
-    return this.usersService.changePassword(req.user.id, changePasswordDto);
+    return this.usersService.changePassword(req.user.userId, changePasswordDto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
