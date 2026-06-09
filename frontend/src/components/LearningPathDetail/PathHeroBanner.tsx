@@ -1,6 +1,6 @@
 import { Clock, BookOpen, Users, Star, Play, Bookmark, Share2 } from 'lucide-react';
 import CircularProgress from './CircularProgress';
-import type { LearningPath } from '../../../services/learning-path/learning-path.service';
+import type { LearningPath } from '../../services/learning-path/learning-path.service';
 
 interface PathHeroBannerProps {
   path: LearningPath;

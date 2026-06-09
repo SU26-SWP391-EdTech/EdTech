@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Code, Layers, Database, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useAuthStore } from '../../../stores/auth.stores';
-import type { Course } from '../../../services/course/course.service';
-import type { Enrollment } from '../../../services/enrollment/enrollment.service';
-import type { LearningPath } from '../../../services/learning-path/learning-path.service';
+import { useAuthStore } from '../../stores/auth.stores';
+import type { Course } from '../../services/course/course.service';
+import type { Enrollment } from '../../services/enrollment/enrollment.service';
+import type { LearningPath } from '../../services/learning-path/learning-path.service';
 
 export type NodeState = 'completed' | 'current' | 'upcoming' | 'locked';
 
@@ -46,7 +46,7 @@ export function useLearningPathDetail() {
     async function loadPathData() {
       try {
         setIsLoading(true);
-        const { MOCK_COURSES, MOCK_LEARNING_PATHS, MOCK_ENROLLMENTS } = await import('../../../db/data');
+        const { MOCK_COURSES, MOCK_LEARNING_PATHS, MOCK_ENROLLMENTS } = await import('../../db/data');
         setCourses(MOCK_COURSES);
 
         const targetPath = MOCK_LEARNING_PATHS.find(p => p.learningPathId === parseInt(id || '1'));

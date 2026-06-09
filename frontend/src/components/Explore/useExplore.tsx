@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { useAuthStore } from '../../../stores/auth.stores';
-import type { Course } from '../../../services/course/course.service';
-import type { Enrollment } from '../../../services/enrollment/enrollment.service';
-import type { LearningPath } from '../../../services/learning-path/learning-path.service';
+import { useAuthStore } from '../../stores/auth.stores';
+import type { Course } from '../../services/course/course.service';
+import type { Enrollment } from '../../services/enrollment/enrollment.service';
+import type { LearningPath } from '../../services/learning-path/learning-path.service';
 
 type Tab = 'all' | 'courses' | 'paths' | 'recommended' | 'saved';
 
@@ -30,7 +30,7 @@ export function useExplore() {
     async function loadData() {
         try {
             setIsLoading(true);
-            const { MOCK_COURSES, MOCK_LEARNING_PATHS, MOCK_ENROLLMENTS, MOCK_LEARNER_PROFILE_FULL } = await import('../../../db/data');
+            const { MOCK_COURSES, MOCK_LEARNING_PATHS, MOCK_ENROLLMENTS, MOCK_LEARNER_PROFILE_FULL } = await import('../../db/data');
             setCourses(MOCK_COURSES);
             setLearningPaths(MOCK_LEARNING_PATHS);
             

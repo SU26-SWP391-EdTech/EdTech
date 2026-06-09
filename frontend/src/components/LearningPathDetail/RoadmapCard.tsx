@@ -86,7 +86,7 @@ export default function RoadmapCard({
             {/* Progress bar */}
             {node.progress > 0 && (
               <div className="mt-2.5">
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[10px] text-[#9CA3AF]">Progress</span>
                   <span className="text-[10px]" style={{ fontWeight: 600, color: node.state === 'completed' ? '#16A34A' : '#E11D48' }}>{node.progress}%</span>
                 </div>

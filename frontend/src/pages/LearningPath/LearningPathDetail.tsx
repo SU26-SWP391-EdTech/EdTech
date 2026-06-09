@@ -1,8 +1,8 @@
-import { useLearningPathDetail } from '../../components/learner/LearningPathDetail/useLearningPathDetail';
-import PathHeroBanner from '../../components/learner/LearningPathDetail/PathHeroBanner';
-import RoadmapCard from '../../components/learner/LearningPathDetail/RoadmapCard';
-import ModuleAccordion from '../../components/learner/LearningPathDetail/ModuleAccordion';
-import PathOverviewStats from '../../components/learner/LearningPathDetail/PathOverviewStats';
+import { useLearningPathDetail } from '../../components/LearningPathDetail/useLearningPathDetail';
+import PathHeroBanner from '../../components/LearningPathDetail/PathHeroBanner';
+import RoadmapCard from '../../components/LearningPathDetail/RoadmapCard';
+import ModuleAccordion from '../../components/LearningPathDetail/ModuleAccordion';
+import PathOverviewStats from '../../components/LearningPathDetail/PathOverviewStats';
 
 export function LearningPathDetail() {
   const {

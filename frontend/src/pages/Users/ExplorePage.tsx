@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { Play, Search } from 'lucide-react';
-import { useExplore } from '../../components/learner/Explore/useExplore';
-import SectionHeader from '../../components/learner/Explore/SectionHeader';
-import HeroDiscovery from '../../components/learner/Explore/HeroDiscovery';
-import ExplorePathCard from '../../components/learner/Explore/ExplorePathCard';
-import ExploreCourseCard from '../../components/learner/Explore/ExploreCourseCard';
+import { useExplore } from '../../components/Explore/useExplore';
+import SectionHeader from '../../components/Explore/SectionHeader';
+import HeroDiscovery from '../../components/Explore/HeroDiscovery';
+import ExplorePathCard from '../../components/Explore/ExplorePathCard';
+import ExploreCourseCard from '../../components/Explore/ExploreCourseCard';
 
 type Tab = 'all' | 'courses' | 'paths' | 'recommended' | 'saved';
 
