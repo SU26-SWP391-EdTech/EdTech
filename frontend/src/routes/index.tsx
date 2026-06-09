@@ -22,7 +22,8 @@ import { ExplorePage } from '../pages/Users/ExplorePage';
 import { UserProfile } from '../pages/Users/UserProfile';
 
 // Course pages
-import { CourseManagement } from '../pages/auth/Course/CourseManagement';
+import { CourseManagement } from '../pages/Course/CourseManagement';
+import { CourseDetail } from '../pages/Course/CourseDetail';
 
 // Role navigation pages 
 import { GuestLayout } from '../layouts/Dashboard/GuestLayout';
@@ -152,7 +153,7 @@ export const router = createBrowserRouter([
             },
             {
                 path: 'courses/detail',
-                element: <CourseManagement />
+                element: <CourseDetail />
             },
             {
                 path: 'courses/lessons',
@@ -188,18 +189,6 @@ export const router = createBrowserRouter([
             {
                 path: 'adminprofile',
                 element: <AdminProfile />
-            },
-            {
-                path: 'courses',
-                element: <CourseManagement />
-            },
-            {
-                path: 'courses/detail',
-                element: <CourseManagement />
-            },
-            {
-                path: 'courses/lessons',
-                element: <CourseManagement />
             }
         ]
     },
@@ -230,7 +219,7 @@ export const router = createBrowserRouter([
             },
             {
                 path: 'courses/detail',
-                element: <CourseManagement />
+                element: <CourseDetail />
             },
             {
                 path: 'courses/lessons',

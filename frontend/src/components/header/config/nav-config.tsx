@@ -18,7 +18,6 @@ export const LEARNER_NAV = [
 export const ADMIN_NAV = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
     { id: 'users', label: 'Users', icon: <Users className="w-3.5 h-3.5" />, count: 3, countColor: '#0EA5E9' },
-    { id: 'courses', label: 'Courses', icon: <BookOpen className="w-3.5 h-3.5" /> },
     { id: 'analytics', label: 'Analytics', icon: <BarChart2 className="w-3.5 h-3.5" /> },
 ];
 
