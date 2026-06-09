@@ -1,4 +1,3 @@
-import { Code, Zap, Monitor, Trophy } from 'lucide-react';
 import { BarChart, Bar, XAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import CircularProgress from './CircularProgress';
 
@@ -15,12 +14,6 @@ const WEEKLY = [
   { day: 'Thu', h: 3 }, { day: 'Fri', h: 1 }, { day: 'Sat', h: 0.5 }, { day: 'Sun', h: 0 },
 ];
 
-const BADGES = [
-  { label: 'Foundations', desc: 'Completed basic design/code', icon: <Code className="w-4 h-4" />, earned: true, color: '#E11D48' },
-  { label: 'Code Ninja', desc: 'Advanced JS/React done', icon: <Zap className="w-4 h-4" />, earned: true, color: '#D97706' },
-  { label: 'Explorer', desc: 'Active study in paths', icon: <Monitor className="w-4 h-4" />, earned: false, color: '#2563EB' },
-  { label: 'Full-Stack Dev', desc: 'Complete the path', icon: <Trophy className="w-4 h-4" />, earned: false, color: '#7C3AED' },
-];
 
 export default function PathOverviewStats({
   overallProgress,
@@ -60,28 +53,6 @@ export default function PathOverviewStats({
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
-      </div>
-
-      {/* Badges overview */}
-      <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
-        <h3 className="text-[#111827] mb-3" style={{ fontSize: '15px', fontWeight: 700 }}>Path Credentials</h3>
-        <p className="text-xs text-[#9CA3AF] mb-4">Earn professional status indicators as you pass milestones</p>
-        <div className="grid grid-cols-2 gap-3">
-          {BADGES.map((b, i) => (
-            <div key={i} className={`p-3 border rounded-xl flex flex-col justify-between h-24 transition-all ${b.earned ? 'bg-[#FAFAFA] border-[#E5E7EB]' : 'bg-white border-[#F3F4F6] opacity-50'}`}>
-              <div className="flex items-center justify-between">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white" style={{ backgroundColor: b.color }}>
-                  {b.icon}
-                </div>
-                {b.earned && <span className="text-[9px] text-[#16A34A] font-bold uppercase tracking-wider">Earned</span>}
-              </div>
-              <div>
-                <p className="text-xs font-bold text-[#111827] mt-2 line-clamp-1">{b.label}</p>
-                <p className="text-[10px] text-[#9CA3AF] line-clamp-1 mt-0.5">{b.desc}</p>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </div>

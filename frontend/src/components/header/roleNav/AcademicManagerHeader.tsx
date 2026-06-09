@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDown, LogOut, UserCircle, Settings, BarChart2 } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
-import { SearchBar } from '../shared/SearchBar';
 import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { ACADEMIC_MANAGER_NAV } from '../config/nav-config';
@@ -18,11 +17,13 @@ export function AcademicManagerHeader() {
 
     // Determine active item based on current URL path
     const getActiveTab = () => {
-        if (location.pathname.includes('/pending-courses')) return 'pending-courses';
-        if (location.pathname.includes('/courses')) return 'courses';
-        if (location.pathname.includes('/learning-paths')) return 'learning-paths';
-        if (location.pathname.includes('/providers')) return 'providers';
-        return 'dashboard';
+        const path = location.pathname;
+        if (path === '/academic') return 'dashboard';
+        if (path === '/academic/pending-courses') return 'pending-courses';
+        if (path === '/academic/courses') return 'courses';
+        if (path === '/academic/learning-paths') return 'learning-paths';
+        if (path === '/academic/providers') return 'providers';
+        return '';
     };
 
     const active = getActiveTab();
@@ -56,10 +57,6 @@ export function AcademicManagerHeader() {
                                     navigate('/academic/pending-courses');
                                 } else if (item.id === 'dashboard') {
                                     navigate('/academic');
-                                } else if (item.id === 'learning-paths') {
-                                    navigate('/academic');
-                                } else if (item.id === 'providers') {
-                                    navigate('/academic');
                                 }
                             }}
                         />
@@ -67,8 +64,6 @@ export function AcademicManagerHeader() {
                 </nav>
 
                 <div className="flex-1" />
-
-                <SearchBar placeholder="Search submissions, paths..." accentColor={ACC} />
 
                 <NotifBell count={8} accentColor={ACC} />
 
