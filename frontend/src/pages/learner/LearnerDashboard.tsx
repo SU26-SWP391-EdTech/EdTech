@@ -44,8 +44,8 @@ export function LearnerDashboard() {
             <div className="grid grid-cols-12 gap-6">
                 <ContinueLearningSection
                     continueCourses={continueCourses}
-                    onViewAllClick={() => navigate('/learner/my-learning')}
-                    onContinueClick={() => navigate('/learner/my-learning')}
+                    onViewAllClick={() => navigate('/learner/my-learning#enrolled-courses')}
+                    onContinueClick={(courseId) => navigate(`/learner/courses/detail?id=${courseId}`)}
                     onBrowseClick={() => navigate('/learner/explore')}
                 />
 

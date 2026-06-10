@@ -13,6 +13,7 @@ interface ContinueCourseCardProps {
     initials: string;
     idx: number;
     onContinue: () => void;
+    onClick?: () => void;
 }
 
 export default function ContinueCourseCard({
@@ -25,10 +26,22 @@ export default function ContinueCourseCard({
     gradient,
     initials,
     idx,
-    onContinue
+    onContinue,
+    onClick
 }: ContinueCourseCardProps) {
     return (
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 hover:border-[#E11D48]/30 hover:shadow-md transition-all group">
+        <div
+            role="button"
+            tabIndex={0}
+            onClick={onClick}
+            onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onClick?.();
+                }
+            }}
+            className="bg-white border border-[#E5E7EB] rounded-2xl p-5 hover:border-[#E11D48]/30 hover:shadow-md transition-all group cursor-pointer"
+        >
             <div className="flex items-start gap-4 mb-4">
                 <div className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-white text-sm shadow-sm" style={{ background: gradient, fontWeight: 700 }}>
                     {initials}
@@ -57,7 +70,10 @@ export default function ContinueCourseCard({
                     <span>{duration}</span>
                 </div>
                 <button 
-                    onClick={onContinue}
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        onContinue();
+                    }}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F8FAFC] group-hover:bg-[#E11D48] text-[#374151] group-hover:text-white rounded-lg text-xs transition-all" 
                     style={{ fontWeight: 500 }}
                 >

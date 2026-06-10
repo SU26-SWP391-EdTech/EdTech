@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../stores/auth.stores';
 import type { Enrollment } from '../../../services/enrollment/enrollment.service';
 import type { LearningPath } from '../../../services/learning-path/learning-path.service';
@@ -8,6 +8,7 @@ type Tab = 'all' | 'in-progress' | 'completed' | 'saved' | 'archived';
 
 export function useMyLearning() {
     const navigate = useNavigate();
+    const location = useLocation();
     const [activeView, setActiveView] = useState<'dashboard' | 'all-paths' | 'all-courses'>('dashboard');
     const [tab, setTab] = useState<Tab>('all');
     const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
@@ -19,7 +20,9 @@ export function useMyLearning() {
     const user = useAuthStore((state) => state.user);
 
     useEffect(() => {
-        window.scrollTo(0, 0);
+        if (!location.hash) {
+            window.scrollTo(0, 0);
+        }
         async function fetchData() {
             try {
                 setIsLoading(true);
@@ -42,7 +45,29 @@ export function useMyLearning() {
         if (user) {
             fetchData();
         }
-    }, [user]);
+    }, [user, location.hash]);
+
+    useEffect(() => {
+        if (!isLoading || location.hash !== '#enrolled-courses') {
+            return;
+        }
+
+        setActiveView('dashboard');
+    }, [isLoading, location.hash]);
+
+    useEffect(() => {
+        if (isLoading || location.hash !== '#enrolled-courses') {
+            return;
+        }
+
+        window.requestAnimationFrame(() => {
+            const target = document.getElementById('enrolled-courses');
+            if (target) {
+                target.scrollIntoView({ block: 'start' });
+                window.scrollBy({ top: -88, left: 0, behavior: 'auto' });
+            }
+        });
+    }, [isLoading, location.hash, activeView]);
 
     function timeAgo(dateString?: string | null): string {
         if (!dateString) return 'Never';

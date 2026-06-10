@@ -1,4 +1,3 @@
-import toast from 'react-hot-toast';
 import { useCourseDetail } from '../../components/CourseDetail/useCourseDetail';
 import { CourseHero } from '../../components/CourseDetail/CourseHero';
 import { CourseOverview } from '../../components/CourseDetail/CourseOverview';
@@ -11,6 +10,10 @@ import { CourseSidebar } from '../../components/CourseDetail/CourseSidebar';
 export function CourseDetail() {
   const {
     matchedCourse,
+    providerProfile,
+    providerCoursesCount,
+    providerLearnerCount,
+    relatedCourses,
     role,
     enrolled,
     progressVal,
@@ -26,6 +29,8 @@ export function CourseDetail() {
     prerequisites,
     audience,
     handleEnroll,
+    getCourseDetailPath,
+    getProviderProfilePath,
     navigate,
   } = useCourseDetail();
 
@@ -66,20 +71,19 @@ export function CourseDetail() {
           <CourseProviderCard
             instructorName={instructorName}
             instructorAvatar={instructorAvatar}
+            expertise={providerProfile?.expertise}
+            bio={providerProfile?.bio}
+            rating={providerProfile?.rating}
+            courseCount={providerCoursesCount}
+            learnerCount={providerLearnerCount}
             onViewProfile={() => {
-              if (role === 'guest') {
-                toast.error('Please sign in to view provider profile.');
-                navigate('/login');
-              } else {
-                toast.success(`Navigating to ${instructorName}'s profile...`);
-              }
+              navigate(getProviderProfilePath(matchedCourse.user?.userId));
             }}
           />
 
           <RelatedCourses
-            onViewCourse={(title) => {
-              toast.success(`Viewing details for ${title}`);
-            }}
+            courses={relatedCourses}
+            onViewCourse={(courseId) => navigate(getCourseDetailPath(courseId))}
           />
         </div>
 

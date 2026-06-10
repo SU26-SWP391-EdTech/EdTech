@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../stores/auth.stores';
-import { MOCK_COURSES } from '../../db/data';
+import { MOCK_COURSES, MOCK_PROVIDER_PROFILES } from '../../db/data';
 import toast from 'react-hot-toast';
 import type { Module, LessonStatus } from './types';
 
@@ -16,6 +16,18 @@ export function useCourseDetail() {
   // Get active course from URL or location state
   const courseId = Number(searchParams.get('id') || location.state?.courseId || 8);
   const matchedCourse = MOCK_COURSES.find(c => c.courseId === courseId) || MOCK_COURSES[0];
+  const providerId = matchedCourse.user?.userId;
+  const providerProfile = MOCK_PROVIDER_PROFILES.find(provider => provider.userId === providerId);
+  const providerCourses = MOCK_COURSES.filter(course => course.user?.userId === providerId);
+  const providerLearnerCount = providerCourses.reduce((sum, course) => sum + (course.enrollmentCount || 0), 0);
+  const relatedCourses = MOCK_COURSES
+    .filter(course => course.courseId !== matchedCourse.courseId)
+    .sort((a, b) => {
+      const aScore = Number(a.language === matchedCourse.language) + Number(a.user?.userId === providerId);
+      const bScore = Number(b.language === matchedCourse.language) + Number(b.user?.userId === providerId);
+      return bScore - aScore;
+    })
+    .slice(0, 3);
 
   const outcomes = matchedCourse.outcomes || [];
   const prerequisites = matchedCourse.prerequisites || [];
@@ -48,7 +60,7 @@ export function useCourseDetail() {
       enrollmentId: Date.now(),
       enrolledAt: new Date().toISOString(),
       status: 'active',
-      progress: 42,
+      progress: 0,
       lastAccessedAt: new Date().toISOString(),
       completedAt: null,
       expiresAt: null,
@@ -63,7 +75,7 @@ export function useCourseDetail() {
   const isSpecialRole = ['guest', 'course provider', 'admin', 'academic manager'].includes(role);
 
   // Set progress: 0 for special roles, actual progress from enrollment for learner
-  const progressVal = isSpecialRole ? 0 : (isEnrolled ? (enrollments.find(e => e.course?.courseId === matchedCourse.courseId)?.progress || 42) : 0);
+  const progressVal = isSpecialRole ? 0 : (isEnrolled ? (enrollments.find(e => e.course?.courseId === matchedCourse.courseId)?.progress ?? 0) : 0);
   const enrolled = isEnrolled;
 
   const totalLessons = curriculum.reduce((acc, m) => acc + (m.lessons || []).length, 0);
@@ -116,9 +128,26 @@ export function useCourseDetail() {
   const difficultyLabel = matchedCourse.duration > 15 ? 'Advanced' : matchedCourse.duration > 10 ? 'Intermediate' : 'Beginner';
   const instructorName = matchedCourse.user?.fullName || 'Tech Mentors';
   const instructorAvatar = instructorName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  const getCourseDetailPath = (id: number) => {
+    if (role === 'learner') return `/learner/courses/detail?id=${id}`;
+    if (role === 'course provider') return `/provider/courses/detail?id=${id}`;
+    if (role === 'academic manager') return `/academic/courses/detail?id=${id}`;
+    return `/courses/detail?id=${id}`;
+  };
+  const getProviderProfilePath = (id: number) => {
+    if (role === 'learner') return `/learner/providers/${id}`;
+    if (role === 'course provider') return `/provider/providers/${id}`;
+    if (role === 'academic manager') return `/academic/providers/${id}`;
+    if (role === 'admin') return `/admin/providers/${id}`;
+    return `/providers/${id}`;
+  };
 
   return {
     matchedCourse,
+    providerProfile,
+    providerCoursesCount: providerCourses.length,
+    providerLearnerCount,
+    relatedCourses,
     role,
     enrolled,
     progressVal,
@@ -134,6 +163,8 @@ export function useCourseDetail() {
     prerequisites,
     audience,
     handleEnroll,
+    getCourseDetailPath,
+    getProviderProfilePath,
     navigate,
   };
 }

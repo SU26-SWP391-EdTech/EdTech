@@ -18,6 +18,7 @@ import { MyLearning } from '../pages/learner/MyLearning';
 import { LearnerDashboard } from '../pages/learner/LearnerDashboard';
 import { ExplorePage } from '../pages/Users/ExplorePage';
 import { LearningPathDetail } from '../pages/LearningPath/LearningPathDetail';
+import { ProviderProfile } from '../pages/Users/ProviderProfile';
 
 // User Profile page
 import { UserProfile } from '../pages/Users/UserProfile';
@@ -80,6 +81,10 @@ export const router = createBrowserRouter([
             {
                 path: "learning-path/:id",
                 element: <LearningPathDetail />
+            },
+            {
+                path: "providers/:id",
+                element: <ProviderProfile />
             }
         ]
     },
@@ -143,6 +148,10 @@ export const router = createBrowserRouter([
             {
                 path: 'learning-path/:id',
                 element: <LearningPathDetail />
+            },
+            {
+                path: 'providers/:id',
+                element: <ProviderProfile />
             }
         ]
     },
@@ -174,6 +183,10 @@ export const router = createBrowserRouter([
             {
                 path: 'learning-path/:id',
                 element: <LearningPathDetail />
+            },
+            {
+                path: 'providers/:id',
+                element: <ProviderProfile />
             }
         ]
     },
@@ -201,6 +214,10 @@ export const router = createBrowserRouter([
             {
                 path: 'adminprofile',
                 element: <AdminProfile />
+            },
+            {
+                path: 'providers/:id',
+                element: <ProviderProfile />
             }
         ]
     },
@@ -232,6 +249,10 @@ export const router = createBrowserRouter([
             {
                 path: 'learning-path/:id',
                 element: <LearningPathDetail />
+            },
+            {
+                path: 'providers/:id',
+                element: <ProviderProfile />
             }
         ]
     },

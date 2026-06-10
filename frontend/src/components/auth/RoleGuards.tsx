@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuthStore } from '../../stores/auth.stores';
+import { ScrollToTop } from '../ScrollToTop';
 
 interface GuardProps {
   children?: ReactNode;
@@ -32,7 +33,12 @@ export function GuestGuard({ children }: GuardProps) {
     return <Navigate to={getDefaultRoute(user.roleName)} replace />;
   }
 
-  return children ? <>{children}</> : <Outlet />;
+  return (
+    <>
+      <ScrollToTop />
+      {children ? <>{children}</> : <Outlet />}
+    </>
+  );
 }
 
 /**

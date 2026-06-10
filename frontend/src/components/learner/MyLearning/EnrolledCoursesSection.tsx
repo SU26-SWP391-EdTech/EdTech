@@ -3,6 +3,7 @@ import CourseCard from './CourseCard';
 import type { Enrollment } from '../../../services/enrollment/enrollment.service';
 
 interface EnrolledCoursesSectionProps {
+    id?: string;
     filteredEnrollmentsCount: number;
     sortedEnrollments: Enrollment[];
     timeAgo: (dateString?: string | null) => string;
@@ -13,6 +14,7 @@ interface EnrolledCoursesSectionProps {
 }
 
 export default function EnrolledCoursesSection({
+    id,
     filteredEnrollmentsCount,
     sortedEnrollments,
     timeAgo,
@@ -22,7 +24,7 @@ export default function EnrolledCoursesSection({
     onCourseClick,
 }: EnrolledCoursesSectionProps) {
     return (
-        <section>
+        <section id={id}>
             <SectionHeader
                 title="Enrolled Courses"
                 subtitle={`${filteredEnrollmentsCount} courses`}

@@ -9,6 +9,83 @@ const MOCK_USER = {
   avatar: null,
 };
 
+export const MOCK_PROVIDER_PROFILES = [
+  {
+    userId: 2,
+    fullName: 'Tráº§n Thá»‹ Provider',
+    email: 'provider@edtech.com',
+    avatar: null,
+    expertise: 'Frontend Engineering, React, TypeScript',
+    experienceYears: 8,
+    bio: 'Professional educator focused on practical frontend engineering, reusable UI architecture, and production-ready React applications.',
+    rating: 4.9,
+  },
+  {
+    userId: 5,
+    fullName: 'Tech Mentors',
+    email: 'mentors@edtech.com',
+    avatar: null,
+    expertise: 'Backend Engineering, APIs, Cloud Infrastructure',
+    experienceYears: 10,
+    bio: 'A team of senior backend engineers from leading tech companies, focused on shipping practical, production-grade backend curriculums.',
+    rating: 4.8,
+  },
+  {
+    userId: 6,
+    fullName: 'Design Lab Academy',
+    email: 'designlab@edtech.com',
+    avatar: null,
+    expertise: 'UI/UX Design, Product Design, Figma',
+    experienceYears: 6,
+    bio: 'Design educators helping learners build strong product thinking, interface craft, and portfolio-ready design case studies.',
+    rating: 4.7,
+  },
+  {
+    userId: 7,
+    fullName: 'DataCraft Institute',
+    email: 'datacraft@edtech.com',
+    avatar: null,
+    expertise: 'Data Science, Python, SQL, Machine Learning',
+    experienceYears: 9,
+    bio: 'Data practitioners teaching analytics, machine learning foundations, and applied database skills through hands-on projects.',
+    rating: 4.8,
+  },
+];
+
+function getMockProviderForCourse(courseId: number, title: string) {
+  const normalizedTitle = title.toLowerCase();
+
+  if (normalizedTitle.includes('figma') || normalizedTitle.includes('ui/ux')) {
+    return MOCK_PROVIDER_PROFILES[2];
+  }
+
+  if (
+    normalizedTitle.includes('python') ||
+    normalizedTitle.includes('data') ||
+    normalizedTitle.includes('sql') ||
+    normalizedTitle.includes('trÃ­ tuá»‡') ||
+    normalizedTitle.includes('ai')
+  ) {
+    return MOCK_PROVIDER_PROFILES[3];
+  }
+
+  if (
+    normalizedTitle.includes('spring') ||
+    normalizedTitle.includes('node') ||
+    normalizedTitle.includes('nestjs') ||
+    normalizedTitle.includes('docker') ||
+    normalizedTitle.includes('kubernetes') ||
+    normalizedTitle.includes('system design') ||
+    normalizedTitle.includes('owasp') ||
+    normalizedTitle.includes('graphql') ||
+    normalizedTitle.includes('devops')
+  ) {
+    return MOCK_PROVIDER_PROFILES[1];
+  }
+
+  return courseId % 2 === 0 ? MOCK_PROVIDER_PROFILES[1] : MOCK_PROVIDER_PROFILES[0];
+}
+
 function getCourseMetadata(title: string) {
   const t = title.toLowerCase();
 
@@ -591,6 +668,7 @@ const MOCK_COURSES_RAW: Course[] = [
 
 export const MOCK_COURSES: Course[] = MOCK_COURSES_RAW.map(course => ({
   ...course,
+  user: getMockProviderForCourse(course.courseId, course.title),
   ...getCourseMetadata(course.title)
 }));
 

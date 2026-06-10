@@ -3,6 +3,7 @@ import ContinueCourseCard from './ContinueCourseCard';
 
 interface CourseData {
     id: number;
+    courseId: number;
     title: string;
     path: string;
     progress: number;
@@ -16,7 +17,7 @@ interface CourseData {
 interface ContinueLearningSectionProps {
     continueCourses: CourseData[];
     onViewAllClick: () => void;
-    onContinueClick: () => void;
+    onContinueClick: (courseId: number) => void;
     onBrowseClick: () => void;
 }
 
@@ -53,7 +54,8 @@ export default function ContinueLearningSection({
                             gradient={course.gradient}
                             initials={course.initials}
                             idx={idx}
-                            onContinue={onContinueClick}
+                            onContinue={() => onContinueClick(course.courseId)}
+                            onClick={() => onContinueClick(course.courseId)}
                         />
                     ))
                 ) : (

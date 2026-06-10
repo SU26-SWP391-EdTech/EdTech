@@ -70,6 +70,7 @@ export function useLearnerDashboard() {
     // Continue Learning courses mapping
     const continueCourses = enrollments
         .filter(e => e.status === 'active' && e.progress < 100)
+        .slice(0, 3)
         .map((enrollment, idx) => {
             const parentPath = learningPaths.find(p =>
                 p.learningPathCourses?.some(lpc => lpc.courseId === enrollment.course.courseId)
@@ -88,6 +89,7 @@ export function useLearnerDashboard() {
 
             return {
                 id: enrollment.enrollmentId,
+                courseId: enrollment.course.courseId,
                 title: enrollment.course.title,
                 path: pathTitle,
                 progress: enrollment.progress,

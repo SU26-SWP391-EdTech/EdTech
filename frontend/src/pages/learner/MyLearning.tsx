@@ -50,7 +50,13 @@ export function MyLearning() {
                         <MyLearningHeader
                             hasEnrollments={!!displayEnrollment}
                             onExploreMoreClick={() => navigate('/learner/explore')}
-                            onContinueClick={() => navigate('/learner/explore')}
+                            onContinueClick={() => {
+                                if (displayEnrollment) {
+                                    navigate(`/learner/courses/detail?id=${displayEnrollment.course.courseId}`);
+                                } else {
+                                    navigate('/learner/explore');
+                                }
+                            }}
                         />
 
                         {/* Summary Cards */}
@@ -68,8 +74,16 @@ export function MyLearning() {
                                     <ContinueHighlight
                                         displayEnrollment={displayEnrollment}
                                         parentPathTitle={parentPathTitle}
-                                        onContinueClick={() => navigate('/learner/explore')}
-                                        onViewCourseClick={() => navigate('/learner/explore')}
+                                        onContinueClick={() => {
+                                            if (displayEnrollment) {
+                                                navigate(`/learner/courses/detail?id=${displayEnrollment.course.courseId}`);
+                                            }
+                                        }}
+                                        onViewCourseClick={() => {
+                                            if (displayEnrollment) {
+                                                navigate(`/learner/courses/detail?id=${displayEnrollment.course.courseId}`);
+                                            }
+                                        }}
                                         onBrowseClick={() => navigate('/learner/explore')}
                                     />
                                 </section>
@@ -86,6 +100,7 @@ export function MyLearning() {
 
                                 {/* Enrolled Courses */}
                                 <EnrolledCoursesSection
+                                    id="enrolled-courses"
                                     filteredEnrollmentsCount={filteredEnrollments.length}
                                     sortedEnrollments={sortedEnrollments}
                                     timeAgo={timeAgo}
