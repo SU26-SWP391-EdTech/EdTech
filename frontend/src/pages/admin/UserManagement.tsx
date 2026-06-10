@@ -37,6 +37,11 @@ export function UserManagement() {
     handleSaveUser,
     handleDeleteUser,
     fetchUsers,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    paginatedUsers,
+    itemsPerPage,
   } = useUserManagement();
 
   return (
@@ -56,9 +61,6 @@ export function UserManagement() {
                 </p>
               </div>
               <div className="flex items-center gap-2.5">
-                <button className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#374151] hover:border-[#D1D5DB] hover:bg-[#F9FAFB] transition-colors" style={{ fontWeight: 500 }}>
-                  <Download className="w-4 h-4" /> Export
-                </button>
                 <button
                   onClick={() => { setSelectedUser(undefined); setShowModal(true); }}
                   className="flex items-center gap-2 px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors"
@@ -182,10 +184,10 @@ export function UserManagement() {
                         </tr>
                       </thead>
                       <tbody>
-                        {filtered.map((user, i) => (
+                        {paginatedUsers.map((user, i) => (
                           <tr
                             key={user.id}
-                            className={`group hover:bg-[#FAFAFA] transition-colors ${i < filtered.length - 1 ? 'border-b border-[#F3F4F6]' : ''} ${i % 2 === 1 ? 'bg-[#FAFAFA]/40' : ''}`}
+                            className={`group hover:bg-[#FAFAFA] transition-colors ${i < paginatedUsers.length - 1 ? 'border-b border-[#F3F4F6]' : ''} ${i % 2 === 1 ? 'bg-[#FAFAFA]/40' : ''}`}
                           >
                             <td className="px-5 py-3.5">
                               <div className="flex items-center gap-3">
@@ -252,18 +254,37 @@ export function UserManagement() {
 
                     <div className="px-5 py-3.5 border-t border-[#F3F4F6] flex items-center justify-between bg-[#FAFAFA]">
                       <p className="text-xs text-[#6B7280]">
-                        Showing <span style={{ fontWeight: 500 }} className="text-[#111827]">{filtered.length}</span> of <span style={{ fontWeight: 500 }} className="text-[#111827]">{users.length}</span> users
+                        Showing <span style={{ fontWeight: 500 }} className="text-[#111827]">{filtered.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</span> to{' '}
+                        <span style={{ fontWeight: 500 }} className="text-[#111827]">{Math.min(currentPage * itemsPerPage, filtered.length)}</span> of{' '}
+                        <span style={{ fontWeight: 500 }} className="text-[#111827]">{filtered.length}</span> users
                       </p>
                       <div className="flex items-center gap-1.5">
-                        <button className="px-3 py-1.5 text-xs border border-[#E5E7EB] rounded-lg text-[#6B7280] hover:bg-[#F8FAFC]" style={{ fontWeight: 500 }}>Previous</button>
-                        {[1, 2, 3].map(p => (
+                        <button
+                          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                          disabled={currentPage === 1}
+                          className={`px-3 py-1.5 text-xs border border-[#E5E7EB] rounded-lg text-[#6B7280] transition-all ${currentPage === 1 ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'hover:bg-[#F8FAFC] active:bg-gray-100'}`}
+                          style={{ fontWeight: 500 }}
+                        >
+                          Previous
+                        </button>
+                        {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(p => (
                           <button
                             key={p}
-                            className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs ${p === 1 ? 'bg-[#E11D48] text-white' : 'border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F8FAFC]'}`}
-                            style={{ fontWeight: p === 1 ? 600 : 400 }}
-                          >{p}</button>
+                            onClick={() => setCurrentPage(p)}
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-all ${p === currentPage ? 'bg-[#E11D48] text-white font-semibold' : 'border border-[#E5E7EB] text-[#6B7280] hover:bg-[#F8FAFC] active:bg-gray-100'}`}
+                            style={{ fontWeight: p === currentPage ? 600 : 400 }}
+                          >
+                            {p}
+                          </button>
                         ))}
-                        <button className="px-3 py-1.5 text-xs border border-[#E5E7EB] rounded-lg text-[#6B7280] hover:bg-[#F8FAFC]" style={{ fontWeight: 500 }}>Next</button>
+                        <button
+                          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                          disabled={currentPage === totalPages}
+                          className={`px-3 py-1.5 text-xs border border-[#E5E7EB] rounded-lg text-[#6B7280] transition-all ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'hover:bg-[#F8FAFC] active:bg-gray-100'}`}
+                          style={{ fontWeight: 500 }}
+                        >
+                          Next
+                        </button>
                       </div>
                     </div>
                   </>

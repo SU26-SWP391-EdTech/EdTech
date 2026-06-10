@@ -36,7 +36,6 @@ export function CoursePreviewPanel({ course, onViewDetails }: CoursePreviewPanel
           ) : (
             <div className="flex flex-col items-center gap-2 opacity-80">
               {course.thumbIcon}
-              <span className="text-white/70 text-xs" style={{ fontWeight: 500 }}>{course.category}</span>
             </div>
           )}
         </div>
