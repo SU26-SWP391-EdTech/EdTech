@@ -90,10 +90,12 @@ export class AuthService {
   async login(loginDto: LoginDto, res: Response) {
     const { email, password } = loginDto;
 
-    const user = await this.userRepository.findOne({
-      where: { email },
-      relations: ['role'],
-    });
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.email = :email', { email })
+      .leftJoinAndSelect('user.role', 'role')
+      .getOne();
 
     if (!user) {
       throw new UnauthorizedException('Email or password is not true');

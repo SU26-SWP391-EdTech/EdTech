@@ -25,6 +25,13 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
       envFilePath: ['.env', '../.env'],
     }),
 
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 20,
+      },
+    ]),
+
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOST,
