@@ -145,15 +145,16 @@ export const useAuthStore = create<AuthState>()(
                     // Lưu vào mock storage (localStorage)
                     const stored = localStorage.getItem('mock_registered_users');
                     const users = stored ? JSON.parse(stored) : [];
-                    
+
                     const emailLower = data.email.toLowerCase().trim();
                     if (!users.some((u: any) => u.email === emailLower)) {
+                        const roleId = data.roleName === 'course provider' ? 2 : 1;
                         users.push({
                             email: emailLower,
                             fullName: data.fullName,
                             password: data.password,
-                            roleId: data.roleId || 1,
-                            roleName: data.roleId === 2 ? 'course provider' : 'learner',
+                            roleId: roleId,
+                            roleName: data.roleName,
                         });
                         localStorage.setItem('mock_registered_users', JSON.stringify(users));
                     }

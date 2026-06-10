@@ -71,3 +71,15 @@ export async function deleteCourse(id: number): Promise<{ message: string }> {
   const response = await api.delete(`/courses/${id}`);
   return response.data;
 }
+
+// Phê duyệt khóa học
+export async function approveCourse(id: number): Promise<BackendCourse> {
+  const response = await api.patch(`/courses/${id}/approve`);
+  return response.data;
+}
+
+// Từ chối khóa học
+export async function rejectCourse(id: number): Promise<BackendCourse> {
+  const response = await api.patch(`/courses/${id}/reject`);
+  return response.data;
+}

@@ -21,7 +21,7 @@ const MOCK_YOUTUBE_VIDEO_URLS = [
 export const MOCK_PROVIDER_PROFILES = [
   {
     userId: 2,
-    fullName: 'Tráº§n Thá»‹ Provider',
+    fullName: 'Trần Thị Provider',
     email: 'provider@edtech.com',
     avatar: null,
     expertise: 'Frontend Engineering, React, TypeScript',
@@ -72,7 +72,7 @@ function getMockProviderForCourse(courseId: number, title: string) {
     normalizedTitle.includes('python') ||
     normalizedTitle.includes('data') ||
     normalizedTitle.includes('sql') ||
-    normalizedTitle.includes('trÃ­ tuá»‡') ||
+    normalizedTitle.includes('trí tuệ') ||
     normalizedTitle.includes('ai')
   ) {
     return MOCK_PROVIDER_PROFILES[3];

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../stores/auth.stores';
 import { MOCK_COURSES, MOCK_PROVIDER_PROFILES } from '../../db/data';
+import { approveCourse, rejectCourse } from '../../services/course.service';
 import toast from 'react-hot-toast';
 import type { Module, LessonStatus } from './types';
 
@@ -173,6 +174,60 @@ export function useCourseDetail() {
     navigate(`/learner/lesson?courseId=${matchedCourse.courseId}&lessonId=${lessonId}`);
   };
 
+  const handleApproveCourse = async (id: number) => {
+    try {
+      await approveCourse(id);
+    } catch (e) {
+      console.log('Backend approve failed', e);
+    }
+    
+    // Update MOCK_COURSES in db/data.ts:
+    const dbIndex = MOCK_COURSES.findIndex(c => c.courseId === id || c.id === id);
+    if (dbIndex !== -1) {
+      MOCK_COURSES[dbIndex].status = 'approved' as any;
+    }
+    
+    // Update MOCK_COURSES in useCourseManagement:
+    try {
+      const { MOCK_COURSES: managementMockCourses } = await import('../CourseManagement/useCourseManagement');
+      const mockIndex = managementMockCourses.findIndex(c => c.id === id || c.courseId === id);
+      if (mockIndex !== -1) {
+        managementMockCourses[mockIndex].status = 'Published';
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    toast.success('Course approved successfully!');
+  };
+
+  const handleRejectCourse = async (id: number, reason: string) => {
+    try {
+      await rejectCourse(id);
+    } catch (e) {
+      console.log('Backend reject failed', e);
+    }
+    
+    // Update MOCK_COURSES in db/data.ts:
+    const dbIndex = MOCK_COURSES.findIndex(c => c.courseId === id || c.id === id);
+    if (dbIndex !== -1) {
+      MOCK_COURSES[dbIndex].status = 'rejected' as any;
+    }
+    
+    // Update MOCK_COURSES in useCourseManagement:
+    try {
+      const { MOCK_COURSES: managementMockCourses } = await import('../CourseManagement/useCourseManagement');
+      const mockIndex = managementMockCourses.findIndex(c => c.id === id || c.courseId === id);
+      if (mockIndex !== -1) {
+        managementMockCourses[mockIndex].status = 'Rejected';
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    toast.success('Course rejected successfully!');
+  };
+
   return {
     matchedCourse,
     providerProfile,
@@ -198,5 +253,7 @@ export function useCourseDetail() {
     getCourseDetailPath,
     getProviderProfilePath,
     navigate,
+    handleApproveCourse,
+    handleRejectCourse,
   };
 }
