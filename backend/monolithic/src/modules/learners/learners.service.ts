@@ -52,7 +52,7 @@ export class LearnersService {
       
       if (file) {
         const uploaded =
-          await this.cloudinaryService.uploadFile(file);
+          await this.cloudinaryService.uploadImage(file);
         user.avatar = uploaded.secure_url;
       } else if (dto.avatarUrl) {
         user.avatar = dto.avatarUrl;

@@ -39,7 +39,7 @@ export class CoursesService {
     }
 
     if (file) {
-      const uploaded = await this.cloudinaryService.uploadFile(file);
+      const uploaded = await this.cloudinaryService.uploadImage(file);
       createCourseDto.thumbnailUrl = uploaded.secure_url;
     }
 

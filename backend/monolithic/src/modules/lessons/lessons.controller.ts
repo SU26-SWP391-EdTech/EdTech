@@ -22,6 +22,7 @@ import { Roles } from 'src/common/decorators/roles/roles.decorator';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('Lessons')
 @Controller('lessons')
@@ -31,6 +32,7 @@ export class LessonsController {
 
 
     @Post(':id')
+    @Throttle({ default: { limit: 10, ttl: 60000 } })
     @Roles(RoleEnum.COURSE_PROVIDER)
     @UseInterceptors(FileInterceptor('videoUrl'))
     @ApiOperation({ summary: 'Create a lesson in a course' })

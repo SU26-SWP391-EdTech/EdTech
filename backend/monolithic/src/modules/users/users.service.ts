@@ -192,7 +192,7 @@ export class UsersService implements OnApplicationBootstrap {
     }
 
     if (file) {
-      const uploaded = await this.cloudinaryService.uploadFile(file);
+      const uploaded = await this.cloudinaryService.uploadImage(file);
       academicUser.avatar = uploaded.secure_url;
     } else if (dto.avatarUrl) {
       academicUser.avatar = dto.avatarUrl;

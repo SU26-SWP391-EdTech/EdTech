@@ -5,6 +5,7 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { JwtPayloadUser } from 'src/common/decorators/current-user.decorator';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('Enrollments')
 @Controller('enrollments')
@@ -13,6 +14,7 @@ export class EnrollmentsController {
     constructor(private readonly enrollmentsService: EnrollmentsService) { }
     //enroll course
     @Post('enroll/:id')
+    @Throttle({ default: { limit: 3, ttl: 60000 } })
     @ApiOperation({ summary: 'Enroll current user in a course' })
     @ApiResponse({ status: 201, description: 'Enrollment created successfully' })
     @ApiResponse({ status: 400, description: 'Invalid request data' })
