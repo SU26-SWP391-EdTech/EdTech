@@ -1,40 +1,79 @@
 import React, { useEffect, useState } from 'react';
 import { Flame, Clock, Target, GraduationCap } from 'lucide-react';
 import { useAuthStore } from '../../../stores/auth.stores';
-import type { Enrollment } from '../../../services/enrollment/enrollment.service';
-import type { LearningPath } from '../../../services/learning-path/learning-path.service';
+import { getMyEnrollments, type Enrollment } from '../../../services/enrollment/enrollment.service';
+import { getLearningPaths, type LearningPath } from '../../../services/learning-path/learning-path.service';
 import type { NodeState } from './RoadmapNode';
+import { getLearnerProfile } from '../../../services/learner/learner.services';
 
 export function useLearnerDashboard() {
     const user = useAuthStore((state) => state.user);
     const [profile, setProfile] = useState<any>(null);
     const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
     const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const loadDashboardData = async () => {
-            const { MOCK_PROFILE, MOCK_ENROLLMENTS, MOCK_LEARNING_PATHS } = await import('../../../db/data');
-            const isNewUser = user && !['learner@edtech.com', 'provider@edtech.com', 'manager@edtech.com', 'admin@edtech.com'].includes(user.email.toLowerCase());
+            if (!user) return;
+            try {
+                setIsLoading(true);
+                const [profileData, enrollmentsData, pathsData] = await Promise.all([
+                    getLearnerProfile(user.userId),
+                    getMyEnrollments(),
+                    getLearningPaths()
+                ]);
 
-            if (isNewUser) {
+                const completedCount = enrollmentsData.filter(
+                    e => e.status === 'completed' || e.progress === 100
+                ).length;
+
+                const totalHours = enrollmentsData.reduce((acc, curr) => {
+                    const duration = curr.course.duration || 10;
+                    return acc + Math.round(duration * (curr.progress / 100));
+                }, 0);
+
                 const storedPaths = sessionStorage.getItem('explore_cache_enrolled_paths');
                 const enrolledPathIds = storedPaths ? JSON.parse(storedPaths) : [];
+
                 setProfile({
-                    fullName: user.fullName,
-                    email: user.email,
-                    streakCount: 0,
-                    completedCourses: 0,
-                    learningHours: 0,
+                    ...profileData,
+                    streakCount: (profileData as any).streakCount ?? 5,
+                    completedCourses: completedCount,
+                    learningHours: totalHours,
                     enrolledPaths: enrolledPathIds.length,
                 });
-            } else {
-                setProfile(MOCK_PROFILE);
+
+                setEnrollments(enrollmentsData);
+                setLearningPaths(pathsData);
+            } catch (error) {
+                console.error("Failed to load dashboard data from API, falling back to mock:", error);
+
+                const { MOCK_PROFILE, MOCK_ENROLLMENTS, MOCK_LEARNING_PATHS } = await import('../../../db/data');
+                const isNewUser = !['learner@edtech.com', 'provider@edtech.com', 'manager@edtech.com', 'admin@edtech.com'].includes(user.email.toLowerCase());
+
+                if (isNewUser) {
+                    const storedPaths = sessionStorage.getItem('explore_cache_enrolled_paths');
+                    const enrolledPathIds = storedPaths ? JSON.parse(storedPaths) : [];
+                    setProfile({
+                        fullName: user.fullName,
+                        email: user.email,
+                        streakCount: 0,
+                        completedCourses: 0,
+                        learningHours: 0,
+                        enrolledPaths: enrolledPathIds.length,
+                    });
+                } else {
+                    setProfile(MOCK_PROFILE);
+                }
+
+                setLearningPaths(MOCK_LEARNING_PATHS);
+
+                const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
+                setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : (isNewUser ? [] : MOCK_ENROLLMENTS));
+            } finally {
+                setIsLoading(false);
             }
-
-            setLearningPaths(MOCK_LEARNING_PATHS);
-
-            const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
-            setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : (isNewUser ? [] : MOCK_ENROLLMENTS));
         };
         loadDashboardData();
     }, [user]);
@@ -171,6 +210,7 @@ export function useLearnerDashboard() {
         activePath,
         roadmapNodes,
         completedCount,
-        enrollments
+        enrollments,
+        isLoading
     };
 }
