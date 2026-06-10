@@ -191,6 +191,24 @@ export function useLearningPathDetail() {
 
   const currentModules = activeCourse ? generateModulesForCourse(activeCourse, selectedNode.progress) : [];
 
+  const getCourseDetailPath = (courseId: number) => {
+    const role = user?.roleName?.toLowerCase();
+    if (role === 'learner') return `/learner/courses/detail?id=${courseId}`;
+    if (role === 'course provider') return `/provider/courses/detail?id=${courseId}`;
+    if (role === 'academic manager') return `/academic/courses/detail?id=${courseId}`;
+    return `/courses/detail?id=${courseId}`;
+  };
+
+  const handleContinueCourse = (courseId: number) => {
+    const node = roadmapNodes.find(n => n.id === courseId);
+    if (!node || node.state === 'locked') {
+      toast.error('This course is locked. Please complete or enroll in the previous courses first.');
+      return;
+    }
+
+    navigate(getCourseDetailPath(courseId));
+  };
+
   // Actions
   const handleEnrollSingleCourse = async (courseId: number) => {
     if (!user) {
@@ -339,5 +357,6 @@ export function useLearningPathDetail() {
     handleEnrollSingleCourse,
     handleEnrollAllPath,
     handleStartLesson,
+    handleContinueCourse,
   };
 }

@@ -15,7 +15,7 @@ export function useCourseDetail() {
 
   // Get active course from URL or location state
   const courseId = Number(searchParams.get('id') || location.state?.courseId || 8);
-  const matchedCourse = MOCK_COURSES.find(c => c.courseId === courseId) || MOCK_COURSES[0];
+  const matchedCourse: any = MOCK_COURSES.find(c => c.courseId === courseId) || MOCK_COURSES[0];
   const providerId = matchedCourse.user?.userId;
   const providerProfile = MOCK_PROVIDER_PROFILES.find(provider => provider.userId === providerId);
   const providerCourses = MOCK_COURSES.filter(course => course.user?.userId === providerId);
@@ -75,15 +75,21 @@ export function useCourseDetail() {
   const isSpecialRole = ['guest', 'course provider', 'admin', 'academic manager'].includes(role);
 
   // Set progress: 0 for special roles, actual progress from enrollment for learner
-  const progressVal = isSpecialRole ? 0 : (isEnrolled ? (enrollments.find(e => e.course?.courseId === matchedCourse.courseId)?.progress ?? 0) : 0);
+  const currentEnrollment = enrollments.find(e => e.course?.courseId === matchedCourse.courseId);
+  const completedLessonIds = new Set<string>((currentEnrollment?.completedLessonIds || []).map(String));
+  const progressVal = isSpecialRole ? 0 : (isEnrolled ? (currentEnrollment?.progress ?? 0) : 0);
   const enrolled = isEnrolled;
 
-  const totalLessons = curriculum.reduce((acc, m) => acc + (m.lessons || []).length, 0);
-  const completedLessons = isSpecialRole ? 0 : (enrolled ? Math.round((progressVal / 100) * totalLessons) : 0);
+  const totalLessons = curriculum.reduce((acc: number, m: any) => acc + (m.lessons || []).length, 0);
+  const completedLessons = isSpecialRole
+    ? 0
+    : completedLessonIds.size > 0
+      ? completedLessonIds.size
+      : (enrolled ? Math.round((progressVal / 100) * totalLessons) : 0);
 
   // Dynamically map curriculum lessons status based on progress and role
   let lessonCounter = 0;
-  const dynamicCurriculum: Module[] = curriculum.map((m) => {
+  const dynamicCurriculum: Module[] = curriculum.map((m: any) => {
     let completedInModule = 0;
     const mappedLessons = (m.lessons || []).map((l: any) => {
       lessonCounter++;
@@ -99,7 +105,7 @@ export function useCourseDetail() {
         if (!enrolled) {
           status = l.preview ? 'not-started' : 'locked';
         } else {
-          if (lessonCounter <= completedLessons) {
+          if (completedLessonIds.has(String(l.id)) || lessonCounter <= completedLessons) {
             status = 'completed';
             completedInModule++;
           } else if (lessonCounter === completedLessons + 1) {
@@ -125,9 +131,10 @@ export function useCourseDetail() {
   const categoryLabel = matchedCourse.title.toLowerCase().includes('react') || matchedCourse.title.toLowerCase().includes('next.js')
     ? 'Frontend Development'
     : 'Backend Development';
-  const difficultyLabel = matchedCourse.duration > 15 ? 'Advanced' : matchedCourse.duration > 10 ? 'Intermediate' : 'Beginner';
+  const courseDuration = matchedCourse.duration || 0;
+  const difficultyLabel = courseDuration > 15 ? 'Advanced' : courseDuration > 10 ? 'Intermediate' : 'Beginner';
   const instructorName = matchedCourse.user?.fullName || 'Tech Mentors';
-  const instructorAvatar = instructorName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  const instructorAvatar = instructorName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase();
   const getCourseDetailPath = (id: number) => {
     if (role === 'learner') return `/learner/courses/detail?id=${id}`;
     if (role === 'course provider') return `/provider/courses/detail?id=${id}`;
@@ -140,6 +147,30 @@ export function useCourseDetail() {
     if (role === 'academic manager') return `/academic/providers/${id}`;
     if (role === 'admin') return `/admin/providers/${id}`;
     return `/providers/${id}`;
+  };
+
+  const getContinueLessonId = () => {
+    const flatLessons = dynamicCurriculum.flatMap(module => module.lessons || []);
+    const currentLesson = flatLessons.find(lesson => lesson.status === 'current');
+    const firstOpenLesson = flatLessons.find(lesson => lesson.status !== 'locked' && lesson.status !== 'completed');
+    const firstLesson = flatLessons.find(lesson => lesson.status !== 'locked');
+
+    return currentLesson?.id || firstOpenLesson?.id || firstLesson?.id;
+  };
+
+  const handleContinueCourse = () => {
+    if (!enrolled) {
+      handleEnroll();
+      return;
+    }
+
+    const lessonId = getContinueLessonId();
+    if (!lessonId) {
+      toast.error('No lesson is available for this course yet.');
+      return;
+    }
+
+    navigate(`/learner/lesson?courseId=${matchedCourse.courseId}&lessonId=${lessonId}`);
   };
 
   return {
@@ -163,6 +194,7 @@ export function useCourseDetail() {
     prerequisites,
     audience,
     handleEnroll,
+    handleContinueCourse,
     getCourseDetailPath,
     getProviderProfilePath,
     navigate,

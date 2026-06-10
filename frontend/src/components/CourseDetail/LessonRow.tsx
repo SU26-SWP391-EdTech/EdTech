@@ -1,13 +1,16 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Clock, Video, BookOpen, ClipboardList, FileText } from 'lucide-react';
 import type { Lesson, LessonType } from './types';
 import { StatusIcon } from './StatusIcon';
 
 interface LessonRowProps {
   lesson: Lesson;
+  courseId: number;
 }
 
-export function LessonRow({ lesson }: LessonRowProps) {
+export function LessonRow({ lesson, courseId }: LessonRowProps) {
+  const navigate = useNavigate();
   const typeMap: Record<LessonType, { Icon: React.ComponentType<{ className?: string }>; color: string }> = {
     Video: { Icon: Video, color: '#E11D48' },
     Reading: { Icon: BookOpen, color: '#6366F1' },
@@ -20,12 +23,12 @@ export function LessonRow({ lesson }: LessonRowProps) {
   const isLocked = lesson.status === 'locked';
 
   return (
-    <a
-      href="#"
-      onClick={(e) => {
+    <div
+      onClick={() => {
         if (isLocked) {
-          e.preventDefault();
+          return;
         }
+        navigate(`/learner/lesson?courseId=${courseId}&lessonId=${lesson.id}`);
       }}
       className={`flex items-center gap-3 px-4 py-2.5 border-t border-[#F1F5F9] transition-colors ${
         isCurrent ? 'bg-[#FEF2F2]' : 'hover:bg-[#FAFAFA]'
@@ -46,6 +49,6 @@ export function LessonRow({ lesson }: LessonRowProps) {
         <Clock className="w-3 h-3" />
         {lesson.duration}
       </span>
-    </a>
+    </div>
   );
 }

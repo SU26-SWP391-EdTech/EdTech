@@ -37,6 +37,7 @@ import { AdminProfile } from '../pages/admin/AdminProfile';
 
 
 import { useAuthStore } from '../stores/auth.stores';
+import { LessonPage } from '../pages/Lesson/LessonPage';
 
 function HomeRedirect() {
     const user = useAuthStore((state) => state.user);
@@ -153,6 +154,10 @@ export const router = createBrowserRouter([
             {
                 path: 'providers/:id',
                 element: <ProviderProfile />
+            },
+            {
+                path: 'lesson',
+                element: <LessonPage />
             }
         ]
     },

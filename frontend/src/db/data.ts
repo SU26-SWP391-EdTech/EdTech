@@ -9,6 +9,14 @@ const MOCK_USER = {
   avatar: null,
 };
 
+const MOCK_YOUTUBE_VIDEO_URLS = [
+  'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+  'https://youtu.be/jNQXAC9IVRw',
+  'https://www.youtube.com/embed/tgbNymZ7vqY',
+  'https://www.youtube.com/watch?v=ysz5S6PUM-U',
+  'https://youtu.be/aqz-KE-bpKQ',
+];
+
 export const MOCK_PROVIDER_PROFILES = [
   {
     userId: 2,
@@ -117,9 +125,9 @@ function getCourseMetadata(title: string) {
           description: 'Set up your project workspace and explore core architecture concept details.',
           progress: 0,
           lessons: [
-            { id: 'l1', title: 'Course Overview & Roadmap', type: 'Video', duration: '05:30', status: 'not-started', preview: true },
+            { id: 'l1', title: 'Course Overview & Roadmap', type: 'Video', duration: '05:30', status: 'not-started', preview: true, videoUrl: MOCK_YOUTUBE_VIDEO_URLS[0] },
             { id: 'l2', title: 'Local Tooling & Boilerplate config', type: 'Reading', duration: '12 min', status: 'not-started' },
-            { id: 'l3', title: 'Building Your First Interactive Component', type: 'Video', duration: '10:45', status: 'not-started' },
+            { id: 'l3', title: 'Building Your First Interactive Component', type: 'Video', duration: '10:45', status: 'not-started', videoUrl: MOCK_YOUTUBE_VIDEO_URLS[1] },
             { id: 'l4', title: 'Environment Knowledge Check', type: 'Quiz', duration: '5 min', status: 'not-started' }
           ]
         },
@@ -129,9 +137,9 @@ function getCourseMetadata(title: string) {
           description: 'Dive deep into responsive layout utilities and advanced hook controls.',
           progress: 0,
           lessons: [
-            { id: 'l5', title: 'Responsive Design Best Practices', type: 'Video', duration: '15:20', status: 'not-started' },
+            { id: 'l5', title: 'Responsive Design Best Practices', type: 'Video', duration: '15:20', status: 'not-started', videoUrl: MOCK_YOUTUBE_VIDEO_URLS[2] },
             { id: 'l6', title: 'State Lifecycle & Custom Hook Patterns', type: 'Reading', duration: '15 min', status: 'not-started' },
-            { id: 'l7', title: 'Building a Complex Data-driven View', type: 'Video', duration: '20:15', status: 'not-started' },
+            { id: 'l7', title: 'Building a Complex Data-driven View', type: 'Video', duration: '20:15', status: 'not-started', videoUrl: MOCK_YOUTUBE_VIDEO_URLS[3] },
             { id: 'l8', title: 'Module 2 Practice Review', type: 'Quiz', duration: '8 min', status: 'not-started' }
           ]
         },
@@ -141,7 +149,7 @@ function getCourseMetadata(title: string) {
           description: 'Compile your frontend bundle and configure production deployments.',
           progress: 0,
           lessons: [
-            { id: 'l9', title: 'Optimizing Build Bundles', type: 'Video', duration: '12:30', status: 'not-started' },
+            { id: 'l9', title: 'Optimizing Build Bundles', type: 'Video', duration: '12:30', status: 'not-started', videoUrl: MOCK_YOUTUBE_VIDEO_URLS[4] },
             { id: 'l10', title: 'Hosting Services Config & Edge Routing', type: 'Reading', duration: '10 min', status: 'not-started' },
             { id: 'l11', title: 'Full Frontend Capstone Submission', type: 'Assignment', duration: '2 hours', status: 'not-started' }
           ]
@@ -178,9 +186,9 @@ function getCourseMetadata(title: string) {
           description: 'Learn relational database paradigms and execute your very first SELECT queries.',
           progress: 0,
           lessons: [
-            { id: 'l1', title: 'Introduction to Relational Databases', type: 'Video', duration: '08:15', status: 'not-started', preview: true },
+            { id: 'l1', title: 'Introduction to Relational Databases', type: 'Video', duration: '08:15', status: 'not-started', preview: true, videoUrl: MOCK_YOUTUBE_VIDEO_URLS[0] },
             { id: 'l2', title: 'Installing SQL Workbench / DBeaver', type: 'Reading', duration: '15 min', status: 'not-started' },
-            { id: 'l3', title: 'Understanding tables, keys, and values', type: 'Video', duration: '14:20', status: 'not-started' },
+            { id: 'l3', title: 'Understanding tables, keys, and values', type: 'Video', duration: '14:20', status: 'not-started', videoUrl: MOCK_YOUTUBE_VIDEO_URLS[1] },
             { id: 'l4', title: 'Basic Queries Quiz', type: 'Quiz', duration: '8 min', status: 'not-started' }
           ]
         },
@@ -190,9 +198,9 @@ function getCourseMetadata(title: string) {
           description: 'Combine datasets from separate tables and summarize data details.',
           progress: 0,
           lessons: [
-            { id: 'l5', title: 'INNER, LEFT, RIGHT JOINs Explained', type: 'Video', duration: '18:40', status: 'not-started' },
+            { id: 'l5', title: 'INNER, LEFT, RIGHT JOINs Explained', type: 'Video', duration: '18:40', status: 'not-started', videoUrl: MOCK_YOUTUBE_VIDEO_URLS[2] },
             { id: 'l6', title: 'Grouping Results (GROUP BY & HAVING)', type: 'Reading', duration: '15 min', status: 'not-started' },
-            { id: 'l7', title: 'Writing CTEs & Subqueries', type: 'Video', duration: '22:10', status: 'not-started' },
+            { id: 'l7', title: 'Writing CTEs & Subqueries', type: 'Video', duration: '22:10', status: 'not-started', videoUrl: MOCK_YOUTUBE_VIDEO_URLS[3] },
             { id: 'l8', title: 'Joins and Aggregations Challenge', type: 'Quiz', duration: '10 min', status: 'not-started' }
           ]
         },
@@ -202,7 +210,7 @@ function getCourseMetadata(title: string) {
           description: 'Create database designs and execute performance optimizations.',
           progress: 0,
           lessons: [
-            { id: 'l9', title: 'Normalizing Schemas (1NF, 2NF, 3NF)', type: 'Video', duration: '20:15', status: 'not-started' },
+            { id: 'l9', title: 'Normalizing Schemas (1NF, 2NF, 3NF)', type: 'Video', duration: '20:15', status: 'not-started', videoUrl: MOCK_YOUTUBE_VIDEO_URLS[4] },
             { id: 'l10', title: 'Database Indexing Strategies', type: 'Reading', duration: '12 min', status: 'not-started' },
             { id: 'l11', title: 'E-commerce Schema Capstone submission', type: 'Assignment', duration: '3 hours', status: 'not-started' }
           ]
@@ -239,9 +247,9 @@ function getCourseMetadata(title: string) {
           description: 'Set up Python, Jupyter notebooks, and learn core coding syntax structures.',
           progress: 0,
           lessons: [
-            { id: 'l1', title: 'Why Python is the language of AI', type: 'Video', duration: '07:50', status: 'not-started', preview: true },
+            { id: 'l1', title: 'Why Python is the language of AI', type: 'Video', duration: '07:50', status: 'not-started', preview: true, videoUrl: MOCK_YOUTUBE_VIDEO_URLS[0] },
             { id: 'l2', title: 'Setting up Anaconda & JupyterLab', type: 'Reading', duration: '15 min', status: 'not-started' },
-            { id: 'l3', title: 'Variables, loops, and lists in Python', type: 'Video', duration: '16:30', status: 'not-started' },
+            { id: 'l3', title: 'Variables, loops, and lists in Python', type: 'Video', duration: '16:30', status: 'not-started', videoUrl: MOCK_YOUTUBE_VIDEO_URLS[1] },
             { id: 'l4', title: 'Basic Syntax Quiz', type: 'Quiz', duration: '6 min', status: 'not-started' }
           ]
         },
@@ -251,9 +259,9 @@ function getCourseMetadata(title: string) {
           description: 'Load, filter, transform, and clean real-world dataset files.',
           progress: 0,
           lessons: [
-            { id: 'l5', title: 'Pandas DataFrames Essentials', type: 'Video', duration: '20:10', status: 'not-started' },
+            { id: 'l5', title: 'Pandas DataFrames Essentials', type: 'Video', duration: '20:10', status: 'not-started', videoUrl: MOCK_YOUTUBE_VIDEO_URLS[2] },
             { id: 'l6', title: 'Vectorized Operations with NumPy', type: 'Reading', duration: '12 min', status: 'not-started' },
-            { id: 'l7', title: 'Plotting Insights & Visualizations', type: 'Video', duration: '18:45', status: 'not-started' },
+            { id: 'l7', title: 'Plotting Insights & Visualizations', type: 'Video', duration: '18:45', status: 'not-started', videoUrl: MOCK_YOUTUBE_VIDEO_URLS[3] },
             { id: 'l8', title: 'Data Wrangling Challenge', type: 'Quiz', duration: '10 min', status: 'not-started' }
           ]
         },
@@ -263,7 +271,7 @@ function getCourseMetadata(title: string) {
           description: 'Build predictive AI and interface with large language model APIs.',
           progress: 0,
           lessons: [
-            { id: 'l9', title: 'Supervised Learning with Scikit-learn', type: 'Video', duration: '24:15', status: 'not-started' },
+            { id: 'l9', title: 'Supervised Learning with Scikit-learn', type: 'Video', duration: '24:15', status: 'not-started', videoUrl: MOCK_YOUTUBE_VIDEO_URLS[4] },
             { id: 'l10', title: 'Building a RAG Agent with OpenAI API', type: 'Reading', duration: '20 min', status: 'not-started' },
             { id: 'l11', title: 'Predictive Model Capstone submission', type: 'Assignment', duration: '4 hours', status: 'not-started' }
           ]
@@ -300,9 +308,9 @@ function getCourseMetadata(title: string) {
         description: 'Set up your environment and understand Spring Boot fundamentals.',
         progress: 0,
         lessons: [
-          { id: 'l1', title: 'Why Spring Boot?', type: 'Video', duration: '08:24', status: 'not-started', preview: true },
+          { id: 'l1', title: 'Why Spring Boot?', type: 'Video', duration: '08:24', status: 'not-started', preview: true, videoUrl: MOCK_YOUTUBE_VIDEO_URLS[0] },
           { id: 'l2', title: 'Setting up IntelliJ & Maven', type: 'Reading', duration: '10 min', status: 'not-started' },
-          { id: 'l3', title: 'Hello World Application', type: 'Video', duration: '12:10', status: 'not-started' },
+          { id: 'l3', title: 'Hello World Application', type: 'Video', duration: '12:10', status: 'not-started', videoUrl: MOCK_YOUTUBE_VIDEO_URLS[1] },
           { id: 'l4', title: 'Module Quiz', type: 'Quiz', duration: '5 min', status: 'not-started' }
         ]
       },
@@ -312,9 +320,9 @@ function getCourseMetadata(title: string) {
         description: 'Understand REST architecture, HTTP verbs, and status codes.',
         progress: 0,
         lessons: [
-          { id: 'l5', title: 'REST Architecture Explained', type: 'Video', duration: '14:32', status: 'not-started' },
+          { id: 'l5', title: 'REST Architecture Explained', type: 'Video', duration: '14:32', status: 'not-started', videoUrl: MOCK_YOUTUBE_VIDEO_URLS[2] },
           { id: 'l6', title: 'HTTP Methods Deep Dive', type: 'Reading', duration: '15 min', status: 'not-started' },
-          { id: 'l7', title: 'Building Your First Controller', type: 'Video', duration: '18:45', status: 'not-started' },
+          { id: 'l7', title: 'Building Your First Controller', type: 'Video', duration: '18:45', status: 'not-started', videoUrl: MOCK_YOUTUBE_VIDEO_URLS[3] },
           { id: 'l8', title: 'Knowledge Check', type: 'Quiz', duration: '8 min', status: 'not-started' }
         ]
       },
@@ -324,7 +332,7 @@ function getCourseMetadata(title: string) {
         description: 'Connect Spring Boot to MySQL and secure it using JWT.',
         progress: 0,
         lessons: [
-          { id: 'l9', title: 'JPA Fundamentals & Hibernate', type: 'Video', duration: '20:00', status: 'not-started' },
+          { id: 'l9', title: 'JPA Fundamentals & Hibernate', type: 'Video', duration: '20:00', status: 'not-started', videoUrl: MOCK_YOUTUBE_VIDEO_URLS[4] },
           { id: 'l10', title: 'JWT Token Authentication Flow', type: 'Reading', duration: '18 min', status: 'not-started' },
           { id: 'l11', title: 'Bookstore REST API Capstone Submission', type: 'Assignment', duration: '4 hours', status: 'not-started' }
         ]

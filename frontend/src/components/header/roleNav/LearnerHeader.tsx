@@ -7,6 +7,7 @@ import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { LEARNER_NAV } from '../config/nav-config';
 import { useAuthStore } from '../../../stores/auth.stores';
+import { getContinueLessonUrl } from '../../LessonPage/lessonUtils';
 
 export function LearnerHeader() {
     const navigate = useNavigate();
@@ -27,6 +28,24 @@ export function LearnerHeader() {
 
     const ACC = '#E11D48';
     const ACTIVE_BG = '#FFF1F3';
+
+    const handleContinueLearning = () => {
+        const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
+        const enrollments = storedEnrollments ? JSON.parse(storedEnrollments) : [];
+        const activeEnrollments = enrollments.filter((e: any) => e.status === 'active' && e.progress < 100);
+
+        if (activeEnrollments.length > 0) {
+            const courseId = activeEnrollments[0].course.courseId;
+            const url = getContinueLessonUrl(courseId, enrollments);
+            navigate(url);
+        } else if (enrollments.length > 0) {
+            const courseId = enrollments[0].course.courseId;
+            const url = getContinueLessonUrl(courseId, enrollments);
+            navigate(url);
+        } else {
+            navigate('/learner/explore');
+        }
+    };
 
     return (
         <div className="bg-white border-b border-[#E5E7EB] shadow-sm">
@@ -72,7 +91,7 @@ export function LearnerHeader() {
                 <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
 
                 <button
-                    onClick={() => navigate('/learner/my-learning')}
+                    onClick={handleContinueLearning}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm flex-shrink-0 transition-all hover:scale-[1.02] active:scale-[0.98]"
                     style={{
                         backgroundColor: ACC,

@@ -47,6 +47,8 @@ export const useAuthStore = create<AuthState>()(
                             roleName: 'learner' as const,
                             avatarUrl: null,
                         };
+                        sessionStorage.removeItem('explore_cache_enrollments');
+                        sessionStorage.removeItem('explore_cache_enrolled_paths');
                     } else if (emailLower === 'provider@edtech.com') {
                         mockUser = {
                             userId: 2,
@@ -74,6 +76,28 @@ export const useAuthStore = create<AuthState>()(
                             roleName: 'admin' as const,
                             avatarUrl: null,
                         };
+                    }
+
+                    // Kiểm tra mock users được đăng ký động trong localStorage
+                    if (!mockUser) {
+                        const stored = localStorage.getItem('mock_registered_users');
+                        const mockUsers = stored ? JSON.parse(stored) : [];
+                        const matched = mockUsers.find((u: any) => u.email === emailLower);
+                        if (matched) {
+                            if (!credentials.password || matched.password === credentials.password) {
+                                mockUser = {
+                                    userId: Math.floor(Math.random() * 100000) + 10,
+                                    email: matched.email,
+                                    fullName: matched.fullName,
+                                    roleId: matched.roleId,
+                                    roleName: matched.roleName as 'learner' | 'course provider' | 'academic manager' | 'admin',
+                                    avatarUrl: null,
+                                };
+                                // Khởi tạo tiến trình trống cho tài khoản mới
+                                sessionStorage.setItem('explore_cache_enrollments', JSON.stringify([]));
+                                sessionStorage.setItem('explore_cache_enrolled_paths', JSON.stringify([]));
+                            }
+                        }
                     }
 
                     // Nếu khớp tài khoản mock, cập nhật trạng thái đăng nhập vào store và lưu token giả lập.
@@ -112,7 +136,31 @@ export const useAuthStore = create<AuthState>()(
             register: async (data) => {
                 set({ isLoading: true, error: null });
                 try {
-                    await registerApi(data);
+                    try {
+                        await registerApi(data);
+                    } catch (apiErr) {
+                        console.warn("Backend API registration failed, falling back to mock registration storage.", apiErr);
+                    }
+
+                    // Lưu vào mock storage (localStorage)
+                    const stored = localStorage.getItem('mock_registered_users');
+                    const users = stored ? JSON.parse(stored) : [];
+                    
+                    const emailLower = data.email.toLowerCase().trim();
+                    if (!users.some((u: any) => u.email === emailLower)) {
+                        users.push({
+                            email: emailLower,
+                            fullName: data.fullName,
+                            password: data.password,
+                            roleId: data.roleId || 1,
+                            roleName: data.roleId === 2 ? 'course provider' : 'learner',
+                        });
+                        localStorage.setItem('mock_registered_users', JSON.stringify(users));
+                    }
+
+                    // Lưu email vào sessionStorage để hiển thị trên màn hình verify email
+                    sessionStorage.setItem('registered_email', data.email);
+
                     set({ isLoading: false });
                 } catch (err: any) {
                     const errMsg = err.response?.data?.message || 'Failed to register. Please try again.';
@@ -125,7 +173,11 @@ export const useAuthStore = create<AuthState>()(
             verifyEmail: async (token) => {
                 set({ error: null });
                 try {
-                    await verifyEmailApi(token);
+                    try {
+                        await verifyEmailApi(token);
+                    } catch (apiErr) {
+                        console.warn("Backend API email verification failed, bypassing for mock flow.", apiErr);
+                    }
                 } catch (err: any) {
                     const errMsg = err.response?.data?.message || 'Failed to verify email. Please try again.';
                     set({ error: errMsg });
@@ -135,18 +187,9 @@ export const useAuthStore = create<AuthState>()(
 
             // Action 3: Đăng xuất
             logout: async () => {
-                // ── BACKEND API LOGOUT (TẠM THỜI COMMENT LẠI KHI DÙNG MOCKDATA) ──────────────────
-                /*
-                try {
-                    await logoutApi();
-                } catch (e) {
-                    console.error('Failed to logout from backend:', e);
-                }
-                */
-
-                // ── MOCK LOGOUT LOGIC (HỖ TRỢ CHẠY MOCKDATA ĐỘC LẬP VÀ TRÁNH LỖI PHẢI BẤM 2 LẦN) ─
-                // Clear state lập tức và đồng bộ ở Client để UI chuyển hướng ngay về trang login,
-                // không bị treo/đợi phản hồi từ API Backend (tránh lỗi race condition giữa route guard và store).
+                // Clear state lập tức và đồng bộ ở Client để UI chuyển hướng ngay về trang login
+                sessionStorage.removeItem('explore_cache_enrollments');
+                sessionStorage.removeItem('explore_cache_enrolled_paths');
                 set({
                     user: null,
                     token: null,
@@ -169,6 +212,8 @@ export const useAuthStore = create<AuthState>()(
 // Lắng nghe sự kiện logout từ axios interceptor (khi gặp lỗi 401)
 if (typeof window !== 'undefined') {
     window.addEventListener('auth:logout', () => {
+        sessionStorage.removeItem('explore_cache_enrollments');
+        sessionStorage.removeItem('explore_cache_enrolled_paths');
         useAuthStore.setState({
             user: null,
             token: null,

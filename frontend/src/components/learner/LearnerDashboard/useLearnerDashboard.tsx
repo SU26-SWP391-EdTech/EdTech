@@ -14,11 +14,27 @@ export function useLearnerDashboard() {
     useEffect(() => {
         const loadDashboardData = async () => {
             const { MOCK_PROFILE, MOCK_ENROLLMENTS, MOCK_LEARNING_PATHS } = await import('../../../db/data');
-            setProfile(MOCK_PROFILE);
+            const isNewUser = user && !['learner@edtech.com', 'provider@edtech.com', 'manager@edtech.com', 'admin@edtech.com'].includes(user.email.toLowerCase());
+
+            if (isNewUser) {
+                const storedPaths = sessionStorage.getItem('explore_cache_enrolled_paths');
+                const enrolledPathIds = storedPaths ? JSON.parse(storedPaths) : [];
+                setProfile({
+                    fullName: user.fullName,
+                    email: user.email,
+                    streakCount: 0,
+                    completedCourses: 0,
+                    learningHours: 0,
+                    enrolledPaths: enrolledPathIds.length,
+                });
+            } else {
+                setProfile(MOCK_PROFILE);
+            }
+
             setLearningPaths(MOCK_LEARNING_PATHS);
 
             const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
-            setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : MOCK_ENROLLMENTS);
+            setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : (isNewUser ? [] : MOCK_ENROLLMENTS));
         };
         loadDashboardData();
     }, [user]);
@@ -33,7 +49,7 @@ export function useLearnerDashboard() {
             icon: React.createElement(Flame, { className: "w-5 h-5" }),
             color: '#F59E0B',
             bg: '#FFF7ED',
-            sparkData: [0, 2, 3, 5, 4, 8, profile?.streakCount ?? 0],
+            sparkData: (profile?.streakCount ?? 0) === 0 ? [0, 0, 0, 0, 0, 0, 0] : [0, 2, 3, 5, 4, 8, profile?.streakCount ?? 0],
         },
         {
             id: 'completed',
@@ -43,7 +59,7 @@ export function useLearnerDashboard() {
             icon: React.createElement(GraduationCap, { className: "w-5 h-5" }),
             color: '#10B981',
             bg: '#F0FDF4',
-            sparkData: [0, 0, 0, 0, 0, 0, profile?.completedCourses ?? 0],
+            sparkData: (profile?.completedCourses ?? 0) === 0 ? [0, 0, 0, 0, 0, 0, 0] : [0, 0, 0, 0, 0, 0, profile?.completedCourses ?? 0],
         },
         {
             id: 'hours',
@@ -53,7 +69,7 @@ export function useLearnerDashboard() {
             icon: React.createElement(Clock, { className: "w-5 h-5" }),
             color: '#3B82F6',
             bg: '#EFF6FF',
-            sparkData: [0, 15, 30, 45, 60, 90, profile?.learningHours ?? 0],
+            sparkData: (profile?.learningHours ?? 0) === 0 ? [0, 0, 0, 0, 0, 0, 0] : [0, 15, 30, 45, 60, 90, profile?.learningHours ?? 0],
         },
         {
             id: 'paths',
@@ -63,7 +79,7 @@ export function useLearnerDashboard() {
             icon: React.createElement(Target, { className: "w-5 h-5" }),
             color: '#E11D48',
             bg: '#FFF1F4',
-            sparkData: [0, 0, 0, 1, 1, 1, profile?.enrolledPaths ?? 0],
+            sparkData: (profile?.enrolledPaths ?? 0) === 0 ? [0, 0, 0, 0, 0, 0, 0] : [0, 0, 0, 1, 1, 1, profile?.enrolledPaths ?? 0],
         },
     ];
 
@@ -102,13 +118,15 @@ export function useLearnerDashboard() {
         });
 
     // Roadmap active path & nodes mapping
-    const activePath = learningPaths.find(path =>
-        path.learningPathCourses?.some(pc =>
-            enrollments.some(e => e.course.courseId === pc.courseId)
-        )
-    ) || learningPaths[0] || null;
+    const storedPaths = sessionStorage.getItem('explore_cache_enrolled_paths');
+    const isNewUser = user && !['learner@edtech.com', 'provider@edtech.com', 'manager@edtech.com', 'admin@edtech.com'].includes(user.email.toLowerCase());
+    const enrolledPathIds: number[] = storedPaths ? JSON.parse(storedPaths) : (isNewUser ? [] : [1]);
 
-    const pathCourses = [...(activePath?.learningPathCourses || [])].sort((a, b) => a.order - b.order);
+    const activePath = learningPaths.find(path =>
+        enrolledPathIds.includes(path.learningPathId)
+    ) || null;
+
+    const pathCourses = activePath ? [...(activePath.learningPathCourses || [])].sort((a, b) => a.order - b.order) : [];
 
     let foundCurrentOrUpcoming = false;
     const roadmapNodes = pathCourses.map((lpc, idx) => {
@@ -152,6 +170,7 @@ export function useLearnerDashboard() {
         continueCourses,
         activePath,
         roadmapNodes,
-        completedCount
+        completedCount,
+        enrollments
     };
 }

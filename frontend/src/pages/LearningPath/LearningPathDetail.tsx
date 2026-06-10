@@ -23,6 +23,7 @@ export function LearningPathDetail() {
     handleEnrollSingleCourse,
     handleEnrollAllPath,
     handleStartLesson,
+    handleContinueCourse,
   } = useLearningPathDetail();
 
   if (isLoading || !path) {
@@ -82,6 +83,7 @@ export function LearningPathDetail() {
                   isLast={i === roadmapNodes.length - 1} 
                   onSelect={() => node.state !== 'locked' && setActiveCourseId(node.id)}
                   onEnroll={() => handleEnrollSingleCourse(node.id)}
+                  onContinue={() => handleContinueCourse(node.id)}
                 />
               ))}
             </div>

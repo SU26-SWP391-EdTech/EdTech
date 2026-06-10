@@ -19,6 +19,7 @@ export function useExplore() {
     const [courses, setCourses] = useState<Course[]>([]);
     const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
     const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+    const [enrolledPathIds, setEnrolledPathIds] = useState<number[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [enrollingId, setEnrollingId] = useState<number | null>(null);
     const [profile, setProfile] = useState<any>(null);
@@ -36,11 +37,28 @@ export function useExplore() {
             
             const isLearner = user?.roleName?.toLowerCase() === 'learner';
             if (user && isLearner) {
+                const isNewUser = !['learner@edtech.com', 'provider@edtech.com', 'manager@edtech.com', 'admin@edtech.com'].includes(user.email.toLowerCase());
                 const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
-                setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : MOCK_ENROLLMENTS);
-                setProfile(MOCK_LEARNER_PROFILE_FULL);
+                setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : (isNewUser ? [] : MOCK_ENROLLMENTS));
+                
+                const storedPaths = sessionStorage.getItem('explore_cache_enrolled_paths');
+                setEnrolledPathIds(storedPaths ? JSON.parse(storedPaths) : (isNewUser ? [] : [1, 2]));
+
+                if (isNewUser) {
+                    setProfile({
+                        fullName: user.fullName,
+                        email: user.email,
+                        streakCount: 0,
+                        completedCourses: 0,
+                        learningHours: 0,
+                        enrolledPaths: 0,
+                    });
+                } else {
+                    setProfile(MOCK_LEARNER_PROFILE_FULL);
+                }
             } else {
                 setEnrollments([]);
+                setEnrolledPathIds([]);
                 setProfile(null);
             }
         } catch (error) {
@@ -149,6 +167,11 @@ export function useExplore() {
 
             setEnrollments(newEnrollments);
             sessionStorage.setItem('explore_cache_enrollments', JSON.stringify(newEnrollments));
+
+            const updatedPaths = [...enrolledPathIds, path.learningPathId];
+            setEnrolledPathIds(updatedPaths);
+            sessionStorage.setItem('explore_cache_enrolled_paths', JSON.stringify(updatedPaths));
+
             toast.success(`Successfully enrolled in ${unenrolledCourses.length} course(s) on this path! (Mock)`);
         } catch (error) {
             console.error('Path enrollment error:', error);
@@ -174,10 +197,8 @@ export function useExplore() {
     });
 
     const filteredPaths = learningPaths.filter((path) => {
-        const pathCourses = path.learningPathCourses || [];
-        const userEnrolledInPath = pathCourses.some(pc => isEnrolled(pc.courseId));
-
         const isLearner = user?.roleName?.toLowerCase() === 'learner';
+        const userEnrolledInPath = enrolledPathIds.includes(path.learningPathId);
         return isLearner ? !userEnrolledInPath : true;
     });
 

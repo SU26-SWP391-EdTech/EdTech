@@ -13,6 +13,7 @@ interface CourseHeroProps {
   difficultyLabel: string;
   instructorName: string;
   instructorAvatar: string;
+  onContinueCourse: () => void;
 }
 
 export function CourseHero({
@@ -27,6 +28,7 @@ export function CourseHero({
   difficultyLabel,
   instructorName,
   instructorAvatar,
+  onContinueCourse,
 }: CourseHeroProps) {
   return (
     <div className="max-w-[1376px] mx-auto px-8 pt-6">
@@ -110,7 +112,7 @@ export function CourseHero({
                       Enroll Course
                     </button>
                   ) : (
-                    <button onClick={() => toast.success('Starting learning session...')} className="flex items-center gap-2 px-5 py-2.5 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors shadow-lg shadow-[#E11D48]/30" style={{ fontWeight: 600 }}>
+                    <button onClick={onContinueCourse} className="flex items-center gap-2 px-5 py-2.5 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors shadow-lg shadow-[#E11D48]/30" style={{ fontWeight: 600 }}>
                       <Play className="w-4 h-4 fill-white" />
                       Continue Course
                     </button>

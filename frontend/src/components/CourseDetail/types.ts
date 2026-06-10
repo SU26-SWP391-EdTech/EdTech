@@ -8,6 +8,7 @@ export interface Lesson {
   duration: string;
   status: LessonStatus;
   preview?: boolean;
+  videoUrl?: string;
 }
 
 export interface Module {

@@ -5,7 +5,6 @@ import { CourseOutcomes } from '../../components/CourseDetail/CourseOutcomes';
 import { CourseCurriculum } from '../../components/CourseDetail/CourseCurriculum';
 import { CourseProviderCard } from '../../components/CourseDetail/CourseProviderCard';
 import { RelatedCourses } from '../../components/CourseDetail/RelatedCourses';
-import { CourseSidebar } from '../../components/CourseDetail/CourseSidebar';
 
 export function CourseDetail() {
   const {
@@ -24,11 +23,11 @@ export function CourseDetail() {
     difficultyLabel,
     instructorName,
     instructorAvatar,
-    skills,
     outcomes,
     prerequisites,
     audience,
     handleEnroll,
+    handleContinueCourse,
     getCourseDetailPath,
     getProviderProfilePath,
     navigate,
@@ -48,13 +47,14 @@ export function CourseDetail() {
         difficultyLabel={difficultyLabel}
         instructorName={instructorName}
         instructorAvatar={instructorAvatar}
+        onContinueCourse={handleContinueCourse}
       />
 
       {/* Main Grid */}
       <div className="max-w-[1376px] mx-auto px-8 py-8 grid grid-cols-12 gap-6">
-        <div className="col-span-8 space-y-6">
+        <div className="col-span-12 space-y-6">
           <CourseOverview
-            description={matchedCourse.description}
+            description={matchedCourse.description || ''}
             audience={audience}
             prerequisites={prerequisites}
           />
@@ -64,8 +64,9 @@ export function CourseDetail() {
           <CourseCurriculum
             curriculum={dynamicCurriculum}
             totalLessons={totalLessons}
-            duration={matchedCourse.duration}
+            duration={matchedCourse.duration || 0}
             enrolled={enrolled}
+            courseId={matchedCourse.courseId}
           />
 
           <CourseProviderCard
@@ -87,17 +88,6 @@ export function CourseDetail() {
           />
         </div>
 
-        <CourseSidebar
-          enrolled={enrolled}
-          progressVal={progressVal}
-          completedLessons={completedLessons}
-          totalLessons={totalLessons}
-          role={role}
-          handleEnroll={handleEnroll}
-          duration={matchedCourse.duration}
-          curriculumLength={dynamicCurriculum.length}
-          skills={skills}
-        />
       </div>
     </div>
   );

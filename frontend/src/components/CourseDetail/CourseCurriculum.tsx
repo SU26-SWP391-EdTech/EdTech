@@ -9,9 +9,10 @@ interface CourseCurriculumProps {
   totalLessons: number;
   duration: number;
   enrolled: boolean;
+  courseId: number;
 }
 
-export function CourseCurriculum({ curriculum, totalLessons, duration, enrolled }: CourseCurriculumProps) {
+export function CourseCurriculum({ curriculum, totalLessons, duration, enrolled, courseId }: CourseCurriculumProps) {
   const [openModules, setOpenModules] = useState<Record<string, boolean>>({ m1: true, m2: true });
   const toggle = (id: string) => setOpenModules((s) => ({ ...s, [id]: !s[id] }));
 
@@ -50,7 +51,7 @@ export function CourseCurriculum({ curriculum, totalLessons, duration, enrolled 
             {openModules[m.id] && (
               <div className="bg-white">
                 {m.lessons.map((l) => (
-                  <LessonRow key={l.id} lesson={l} />
+                  <LessonRow key={l.id} lesson={l} courseId={courseId} />
                 ))}
               </div>
             )}
@@ -60,3 +61,4 @@ export function CourseCurriculum({ curriculum, totalLessons, duration, enrolled 
     </Card>
   );
 }
+

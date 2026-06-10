@@ -7,6 +7,7 @@ interface RoadmapCardProps {
   isLast: boolean;
   onSelect: () => void;
   onEnroll: () => void;
+  onContinue: () => void;
 }
 
 const nodeCfg = {
@@ -20,7 +21,8 @@ export default function RoadmapCard({
   node,
   isLast,
   onSelect,
-  onEnroll
+  onEnroll,
+  onContinue
 }: RoadmapCardProps) {
   const cfg = nodeCfg[node.state];
   const isLocked = node.state === 'locked';
@@ -100,7 +102,7 @@ export default function RoadmapCard({
             {/* CTA for current/upcoming */}
             {node.state === 'current' && (
               <button 
-                onClick={(e) => { e.stopPropagation(); onSelect(); }}
+                onClick={(e) => { e.stopPropagation(); onContinue(); }}
                 className="mt-3 flex items-center gap-1.5 px-3 py-1.5 bg-[#E11D48] text-white rounded-lg text-xs hover:bg-[#BE123C] transition-colors" 
                 style={{ fontWeight: 500 }}
               >
