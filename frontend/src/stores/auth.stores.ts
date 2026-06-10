@@ -12,6 +12,7 @@ interface AuthState {
     isAuthenticated: boolean;
     isLoading: boolean;
     error: string | null;
+    requiresPlatformSetup: boolean;
 
     login: (credentials: { email: string; password: string }) => Promise<User>;
     register: (data: { fullName: string; email: string; password: string; roleName: string }) => Promise<void>;
@@ -27,6 +28,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             isLoading: false,
             error: null,
+            requiresPlatformSetup: false,
 
             // Action 1: Đăng nhập
             login: async (credentials) => {

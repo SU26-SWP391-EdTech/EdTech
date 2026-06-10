@@ -17,6 +17,7 @@ export class CoursesController {
     constructor(private readonly coursesService: CoursesService) { }
 
     @Post()
+    @Roles(RoleEnum.COURSE_PROVIDER)
     @Throttle({ default: { limit: 3, ttl: 60000 } })
     @UseInterceptors(FileInterceptor('thumbnailUrl'))
     @ApiOperation({ summary: 'Create a course' })
@@ -55,6 +56,7 @@ export class CoursesController {
     }
 
     @Patch(':id')
+    @Roles(RoleEnum.COURSE_PROVIDER, RoleEnum.ACADEMIC_MANAGER)
     @ApiOperation({ summary: 'Update a course' })
     @ApiResponse({ status: 200, description: 'Course updated successfully' })
     @ApiResponse({ status: 400, description: 'Invalid request data' })
@@ -68,6 +70,7 @@ export class CoursesController {
     }
 
     @Delete(':id')
+    @Roles(RoleEnum.COURSE_PROVIDER, RoleEnum.ACADEMIC_MANAGER)
     @ApiOperation({ summary: 'Delete a course' })
     @ApiResponse({ status: 200, description: 'Course deleted successfully' })
     @ApiResponse({ status: 404, description: 'Course not found' })
