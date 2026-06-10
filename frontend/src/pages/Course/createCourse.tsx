@@ -52,14 +52,9 @@ const initialModules: Module[] = [
 
 export function CreateCoursePage() {
     const navigate = useNavigate();
-    const [modules, setModules] = useState<Module[]>(initialModules);
-    const [outcomes, setOutcomes] = useState<string[]>([
-        'Design and implement RESTful APIs using Spring Boot',
-        'Integrate JPA with relational databases and run migrations',
-        'Apply authentication & authorization with Spring Security',
-        'Containerize and deploy a Spring Boot application',
-    ]);
-    const [skills, setSkills] = useState<string[]>(['Java', 'Spring Boot', 'REST API', 'JPA', 'Security']);
+    const [modules, setModules] = useState<Module[]>([]);
+    const [outcomes, setOutcomes] = useState<string[]>([]);
+    const [skills, setSkills] = useState<string[]>([]);
     const [showAddModule, setShowAddModule] = useState(false);
     const [showAddLesson, setShowAddLesson] = useState(false);
     const [showSubmit, setShowSubmit] = useState(false);
@@ -68,17 +63,17 @@ export function CreateCoursePage() {
     const [deletingModuleId, setDeletingModuleId] = useState<string | null>(null);
 
     // Form states
-    const [title, setTitle] = useState('Spring Boot REST API Masterclass');
-    const [description, setDescription] = useState('Master REST architecture by building real-world APIs. Covers controllers, services, JPA, security, deployment, and testing — with hands-on labs and a capstone project.');
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
     const [language, setLanguage] = useState('English');
-    const [durationHours, setDurationHours] = useState(12);
-    const [durationMinutes, setDurationMinutes] = useState(30);
+    const [durationHours, setDurationHours] = useState(0);
+    const [durationMinutes, setDurationMinutes] = useState(0);
     const [projectUrl, setProjectUrl] = useState('');
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
     const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
     const [dragOver, setDragOver] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [prerequisiteCourseIds, setPrerequisiteCourseIds] = useState<number[]>([1]);
+    const [prerequisiteCourseIds, setPrerequisiteCourseIds] = useState<number[]>([]);
     const [draggedModuleIndex, setDraggedModuleIndex] = useState<number | null>(null);
     const [draggedLessonInfo, setDraggedLessonInfo] = useState<{ mIdx: number; lIdx: number } | null>(null);
     const [dragEnabled, setDragEnabled] = useState(false);
@@ -215,6 +210,12 @@ export function CreateCoursePage() {
 
     return (
         <div className="bg-[#F8FAFC] min-h-screen">
+            {isSubmitting && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center gap-4">
+                    <div className="w-14 h-14 border-4 border-white border-t-transparent rounded-full animate-spin" />
+                    <p className="text-white text-base font-semibold animate-pulse">Creating course & uploading image, please wait...</p>
+                </div>
+            )}
             <div className="max-w-[1376px] mx-auto px-8 py-8">
                 {/* Header */}
                 <div className="flex items-end justify-between mb-7">
