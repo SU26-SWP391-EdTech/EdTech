@@ -99,11 +99,17 @@ npm run start:dev
 ## 🐳 HOẶC chạy bằng Docker (full stack)
 
 > ⚠️ Chỉ dùng khi:
-> - đã có `.env.docker`
+> - đã có `.env.docker` trong backend
 > - đã chạy `npm install`
 
 ```
 docker compose up -d
+
+# Frontend: http://localhost:3001/
+# API SwaggerUI: http://localhost:3001/api/docs 
+# or http://localhost:3000/docs
+# MyPHPAdmin http://localhost:8080
+# Backend API: http://localhost:3000/api/user
 ```
 
 ---

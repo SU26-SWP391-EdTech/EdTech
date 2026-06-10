@@ -25,6 +25,7 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
       envFilePath: ['.env', '../.env'],
     }),
 
+    // In 1 minute: Maximum 5 requests per user (or IP address)
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
@@ -52,7 +53,7 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
     CoursesModule,
     LessonsModule,
     LearnersModule,
-    LearningPathsModule,  
+    LearningPathsModule,
     AuthModule,
     MailModule,
     CloudinaryModule

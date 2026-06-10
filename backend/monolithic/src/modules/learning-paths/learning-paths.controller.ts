@@ -13,10 +13,10 @@ import { Public } from 'src/common/decorators/public.decorator';
 @ApiTags('Learning paths')
 @Controller('learning-paths')
 export class LearningPathsController {
-  constructor(private readonly learningPathsService: LearningPathsService) {}
+  constructor(private readonly learningPathsService: LearningPathsService) { }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleEnum.COURSE_PROVIDER)
+  @Roles(RoleEnum.ACADEMIC_MANAGER)
   @Post()
   @ApiOperation({
     summary: 'Create a learning path',
@@ -48,14 +48,25 @@ export class LearningPathsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER)
   @Post(':id/courses')
+  @ApiOperation({
+    summary: 'Add a course to a learning path',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Course added to learning path successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Learning path or course not found',
+  })
   public async addCourse(
-    @Param('id', ParseIntPipe) 
+    @Param('id', ParseIntPipe)
     learningPathId: number,
 
     @Body()
     dto: AddCourseToLearningPathDto,
 
-    @Req() 
+    @Req()
     req: any
 
   ) {

@@ -1,14 +1,8 @@
 {
-  "dependencies": {
-    "@nestjs/throttler": "^6.5.0",
-    "cloudinary": "^2.10.0"
-  },
-  "devDependencies": {
-    "@types/multer": "^2.1.0"
-  },
   "scripts": {
     "start": "docker-compose up",
-    "dev": "docker-compose up",
-    "down": "docker-compose down"
+    "down": "docker-compose down",
+    "down:remove-all": "docker-compose down -v",
+    "start:database": "docker-compose up db phpmyadmin"
   }
 }
