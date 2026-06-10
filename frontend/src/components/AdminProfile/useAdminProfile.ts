@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '../../stores/auth.stores';
 import type { ProfileData } from './EditProfileModal';
+import { getUserById, updateUser } from '../../services/user/user.service';
+import toast from 'react-hot-toast';
 
 const mapRoleNameToLabel = (roleName?: string): string => {
     if (!roleName) return 'User';
@@ -37,20 +39,18 @@ export function useAdminProfile() {
         try {
             setLoading(true);
 
-            const { MOCK_ACADEMIC_PROFILE } = await import('../../db/data');
-            const stored = sessionStorage.getItem('mock_admin_profile');
-            const res = stored ? JSON.parse(stored) : { ...MOCK_ACADEMIC_PROFILE, fullName: 'Phạm Hồng Admin', email: 'admin@edtech.com', bio: 'dang cap vcl' };
+            const res = await getUserById(loggedInUser.userId);
 
             setProfile({
-                name: res.fullName || loggedInUser.fullName || 'No Name',
-                email: res.email || loggedInUser.email,
-                bio: res.bio || 'dang cap vcl',
+                name: res?.fullName || loggedInUser.fullName || 'No Name',
+                email: res?.email || loggedInUser.email,
+                bio: 'Platform Administrator',
                 location: 'Not set',
                 organization: 'EdTech Platform',
-                avatar: res.avatarUrl || loggedInUser.avatarUrl || '',
-                expertise: res.expertise || 'Not set',
-                experienceYear: res.experienceYears !== undefined && res.experienceYears !== null ? `${res.experienceYears} years` : '10 years',
-                createdAt: res.createdAt ? new Date(res.createdAt).toLocaleDateString('en-US', {
+                avatar: res?.avatar || loggedInUser.avatarUrl || '',
+                expertise: 'Not set',
+                experienceYear: 'N/A',
+                createdAt: res?.createdAt ? new Date(res.createdAt).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
                     year: 'numeric'
@@ -62,7 +62,7 @@ export function useAdminProfile() {
             setProfile({
                 name: loggedInUser.fullName || 'No Name',
                 email: loggedInUser.email,
-                bio: 'dang cap vcl',
+                bio: 'Platform Administrator',
                 location: 'Not set',
                 organization: 'EdTech Platform',
                 avatar: loggedInUser.avatarUrl || '',
@@ -99,29 +99,40 @@ export function useAdminProfile() {
     }) => {
         if (!loggedInUser) return;
 
-        const yearsMatch = updated.experienceYear.match(/\d+/);
-        const years = yearsMatch ? parseInt(yearsMatch[0], 10) : 10;
+        try {
+            setLoading(true);
+            let avatarUrlToSend = updated.avatar;
 
-        const updatedProfile = {
-            fullName: updated.name,
-            expertise: updated.expertise,
-            experienceYears: years,
-            avatarUrl: updated.avatar,
-            bio: profile.bio,
-            email: profile.email,
-            createdAt: profile.createdAt
-        };
-        sessionStorage.setItem('mock_admin_profile', JSON.stringify(updatedProfile));
-
-        useAuthStore.setState({
-            user: {
-                ...loggedInUser,
-                fullName: updated.name,
-                avatarUrl: updated.avatar,
+            if (updated.avatarFile) {
+                avatarUrlToSend = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result as string);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(updated.avatarFile!);
+                });
             }
-        });
 
-        await fetchProfileData();
+            const res = await updateUser(loggedInUser.userId, {
+                fullName: updated.name,
+                avatar_url: avatarUrlToSend,
+            });
+
+            useAuthStore.setState({
+                user: {
+                    ...loggedInUser,
+                    fullName: res.fullName || updated.name,
+                    avatarUrl: res.avatar || updated.avatar,
+                }
+            });
+
+            toast.success('Profile updated successfully!');
+            await fetchProfileData();
+        } catch (err: any) {
+            console.error('Failed to save profile', err);
+            toast.error(err.response?.data?.message || 'Failed to save profile. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return {

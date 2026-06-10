@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { MOCK_COURSES } from '../../db/data';
 import toast from 'react-hot-toast';
 import type { Lesson, MockEnrollment, Module, Note } from './types';
 import {
@@ -10,6 +9,9 @@ import {
   SAVED_NOTES
 } from './lessonUtils';
 import { useAuthStore } from '../../stores/auth.stores';
+import { getCourseById } from '../../services/course/course.service';
+import { getLessonsByCourse } from '../../services/lesson/lesson.service';
+import { getMyEnrollments, updateEnrollmentProgress } from '../../services/enrollment/enrollment.service';
 
 export function useLessonPage() {
   const navigate = useNavigate();
@@ -19,18 +21,64 @@ export function useLessonPage() {
   const courseId = Number(searchParams.get('courseId') || 8);
   const activeLessonId = searchParams.get('lessonId');
 
-  // Load course details
-  const matchedCourse: any = MOCK_COURSES.find(c => c.courseId === courseId) || MOCK_COURSES.find(c => c.courseId === 8) || MOCK_COURSES[0];
-  const rawModules = matchedCourse.curriculum || [];
+  const [course, setCourse] = useState<any>(null);
+  const [lessonsList, setLessonsList] = useState<any[]>([]);
+  const [enrollments, setEnrollments] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Enrollment checks
-  const [enrollments, setEnrollments] = useState<MockEnrollment[]>(() => {
-    const cached = sessionStorage.getItem('explore_cache_enrollments');
-    return cached ? JSON.parse(cached) : [];
-  });
   const user = useAuthStore((state) => state.user);
   const role = user?.roleName?.toLowerCase() || 'guest';
-  const currentEnrollment = enrollments.find(e => e.course?.courseId === matchedCourse.courseId);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setIsLoading(true);
+        const [courseData, lessonsData] = await Promise.all([
+          getCourseById(courseId),
+          getLessonsByCourse(courseId),
+        ]);
+        setCourse(courseData);
+        setLessonsList(lessonsData);
+
+        if (role === 'learner') {
+          const enrolls = await getMyEnrollments();
+          setEnrollments(enrolls);
+        } else {
+          setEnrollments([]);
+        }
+      } catch (error) {
+        console.error('Failed to load lesson page data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, [courseId, role]);
+
+  const matchedCourse: any = course || {
+    courseId,
+    title: 'Loading course...',
+    curriculum: [],
+  };
+
+  const rawModules = [
+    {
+      id: 'm1',
+      title: 'Course Curriculum',
+      description: 'Lessons list',
+      lessons: lessonsList.map(l => ({
+        id: String(l.lessonId),
+        title: l.title,
+        duration: l.videoDuration ? `${Math.round(l.videoDuration / 60)}m` : '15m',
+        type: l.content ? 'Reading' : 'Video',
+        preview: false,
+        videoUrl: l.videoUrl || '',
+        content: l.content || '',
+      })),
+    }
+  ];
+
+  const currentEnrollment = enrollments.find(e => e.course?.courseId === courseId);
   const isEnrolled = role === 'learner' && Boolean(currentEnrollment);
   const isSpecialRole = ['guest', 'course provider', 'admin', 'academic manager'].includes(role);
   const progressVal = isSpecialRole ? 0 : (isEnrolled ? (currentEnrollment?.progress ?? 0) : 0);
@@ -38,7 +86,7 @@ export function useLessonPage() {
   // States
   const [videoProgress] = useState(34);
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
-  const [completedLessonIds, setCompletedLessonIds] = useState<Set<string>>(() => new Set(currentEnrollment?.completedLessonIds || []));
+  const [completedLessonIds, setCompletedLessonIds] = useState<Set<string>>(new Set());
   const [noteText, setNoteText] = useState('');
   const [notes, setNotes] = useState<Note[]>(SAVED_NOTES);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -54,6 +102,23 @@ export function useLessonPage() {
   const [assignmentSubmitted, setAssignmentSubmitted] = useState(false);
   const [assignmentText, setAssignmentText] = useState('');
   const [assignmentFile, setAssignmentFile] = useState<File | null>(null);
+
+  // Sync completedLessonIds from progressVal
+  useEffect(() => {
+    if (currentEnrollment) {
+      const lessonsCount = lessonsList.length;
+      const completedCount = Math.round((progressVal / 100) * lessonsCount);
+      const nextCompleted = new Set<string>();
+      lessonsList.forEach((l, idx) => {
+        if (idx < completedCount) {
+          nextCompleted.add(String(l.lessonId));
+        }
+      });
+      setCompletedLessonIds(nextCompleted);
+    } else {
+      setCompletedLessonIds(new Set());
+    }
+  }, [currentEnrollment, lessonsList, progressVal]);
 
   // Map modules and status
   const hasTrackedLessonProgress = completedLessonIds.size > 0;
@@ -191,7 +256,7 @@ export function useLessonPage() {
     toast.success('Note deleted.');
   };
 
-  const persistLessonCompletion = (lesson: Lesson, showToast = true) => {
+  const persistLessonCompletion = async (lesson: Lesson, showToast = true) => {
     if (role !== 'learner') {
       if (showToast) toast.error('Only learners can update course progress.');
       return;
@@ -207,34 +272,17 @@ export function useLessonPage() {
     setCompletedLessonIds(nextCompletedIds);
 
     const progress = totalLessons > 0 ? Math.round((nextCompletedIds.size / totalLessons) * 100) : 0;
-    const now = new Date().toISOString();
-
-    setEnrollments(prev => {
-      const existing = prev.find(e => e.course?.courseId === matchedCourse.courseId);
-      const updatedEnrollment: MockEnrollment = {
-        ...(existing || {
-          enrollmentId: Date.now(),
-          enrolledAt: now,
-          expiresAt: null,
-          course: matchedCourse,
-        }),
-        course: existing?.course || matchedCourse,
-        status: progress >= 100 ? 'completed' : 'active',
-        progress,
-        lastAccessedAt: now,
-        completedAt: progress >= 100 ? now : null,
-        completedLessonIds: Array.from(nextCompletedIds),
-      };
-
-      const updated = existing
-        ? prev.map(e => e.course?.courseId === matchedCourse.courseId ? updatedEnrollment : e)
-        : [...prev, updatedEnrollment];
-
-      sessionStorage.setItem('explore_cache_enrollments', JSON.stringify(updated));
-      return updated;
-    });
-
-    if (showToast) toast.success('Marked lesson as completed!');
+    
+    try {
+      await updateEnrollmentProgress(courseId, progress);
+      if (showToast) toast.success('Marked lesson as completed!');
+      
+      const enrolls = await getMyEnrollments();
+      setEnrollments(enrolls);
+    } catch (err) {
+      console.error('Failed to update progress on backend:', err);
+      toast.error('Failed to update progress on server.');
+    }
   };
 
   const handleMarkComplete = () => {
@@ -408,6 +456,7 @@ export function useLessonPage() {
     handleNextLesson,
     handleQuizSubmit,
     handleAssignmentSubmit,
-    handleBackToCourse
+    handleBackToCourse,
+    isLoading
   };
 }

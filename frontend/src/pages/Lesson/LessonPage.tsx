@@ -15,6 +15,17 @@ import { QUESTIONS } from '../../components/LessonPage/lessonUtils';
 export function LessonPage() {
   const lesson = useLessonPage();
 
+  if (lesson.isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="loading loading-spinner loading-lg text-primary"></div>
+          <p className="text-slate-500 font-medium animate-pulse">Loading lesson content...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       {/* ── PAGE HEADER ─────────────────────────────────────────────────────── */}

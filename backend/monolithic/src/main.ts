@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,7 +21,8 @@ async function bootstrap() {
       transform: true,
     }),
   );
-
+  app.use(bodyParser.json({ limit: '250mb' }));
+  app.use(bodyParser.urlencoded({ limit: '250mb', extended: true }));
   // Chỉ kích hoạt Swagger khi không ở môi trường production
   if (process.env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()

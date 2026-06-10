@@ -27,6 +27,7 @@ import { UserProfile } from '../pages/Users/UserProfile';
 // Course pages
 import { CourseManagement } from '../pages/Course/CourseManagement';
 import { CourseDetail } from '../pages/Course/CourseDetail';
+import { CreateCoursePage } from '../pages/Course/createCourse';
 
 // Role navigation pages 
 import { GuestLayout } from '../layouts/Dashboard/GuestLayout';
@@ -35,6 +36,7 @@ import { DashboardLayout } from '../layouts/Dashboard/Dashboard';
 // Role Guards
 import { GuestGuard, LearnerGuard, ProviderGuard, AdminGuard, AcademicGuard } from '../components/auth/RoleGuards';
 import { AdminProfile } from '../pages/admin/AdminProfile';
+import { PlatformSettings } from '../pages/admin/PlatformSettings';
 
 
 import { useAuthStore } from '../stores/auth.stores';
@@ -184,6 +186,10 @@ export const router = createBrowserRouter([
                 element: <CourseManagement />
             },
             {
+                path: 'courses/create',
+                element: <CreateCoursePage />
+            },
+            {
                 path: 'courses/detail',
                 element: <CourseDetail />
             },
@@ -229,6 +235,10 @@ export const router = createBrowserRouter([
             {
                 path: 'adminprofile',
                 element: <AdminProfile />
+            },
+            {
+                path: 'settings',
+                element: <PlatformSettings />
             },
             {
                 path: 'providers/:id',

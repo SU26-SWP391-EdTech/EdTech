@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../stores/auth.stores';
 import type { ProfileData } from './types';
+import { getLearnerProfile, editLearnerProfile } from '../../services/learner/learner.services';
+import toast from 'react-hot-toast';
 
 const mapRoleNameToLabel = (roleName?: string): string => {
   if (!roleName) return 'User';
@@ -37,20 +39,18 @@ export function useLearnerProfile() {
     if (!loggedInUser) return;
     try {
       setLoading(true);
-      const { MOCK_LEARNER_PROFILE_FULL } = await import('../../db/data');
-      const stored = sessionStorage.getItem('mock_learner_profile');
-      const res = stored ? JSON.parse(stored) : MOCK_LEARNER_PROFILE_FULL;
+      const res = await getLearnerProfile(loggedInUser.userId);
 
       setProfile({
-        name: res.fullName || loggedInUser.fullName || 'No Name',
-        email: res.email || loggedInUser.email,
-        bio: res.bio || '',
+        name: res?.fullName || loggedInUser.fullName || 'No Name',
+        email: res?.email || loggedInUser.email,
+        bio: res?.bio || '',
         location: 'Not set',
         organization: 'EdTech Platform',
-        avatar: res.avatarUrl || loggedInUser.avatarUrl || '',
-        learningGoal: res.learningGoal || '',
-        level: res.level || '',
-        createdAt: res.createdAt ? new Date(res.createdAt).toLocaleDateString('en-US', {
+        avatar: res?.avatarUrl || loggedInUser.avatarUrl || '',
+        learningGoal: res?.learningGoal || '',
+        level: res?.level || '',
+        createdAt: res?.createdAt ? new Date(res.createdAt).toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
           year: 'numeric'
@@ -90,26 +90,37 @@ export function useLearnerProfile() {
   }) => {
     if (!loggedInUser) return;
 
-    const updatedProfile = {
-      fullName: updated.name,
-      learningGoal: updated.learningGoal,
-      level: updated.level,
-      bio: updated.bio,
-      avatarUrl: updated.avatar,
-      createdAt: profile.createdAt,
-      email: profile.email
-    };
-    sessionStorage.setItem('mock_learner_profile', JSON.stringify(updatedProfile));
-
-    useAuthStore.setState({
-      user: {
-        ...loggedInUser,
-        fullName: updated.name,
-        avatarUrl: updated.avatar,
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('fullName', updated.name);
+      formData.append('learningGoal', updated.learningGoal);
+      formData.append('level', updated.level);
+      formData.append('bio', updated.bio);
+      if (updated.avatarFile) {
+        formData.append('avatarUrl', updated.avatarFile);
+      } else if (updated.avatar) {
+        formData.append('avatarUrl', updated.avatar);
       }
-    });
 
-    await fetchProfileData();
+      const res = await editLearnerProfile(loggedInUser.userId, formData);
+
+      useAuthStore.setState({
+        user: {
+          ...loggedInUser,
+          fullName: res.fullName || updated.name,
+          avatarUrl: res.avatarUrl || updated.avatar,
+        }
+      });
+
+      toast.success('Profile updated successfully!');
+      await fetchProfileData();
+    } catch (err: any) {
+      console.error('Failed to save profile', err);
+      toast.error(err.response?.data?.message || 'Failed to save profile. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return {

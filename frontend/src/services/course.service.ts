@@ -44,7 +44,6 @@ export async function createCourse(formData: FormData): Promise<BackendCourse> {
   return response.data;
 }
 
-// Tìm kiếm/Lọc danh sách khóa học
 export async function searchCourses(params?: {
   search?: string;
   status?: string;
@@ -55,7 +54,7 @@ export async function searchCourses(params?: {
   sortOrder?: 'ASC' | 'DESC';
   userId?: number;
 }): Promise<SearchCoursesResponse> {
-  const response = await api.get('/courses', { params });
+  const response = await api.get('/courses/search', { params });
   return response.data;
 }
 
@@ -69,5 +68,17 @@ export async function updateCourse(id: number, data: FormData | any): Promise<Ba
 // Xóa khóa học
 export async function deleteCourse(id: number): Promise<{ message: string }> {
   const response = await api.delete(`/courses/${id}`);
+  return response.data;
+}
+
+// Phê duyệt khóa học
+export async function approveCourse(id: number): Promise<BackendCourse> {
+  const response = await api.patch(`/courses/${id}/approve`);
+  return response.data;
+}
+
+// Từ chối khóa học
+export async function rejectCourse(id: number): Promise<BackendCourse> {
+  const response = await api.patch(`/courses/${id}/reject`);
   return response.data;
 }

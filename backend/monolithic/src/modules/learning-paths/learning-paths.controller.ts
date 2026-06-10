@@ -98,6 +98,36 @@ export class LearningPathsController {
     return this.learningPathsService.removeCourse(learningPathId, courseId);
   }
 
+  @Public()
+  @Get()
+  @ApiOperation({
+    summary: 'Get all learning paths',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all learning paths',
+  })
+  async getAll() {
+    return this.learningPathsService.getAll();
+  }
+
+  @Public()
+  @Get(':id')
+  @ApiOperation({
+    summary: 'Get learning path detail by ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Learning path details',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Learning path not found',
+  })
+  async getById(@Param('id', ParseIntPipe) id: number) {
+    return this.learningPathsService.getLearningPathById(id);
+  }
+
   // Get courses in a learning path
   @Public()
   @Get(':id/courses')

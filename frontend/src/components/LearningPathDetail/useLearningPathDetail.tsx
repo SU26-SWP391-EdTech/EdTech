@@ -5,7 +5,9 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '../../stores/auth.stores';
 import type { Course } from '../../services/course/course.service';
 import type { Enrollment } from '../../services/enrollment/enrollment.service';
+import { getMyEnrollments, enrollCourse } from '../../services/enrollment/enrollment.service';
 import type { LearningPath } from '../../services/learning-path/learning-path.service';
+import { getLearningPathById } from '../../services/learning-path/learning-path.service';
 
 export type NodeState = 'completed' | 'current' | 'upcoming' | 'locked';
 
@@ -44,12 +46,12 @@ export function useLearningPathDetail() {
 
   useEffect(() => {
     async function loadPathData() {
+      if (!id) return;
       try {
         setIsLoading(true);
-        const { MOCK_COURSES, MOCK_LEARNING_PATHS, MOCK_ENROLLMENTS } = await import('../../db/data');
-        setCourses(MOCK_COURSES);
+        setCourses([]);
 
-        const targetPath = MOCK_LEARNING_PATHS.find(p => p.learningPathId === parseInt(id || '1'));
+        const targetPath = await getLearningPathById(parseInt(id));
         if (!targetPath) {
           toast.error('Learning Path not found!');
           navigate('/learner/explore');
@@ -59,10 +61,10 @@ export function useLearningPathDetail() {
         setPath(targetPath);
 
         const isLearner = user?.roleName?.toLowerCase() === 'learner';
-        const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
-        const activeEnrollments = isLearner
-          ? (storedEnrollments ? JSON.parse(storedEnrollments) : MOCK_ENROLLMENTS)
-          : [];
+        let activeEnrollments: Enrollment[] = [];
+        if (user && isLearner) {
+          activeEnrollments = await getMyEnrollments();
+        }
         setEnrollments(activeEnrollments);
 
         // Find active/current course in path to display details first
@@ -225,23 +227,13 @@ export function useLearningPathDetail() {
 
     try {
       setIsLoading(true);
-      const newEnrollment: Enrollment = {
-        enrollmentId: Date.now() + Math.random(),
-        enrolledAt: new Date().toISOString(),
-        status: 'active',
-        progress: 0,
-        lastAccessedAt: new Date().toISOString(),
-        completedAt: null,
-        expiresAt: null,
-        course: courses.find(c => c.courseId === courseId)!,
-      };
-
-      const updated = [...enrollments, newEnrollment];
-      setEnrollments(updated);
-      sessionStorage.setItem('explore_cache_enrollments', JSON.stringify(updated));
+      await enrollCourse(courseId);
       toast.success('Successfully enrolled in course!');
-    } catch (err) {
-      toast.error('Failed to enroll.');
+      
+      const activeEnrollments = await getMyEnrollments();
+      setEnrollments(activeEnrollments);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to enroll.');
     } finally {
       setIsLoading(false);
     }
@@ -268,25 +260,13 @@ export function useLearningPathDetail() {
 
     try {
       setIsLoading(true);
-      const updated = [...enrollments];
-      unenrolled.forEach(n => {
-        updated.push({
-          enrollmentId: Date.now() + Math.random(),
-          enrolledAt: new Date().toISOString(),
-          status: 'active',
-          progress: 0,
-          lastAccessedAt: new Date().toISOString(),
-          completedAt: null,
-          expiresAt: null,
-          course: n.course,
-        });
-      });
-
-      setEnrollments(updated);
-      sessionStorage.setItem('explore_cache_enrollments', JSON.stringify(updated));
+      await Promise.all(unenrolled.map(n => enrollCourse(n.id)));
       toast.success(`Successfully enrolled in ${unenrolled.length} remaining courses!`);
-    } catch (err) {
-      toast.error('Failed to enroll in learning path.');
+      
+      const activeEnrollments = await getMyEnrollments();
+      setEnrollments(activeEnrollments);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to enroll in learning path.');
     } finally {
       setIsLoading(false);
     }
@@ -313,28 +293,7 @@ export function useLearningPathDetail() {
       return;
     }
 
-    const currentEnrollment = enrollments[enrollmentIdx];
-    if (currentEnrollment.progress >= 100) {
-      toast.success(`You've already completed this lesson: ${lessonTitle}`);
-      return;
-    }
-
-    // Increment progress by 1 lesson proportion
-    const lessonsCount = activeCourse?.totalLessons || 12;
-    const progressInc = Math.round(100 / lessonsCount);
-    const newProgress = Math.min(100, currentEnrollment.progress + progressInc);
-    
-    const updatedEnrollments = [...enrollments];
-    updatedEnrollments[enrollmentIdx] = {
-      ...currentEnrollment,
-      progress: newProgress,
-      status: newProgress === 100 ? 'completed' : 'active',
-      completedAt: newProgress === 100 ? new Date().toISOString() : null,
-    };
-
-    setEnrollments(updatedEnrollments);
-    sessionStorage.setItem('explore_cache_enrollments', JSON.stringify(updatedEnrollments));
-    toast.success(`Started: ${lessonTitle}! Progress updated.`);
+    navigate(`/learner/lesson?courseId=${activeCourseId}`);
   };
 
   return {

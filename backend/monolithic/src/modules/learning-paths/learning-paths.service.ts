@@ -132,6 +132,18 @@ export class LearningPathsService {
     );
   }
 
+  public async getAll(): Promise<LearningPath[]> {
+    return await this.learningPathsRepository.getAll();
+  }
+
+  public async getLearningPathById(id: number): Promise<LearningPath> {
+    const learningPath = await this.learningPathsRepository.getLearningPathById(id);
+    if (!learningPath) {
+      throw new NotFoundException('Learning path not found');
+    }
+    return learningPath;
+  }
+
   public async updateLearningPath(user: User, learningPathId: number, dto: UpdateLearningPathDto): Promise<LearningPath> {
     const learningPath = await this.learningPathsRepository.getLearningPathById(learningPathId);
 

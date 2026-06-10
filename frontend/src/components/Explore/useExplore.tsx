@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../stores/auth.stores';
+import { searchCourses } from '../../services/course/course.service';
+import { getMyEnrollments, enrollCourse } from '../../services/enrollment/enrollment.service';
+import { getLearningPaths } from '../../services/learning-path/learning-path.service';
 import type { Course } from '../../services/course/course.service';
 import type { Enrollment } from '../../services/enrollment/enrollment.service';
 import type { LearningPath } from '../../services/learning-path/learning-path.service';
@@ -31,31 +34,40 @@ export function useExplore() {
     async function loadData() {
         try {
             setIsLoading(true);
-            const { MOCK_COURSES, MOCK_LEARNING_PATHS, MOCK_ENROLLMENTS, MOCK_LEARNER_PROFILE_FULL } = await import('../../db/data');
-            setCourses(MOCK_COURSES);
-            setLearningPaths(MOCK_LEARNING_PATHS);
-            
+
+            const [coursesRes, pathsRes] = await Promise.all([
+                searchCourses({ status: 'approved' }),
+                getLearningPaths(),
+            ]);
+
+            const coursesData = coursesRes.data?.items || [];
+            setCourses(coursesData);
+            setLearningPaths(pathsRes);
+
             const isLearner = user?.roleName?.toLowerCase() === 'learner';
             if (user && isLearner) {
-                const isNewUser = !['learner@edtech.com', 'provider@edtech.com', 'manager@edtech.com', 'admin@edtech.com'].includes(user.email.toLowerCase());
-                const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
-                setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : (isNewUser ? [] : MOCK_ENROLLMENTS));
-                
-                const storedPaths = sessionStorage.getItem('explore_cache_enrolled_paths');
-                setEnrolledPathIds(storedPaths ? JSON.parse(storedPaths) : (isNewUser ? [] : [1, 2]));
+                const enrollmentsData = await getMyEnrollments();
+                setEnrollments(enrollmentsData);
 
-                if (isNewUser) {
-                    setProfile({
-                        fullName: user.fullName,
-                        email: user.email,
-                        streakCount: 0,
-                        completedCourses: 0,
-                        learningHours: 0,
-                        enrolledPaths: 0,
-                    });
-                } else {
-                    setProfile(MOCK_LEARNER_PROFILE_FULL);
-                }
+                // Determine enrolled path IDs dynamically: user is enrolled in path if they are enrolled in at least one course of the path
+                const enrolledPaths = pathsRes.filter(path => {
+                    const pathCourses = path.learningPathCourses || [];
+                    if (pathCourses.length === 0) return false;
+                    return pathCourses.some(pc =>
+                        enrollmentsData.some(e => e.course?.courseId === pc.courseId)
+                    );
+                }).map(p => p.learningPathId);
+
+                setEnrolledPathIds(enrolledPaths);
+
+                setProfile({
+                    fullName: user.fullName,
+                    email: user.email,
+                    streakCount: 0,
+                    completedCourses: enrollmentsData.filter(e => e.status === 'completed' || e.progress === 100).length,
+                    learningHours: enrollmentsData.reduce((acc, curr) => acc + Math.round((curr.course.duration || 10) * (curr.progress / 100)), 0),
+                    enrolledPaths: enrolledPaths.length,
+                });
             } else {
                 setEnrollments([]);
                 setEnrolledPathIds([]);
@@ -94,27 +106,12 @@ export function useExplore() {
 
         try {
             setEnrollingId(courseId);
-            const courseToEnroll = courses.find(c => c.courseId === courseId);
-            if (!courseToEnroll) return;
-
-            const newEnrollment: Enrollment = {
-                enrollmentId: Date.now(),
-                enrolledAt: new Date().toISOString(),
-                status: 'active',
-                progress: 0,
-                lastAccessedAt: new Date().toISOString(),
-                completedAt: null,
-                expiresAt: null,
-                course: courseToEnroll,
-            };
-
-            const updated = [...enrollments, newEnrollment];
-            setEnrollments(updated);
-            sessionStorage.setItem('explore_cache_enrollments', JSON.stringify(updated));
-            toast.success('Successfully enrolled! (Mock)');
+            await enrollCourse(courseId);
+            toast.success('Successfully enrolled in course!');
+            await loadData();
         } catch (error: any) {
             console.error('Enrollment error:', error);
-            toast.error('Failed to enroll.');
+            toast.error(error.response?.data?.message || 'Failed to enroll.');
         } finally {
             setEnrollingId(null);
         }
@@ -140,42 +137,23 @@ export function useExplore() {
         const pathCourses = path.learningPathCourses || [];
         if (pathCourses.length === 0) return;
 
-        const unenrolledCourses = pathCourses.filter(pc => !isEnrolled(pc.courseId));
+        // Sort courses by position to find the first course in the learning path
+        const sortedPathCourses = [...pathCourses].sort((a, b) => a.position - b.position);
+        const firstCourse = sortedPathCourses[0];
 
-        if (unenrolledCourses.length === 0) {
-            toast.success('You are already enrolled in all courses of this path!');
+        if (isEnrolled(firstCourse.courseId)) {
+            toast.success('You are already enrolled in the first course of this path!');
             return;
         }
 
         try {
             setIsLoading(true);
-            const newEnrollments = [...enrollments];
-            
-            unenrolledCourses.forEach(pc => {
-                const newEnrollment: Enrollment = {
-                    enrollmentId: Date.now() + Math.random(),
-                    enrolledAt: new Date().toISOString(),
-                    status: 'active',
-                    progress: 0,
-                    lastAccessedAt: new Date().toISOString(),
-                    completedAt: null,
-                    expiresAt: null,
-                    course: pc.course,
-                };
-                newEnrollments.push(newEnrollment);
-            });
-
-            setEnrollments(newEnrollments);
-            sessionStorage.setItem('explore_cache_enrollments', JSON.stringify(newEnrollments));
-
-            const updatedPaths = [...enrolledPathIds, path.learningPathId];
-            setEnrolledPathIds(updatedPaths);
-            sessionStorage.setItem('explore_cache_enrolled_paths', JSON.stringify(updatedPaths));
-
-            toast.success(`Successfully enrolled in ${unenrolledCourses.length} course(s) on this path! (Mock)`);
-        } catch (error) {
+            await enrollCourse(firstCourse.courseId);
+            toast.success(`Successfully enrolled in ${path.title}!`);
+            await loadData();
+        } catch (error: any) {
             console.error('Path enrollment error:', error);
-            toast.error('Failed to enroll in path.');
+            toast.error(error.response?.data?.message || 'Failed to enroll in path.');
         } finally {
             setIsLoading(false);
         }

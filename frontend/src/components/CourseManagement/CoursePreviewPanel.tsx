@@ -5,7 +5,7 @@ import { StarRating } from './StarRating';
 import type { Course } from './types';
 
 interface CoursePreviewPanelProps {
-  course: Course;
+  course?: Course;
   onViewDetails?: () => void;
 }
 
@@ -14,6 +14,7 @@ export function CoursePreviewPanel({ course, onViewDetails }: CoursePreviewPanel
   const location = useLocation();
 
   const handleViewDetails = () => {
+    if (!course) return;
     if (onViewDetails) {
       onViewDetails();
     } else {
@@ -22,9 +23,21 @@ export function CoursePreviewPanel({ course, onViewDetails }: CoursePreviewPanel
         : location.pathname.endsWith('/pending-courses')
           ? `${location.pathname.replace('/pending-courses', '/courses')}/detail`
           : `${location.pathname}/courses/detail`;
-      navigate(basePath);
+      navigate(`${basePath}?id=${course.id || course.courseId}`);
     }
   };
+
+  if (!course) {
+    return (
+      <div className="bg-white border border-[#E5E7EB] rounded-2xl p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
+        <div className="w-12 h-12 bg-[#F9FAFB] rounded-2xl flex items-center justify-center mb-3">
+          <Clock className="w-6 h-6 text-[#9CA3AF]" />
+        </div>
+        <p className="text-sm font-semibold text-[#111827]">No course selected</p>
+        <p className="text-xs text-[#6B7280] mt-1 max-w-[200px]">Select a course from the list on the left to preview it here.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">

@@ -28,8 +28,8 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
-        limit: 20,
-      },
+        limit: 500,
+      }, 
     ]),
 
     TypeOrmModule.forRoot({

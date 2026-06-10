@@ -14,6 +14,8 @@ interface CourseHeroProps {
   instructorName: string;
   instructorAvatar: string;
   onContinueCourse: () => void;
+  onApprove?: () => void;
+  onReject?: () => void;
 }
 
 export function CourseHero({
@@ -29,6 +31,8 @@ export function CourseHero({
   instructorName,
   instructorAvatar,
   onContinueCourse,
+  onApprove,
+  onReject,
 }: CourseHeroProps) {
   return (
     <div className="max-w-[1376px] mx-auto px-8 pt-6">
@@ -99,6 +103,16 @@ export function CourseHero({
               )}
 
               <div className="flex flex-wrap items-center gap-2">
+                {(role === 'academic manager' || role === 'academic-manager') && (
+                  <>
+                    <button onClick={onApprove} className="flex items-center gap-2 px-5 py-2.5 bg-[#10B981] text-white rounded-lg text-sm hover:bg-[#059669] transition-colors shadow-lg shadow-[#10B981]/30 animate-in fade-in duration-200" style={{ fontWeight: 600 }}>
+                      Approve
+                    </button>
+                    <button onClick={onReject} className="flex items-center gap-2 px-5 py-2.5 bg-[#EF4444] text-white rounded-lg text-sm hover:bg-[#DC2626] transition-colors shadow-lg shadow-[#EF4444]/30 animate-in fade-in duration-200" style={{ fontWeight: 600 }}>
+                      Reject
+                    </button>
+                  </>
+                )}
                 {role === 'guest' && (
                   <button onClick={handleEnroll} className="flex items-center gap-2 px-5 py-2.5 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors shadow-lg shadow-[#E11D48]/30" style={{ fontWeight: 600 }}>
                     <Play className="w-4 h-4 fill-white" />
@@ -123,6 +137,7 @@ export function CourseHero({
                   Share
                 </button>
               </div>
+
             </div>
 
             <div className="col-span-5 relative">

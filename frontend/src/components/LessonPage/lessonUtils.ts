@@ -1,5 +1,4 @@
 import type { Note, Question } from './types';
-import { MOCK_COURSES } from '../../db/data';
 
 // ─── DOMAIN MOCK CODE GENERATORS ──────────────────────────────────────────────
 
@@ -270,7 +269,7 @@ export const QUESTIONS: Question[] = [
 
 export function getContinueLessonUrl(courseId: number, enrollments: any[]): string {
   const enrollment = enrollments.find(e => e.course?.courseId === courseId);
-  const matchedCourse = MOCK_COURSES.find(c => c.courseId === courseId) || MOCK_COURSES[0];
+  const matchedCourse = enrollment?.course || { courseId, title: 'Course Detail', curriculum: [] };
   const rawModules = matchedCourse?.curriculum || [];
   const completedLessonIds = new Set<string>(enrollment?.completedLessonIds || []);
   const progressVal = enrollment?.progress ?? 0;

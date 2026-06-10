@@ -68,4 +68,20 @@ export class EnrollmentsService {
 
         return enrollment;
     }
+
+    async updateProgress(userId: number, courseId: number, progress: number): Promise<Enrollment> {
+        const enrollment = await this.enrollmentsRepo.findByUserAndCourse(userId, courseId);
+        if (!enrollment) {
+            throw new NotFoundException(`You are not enrolled in course ${courseId}`);
+        }
+        enrollment.progress = progress;
+        enrollment.lastAccessedAt = new Date();
+        if (progress >= 100) {
+            enrollment.status = EnrollmentStatus.COMPLETED;
+            enrollment.completedAt = new Date();
+        } else {
+            enrollment.status = EnrollmentStatus.ACTIVE;
+        }
+        return await this.enrollmentsRepo.save(enrollment);
+    }
 }
