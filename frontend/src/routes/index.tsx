@@ -25,6 +25,7 @@ import { UserProfile } from '../pages/Users/UserProfile';
 
 // Course pages
 import { CourseManagement } from '../pages/Course/CourseManagement';
+import { CourseDetail } from '../pages/Course/CourseDetail';
 
 // Role navigation pages 
 import { GuestLayout } from '../layouts/Dashboard/GuestLayout';
@@ -177,6 +178,14 @@ export const router = createBrowserRouter([
                 element: <CourseManagement />
             },
             {
+                path: 'courses/detail',
+                element: <CourseDetail />
+            },
+            {
+                path: 'courses/lessons',
+                element: <CourseManagement />
+            },
+            {
                 path: 'explore',
                 element: <ExplorePage />
             },
@@ -241,6 +250,14 @@ export const router = createBrowserRouter([
             {
                 path: 'courses',
                 element: <CourseManagement />
+            },
+            {
+                path: 'pending-courses',
+                element: <CourseManagement />
+            },
+            {
+                path: 'courses/detail',
+                element: <CourseDetail />
             },
             {
                 path: 'courses/lessons',

@@ -108,21 +108,6 @@ export function useUserManagement() {
       });
   }, [users, search, roleFilter, statusFilter, sortField, sortAsc]);
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, roleFilter, statusFilter]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
-  const activePage = Math.min(currentPage, totalPages);
-
-  const paginatedUsers = useMemo(() => {
-    const start = (activePage - 1) * itemsPerPage;
-    return filtered.slice(start, start + itemsPerPage);
-  }, [filtered, activePage, itemsPerPage]);
-
   const toggleSort = (field: 'name' | 'joined') => {
     if (sortField === field) setSortAsc(a => !a);
     else { setSortField(field); setSortAsc(true); }
@@ -229,10 +214,5 @@ export function useUserManagement() {
     handleSaveUser,
     handleDeleteUser,
     fetchUsers,
-    currentPage: activePage,
-    setCurrentPage,
-    totalPages,
-    paginatedUsers,
-    itemsPerPage,
   };
 }

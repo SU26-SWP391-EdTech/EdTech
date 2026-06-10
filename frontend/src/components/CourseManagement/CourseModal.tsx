@@ -4,6 +4,7 @@ import { createCourse, updateCourse } from '../../services/course.service';
 import type { Course, CourseStatus, Category } from './types';
 import toast from 'react-hot-toast';
 
+const CATEGORIES = ['Web Development', 'Data Science', 'Design', 'Marketing', 'Business', 'DevOps'];
 const STATUSES = ['Published', 'Draft', 'Pending Review', 'Rejected'];
 
 interface CourseModalProps {
@@ -177,19 +178,36 @@ export function CourseModal({ course, onClose, onSuccess, isViewOnly = false, mo
             />
           </div>
 
-          {/* Status */}
-          <div>
-            <label className="block text-xs text-[#374151] mb-1.5" style={{ fontWeight: 500 }}>Status <span className="text-[#E11D48]">*</span></label>
-            <div className="relative">
-              <select
-                value={status}
-                onChange={e => setStatus(e.target.value as CourseStatus)}
-                disabled={isViewOnly}
-                className="appearance-none w-full px-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 cursor-pointer disabled:bg-gray-50 disabled:text-[#6B7280] disabled:cursor-not-allowed"
-              >
-                {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF] pointer-events-none" />
+          {/* Category + Status row */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-[#374151] mb-1.5" style={{ fontWeight: 500 }}>Category <span className="text-[#E11D48]">*</span></label>
+              <div className="relative">
+                <select
+                  value={category}
+                  onChange={e => setCategory(e.target.value as Category)}
+                  disabled={isViewOnly}
+                  className="appearance-none w-full px-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 cursor-pointer disabled:bg-gray-50 disabled:text-[#6B7280] disabled:cursor-not-allowed"
+                >
+                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF] pointer-events-none" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs text-[#374151] mb-1.5" style={{ fontWeight: 500 }}>Status <span className="text-[#E11D48]">*</span></label>
+              <div className="relative">
+                <select
+                  value={status}
+                  onChange={e => setStatus(e.target.value as CourseStatus)}
+                  disabled={isViewOnly}
+                  className="appearance-none w-full px-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 cursor-pointer disabled:bg-gray-50 disabled:text-[#6B7280] disabled:cursor-not-allowed"
+                >
+                  {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF] pointer-events-none" />
+              </div>
             </div>
           </div>
 

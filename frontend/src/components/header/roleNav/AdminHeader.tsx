@@ -25,7 +25,7 @@ export function AdminHeader() {
         if (path === '/admin') return 'dashboard';
         if (path === '/admin/usermanagement') return 'users';
         if (path === '/admin/analytics') return 'analytics';
-        if (path === '/admin/adminprofile') return 'profile';
+        if (path === '/admin/courses') return 'courses';
         return '';
     };
 
@@ -122,7 +122,7 @@ export function AdminHeader() {
                                 ))}
 
                                 <div className="border-t border-[#F3F4F6] mt-1">
-                                    <button
+                                    <button 
                                         onClick={() => {
                                             logout();
                                             navigate('/login');
