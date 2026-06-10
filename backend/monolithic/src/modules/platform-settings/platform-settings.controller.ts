@@ -63,9 +63,20 @@ export class PlatformSettingsController {
   @ApiResponse({ status: 403, description: 'Forbidden (Admin only)' })
   @Put()
   @Roles(RoleEnum.ADMIN)
-  updateSettings(@Body() updatePlatformSettingDto: UpdatePlatformSettingDto) {
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'logoUrl', maxCount: 1 },
+    { name: 'bannerUrl', maxCount: 1 },
+  ]))
+  updateSettings(
+    @Body() updatePlatformSettingDto: UpdatePlatformSettingDto,
+    @UploadedFiles() files?: {
+      logoUrl?: Express.Multer.File[];
+      bannerUrl?: Express.Multer.File[];
+    },
+  ) {
     return this.platformSettingsService.updateSettings(
       updatePlatformSettingDto,
+      files,
     );
   }
 }

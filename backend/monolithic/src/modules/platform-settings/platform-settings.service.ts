@@ -45,11 +45,31 @@ export class PlatformSettingsService {
         return setting;
     }
 
-    public async updateSettings(updateDto: UpdatePlatformSettingDto): Promise<PlatformSetting> {
+    public async updateSettings(
+        updateDto: UpdatePlatformSettingDto,
+        files?: {
+            logoUrl?: Express.Multer.File[];
+            bannerUrl?: Express.Multer.File[];
+        },
+    ): Promise<PlatformSetting> {
         const setting = await this.platformSettingsRepository.getPlatformSetting();
         if (!setting) {
             throw new NotFoundException('Platform setting not found');
         }
+
+        const logoFile = files?.logoUrl?.[0];
+        const bannerFile = files?.bannerUrl?.[0];
+
+        if (logoFile) {
+            const uploadedLogo = this.cloudinaryService.uploadImage(logoFile);
+            updateDto.logoUrl = (await uploadedLogo).secure_url;
+        }
+
+        if (bannerFile) {
+            const uploadedBanner = this.cloudinaryService.uploadImage(bannerFile);
+            updateDto.bannerUrl = (await uploadedBanner).secure_url;
+        }
+
         return this.platformSettingsRepository.updatePlatformSetting(setting.settingId, updateDto);
     }
 }

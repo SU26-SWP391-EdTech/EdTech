@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/auth.stores';
 import { ScrollToTop } from '../ScrollToTop';
 
@@ -79,7 +79,8 @@ export function ProviderGuard({ children }: GuardProps) {
  * AdminGuard: Chỉ cho phép người dùng có vai trò 'admin' (Quản trị viên).
  */
 export function AdminGuard({ children }: GuardProps) {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, requiresPlatformSetup } = useAuthStore();
+  const location = useLocation();
 
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
@@ -87,6 +88,10 @@ export function AdminGuard({ children }: GuardProps) {
 
   if (user.roleName !== 'admin') {
     return <Navigate to={getDefaultRoute(user.roleName)} replace />;
+  }
+
+  if (requiresPlatformSetup && !location.pathname.endsWith('/admin/setup')) {
+    return <Navigate to="/admin/setup" replace />;
   }
 
   return children ? <>{children}</> : <Outlet />;

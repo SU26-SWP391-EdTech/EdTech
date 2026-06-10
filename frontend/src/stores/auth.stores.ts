@@ -5,6 +5,11 @@ import type { User } from '../services/auth/auth.service';
 
 export type { User };
 
+export interface LoginResult {
+    user: User;
+    requiresPlatformSetup: boolean;
+}
+
 // Định nghĩa State và các Action trong Store
 interface AuthState {
     user: User | null;
@@ -14,10 +19,11 @@ interface AuthState {
     error: string | null;
     requiresPlatformSetup: boolean;
 
-    login: (credentials: { email: string; password: string }) => Promise<User>;
+    login: (credentials: { email: string; password: string }) => Promise<LoginResult>;
     register: (data: { fullName: string; email: string; password: string; roleName: string }) => Promise<void>;
     verifyEmail: (token: string) => Promise<void>;
     logout: () => Promise<void>;
+    clearRequiresPlatformSetup: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -36,6 +42,7 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     const data = await loginApi(credentials);
                     const { token, user, requiresPlatformSetup } = data;
+                    const setupRequired = requiresPlatformSetup ?? false;
 
                     // Clear caches when logging in
                     sessionStorage.removeItem('explore_cache_enrollments');
@@ -46,10 +53,10 @@ export const useAuthStore = create<AuthState>()(
                         user,
                         isAuthenticated: true,
                         isLoading: false,
-                        requiresPlatformSetup: requiresPlatformSetup || false,
+                        requiresPlatformSetup: setupRequired,
                     });
 
-                    return user;
+                    return { user, requiresPlatformSetup: setupRequired };
                 } catch (err: any) {
                     const errMsg = err.response?.data?.message || 'Failed to login. Please try again.';
                     set({ error: errMsg, isLoading: false });
@@ -86,6 +93,10 @@ export const useAuthStore = create<AuthState>()(
                 }
             },
 
+            clearRequiresPlatformSetup: () => {
+                set({ requiresPlatformSetup: false });
+            },
+
             // Action 3: Đăng xuất
             logout: async () => {
                 // Clear state lập tức và đồng bộ ở Client để UI chuyển hướng ngay về trang login
@@ -96,6 +107,7 @@ export const useAuthStore = create<AuthState>()(
                     token: null,
                     isAuthenticated: false,
                     error: null,
+                    requiresPlatformSetup: false,
                 });
             },
         }),
@@ -105,6 +117,7 @@ export const useAuthStore = create<AuthState>()(
                 user: state.user,
                 token: state.token,
                 isAuthenticated: state.isAuthenticated,
+                requiresPlatformSetup: state.requiresPlatformSetup,
             }),
         }
     )
@@ -120,6 +133,7 @@ if (typeof window !== 'undefined') {
             token: null,
             isAuthenticated: false,
             error: null,
+            requiresPlatformSetup: false,
         });
     });
 }

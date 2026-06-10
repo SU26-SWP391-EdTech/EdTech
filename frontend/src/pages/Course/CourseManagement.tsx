@@ -22,98 +22,7 @@ import { CourseModal } from '../../components/CourseManagement/CourseModal';
 import { DeleteCourseConfirmModal } from '../../components/CourseManagement/DeleteCourseConfirmModal';
 
 /* ─── Mock data ─── */
-export const MOCK_COURSES: Course[] = [
-    {
-        id: 1, title: 'React & TypeScript Mastery',
-        description: 'Build production-ready apps with modern React patterns',
-        provider: 'James Wilson', providerInitials: 'JW', providerColor: '#7C3AED',
-        category: 'Web Development', status: 'Published',
-        students: 1240, rating: 4.8, duration: '14h 20m', lessons: 32, created: 'Jan 15, 2026', updated: 'Jan 16, 2026',
-        thumbBg: 'linear-gradient(135deg,#1E40AF,#3B82F6)', thumbIcon: <Monitor className="w-7 h-7 text-white/90" />,
-        progress: 82, language: 'English',
-    },
-    {
-        id: 2, title: 'Data Science with Python',
-        description: 'From data wrangling to machine learning in Python',
-        provider: 'Marcus Davis', providerInitials: 'MD', providerColor: '#0891B2',
-        category: 'Data Science', status: 'Published',
-        students: 980, rating: 4.6, duration: '18h 45m', lessons: 41, created: 'Jan 28, 2026', updated: 'Jan 28, 2026',
-        thumbBg: 'linear-gradient(135deg,#5B21B6,#8B5CF6)', thumbIcon: <Database className="w-7 h-7 text-white/90" />,
-        progress: 74, language: 'English',
-    },
-    {
-        id: 3, title: 'UX Design Fundamentals',
-        description: 'User research, wireframing, and prototyping essentials',
-        provider: 'Priya Nair', providerInitials: 'PN', providerColor: '#DB2777',
-        category: 'Design', status: 'Published',
-        students: 740, rating: 4.9, duration: '10h 10m', lessons: 24, created: 'Feb 4, 2026', updated: 'Feb 5, 2026',
-        thumbBg: 'linear-gradient(135deg,#BE185D,#EC4899)', thumbIcon: <Palette className="w-7 h-7 text-white/90" />,
-        progress: 91, language: 'English',
-    },
-    {
-        id: 4, title: 'Advanced SQL & Databases',
-        description: 'Query optimization, indexing, and schema design',
-        provider: 'Carlos Rivera', providerInitials: 'CR', providerColor: '#9333EA',
-        category: 'Data Science', status: 'Draft',
-        students: 0, rating: 0, duration: '9h 00m', lessons: 20, created: 'Feb 20, 2026', updated: 'Feb 20, 2026',
-        thumbBg: 'linear-gradient(135deg,#0F766E,#14B8A6)', thumbIcon: <Database className="w-7 h-7 text-white/90" />,
-        progress: 0, language: 'English',
-    },
-    {
-        id: 5, title: 'Digital Marketing Strategy',
-        description: 'SEO, paid ads, and analytics-driven growth tactics',
-        provider: 'Lena Park', providerInitials: 'LP', providerColor: '#059669',
-        category: 'Marketing', status: 'Pending Review',
-        students: 0, rating: 0, duration: '7h 30m', lessons: 18, created: 'Mar 1, 2026', updated: 'Mar 1, 2026',
-        thumbBg: 'linear-gradient(135deg,#B45309,#F59E0B)', thumbIcon: <Megaphone className="w-7 h-7 text-white/90" />,
-        progress: 0, language: 'English',
-    },
-    {
-        id: 6, title: 'Cloud Architecture on AWS',
-        description: 'Design scalable, resilient cloud systems on AWS',
-        provider: 'Derek Foster', providerInitials: 'DF', providerColor: '#EA580C',
-        category: 'DevOps', status: 'Published',
-        students: 620, rating: 4.7, duration: '16h 00m', lessons: 36, created: 'Mar 12, 2026', updated: 'Mar 12, 2026',
-        thumbBg: 'linear-gradient(135deg,#1D4ED8,#6366F1)', thumbIcon: <Settings className="w-7 h-7 text-white/90" />,
-        progress: 63, language: 'English',
-    },
-    {
-        id: 7, title: 'Product Management 101',
-        description: 'Strategy, roadmapping, and stakeholder communication',
-        provider: 'Yasmin Al-Hassan', providerInitials: 'YH', providerColor: '#0284C7',
-        category: 'Business', status: 'Draft',
-        students: 0, rating: 0, duration: '11h 15m', lessons: 26, created: 'Apr 2, 2026', updated: 'Apr 2, 2026',
-        thumbBg: 'linear-gradient(135deg,#065F46,#10B981)', thumbIcon: <Briefcase className="w-7 h-7 text-white/90" />,
-        progress: 0, language: 'English',
-    },
-    {
-        id: 8, title: 'Node.js Backend Engineering',
-        description: 'REST APIs, authentication, and microservices in Node',
-        provider: 'James Wilson', providerInitials: 'JW', providerColor: '#7C3AED',
-        category: 'Web Development', status: 'Rejected',
-        students: 0, rating: 0, duration: '12h 40m', lessons: 28, created: 'Apr 18, 2026', updated: 'Apr 18, 2026',
-        thumbBg: 'linear-gradient(135deg,#374151,#6B7280)', thumbIcon: <Monitor className="w-7 h-7 text-white/90" />,
-        progress: 0, language: 'English',
-    },
-    {
-        id: 9, title: 'Machine Learning Basics',
-        description: 'Supervised & unsupervised learning with scikit-learn',
-        provider: 'Marcus Davis', providerInitials: 'MD', providerColor: '#0891B2',
-        category: 'Data Science', status: 'Published',
-        students: 890, rating: 4.5, duration: '20h 00m', lessons: 44, created: 'May 5, 2026', updated: 'May 6, 2026',
-        thumbBg: 'linear-gradient(135deg,#4C1D95,#7C3AED)', thumbIcon: <Database className="w-7 h-7 text-white/90" />,
-        progress: 78, language: 'English',
-    },
-    {
-        id: 10, title: 'Figma for Product Teams',
-        description: 'Component libraries, auto-layout, and design handoff',
-        provider: 'Priya Nair', providerInitials: 'PN', providerColor: '#DB2777',
-        category: 'Design', status: 'Pending Review',
-        students: 0, rating: 0, duration: '8h 20m', lessons: 19, created: 'May 14, 2026', updated: 'May 14, 2026',
-        thumbBg: 'linear-gradient(135deg,#9D174D,#E11D48)', thumbIcon: <Palette className="w-7 h-7 text-white/90" />,
-        progress: 0, language: 'English',
-    },
-];
+export const MOCK_COURSES: Course[] = [];
 
 const CATEGORIES = ['All Categories', 'Web Development', 'Data Science', 'Design', 'Marketing', 'Business', 'DevOps'];
 const STATUSES = ['All Status', 'Published', 'Draft', 'Pending Review', 'Rejected'];
@@ -261,7 +170,27 @@ export function CourseManagement() {
             });
     }, [courses, search, categoryFilter, statusFilter, sortField, sortAsc]);
 
-    const selectedCourse = courses.find(c => c.id === selectedId) ?? courses[0] ?? MOCK_COURSES[0];
+    const fallbackCourse: Course = {
+        id: 0,
+        title: 'No Course Selected',
+        description: 'Please create or select a course.',
+        provider: 'N/A',
+        providerInitials: 'N/A',
+        providerColor: '#6B7280',
+        category: 'Web Development' as Category,
+        status: 'Draft',
+        students: 0,
+        rating: 0,
+        duration: '0h',
+        lessons: 0,
+        created: '—',
+        updated: '—',
+        thumbBg: 'linear-gradient(135deg,#9CA3AF,#6B7280)',
+        thumbIcon: <Monitor className="w-7 h-7 text-white/90" />,
+        progress: 0,
+        language: 'English',
+    };
+    const selectedCourse = courses.find(c => c.id === selectedId) ?? courses[0] ?? fallbackCourse;
 
     const stats = {
         total: courses.length,
@@ -302,7 +231,7 @@ export function CourseManagement() {
                         {[
                             { label: 'Total Courses', value: stats.total, icon: <BookOpen className="w-4 h-4 text-[#6B7280]" />, change: '+2 this month', up: true },
                             { label: 'Published Courses', value: stats.published, icon: <CheckCircle2 className="w-4 h-4 text-[#16A34A]" />, change: `${Math.round((stats.published / stats.total) * 100)}% of total`, up: true },
-                            { label: 'Draft / Pending', value: stats.draft + MOCK_COURSES.filter(c => c.status === 'Pending Review').length, icon: <FileText className="w-4 h-4 text-[#D97706]" />, change: 'Awaiting review', up: null },
+                            { label: 'Draft / Pending', value: stats.draft + courses.filter(c => c.status === 'Pending Review').length, icon: <FileText className="w-4 h-4 text-[#D97706]" />, change: 'Awaiting review', up: null },
                             { label: 'Total Enrollments', value: stats.enrollments.toLocaleString(), icon: <Users className="w-4 h-4 text-[#E11D48]" />, change: '+18.4% vs last mo', up: true },
                         ].map((s, idx) => (
                             <div key={idx} className="bg-white border border-[#E5E7EB] rounded-2xl p-5 hover:shadow-sm transition-shadow">
@@ -490,7 +419,7 @@ export function CourseManagement() {
                                         {/* Table footer */}
                                         <div className="px-4 py-3.5 border-t border-[#F3F4F6] flex items-center justify-between bg-[#FAFAFA]">
                                             <p className="text-xs text-[#6B7280]">
-                                                Showing <span className="text-[#111827]" style={{ fontWeight: 500 }}>{filtered.length}</span> of <span className="text-[#111827]" style={{ fontWeight: 500 }}>{MOCK_COURSES.length}</span> courses
+                                                Showing <span className="text-[#111827]" style={{ fontWeight: 500 }}>{filtered.length}</span> of <span className="text-[#111827]" style={{ fontWeight: 500 }}>{courses.length}</span> courses
                                             </p>
                                             <div className="flex items-center gap-1.5">
                                                 <button className="px-3 py-1.5 text-xs border border-[#E5E7EB] rounded-lg text-[#6B7280] hover:bg-[#F8FAFC]" style={{ fontWeight: 500 }}>Previous</button>
@@ -571,7 +500,6 @@ export function CourseManagement() {
                 <CourseModal
                     course={selectedCourseForEdit}
                     isViewOnly={isViewOnly}
-                    mockCoursesList={MOCK_COURSES}
                     onClose={() => {
                         setShowModal(false);
                         setSelectedCourseForEdit(undefined);

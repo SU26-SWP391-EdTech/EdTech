@@ -11,6 +11,7 @@ import { VerifyEmail } from '../pages/auth/VerifyEmail';
 
 // Admin pages
 import { UserManagement } from '../pages/admin/UserManagement';
+import { PlatformSetup } from '../pages/admin/PlatformSetup';
 
 // Learner page
 import { LearnerProfile } from '../pages/Users/LearnerProfile';
@@ -232,6 +233,10 @@ export const router = createBrowserRouter([
             {
                 path: 'providers/:id',
                 element: <ProviderProfile />
+            },
+            {
+                path: 'setup',
+                element: <PlatformSetup />,
             }
         ]
     },
