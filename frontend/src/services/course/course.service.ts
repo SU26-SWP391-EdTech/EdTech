@@ -28,6 +28,8 @@ export interface Course {
     } | null;
 }
 
+export type BackendCourse = Course;
+
 export interface CreateCourseDto {
     title: string;
     description?: string;
@@ -53,21 +55,39 @@ export interface SearchCourseDto {
     maxDuration?: number;
     sortBy?: string;
     sortOrder?: 'ASC' | 'DESC';
+    userId?: number;
 }
 
-// 1. Tạo khóa học mới (Có hỗ trợ upload ảnh thumbnail)
-export async function createCourse(data: CreateCourseDto, file?: File): Promise<Course> {
-    const formData = new FormData();
-    formData.append('title', data.title);
-    if (data.description) formData.append('description', data.description);
-    if (data.projectUrl) formData.append('projectUrl', data.projectUrl);
-    if (data.language) formData.append('language', data.language);
-    if (data.duration !== undefined) formData.append('duration', String(data.duration));
-    if (file) {
-        formData.append('thumbnailUrl', file);
+export interface SearchCoursesResponse {
+    statusCode: number;
+    message: string;
+    data: {
+        items: Course[];
+        meta: {
+            total: number;
+            count: number;
+        };
+    };
+}
+
+// 1. Tạo khóa học mới (Có hỗ trợ upload ảnh thumbnail qua FormData)
+export async function createCourse(data: CreateCourseDto | FormData, file?: File): Promise<Course> {
+    let body: FormData;
+    if (data instanceof FormData) {
+        body = data;
+    } else {
+        body = new FormData();
+        body.append('title', data.title);
+        if (data.description) body.append('description', data.description);
+        if (data.projectUrl) body.append('projectUrl', data.projectUrl);
+        if (data.language) body.append('language', data.language);
+        if (data.duration !== undefined) body.append('duration', String(data.duration));
+        if (file) {
+            body.append('thumbnailUrl', file);
+        }
     }
 
-    const response = await api.post('/courses', formData, {
+    const response = await api.post('/courses', body, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },
@@ -76,9 +96,9 @@ export async function createCourse(data: CreateCourseDto, file?: File): Promise<
 }
 
 // 2. Tìm kiếm / Lọc danh sách khóa học
-export async function searchCourses(query?: SearchCourseDto): Promise<Course[]> {
-    const response = await api.get('/courses', { params: query });
-    return response.data.data?.items || [];
+export async function searchCourses(query?: SearchCourseDto): Promise<SearchCoursesResponse> {
+    const response = await api.get('/courses/search', { params: query });
+    return response.data;
 }
 
 // 3. Lấy thông tin chi tiết một khóa học
@@ -87,9 +107,10 @@ export async function getCourseById(id: number): Promise<Course> {
     return response.data;
 }
 
-// 4. Cập nhật thông tin khóa học
-export async function updateCourse(id: number, data: UpdateCourseDto): Promise<Course> {
-    const response = await api.patch(`/courses/${id}`, data);
+// 4. Cập nhật thông tin khóa học (chấp nhận cả FormData nếu upload file)
+export async function updateCourse(id: number, data: UpdateCourseDto | FormData): Promise<Course> {
+    const headers = data instanceof FormData ? { 'Content-Type': 'multipart/form-data' } : {};
+    const response = await api.patch(`/courses/${id}`, data, { headers });
     return response.data;
 }
 

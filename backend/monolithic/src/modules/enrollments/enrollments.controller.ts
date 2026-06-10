@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, ParseIntPipe, UseGuards, Patch } from '@nestjs/common';
 import { EnrollmentsService } from './enrollments.service';
 import { EnrollCourseDto } from './dto/enroll-course.dto';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
@@ -42,5 +42,19 @@ export class EnrollmentsController {
         @Param('courseId', ParseIntPipe) courseId: number,
     ) {
         return await this.enrollmentsService.getEnrollmentDetail(user.userId, courseId);
+    }
+
+    //update progress
+    @Patch('progress/:courseId')
+    @ApiOperation({ summary: 'Update enrollment progress by course' })
+    @ApiResponse({ status: 200, description: 'Progress updated successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 404, description: 'Enrollment not found' })
+    async updateProgress(
+        @CurrentUser() user: JwtPayloadUser,
+        @Param('courseId', ParseIntPipe) courseId: number,
+        @Body('progress', ParseIntPipe) progress: number,
+    ) {
+        return await this.enrollmentsService.updateProgress(user.userId, courseId, progress);
     }
 }

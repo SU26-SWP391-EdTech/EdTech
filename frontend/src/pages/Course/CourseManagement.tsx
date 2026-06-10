@@ -7,8 +7,8 @@ import {
     Settings, Inbox, Edit2, Trash2
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth.stores';
-import { searchCourses, deleteCourse } from '../../services/course.service';
-import type { BackendCourse } from '../../services/course.service';
+import { searchCourses, deleteCourse } from '../../services/course/course.service';
+import type { BackendCourse } from '../../services/course/course.service';
 import toast from 'react-hot-toast';
 
 import type { Course, CourseStatus, Category } from '../../components/CourseManagement/types';

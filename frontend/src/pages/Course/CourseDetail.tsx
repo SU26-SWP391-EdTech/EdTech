@@ -31,7 +31,19 @@ export function CourseDetail() {
     getCourseDetailPath,
     getProviderProfilePath,
     navigate,
+    isLoading,
   } = useCourseDetail();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="loading loading-spinner loading-lg text-primary"></div>
+          <p className="text-slate-500 font-medium animate-pulse">Loading course details...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#F8FAFC] min-h-screen">

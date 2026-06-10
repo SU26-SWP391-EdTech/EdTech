@@ -17,7 +17,7 @@ export function LessonRow({ lesson, courseId }: LessonRowProps) {
     Quiz: { Icon: ClipboardList, color: '#F59E0B' },
     Assignment: { Icon: FileText, color: '#10B981' },
   };
-  const tm = typeMap[lesson.type];
+  const tm = typeMap[lesson.type] || typeMap.Video;
 
   const isCurrent = lesson.status === 'current';
   const isLocked = lesson.status === 'locked';
@@ -37,7 +37,7 @@ export function LessonRow({ lesson, courseId }: LessonRowProps) {
       <StatusIcon status={lesson.status} />
       <span className="flex items-center gap-1.5 text-xs" style={{ color: tm.color, fontWeight: 600 }}>
         <tm.Icon className="w-3.5 h-3.5" />
-        {lesson.type}
+        {lesson.type || 'Video'}
       </span>
       <span className={`text-sm flex-1 ${isCurrent ? 'text-[#E11D48]' : 'text-[#111827]'}`} style={{ fontWeight: isCurrent ? 600 : 500 }}>
         {lesson.title}

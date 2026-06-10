@@ -23,6 +23,7 @@ import { RoleEnum } from 'src/common/enums/role.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Lessons')
 @Controller('lessons')
@@ -46,6 +47,7 @@ export class LessonsController {
         return await this.lessonsService.create(courseId, createLessonDto, file);
     }
 
+    @Public()
     @Get('course/:courseId')
     @ApiOperation({ summary: 'Get all lessons by course' })
     @ApiResponse({ status: 200, description: 'Lessons returned successfully' })

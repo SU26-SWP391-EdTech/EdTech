@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { login as loginApi, register as registerApi, verifyEmail as verifyEmailApi, logout as logoutApi } from '../services/auth/auth.service';
+import { login as loginApi, register as registerApi, verifyEmail as verifyEmailApi, logout as logoutApi, getMe } from '../services/auth/auth.service';
 import type { User } from '../services/auth/auth.service';
 
 export type { User };
@@ -18,6 +18,7 @@ interface AuthState {
     register: (data: { fullName: string; email: string; password: string; roleName: string }) => Promise<void>;
     verifyEmail: (token: string) => Promise<void>;
     logout: () => Promise<void>;
+    checkAuth: () => Promise<User | null>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -98,6 +99,34 @@ export const useAuthStore = create<AuthState>()(
                     error: null,
                 });
             },
+
+            // Action 4: Kiểm tra trạng thái đăng nhập từ server
+            checkAuth: async () => {
+                const token = useAuthStore.getState().token;
+                if (!token) {
+                    set({ user: null, isAuthenticated: false, token: null });
+                    return null;
+                }
+                set({ isLoading: true });
+                try {
+                    const data = await getMe();
+                    const { user } = data;
+                    set({
+                        user,
+                        isAuthenticated: true,
+                        isLoading: false,
+                    });
+                    return user;
+                } catch (err: any) {
+                    set({
+                        user: null,
+                        token: null,
+                        isAuthenticated: false,
+                        isLoading: false,
+                    });
+                    return null;
+                }
+            },
         }),
         {
             name: 'edtech-auth-storage', // Tên key lưu trữ trong localStorage
@@ -109,6 +138,7 @@ export const useAuthStore = create<AuthState>()(
         }
     )
 );
+
 
 // Lắng nghe sự kiện logout từ axios interceptor (khi gặp lỗi 401)
 if (typeof window !== 'undefined') {

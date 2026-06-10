@@ -16,7 +16,7 @@ export class LearningPathsRepository {
     @InjectRepository(LearningPathCourse)
     private readonly learningPathCourseRepo: Repository<LearningPathCourse>,
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   async createLearningPath(
     createLearningPathDto: CreateLearningPathDto,
@@ -35,7 +35,13 @@ export class LearningPathsRepository {
   public async getLearningPathById(id: number): Promise<LearningPath | null> {
     return this.learningPathRepo.findOne({
       where: { learningPathId: id },
-      // relations: ['learningPathCourses'],
+      relations: ['learningPathCourses', 'learningPathCourses.course'],
+    });
+  }
+
+  public async getAll(): Promise<LearningPath[]> {
+    return this.learningPathRepo.find({
+      relations: ['learningPathCourses', 'learningPathCourses.course'],
     });
   }
 

@@ -36,3 +36,9 @@ export async function getEnrollmentDetail(courseId: number): Promise<Enrollment>
     const response = await api.get(`/enrollments/course/${courseId}`);
     return response.data;
 }
+
+// 4. Cập nhật tiến độ của một khóa học
+export async function updateEnrollmentProgress(courseId: number, progress: number): Promise<Enrollment> {
+    const response = await api.patch(`/enrollments/progress/${courseId}`, { progress });
+    return response.data;
+}

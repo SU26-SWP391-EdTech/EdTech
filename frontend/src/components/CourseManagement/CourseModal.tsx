@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { X, Image, AlertCircle, BookOpen, ChevronDown } from 'lucide-react';
-import { createCourse, updateCourse } from '../../services/course.service';
+import { createCourse, updateCourse } from '../../services/course/course.service';
 import type { Course, CourseStatus, Category } from './types';
 import toast from 'react-hot-toast';
 

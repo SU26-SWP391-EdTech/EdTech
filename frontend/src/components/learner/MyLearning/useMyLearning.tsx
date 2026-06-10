@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../stores/auth.stores';
+import { getMyEnrollments } from '../../../services/enrollment/enrollment.service';
+import { getLearningPaths } from '../../../services/learning-path/learning-path.service';
 import type { Enrollment } from '../../../services/enrollment/enrollment.service';
 import type { LearningPath } from '../../../services/learning-path/learning-path.service';
 
@@ -28,13 +30,23 @@ export function useMyLearning() {
                 setIsLoading(true);
                 setError(null);
                 
-                const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
-                setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : []);
-                
-                const storedPaths = sessionStorage.getItem('explore_cache_enrolled_paths');
-                const enrolledPathIds = storedPaths ? JSON.parse(storedPaths) : [];
-                setLearningPaths([]);
+                const [enrolls, paths] = await Promise.all([
+                    getMyEnrollments(),
+                    getLearningPaths(),
+                ]);
 
+                setEnrollments(enrolls);
+                
+                // Only include learning paths where the user has at least one enrolled course
+                const enrolledPaths = paths.filter(path => {
+                    const pathCourses = path.learningPathCourses || [];
+                    if (pathCourses.length === 0) return false;
+                    return pathCourses.some(pc => 
+                        enrolls.some(e => e.course?.courseId === pc.courseId)
+                    );
+                });
+                
+                setLearningPaths(enrolledPaths);
             } catch (err: any) {
                 console.error('Failed to fetch learning progress:', err);
                 setError('Failed to load learning progress. Please try again later.');

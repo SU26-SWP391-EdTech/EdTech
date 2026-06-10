@@ -33,12 +33,17 @@ export function useLearnerDashboard() {
                     return acc + Math.round(duration * (curr.progress / 100));
                 }, 0);
 
-                const storedPaths = sessionStorage.getItem('explore_cache_enrolled_paths');
-                const enrolledPathIds = storedPaths ? JSON.parse(storedPaths) : [];
+                const enrolledPathIds = pathsData.filter(path => {
+                    const pathCourses = path.learningPathCourses || [];
+                    if (pathCourses.length === 0) return false;
+                    return pathCourses.some(pc => 
+                        enrollmentsData.some(e => e.course?.courseId === pc.courseId)
+                    );
+                }).map(p => p.learningPathId);
 
                 setProfile({
                     ...profileData,
-                    streakCount: (profileData as any).streakCount ?? 5,
+                    streakCount: (profileData as any).streakCount ?? 0,
                     completedCourses: completedCount,
                     learningHours: totalHours,
                     enrolledPaths: enrolledPathIds.length,
@@ -137,9 +142,13 @@ export function useLearnerDashboard() {
         });
 
     // Roadmap active path & nodes mapping
-    const storedPaths = sessionStorage.getItem('explore_cache_enrolled_paths');
-    const isNewUser = user && !['learner@edtech.com', 'provider@edtech.com', 'manager@edtech.com', 'admin@edtech.com'].includes(user.email.toLowerCase());
-    const enrolledPathIds: number[] = storedPaths ? JSON.parse(storedPaths) : (isNewUser ? [] : [1]);
+    const enrolledPathIds = learningPaths.filter(path => {
+        const pathCourses = path.learningPathCourses || [];
+        if (pathCourses.length === 0) return false;
+        return pathCourses.some(pc => 
+            enrollments.some(e => e.course?.courseId === pc.courseId)
+        );
+    }).map(p => p.learningPathId);
 
     const activePath = learningPaths.find(path =>
         enrolledPathIds.includes(path.learningPathId)

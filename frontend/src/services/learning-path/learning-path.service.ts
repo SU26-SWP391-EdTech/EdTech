@@ -73,3 +73,9 @@ export async function getLearningPaths(): Promise<LearningPath[]> {
     const response = await api.get('/learning-paths');
     return response.data;
 }
+
+// 6. Lấy chi tiết lộ trình học tập bằng ID
+export async function getLearningPathById(learningPathId: number): Promise<LearningPath> {
+    const response = await api.get(`/learning-paths/${learningPathId}`);
+    return response.data;
+}
