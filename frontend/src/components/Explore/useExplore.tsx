@@ -233,6 +233,7 @@ export function useExplore() {
         filteredCourses,
         filteredPaths,
         enrollments,
+        enrolledPathIds,
         isEnrolled,
         handleEnroll,
         handleEnrollPath,

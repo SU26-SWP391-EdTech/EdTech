@@ -9,21 +9,7 @@ import {
   getYoutubeEmbedUrl,
   SAVED_NOTES
 } from './lessonUtils';
-import { create } from 'zustand';
-
-interface User {
-  fullName: string;
-  roleName: string;
-  userId: number;
-}
-
-interface AuthStore {
-  user: User | null;
-}
-
-const useAuthStore = create<AuthStore>(() => ({
-  user: JSON.parse(localStorage.getItem('auth_store_user') || '{"fullName": "Learner", "roleName": "Learner", "userId": 1}'),
-}));
+import { useAuthStore } from '../../stores/auth.stores';
 
 export function useLessonPage() {
   const navigate = useNavigate();
@@ -342,7 +328,15 @@ export function useLessonPage() {
   };
 
   const handleBackToCourse = () => {
-    navigate(`/courses/detail?id=${courseId}`);
+    if (role === 'learner') {
+      navigate(`/learner/courses/detail?id=${courseId}`);
+    } else if (role === 'course provider') {
+      navigate(`/provider/courses/detail?id=${courseId}`);
+    } else if (role === 'academic manager') {
+      navigate(`/academic/courses/detail?id=${courseId}`);
+    } else {
+      navigate(`/courses/detail?id=${courseId}`);
+    }
   };
 
   const quizQuestionsList = getQuizQuestionsForCourse(matchedCourse.title);

@@ -21,6 +21,7 @@ export function ExplorePage() {
         filteredCourses,
         filteredPaths,
         enrollments,
+        enrolledPathIds,
         isEnrolled,
         handleEnroll,
         handleEnrollPath,
@@ -108,8 +109,8 @@ export function ExplorePage() {
                                         const colors = ['#E11D48', '#6366F1', '#8B5CF6', '#10B981'];
                                         const pathCourses = path.learningPathCourses || [];
                                         
-                                        // Check if user is enrolled in at least one course in the path
-                                        const userEnrolledInPath = pathCourses.some(pc => isEnrolled(pc.courseId));
+                                        // Check if user is enrolled in the path
+                                        const userEnrolledInPath = enrolledPathIds.includes(path.learningPathId);
                                         
                                         // Calculate personal completion rate
                                         const completedInPath = pathCourses.filter(pc =>
