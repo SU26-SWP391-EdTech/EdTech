@@ -1,14 +1,16 @@
 {
-  "dependencies": {
-    "@nestjs/throttler": "^6.5.0",
-    "cloudinary": "^2.10.0"
-  },
-  "devDependencies": {
-    "@types/multer": "^2.1.0"
-  },
+  "private": true,
   "scripts": {
-    "start": "docker-compose up",
-    "dev": "docker-compose up",
-    "down": "docker-compose down"
+    "preinstall": "node -e \"console.error('Stupid Thao, please use Docker. Do not run npm install locally in the root folder.'); process.exit(1)\"",
+    "start": "docker-compose up -d",
+    "start:build": "docker-compose up -d --build --remove-orphans",
+    "start:database": "docker-compose up db phpmyadmin",
+    "down": "docker-compose down",
+    "down:remove-all": "docker-compose down -v",
+    "restart": "docker-compose down && docker-compose up -d",
+    "restart:build": "docker-compose down --remove-orphans && docker-compose up -d --build --remove-orphans",
+    "logs": "docker-compose logs -f",
+    "ps": "docker-compose ps",
+    "rebuild": "docker-compose build --no-cache"
   }
 }

@@ -52,7 +52,7 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
     CoursesModule,
     LessonsModule,
     LearnersModule,
-    LearningPathsModule,  
+    LearningPathsModule,
     AuthModule,
     MailModule,
     CloudinaryModule
