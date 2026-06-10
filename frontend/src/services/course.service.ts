@@ -22,6 +22,8 @@ export interface BackendCourse {
   enrollmentCount?: number;
 }
 
+export type Course = BackendCourse;
+
 export interface SearchCoursesResponse {
   statusCode: number;
   message: string;
@@ -32,6 +34,11 @@ export interface SearchCoursesResponse {
       count: number;
     };
   };
+}
+
+export async function getCourseById(id: number): Promise<BackendCourse> {
+  const response = await api.get(`/courses/${id}`);
+  return response.data;
 }
 
 // Tạo khóa học mới (FormData để upload file thumbnail)
