@@ -63,9 +63,6 @@ export function UserManagement() {
                 </p>
               </div>
               <div className="flex items-center gap-2.5">
-                <button className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#374151] hover:border-[#D1D5DB] hover:bg-[#F9FAFB] transition-colors" style={{ fontWeight: 500 }}>
-                  <Download className="w-4 h-4" /> Export
-                </button>
                 <button
                   onClick={() => { setSelectedUser(undefined); setShowModal(true); }}
                   className="flex items-center gap-2 px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors"

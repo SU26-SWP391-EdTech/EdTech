@@ -13,22 +13,26 @@ import { LearningPathCourse } from './entities/learning-path-course.entity';
 import { CoursesRepository } from '../courses/courses.repository';
 import { UpdateLearningPathDto } from './dto/update-learning-path.dto';
 import { UpdateCoursePositionDto } from './dto/update-course-position.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class LearningPathsService {
   constructor(
     private readonly learningPathsRepository: LearningPathsRepository,
     private readonly courseRepository: CoursesRepository,
+    private readonly cloudinaryService: CloudinaryService,
   ) { }
 
   async create(
     createLearningPathDto: CreateLearningPathDto,
     user: User,
   ): Promise<LearningPath> {
-    const slug = this.generateSlug(createLearningPathDto.title);
+    if (createLearningPathDto.bannerUrl && createLearningPathDto.bannerUrl.startsWith('data:image/')) {
+      const upload = await this.cloudinaryService.uploadBase64(createLearningPathDto.bannerUrl);
+      createLearningPathDto.bannerUrl = upload.secure_url;
+    }
 
-    // In a real application, you should check if the slug already exists and handle collisions
-    // e.g., append a random string or number to make it unique.
+    const slug = this.generateSlug(createLearningPathDto.title);
 
     return await this.learningPathsRepository.createLearningPath(
       createLearningPathDto,
@@ -150,6 +154,12 @@ export class LearningPathsService {
     if (!learningPath) {
       throw new NotFoundException('Learning path not found');
     }
+
+    if (dto.bannerUrl && dto.bannerUrl.startsWith('data:image/')) {
+      const upload = await this.cloudinaryService.uploadBase64(dto.bannerUrl);
+      dto.bannerUrl = upload.secure_url;
+    }
+
     const updateLearningPath = await this.learningPathsRepository.updateLearningPath(learningPathId, dto, user);
     return updateLearningPath;
   }
