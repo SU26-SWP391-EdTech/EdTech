@@ -63,7 +63,7 @@ services:
     container_name: react-frontend
     restart: always
     ports:
-      - "80:80"
+      - "3001:80"
     depends_on:
       - backend
 
