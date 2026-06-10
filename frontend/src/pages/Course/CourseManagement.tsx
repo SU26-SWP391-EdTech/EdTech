@@ -93,22 +93,6 @@ export function CourseManagement() {
                         </div>
                     </div>
 
-                    {/* ── Stats Cards ── */}
-<<<<<<< HEAD
-                    <div className="grid grid-cols-4 gap-4 mb-6">
-                        {[
-                            { label: 'Total Courses', value: stats.total, icon: <BookOpen className="w-4 h-4 text-[#6B7280]" />, change: '+2 this month', up: true },
-                            { label: 'Published Courses', value: stats.published, icon: <CheckCircle2 className="w-4 h-4 text-[#16A34A]" />, change: `${Math.round((stats.published / stats.total) * 100)}% of total`, up: true },
-                            { label: 'Draft / Pending', value: stats.draft + courses.filter(c => c.status === 'Pending Review').length, icon: <FileText className="w-4 h-4 text-[#D97706]" />, change: 'Awaiting review', up: null },
-                            { label: 'Total Enrollments', value: stats.enrollments.toLocaleString(), icon: <Users className="w-4 h-4 text-[#E11D48]" />, change: '+18.4% vs last mo', up: true },
-                        ].map((s, idx) => (
-                            <div key={idx} className="bg-white border border-[#E5E7EB] rounded-2xl p-5 hover:shadow-sm transition-shadow">
-                                <div className="flex items-start justify-between mb-3">
-                                    <div className="p-2 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl">{s.icon}</div>
-                                    <span className={`text-xs px-2 py-1 rounded-lg ${s.up === true ? 'bg-[#F0FDF4] text-[#16A34A]' : s.up === false ? 'bg-[#FEF2F2] text-[#DC2626]' : 'bg-[#FFFBEB] text-[#D97706]'}`} style={{ fontWeight: 500 }}>
-                                        {s.change}
-                                    </span>
-=======
                     {!isPendingPage && (
                         <div className="grid grid-cols-4 gap-4 mb-6 animate-in fade-in duration-200">
                             {[
@@ -126,11 +110,11 @@ export function CourseManagement() {
                                     </div>
                                     <p className="text-[#111827]" style={{ fontSize: '26px', fontWeight: 700, lineHeight: 1.1 }}>{s.value}</p>
                                     <p className="text-[#6B7280] text-sm mt-0.5">{s.label}</p>
->>>>>>> origin/test/frontend
                                 </div>
                             ))}
                         </div>
                     )}
+
 
                     {/* ── Main Grid ── */}
                     <div className="grid grid-cols-12 gap-5">
