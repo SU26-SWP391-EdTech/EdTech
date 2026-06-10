@@ -44,12 +44,13 @@ services:
     container_name: nestjs-backend
     restart: always
     environment:
-      DATABASE_HOST: db
-      DATABASE_PORT: 3306
-      DATABASE_USER: ${MYSQL_USER}
-      DATABASE_PASSWORD: ${MYSQL_PASSWORD}
-      DATABASE_NAME: ${MYSQL_DATABASE}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
       NODE_ENV: ${NODE_ENV}
+      PORT: 3000
     ports:
       - "3000:3000"
     depends_on:
