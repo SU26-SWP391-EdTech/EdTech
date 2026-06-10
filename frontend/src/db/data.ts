@@ -10,6 +10,7 @@ const MOCK_USER = {
 };
 
 const MOCK_YOUTUBE_VIDEO_URLS = [
+  'https://youtu.be/SlQR9iu09bQ?si=-6EhNR98BpXkK9qV',
   'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
   'https://youtu.be/jNQXAC9IVRw',
   'https://www.youtube.com/embed/tgbNymZ7vqY',
