@@ -130,3 +130,16 @@ docker compose up -d
 ```
 docker ps
 ```
+
+| Command                   | Description                      |
+| ------------------------- | -------------------------------- |
+| `npm run start`           | Start all services               |
+| `npm run start:build`     | Build and start all services     |
+| `npm run start:database`  | Start only DB and phpMyAdmin     |
+| `npm run down`            | Stop all services                |
+| `npm run down:remove-all` | Stop services and remove volumes |
+| `npm run restart`         | Restart all services             |
+| `npm run restart:build`   | Rebuild and restart all services |
+| `npm run logs`            | View container logs              |
+| `npm run ps`              | Show container status            |
+| `npm run rebuild`         | Rebuild images without cache     |
