@@ -21,18 +21,20 @@ async function bootstrap() {
     }),
   );
 
-  const config = new DocumentBuilder()
-    .setTitle('LearningPath API')
-    .setDescription('REST API documentation')
-    .setVersion('1.0')
-    .addTag('users')
-    .build();
+  // Chỉ kích hoạt Swagger khi không ở môi trường production
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('LearningPath API')
+      .setDescription('REST API documentation')
+      .setVersion('1.0')
+      .addTag('users')
+      .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-
-  // Mount Swagger UI at /api
-  // http://localhost:number/docs
-  SwaggerModule.setup('docs', app, document);
+    const document = SwaggerModule.createDocument(app, config);
+    // Mount Swagger UI at /api
+    // http://localhost:number/docs
+    SwaggerModule.setup('docs', app, document);
+  }
 
   await app.listen(process.env.PORT ?? 3000);
 }
