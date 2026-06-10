@@ -146,42 +146,47 @@ export function ExplorePage() {
                     )}
 
                     {/* Trending Courses / Catalog */}
-                    {(tab === 'all' || tab === 'courses') && (
-                        <section>
-                            <SectionHeader 
-                                title="Trending Courses" 
-                                subtitle="What learners are taking this week" 
-                                actionLabel={tab === 'all' ? "View All" : ""} 
-                                onAction={() => setTab('courses')}
-                            />
-                            {isLoading ? (
-                                <div className="grid grid-cols-5 gap-4 animate-pulse">
-                                    {[1, 2, 3, 4, 5].map(i => (
-                                        <div key={i} className="h-56 bg-slate-100 rounded-2xl" />
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-5 gap-4">
-                                    {(tab === 'all' ? filteredCourses.slice(0, 5) : filteredCourses).map((course, index) => {
-                                        const difficultyLevel = getCourseLevel(course);
-                                        return (
-                                            <ExploreCourseCard
-                                                key={course.courseId}
-                                                title={course.title}
-                                                provider={course.user?.fullName || "Senior Instructor"}
-                                                rating={4.8}
-                                                students="8.5k"
-                                                duration={`${course.duration || 8}h`}
-                                                difficulty={difficultyLevel}
-                                                tags={[course.language || 'English']}
-                                                thumb={getCourseGradient(index)}
-                                                badge={index === 0 ? "Popular" : index === 1 ? "Trending" : undefined}
-                                                isEnrolled={isEnrolled(course.courseId)}
-                                                onEnroll={() => handleEnroll(course.courseId)}
-                                                enrolling={enrollingId === course.courseId}
-                                            />
-                                        );
-                                    })}
+                                     {(tab === 'all' || tab === 'courses') && (
+                                         <section>
+                                             <SectionHeader 
+                                                 title="Trending Courses" 
+                                                 subtitle="What learners are taking this week" 
+                                                 actionLabel={tab === 'all' ? "View All" : ""} 
+                                                 onAction={() => setTab('courses')}
+                                             />
+                                             {isLoading ? (
+                                                 <div className="grid grid-cols-5 gap-4 animate-pulse">
+                                                     {[1, 2, 3, 4, 5].map(i => (
+                                                         <div key={i} className="h-56 bg-slate-100 rounded-2xl" />
+                                                     ))}
+                                                 </div>
+                                             ) : (
+                                                 <div className="grid grid-cols-5 gap-4">
+                                                     {(tab === 'all' ? filteredCourses.slice(0, 5) : filteredCourses).map((course, index) => {
+                                                         const difficultyLevel = getCourseLevel(course);
+                                                         const roleName = user?.roleName?.toLowerCase() || 'guest';
+                                                         return (
+                                                             <ExploreCourseCard
+                                                                 key={course.courseId}
+                                                                 title={course.title}
+                                                                 provider={course.user?.fullName || "Senior Instructor"}
+                                                                 rating={4.8}
+                                                                 students="8.5k"
+                                                                 duration={`${course.duration || 8}h`}
+                                                                 difficulty={difficultyLevel}
+                                                                 tags={[course.language || 'English']}
+                                                                 thumb={getCourseGradient(index)}
+                                                                 badge={index === 0 ? "Popular" : index === 1 ? "Trending" : undefined}
+                                                                 isEnrolled={isEnrolled(course.courseId)}
+                                                                 onEnroll={() => handleEnroll(course.courseId)}
+                                                                 enrolling={enrollingId === course.courseId}
+                                                                 onClick={() => {
+                                                                     const prefix = roleName === 'learner' ? '/learner' : '';
+                                                                     navigate(`${prefix}/courses/detail?id=${course.courseId}`);
+                                                                 }}
+                                                             />
+                                                         );
+                                                     })}
                                     {filteredCourses.length === 0 && (
                                         <div className="bg-white border border-dashed border-[#E5E7EB] rounded-2xl p-10 flex flex-col items-center text-center col-span-5">
                                             <div className="w-14 h-14 rounded-2xl bg-[#F8FAFC] border border-[#E5E7EB] flex items-center justify-center mb-4">

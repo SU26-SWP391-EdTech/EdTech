@@ -15,6 +15,7 @@ interface AllCoursesViewProps {
     getCourseGradient: (index: number) => string;
     onBack: () => void;
     onCtaClick: (enrollmentId: number) => void;
+    onCourseClick?: (courseId: number) => void;
 }
 
 function FilterChip({ label }: { label: string }) {
@@ -35,7 +36,8 @@ export default function AllCoursesView({
     timeAgo,
     getCourseGradient,
     onBack,
-    onCtaClick
+    onCtaClick,
+    onCourseClick
 }: AllCoursesViewProps) {
     const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
@@ -145,6 +147,7 @@ export default function AllCoursesView({
                                 status={status}
                                 thumb={getCourseGradient(index)}
                                 onCtaClick={() => onCtaClick(enrollment.enrollmentId)}
+                                onClick={() => onCourseClick?.(enrollment.course.courseId)}
                             />
                         );
                     })

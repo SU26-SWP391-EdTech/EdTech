@@ -92,6 +92,7 @@ export function MyLearning() {
                                     getCourseGradient={getCourseGradient}
                                     onViewAll={() => { setActiveView('all-courses'); window.scrollTo(0, 0); }}
                                     onCtaClick={() => navigate('/learner/explore')}
+                                    onCourseClick={(courseId) => navigate(`/learner/courses/detail?id=${courseId}`)}
                                 />
                             </div>
                         </div>
@@ -120,6 +121,7 @@ export function MyLearning() {
                         getCourseGradient={getCourseGradient}
                         onBack={() => { setActiveView('dashboard'); window.scrollTo(0, 0); }}
                         onCtaClick={() => navigate('/learner/explore')}
+                        onCourseClick={(courseId) => navigate(`/learner/courses/detail?id=${courseId}`)}
                     />
                 )}
             </main>

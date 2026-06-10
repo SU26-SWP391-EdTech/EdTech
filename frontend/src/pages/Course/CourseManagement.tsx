@@ -283,17 +283,17 @@ export function CourseManagement() {
                     {/* ── Page Header ── */}
                     <div className="mb-7">
                         <div className="flex items-end justify-between">
-                          <div>
-                            <h1 className="text-[#111827] mb-1" style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2 }}>Course Management</h1>
-                            <p className="text-[#6B7280] text-sm">Review, publish, and organize all courses across the platform from one place.</p>
-                          </div>
-                          <div className="flex items-center gap-2.5">
-                            {isProvider && (
-                              <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
-                                <Plus className="w-4 h-4" /> Create Course
-                              </button>
-                            )}
-                          </div>
+                            <div>
+                                <h1 className="text-[#111827] mb-1" style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2 }}>Course Management</h1>
+                                <p className="text-[#6B7280] text-sm">Review, publish, and organize all courses across the platform from one place.</p>
+                            </div>
+                            <div className="flex items-center gap-2.5">
+                                {isProvider && (
+                                    <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
+                                        <Plus className="w-4 h-4" /> Create Course
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
 

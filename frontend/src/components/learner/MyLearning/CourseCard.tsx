@@ -14,6 +14,7 @@ interface CourseCardProps {
     status: CourseStatus;
     thumb: string;
     onCtaClick?: () => void;
+    onClick?: () => void;
 }
 
 const statusMap: Record<CourseStatus, { label: string; tint: string; color: string }> = {
@@ -34,12 +35,13 @@ export default function CourseCard({
     lastAccessed,
     status,
     thumb,
-    onCtaClick
+    onCtaClick,
+    onClick
 }: CourseCardProps) {
     const s = statusMap[status];
     const cta = status === 'completed' ? 'View Certificate' : status === 'archived' ? 'Review' : 'Continue';
     return (
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 flex gap-4 hover:shadow-md hover:border-[#E11D48]/20 transition-all">
+        <div onClick={onClick} className={`bg-white border border-[#E5E7EB] rounded-2xl p-4 flex gap-4 hover:shadow-md hover:border-[#E11D48]/20 transition-all ${onClick ? 'cursor-pointer' : ''}`}>
             <div className={`flex-shrink-0 w-[88px] h-[88px] rounded-xl bg-gradient-to-br ${thumb} flex items-center justify-center`}>
                 <BookOpen className="w-7 h-7 text-white" />
             </div>
@@ -66,7 +68,7 @@ export default function CourseCard({
                 </div>
                 <div className="flex items-center justify-between mt-auto">
                     <span className="text-[11px] text-[#9CA3AF]">Last accessed {lastAccessed}</span>
-                    <button onClick={onCtaClick} className={`px-3 py-1.5 rounded-lg text-xs transition-colors ${status === 'completed' ? 'bg-[#ECFDF5] text-[#047857] hover:bg-[#D1FAE5]' : 'bg-[#111827] text-white hover:bg-black'}`} style={{ fontWeight: 500 }}>
+                    <button onClick={(e) => { e.stopPropagation(); onCtaClick?.(); }} className={`px-3 py-1.5 rounded-lg text-xs transition-colors ${status === 'completed' ? 'bg-[#ECFDF5] text-[#047857] hover:bg-[#D1FAE5]' : 'bg-[#111827] text-white hover:bg-black'}`} style={{ fontWeight: 500 }}>
                         {cta}
                     </button>
                 </div>

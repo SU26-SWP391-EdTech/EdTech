@@ -9,6 +9,7 @@ interface EnrolledCoursesSectionProps {
     getCourseGradient: (index: number) => string;
     onViewAll: () => void;
     onCtaClick: () => void;
+    onCourseClick?: (courseId: number) => void;
 }
 
 export default function EnrolledCoursesSection({
@@ -18,6 +19,7 @@ export default function EnrolledCoursesSection({
     getCourseGradient,
     onViewAll,
     onCtaClick,
+    onCourseClick,
 }: EnrolledCoursesSectionProps) {
     return (
         <section>
@@ -50,6 +52,7 @@ export default function EnrolledCoursesSection({
                                 status={status}
                                 thumb={getCourseGradient(index)}
                                 onCtaClick={onCtaClick}
+                                onClick={() => onCourseClick?.(enrollment.course.courseId)}
                             />
                         );
                     })

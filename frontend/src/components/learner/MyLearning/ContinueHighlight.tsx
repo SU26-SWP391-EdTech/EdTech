@@ -49,7 +49,7 @@ export default function ContinueHighlight({
                         </span>
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <div 
+                        <div
                             onClick={onContinueClick}
                             className="w-16 h-16 rounded-full bg-white/15 backdrop-blur flex items-center justify-center border border-white/20 cursor-pointer hover:bg-white/25 transition-colors"
                         >
@@ -98,17 +98,17 @@ export default function ContinueHighlight({
                     </div>
 
                     <div className="flex items-center gap-2 mt-auto">
-                        <button 
+                        <button
                             onClick={onContinueClick}
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors" 
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors"
                             style={{ fontWeight: 500 }}
                         >
                             <Play className="w-4 h-4 fill-white" />
                             {displayEnrollment.status === 'completed' ? 'Review Course' : 'Continue Lesson'}
                         </button>
-                        <button 
+                        <button
                             onClick={onViewCourseClick}
-                            className="px-4 py-2.5 bg-white border border-[#E5E7EB] text-[#111827] rounded-lg text-sm hover:bg-[#F8FAFC] transition-colors" 
+                            className="px-4 py-2.5 bg-white border border-[#E5E7EB] text-[#111827] rounded-lg text-sm hover:bg-[#F8FAFC] transition-colors"
                             style={{ fontWeight: 500 }}
                         >
                             View Course

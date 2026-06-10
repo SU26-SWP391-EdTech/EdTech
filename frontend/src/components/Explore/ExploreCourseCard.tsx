@@ -13,6 +13,7 @@ interface ExploreCourseCardProps {
     isEnrolled: boolean;
     onEnroll: () => void;
     enrolling: boolean;
+    onClick?: () => void;
 }
 
 export function DifficultyBadge({ level }: { level: string }) {
@@ -41,7 +42,8 @@ export default function ExploreCourseCard({
     badge,
     isEnrolled,
     onEnroll,
-    enrolling
+    enrolling,
+    onClick
 }: ExploreCourseCardProps) {
     const badgeMap: Record<string, { color: string; tint: string }> = {
         Popular: { color: '#E11D48', tint: '#FEF2F2' },
@@ -52,7 +54,7 @@ export default function ExploreCourseCard({
     const b = badge ? badgeMap[badge] : null;
 
     return (
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md hover:border-[#E11D48]/20 transition-all flex flex-col justify-between">
+        <div onClick={onClick} className={`bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden hover:shadow-md hover:border-[#E11D48]/20 transition-all flex flex-col justify-between ${onClick ? 'cursor-pointer' : ''}`}>
             <div>
                 <div className={`h-28 relative bg-gradient-to-br ${thumb} flex items-center justify-center`}>
                     <BookOpen className="w-9 h-9 text-white" />
@@ -88,7 +90,7 @@ export default function ExploreCourseCard({
                     </div>
                 ) : (
                     <button
-                        onClick={onEnroll}
+                        onClick={(e) => { e.stopPropagation(); onEnroll(); }}
                         disabled={enrolling}
                         className="w-full py-2 bg-[#E11D48] text-white rounded-lg text-xs hover:bg-[#BE123C] disabled:bg-slate-200 disabled:text-slate-400 transition-colors font-semibold"
                     >
