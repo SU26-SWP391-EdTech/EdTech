@@ -41,6 +41,7 @@ import { PlatformSettings } from '../pages/admin/PlatformSettings';
 
 import { useAuthStore } from '../stores/auth.stores';
 import { LessonPage } from '../pages/Lesson/LessonPage';
+import { CreateLessonPage } from '../pages/Lesson/CreateLesson';
 
 function HomeRedirect() {
     const user = useAuthStore((state) => state.user);
@@ -196,6 +197,10 @@ export const router = createBrowserRouter([
             {
                 path: 'courses/lessons',
                 element: <CourseManagement />
+            },
+            {
+                path: 'lessons/create',
+                element: <CreateLessonPage />
             },
             {
                 path: 'explore',
