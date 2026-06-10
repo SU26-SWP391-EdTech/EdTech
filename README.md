@@ -99,11 +99,17 @@ npm run start:dev
 ## 🐳 HOẶC chạy bằng Docker (full stack)
 
 > ⚠️ Chỉ dùng khi:
-> - đã có `.env.docker`
+> - đã có `.env.docker` trong backend
 > - đã chạy `npm install`
 
 ```
 docker compose up -d
+
+# Frontend: http://localhost:3001/
+# API SwaggerUI: http://localhost:3001/api/docs 
+# or http://localhost:3000/docs
+# MyPHPAdmin http://localhost:8080
+# Backend API: http://localhost:3000/api/user
 ```
 
 ---
@@ -124,3 +130,16 @@ docker compose up -d
 ```
 docker ps
 ```
+
+| Command                   | Description                      |
+| ------------------------- | -------------------------------- |
+| `npm run start`           | Start all services               |
+| `npm run start:build`     | Build and start all services     |
+| `npm run start:database`  | Start only DB and phpMyAdmin     |
+| `npm run down`            | Stop all services                |
+| `npm run down:remove-all` | Stop services and remove volumes |
+| `npm run restart`         | Restart all services             |
+| `npm run restart:build`   | Rebuild and restart all services |
+| `npm run logs`            | View container logs              |
+| `npm run ps`              | Show container status            |
+| `npm run rebuild`         | Rebuild images without cache     |

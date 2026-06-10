@@ -7,6 +7,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api');
   app.enableCors({
     origin: true, // Cho phép các domain khác (ví dụ: localhost:5173) gọi API
     credentials: true,
@@ -21,7 +22,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('My API')
+    .setTitle('LearningPath API')
     .setDescription('REST API documentation')
     .setVersion('1.0')
     .addTag('users')
@@ -30,7 +31,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
 
   // Mount Swagger UI at /api
-  SwaggerModule.setup('api', app, document);
+  // http://localhost:number/docs
+  SwaggerModule.setup('docs', app, document);
 
   await app.listen(process.env.PORT ?? 3000);
 }
