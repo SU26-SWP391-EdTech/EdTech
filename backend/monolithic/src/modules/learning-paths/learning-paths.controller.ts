@@ -1,4 +1,4 @@
-import { Controller, Post, Delete, Get, Body, UseGuards, Req, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Delete, Get, Body, UseGuards, Req, Param, ParseIntPipe, Patch } from '@nestjs/common';
 import { LearningPathsService } from './learning-paths.service';
 import { CreateLearningPathDto } from './dto/create-learning-path.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
@@ -7,12 +7,15 @@ import { Roles } from 'src/common/decorators/roles/roles.decorator';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AddCourseToLearningPathDto } from './dto/add-course-to-learning-path.dto';
+import { UpdateLearningPathDto } from './dto/update-learning-path.dto';
+import { UpdateCoursePositionDto } from './dto/update-course-position.dto';
 
 @ApiTags('Learning paths')
 @Controller('learning-paths')
 export class LearningPathsController {
   constructor(private readonly learningPathsService: LearningPathsService) { }
 
+  // Create a learning path
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER)
   @Post()
@@ -43,6 +46,7 @@ export class LearningPathsController {
     return this.learningPathsService.create(createLearningPathDto, req.user);
   }
 
+  // Add a course to a learning path
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER)
   @Post(':id/courses')
@@ -71,6 +75,7 @@ export class LearningPathsController {
     return this.learningPathsService.addCourse(learningPathId, dto, req.user)
   }
 
+  // Remove a course from a learning path
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER)
   @Delete(':id/courses/:courseId')
@@ -92,6 +97,7 @@ export class LearningPathsController {
     return this.learningPathsService.removeCourse(learningPathId, courseId);
   }
 
+  // Get courses in a learning path
   @UseGuards(JwtAuthGuard)
   @Get(':id/courses')
   @ApiOperation({
@@ -109,5 +115,50 @@ export class LearningPathsController {
     @Param('id', ParseIntPipe) learningPathId: number,
   ) {
     return this.learningPathsService.getCoursesInLearningPath(learningPathId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ACADEMIC_MANAGER)
+  @Patch(':id')
+  @ApiOperation({
+    summary: 'Update a learning path',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Learning path updated successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Learning path or course not found',
+  })
+  public async updateLearningPath(
+    @Param('id', ParseIntPipe) learningPathId: number,
+    @Body() dto: UpdateLearningPathDto,
+    @Req() req: any,
+  ) {
+    return this.learningPathsService.updateLearningPath(req.user, learningPathId, dto);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ACADEMIC_MANAGER)
+  @Patch(':id/courses/:courseId/position')
+  @ApiOperation({
+    summary: 'Update a course position in a learning path',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Course position updated successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Learning path or course not found',
+  })
+  public async updateCoursePos(
+    @Param('id', ParseIntPipe) learningPathId: number,
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Body() dto: UpdateCoursePositionDto,
+    @Req() req: any,
+  ) {
+    return this.learningPathsService.updateCoursePosition(req.user, learningPathId, courseId, dto);
   }
 }

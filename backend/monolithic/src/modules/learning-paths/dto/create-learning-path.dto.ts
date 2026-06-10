@@ -5,7 +5,7 @@ import { LearningPathLevel } from 'src/common/enums/learning-path.enum';
 export class CreateLearningPathDto {
   @ApiProperty({
     example: 'Frontend Developer Roadmap',
-    description: 'Tên của learning path',
+    description: 'Learning path title',
     maxLength: 255,
   })
   @IsString()
@@ -14,16 +14,16 @@ export class CreateLearningPathDto {
   title!: string;
 
   @ApiPropertyOptional({
-    example: 'Lộ trình học Backend từ cơ bản đến nâng cao',
-    description: 'Mô tả learning path',
+    example: 'A comprehensive roadmap for becoming a Frontend Developer, covering HTML, CSS, JavaScript, React, and modern web development practices.',
+    description: 'Learning path description',
   })
   @IsString()
   @IsOptional()
   description?: string;
 
   @ApiPropertyOptional({
-    example: 'https://example.com/images/backend-roadmap.jpg',
-    description: 'URL ảnh banner',
+    example: 'https://example.com/images/frontend-roadmap.jpg',
+    description: 'Banner image URL',
   })
   @IsString()
   @IsOptional()
@@ -32,7 +32,7 @@ export class CreateLearningPathDto {
   @ApiPropertyOptional({
     enum: LearningPathLevel,
     example: LearningPathLevel.BEGINNER,
-    description: 'Cấp độ của learning path',
+    description: 'Learning path difficulty level',
   })
   @IsEnum(LearningPathLevel)
   @IsOptional()

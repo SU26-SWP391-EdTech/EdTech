@@ -43,11 +43,11 @@ export class CoursesService {
       createCourseDto.thumbnailUrl = uploaded.secure_url;
     }
 
-    return this.coursesRepository.createCourse({
-      ...createCourseDto,
-      user: courseProvider,
-    });
-  }
+        return this.coursesRepository.createCourse({
+            ...createCourseDto,
+            user: courseProvider,
+        });
+    }
 
   async findAll(): Promise<Course[]> {
     return this.coursesRepository.findAllCourses();
