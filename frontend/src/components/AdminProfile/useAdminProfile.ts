@@ -37,20 +37,19 @@ export function useAdminProfile() {
         try {
             setLoading(true);
 
-            const { MOCK_ACADEMIC_PROFILE } = await import('../../db/data');
             const stored = sessionStorage.getItem('mock_admin_profile');
-            const res = stored ? JSON.parse(stored) : { ...MOCK_ACADEMIC_PROFILE, fullName: 'Phạm Hồng Admin', email: 'admin@edtech.com', bio: 'dang cap vcl' };
+            const res = stored ? JSON.parse(stored) : null;
 
             setProfile({
-                name: res.fullName || loggedInUser.fullName || 'No Name',
-                email: res.email || loggedInUser.email,
-                bio: res.bio || 'dang cap vcl',
+                name: res?.fullName || loggedInUser.fullName || 'No Name',
+                email: res?.email || loggedInUser.email,
+                bio: res?.bio || '',
                 location: 'Not set',
                 organization: 'EdTech Platform',
-                avatar: res.avatarUrl || loggedInUser.avatarUrl || '',
-                expertise: res.expertise || 'Not set',
-                experienceYear: res.experienceYears !== undefined && res.experienceYears !== null ? `${res.experienceYears} years` : '10 years',
-                createdAt: res.createdAt ? new Date(res.createdAt).toLocaleDateString('en-US', {
+                avatar: res?.avatarUrl || loggedInUser.avatarUrl || '',
+                expertise: res?.expertise || 'Not set',
+                experienceYear: res?.experienceYears !== undefined && res?.experienceYears !== null ? `${res.experienceYears} years` : '0 years',
+                createdAt: res?.createdAt ? new Date(res.createdAt).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
                     year: 'numeric'

@@ -28,17 +28,12 @@ export function useMyLearning() {
                 setIsLoading(true);
                 setError(null);
                 
-                // Load dynamic mock data and sessionStorage cache
-                const { MOCK_LEARNING_PATHS, MOCK_ENROLLMENTS } = await import('../../../db/data');
                 const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
-                const isNewUser = user && !['learner@edtech.com', 'provider@edtech.com', 'manager@edtech.com', 'admin@edtech.com'].includes(user.email.toLowerCase());
-
-                setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : (isNewUser ? [] : MOCK_ENROLLMENTS));
+                setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : []);
                 
                 const storedPaths = sessionStorage.getItem('explore_cache_enrolled_paths');
-                const enrolledPathIds = storedPaths ? JSON.parse(storedPaths) : (isNewUser ? [] : [1, 2]);
-                const filteredPaths = MOCK_LEARNING_PATHS.filter(p => enrolledPathIds.includes(p.learningPathId));
-                setLearningPaths(filteredPaths);
+                const enrolledPathIds = storedPaths ? JSON.parse(storedPaths) : [];
+                setLearningPaths([]);
 
             } catch (err: any) {
                 console.error('Failed to fetch learning progress:', err);

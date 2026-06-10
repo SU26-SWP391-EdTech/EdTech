@@ -47,30 +47,10 @@ export function useLearnerDashboard() {
                 setEnrollments(enrollmentsData);
                 setLearningPaths(pathsData);
             } catch (error) {
-                console.error("Failed to load dashboard data from API, falling back to mock:", error);
-
-                const { MOCK_PROFILE, MOCK_ENROLLMENTS, MOCK_LEARNING_PATHS } = await import('../../../db/data');
-                const isNewUser = !['learner@edtech.com', 'provider@edtech.com', 'manager@edtech.com', 'admin@edtech.com'].includes(user.email.toLowerCase());
-
-                if (isNewUser) {
-                    const storedPaths = sessionStorage.getItem('explore_cache_enrolled_paths');
-                    const enrolledPathIds = storedPaths ? JSON.parse(storedPaths) : [];
-                    setProfile({
-                        fullName: user.fullName,
-                        email: user.email,
-                        streakCount: 0,
-                        completedCourses: 0,
-                        learningHours: 0,
-                        enrolledPaths: enrolledPathIds.length,
-                    });
-                } else {
-                    setProfile(MOCK_PROFILE);
-                }
-
-                setLearningPaths(MOCK_LEARNING_PATHS);
-
-                const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
-                setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : (isNewUser ? [] : MOCK_ENROLLMENTS));
+                console.error("Failed to load dashboard data from API:", error);
+                setProfile(null);
+                setEnrollments([]);
+                setLearningPaths([]);
             } finally {
                 setIsLoading(false);
             }

@@ -38,20 +38,19 @@ export function useUserProfile() {
     try {
       setLoading(true);
 
-      const { MOCK_ACADEMIC_PROFILE } = await import('../../db/data');
       const stored = sessionStorage.getItem('mock_academic_profile');
-      const res = stored ? JSON.parse(stored) : MOCK_ACADEMIC_PROFILE;
+      const res = stored ? JSON.parse(stored) : null;
 
       setProfile({
-        name: res.fullName || loggedInUser.fullName || 'No Name',
-        email: res.email || loggedInUser.email,
-        bio: res.bio || 'User bio description not stored on server.',
+        name: res?.fullName || loggedInUser.fullName || 'No Name',
+        email: res?.email || loggedInUser.email,
+        bio: res?.bio || '',
         location: 'Not set',
         organization: 'EdTech Platform',
-        avatar: res.avatarUrl || loggedInUser.avatarUrl || '',
-        expertise: res.expertise || 'Not set',
-        experienceYear: res.experienceYears !== undefined && res.experienceYears !== null ? `${res.experienceYears} years` : '8 years',
-        createdAt: res.createdAt ? new Date(res.createdAt).toLocaleDateString('en-US', {
+        avatar: res?.avatarUrl || loggedInUser.avatarUrl || '',
+        expertise: res?.expertise || 'Not set',
+        experienceYear: res?.experienceYears !== undefined && res?.experienceYears !== null ? `${res.experienceYears} years` : '0 years',
+        createdAt: res?.createdAt ? new Date(res.createdAt).toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
           year: 'numeric'

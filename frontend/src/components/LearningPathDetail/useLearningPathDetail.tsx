@@ -46,10 +46,9 @@ export function useLearningPathDetail() {
     async function loadPathData() {
       try {
         setIsLoading(true);
-        const { MOCK_COURSES, MOCK_LEARNING_PATHS, MOCK_ENROLLMENTS } = await import('../../db/data');
-        setCourses(MOCK_COURSES);
+        setCourses([]);
 
-        const targetPath = MOCK_LEARNING_PATHS.find(p => p.learningPathId === parseInt(id || '1'));
+        const targetPath = null;
         if (!targetPath) {
           toast.error('Learning Path not found!');
           navigate('/learner/explore');
@@ -61,7 +60,7 @@ export function useLearningPathDetail() {
         const isLearner = user?.roleName?.toLowerCase() === 'learner';
         const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
         const activeEnrollments = isLearner
-          ? (storedEnrollments ? JSON.parse(storedEnrollments) : MOCK_ENROLLMENTS)
+          ? (storedEnrollments ? JSON.parse(storedEnrollments) : [])
           : [];
         setEnrollments(activeEnrollments);
 

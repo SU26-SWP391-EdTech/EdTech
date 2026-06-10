@@ -70,12 +70,11 @@ export function useUserManagement() {
       setLoading(true);
       setError(null);
 
-      const { MOCK_USERS_BACKEND } = await import('../../db/data');
       const stored = sessionStorage.getItem('mock_users');
-      const data = stored ? JSON.parse(stored) : MOCK_USERS_BACKEND;
+      const data = stored ? JSON.parse(stored) : [];
 
       if (!stored) {
-        sessionStorage.setItem('mock_users', JSON.stringify(MOCK_USERS_BACKEND));
+        sessionStorage.setItem('mock_users', JSON.stringify([]));
       }
 
       setUsers(data.map(mapBackendUserToFrontend));
@@ -123,9 +122,8 @@ export function useUserManagement() {
     password?: string;
   }) => {
     try {
-      const { MOCK_USERS_BACKEND } = await import('../../db/data');
       const stored = sessionStorage.getItem('mock_users');
-      let currentList = stored ? JSON.parse(stored) : [...MOCK_USERS_BACKEND];
+      let currentList = stored ? JSON.parse(stored) : [];
 
       if (selectedUser) {
         currentList = currentList.map((u: any) => {
@@ -165,9 +163,8 @@ export function useUserManagement() {
 
   const handleDeleteUser = async (id: number) => {
     try {
-      const { MOCK_USERS_BACKEND } = await import('../../db/data');
       const stored = sessionStorage.getItem('mock_users');
-      let currentList = stored ? JSON.parse(stored) : [...MOCK_USERS_BACKEND];
+      let currentList = stored ? JSON.parse(stored) : [];
 
       currentList = currentList.map((u: any) => {
         if (u.userId === id) {

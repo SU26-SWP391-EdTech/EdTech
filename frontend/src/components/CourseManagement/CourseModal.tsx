@@ -12,10 +12,9 @@ interface CourseModalProps {
   onClose: () => void;
   onSuccess: () => void;
   isViewOnly?: boolean;
-  mockCoursesList?: Course[];
 }
 
-export function CourseModal({ course, onClose, onSuccess, isViewOnly = false, mockCoursesList }: CourseModalProps) {
+export function CourseModal({ course, onClose, onSuccess, isViewOnly = false }: CourseModalProps) {
   const [dragOver, setDragOver] = useState(false);
   const [title, setTitle] = useState(course?.title || '');
   const [description, setDescription] = useState(course?.description || '');
@@ -91,25 +90,7 @@ export function CourseModal({ course, onClose, onSuccess, isViewOnly = false, mo
       }
 
       if (course) {
-        const targetList = mockCoursesList;
-        const mockIndex = targetList ? targetList.findIndex(c => c.id === course.id) : -1;
-        if (mockIndex !== -1 && targetList) {
-          targetList[mockIndex] = {
-            ...targetList[mockIndex],
-            title,
-            description,
-            category: category as Category,
-            status: status as CourseStatus,
-            duration: duration,
-            language: language,
-            projectUrl: projectUrl,
-            thumbnailUrl: thumbnailFile ? URL.createObjectURL(thumbnailFile) : course.thumbnailUrl,
-            updated: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          };
-          toast.success('Course updated successfully');
-        } else {
-          await updateCourse(course.id, formData);
-        }
+        await updateCourse(course.id, formData);
       } else {
         await createCourse(formData);
       }

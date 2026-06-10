@@ -1,9 +1,26 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../stores/auth.stores';
-import { MOCK_COURSES, MOCK_PROVIDER_PROFILES } from '../../db/data';
 import toast from 'react-hot-toast';
 import type { Module, LessonStatus } from './types';
+
+const LOCAL_MOCK_COURSES: any[] = [
+  {
+    courseId: 8,
+    title: 'Course Detail',
+    description: 'No description available.',
+    duration: 10,
+    language: 'English',
+    user: { userId: 1, fullName: 'Instructor' },
+    curriculum: [],
+    outcomes: [],
+    prerequisites: [],
+    audience: [],
+    skills: [],
+    enrollmentCount: 0,
+  }
+];
+const LOCAL_MOCK_PROVIDER_PROFILES: any[] = [];
 
 export function useCourseDetail() {
   const navigate = useNavigate();
@@ -15,12 +32,12 @@ export function useCourseDetail() {
 
   // Get active course from URL or location state
   const courseId = Number(searchParams.get('id') || location.state?.courseId || 8);
-  const matchedCourse: any = MOCK_COURSES.find(c => c.courseId === courseId) || MOCK_COURSES[0];
+  const matchedCourse: any = LOCAL_MOCK_COURSES.find(c => c.courseId === courseId) || LOCAL_MOCK_COURSES[0];
   const providerId = matchedCourse.user?.userId;
-  const providerProfile = MOCK_PROVIDER_PROFILES.find(provider => provider.userId === providerId);
-  const providerCourses = MOCK_COURSES.filter(course => course.user?.userId === providerId);
+  const providerProfile = LOCAL_MOCK_PROVIDER_PROFILES.find(provider => provider.userId === providerId);
+  const providerCourses = LOCAL_MOCK_COURSES.filter(course => course.user?.userId === providerId);
   const providerLearnerCount = providerCourses.reduce((sum, course) => sum + (course.enrollmentCount || 0), 0);
-  const relatedCourses = MOCK_COURSES
+  const relatedCourses = LOCAL_MOCK_COURSES
     .filter(course => course.courseId !== matchedCourse.courseId)
     .sort((a, b) => {
       const aScore = Number(a.language === matchedCourse.language) + Number(a.user?.userId === providerId);

@@ -1,16 +1,18 @@
 import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Award, BookOpen, Mail, Star, Users } from 'lucide-react';
-import { MOCK_COURSES, MOCK_PROVIDER_PROFILES } from '../../db/data';
+
+const LOCAL_MOCK_COURSES: any[] = [];
+const LOCAL_MOCK_PROVIDER_PROFILES: any[] = [];
 
 export function ProviderProfile() {
   const navigate = useNavigate();
   const { id } = useParams();
   const providerId = Number(id);
 
-  const provider = MOCK_PROVIDER_PROFILES.find(item => item.userId === providerId);
+  const provider = LOCAL_MOCK_PROVIDER_PROFILES.find(item => item.userId === providerId);
   const providerCourses = useMemo(
-    () => MOCK_COURSES.filter(course => course.user?.userId === providerId),
+    () => LOCAL_MOCK_COURSES.filter(course => course.user?.userId === providerId),
     [providerId],
   );
 

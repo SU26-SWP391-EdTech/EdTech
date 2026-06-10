@@ -37,20 +37,19 @@ export function useLearnerProfile() {
     if (!loggedInUser) return;
     try {
       setLoading(true);
-      const { MOCK_LEARNER_PROFILE_FULL } = await import('../../db/data');
       const stored = sessionStorage.getItem('mock_learner_profile');
-      const res = stored ? JSON.parse(stored) : MOCK_LEARNER_PROFILE_FULL;
+      const res = stored ? JSON.parse(stored) : null;
 
       setProfile({
-        name: res.fullName || loggedInUser.fullName || 'No Name',
-        email: res.email || loggedInUser.email,
-        bio: res.bio || '',
+        name: res?.fullName || loggedInUser.fullName || 'No Name',
+        email: res?.email || loggedInUser.email,
+        bio: res?.bio || '',
         location: 'Not set',
         organization: 'EdTech Platform',
-        avatar: res.avatarUrl || loggedInUser.avatarUrl || '',
-        learningGoal: res.learningGoal || '',
-        level: res.level || '',
-        createdAt: res.createdAt ? new Date(res.createdAt).toLocaleDateString('en-US', {
+        avatar: res?.avatarUrl || loggedInUser.avatarUrl || '',
+        learningGoal: res?.learningGoal || '',
+        level: res?.level || '',
+        createdAt: res?.createdAt ? new Date(res.createdAt).toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
           year: 'numeric'

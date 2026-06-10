@@ -31,31 +31,25 @@ export function useExplore() {
     async function loadData() {
         try {
             setIsLoading(true);
-            const { MOCK_COURSES, MOCK_LEARNING_PATHS, MOCK_ENROLLMENTS, MOCK_LEARNER_PROFILE_FULL } = await import('../../db/data');
-            setCourses(MOCK_COURSES);
-            setLearningPaths(MOCK_LEARNING_PATHS);
+            setCourses([]);
+            setLearningPaths([]);
             
             const isLearner = user?.roleName?.toLowerCase() === 'learner';
             if (user && isLearner) {
-                const isNewUser = !['learner@edtech.com', 'provider@edtech.com', 'manager@edtech.com', 'admin@edtech.com'].includes(user.email.toLowerCase());
                 const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
-                setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : (isNewUser ? [] : MOCK_ENROLLMENTS));
+                setEnrollments(storedEnrollments ? JSON.parse(storedEnrollments) : []);
                 
                 const storedPaths = sessionStorage.getItem('explore_cache_enrolled_paths');
-                setEnrolledPathIds(storedPaths ? JSON.parse(storedPaths) : (isNewUser ? [] : [1, 2]));
+                setEnrolledPathIds(storedPaths ? JSON.parse(storedPaths) : []);
 
-                if (isNewUser) {
-                    setProfile({
-                        fullName: user.fullName,
-                        email: user.email,
-                        streakCount: 0,
-                        completedCourses: 0,
-                        learningHours: 0,
-                        enrolledPaths: 0,
-                    });
-                } else {
-                    setProfile(MOCK_LEARNER_PROFILE_FULL);
-                }
+                setProfile({
+                    fullName: user.fullName,
+                    email: user.email,
+                    streakCount: 0,
+                    completedCourses: 0,
+                    learningHours: 0,
+                    enrolledPaths: 0,
+                });
             } else {
                 setEnrollments([]);
                 setEnrolledPathIds([]);

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { MOCK_COURSES } from '../../db/data';
 import toast from 'react-hot-toast';
 import type { Lesson, MockEnrollment, Module, Note } from './types';
 import {
@@ -20,7 +19,11 @@ export function useLessonPage() {
   const activeLessonId = searchParams.get('lessonId');
 
   // Load course details
-  const matchedCourse: any = MOCK_COURSES.find(c => c.courseId === courseId) || MOCK_COURSES.find(c => c.courseId === 8) || MOCK_COURSES[0];
+  const matchedCourse: any = {
+    courseId,
+    title: 'Course Detail',
+    curriculum: [],
+  };
   const rawModules = matchedCourse.curriculum || [];
 
   // Enrollment checks
