@@ -7,15 +7,14 @@ import { Roles } from 'src/common/decorators/roles/roles.decorator';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AddCourseToLearningPathDto } from './dto/add-course-to-learning-path.dto';
-import { User } from '../users/entities/user.entity';
 
 @ApiTags('Learning paths')
 @Controller('learning-paths')
 export class LearningPathsController {
-  constructor(private readonly learningPathsService: LearningPathsService) {}
+  constructor(private readonly learningPathsService: LearningPathsService) { }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleEnum.COURSE_PROVIDER)
+  @Roles(RoleEnum.ACADEMIC_MANAGER)
   @Post()
   @ApiOperation({
     summary: 'Create a learning path',
@@ -48,13 +47,13 @@ export class LearningPathsController {
   @Roles(RoleEnum.ACADEMIC_MANAGER)
   @Post(':id/courses')
   public async addCourse(
-    @Param('id', ParseIntPipe) 
+    @Param('id', ParseIntPipe)
     learningPathId: number,
 
     @Body()
     dto: AddCourseToLearningPathDto,
 
-    @Req() 
+    @Req()
     req: any
 
   ) {
