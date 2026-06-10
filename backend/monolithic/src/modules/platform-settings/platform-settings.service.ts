@@ -20,12 +20,12 @@ export class PlatformSettingsService {
         const bannerFile = files?.bannerUrl?.[0];
 
         if(logoFile){
-            const uploadedLogo = this.cloudinaryService.uploadFile(logoFile);
+            const uploadedLogo = this.cloudinaryService.uploadImage(logoFile);
             dto.logoUrl = (await uploadedLogo).secure_url;
         }
 
         if(bannerFile){
-            const uploadedBanner = this.cloudinaryService.uploadFile(bannerFile);
+            const uploadedBanner = this.cloudinaryService.uploadImage(bannerFile);
             dto.bannerUrl = (await uploadedBanner).secure_url;
         }
 

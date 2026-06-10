@@ -26,7 +26,7 @@ export class CreateLessonDto {
     })
     @IsOptional()
     @IsString()
-    videoUrl?: string;
+    videoUrl?: any;
 
     @ApiPropertyOptional({
         example: 600,

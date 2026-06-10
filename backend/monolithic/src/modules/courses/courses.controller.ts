@@ -9,6 +9,7 @@ import { Roles } from 'src/common/decorators/roles/roles.decorator';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('Courses')
 @Controller('courses')
@@ -16,6 +17,7 @@ export class CoursesController {
     constructor(private readonly coursesService: CoursesService) { }
 
     @Post()
+    @Throttle({ default: { limit: 3, ttl: 60000 } })
     @UseInterceptors(FileInterceptor('thumbnailUrl'))
     @ApiOperation({ summary: 'Create a course' })
     @ApiConsumes('multipart/form-data')
@@ -28,7 +30,7 @@ export class CoursesController {
     }
 
     @Get()
-    @ApiOperation({ summary: 'Search courses' })
+    @ApiOperation({ summary: 'Get all courses' })
     @ApiResponse({ status: 200, description: 'All Courses returned successfully' })
     async findAllCourse(){
         return this.coursesService.findAll();

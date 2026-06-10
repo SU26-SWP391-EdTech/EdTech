@@ -38,16 +38,14 @@ export class LessonsService {
       throw new NotFoundException(`Not found course with ID ${id}`);
     }
 
-    if (!file) {
-      throw new BadRequestException('Video is required');
+    if (file) {
+      const uploadedVideo = await this.cloudinaryService.uploadVideo(file);
+      lessonData.videoUrl = uploadedVideo.secure_url;
     }
-
-    const uploadedVideo = await this.cloudinaryService.uploadFile(file);
-    lessonData.videoUrl=uploadedVideo.secure_url;
 
     return await this.lessonsRepo.createLesson({
       ...lessonData,
-      course
+      course,
     });
   }
 
@@ -92,7 +90,7 @@ export class LessonsService {
     }
 
     if (file) {
-      const uploadedVideo = await this.cloudinaryService.uploadFile(file);
+      const uploadedVideo = await this.cloudinaryService.uploadImage(file);
       dto.videoUrl = uploadedVideo.secure_url;
     }
 
