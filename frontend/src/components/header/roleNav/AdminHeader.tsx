@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDown, LogOut, UserCircle, Settings } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
-import { SearchBar } from '../shared/SearchBar';
 import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { ADMIN_NAV } from '../config/nav-config';
@@ -22,9 +21,12 @@ export function AdminHeader() {
 
     // Determine active item based on current URL path
     const getActiveTab = () => {
-        if (location.pathname.includes('/usermanagement')) return 'users';
-        if (location.pathname.includes('/analytics')) return 'analytics';
-        return 'dashboard';
+        const path = location.pathname;
+        if (path === '/admin') return 'dashboard';
+        if (path === '/admin/usermanagement') return 'users';
+        if (path === '/admin/analytics') return 'analytics';
+        if (path === '/admin/courses') return 'courses';
+        return '';
     };
 
     const active = getActiveTab();
@@ -63,8 +65,6 @@ export function AdminHeader() {
                 </nav>
 
                 <div className="flex-1" />
-
-                <SearchBar placeholder="Search admin panels..." accentColor={ACC} />
 
                 <NotifBell count={8} accentColor={ACC} />
 

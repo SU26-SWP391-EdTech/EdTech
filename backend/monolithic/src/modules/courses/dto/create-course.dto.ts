@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, IsEnum } from 'class-validator';
+import { CourseStatus } from 'src/common/enums/course.enum';
 
 export class CreateCourseDto {
   @ApiProperty({
@@ -18,6 +19,15 @@ export class CreateCourseDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({
+    enum: CourseStatus,
+    example: CourseStatus.DRAFT,
+    description: 'Trạng thái khóa học',
+  })
+  @IsOptional()
+  @IsEnum(CourseStatus, { message: 'Trạng thái khóa học không hợp lệ' })
+  status?: CourseStatus;
 
   @ApiPropertyOptional({
     example: 'https://example.com/thumbnails/nestjs.jpg',

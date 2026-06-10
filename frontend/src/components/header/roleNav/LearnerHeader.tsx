@@ -1,23 +1,51 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { MessageSquare, Play, Flame, ChevronDown, LogOut, UserCircle, BookOpen, Settings } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Play, ChevronDown, LogOut, UserCircle, BookOpen, Settings } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
-import { SearchBar } from '../shared/SearchBar';
 import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { LEARNER_NAV } from '../config/nav-config';
 import { useAuthStore } from '../../../stores/auth.stores';
+import { getContinueLessonUrl } from '../../LessonPage/lessonUtils';
 
 export function LearnerHeader() {
     const navigate = useNavigate();
+    const location = useLocation();
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
-    const [active, setActive] = useState('dashboard');
     const [open, setOpen] = useState(false);
+
+    // Determine active item based on current URL path
+    const getActiveTab = () => {
+        const path = location.pathname;
+        if (path === '/learner/my-learning') return 'my-learning';
+        if (path === '/learner/explore') return 'explore';
+        return '';
+    };
+
+    const active = getActiveTab();
 
     const ACC = '#E11D48';
     const ACTIVE_BG = '#FFF1F3';
+
+    const handleContinueLearning = () => {
+        const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
+        const enrollments = storedEnrollments ? JSON.parse(storedEnrollments) : [];
+        const activeEnrollments = enrollments.filter((e: any) => e.status === 'active' && e.progress < 100);
+
+        if (activeEnrollments.length > 0) {
+            const courseId = activeEnrollments[0].course.courseId;
+            const url = getContinueLessonUrl(courseId, enrollments);
+            navigate(url);
+        } else if (enrollments.length > 0) {
+            const courseId = enrollments[0].course.courseId;
+            const url = getContinueLessonUrl(courseId, enrollments);
+            navigate(url);
+        } else {
+            navigate('/learner/explore');
+        }
+    };
 
     return (
         <div className="bg-white border-b border-[#E5E7EB] shadow-sm">
@@ -37,29 +65,33 @@ export function LearnerHeader() {
                             accentColor={ACC}
                             activeBg={ACTIVE_BG}
                             badge={item.badge}
-                            onClick={() => setActive(item.id)}
+                            onClick={() => {
+                                if (item.id === 'my-learning') {
+                                    navigate('/learner/my-learning');
+                                } else if (item.id === 'explore') {
+                                    navigate('/learner/explore');
+                                }
+                            }}
                         />
                     ))}
                 </nav>
 
                 <div className="flex-1" />
 
-                <SearchBar placeholder="Search courses, paths..." accentColor={ACC} />
-
+                {/* Streak commented out for future use */}
+                {/* 
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FEF3C7] border border-[#FDE68A] rounded-xl flex-shrink-0">
                     <Flame className="w-3.5 h-3.5 text-[#D97706]" />
                     <span className="text-xs text-[#D97706] font-bold">7</span>
                 </div>
+                */}
 
                 <NotifBell count={3} accentColor={ACC} />
-
-                <button className="p-2 rounded-xl hover:bg-[#F8FAFC] transition-colors">
-                    <MessageSquare style={{ width: 18, height: 18, color: '#6B7280' }} />
-                </button>
 
                 <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
 
                 <button
+                    onClick={handleContinueLearning}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm flex-shrink-0 transition-all hover:scale-[1.02] active:scale-[0.98]"
                     style={{
                         backgroundColor: ACC,
@@ -107,7 +139,7 @@ export function LearnerHeader() {
 
                                 {[
                                     { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/learner/learnerprofile') },
-                                    { icon: <BookOpen className="w-4 h-4" />, label: 'My Learning' },
+                                    { icon: <BookOpen className="w-4 h-4" />, label: 'My Learning', onClick: () => navigate('/learner/my-learning') },
                                     { icon: <Settings className="w-4 h-4" />, label: 'Settings' },
                                 ].map((item) => (
                                     <button
@@ -124,7 +156,7 @@ export function LearnerHeader() {
                                 ))}
 
                                 <div className="border-t border-[#F3F4F6] mt-1">
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             logout();
                                             navigate('/login');

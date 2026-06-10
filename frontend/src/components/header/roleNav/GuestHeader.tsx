@@ -1,13 +1,22 @@
-import { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Play } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
-import { SearchBar } from '../shared/SearchBar';
 import { NavItem } from '../shared/NavItem';
 import { GUEST_NAV } from '../config/nav-config';
 
 export function GuestHeader() {
-    const [active, setActive] = useState('explore');
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const getActiveTab = () => {
+        const path = location.pathname;
+        if (path === '/explore') return 'explore';
+        if (path === '/about') return 'about';
+        return '';
+    };
+
+    const active = getActiveTab();
 
     const ACC = '#E11D48'; // Guest/Default Accent: Crimson
     const ACTIVE_BG = '#FFF1F3';
@@ -29,16 +38,16 @@ export function GuestHeader() {
                             active={active === item.id}
                             accentColor={ACC}
                             activeBg={ACTIVE_BG}
-                            onClick={() => setActive(item.id)}
+                            onClick={() => {
+                                if (item.id === 'explore') {
+                                    navigate('/explore');
+                                }
+                            }}
                         />
                     ))}
                 </nav>
 
                 <div className="flex-1" />
-
-                <SearchBar placeholder="Search public courses..." accentColor={ACC} />
-
-                <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
 
                 <div className="flex items-center gap-2.5">
                     <button

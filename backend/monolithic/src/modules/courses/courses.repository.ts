@@ -49,6 +49,7 @@ export class CoursesRepository extends Repository<Course> {
             maxDuration,
             sortBy = 'createdAt',
             sortOrder = 'DESC',
+            userId,
         } = dto;
 
         // Tạo QueryBuilder với tên alias là 'course'
@@ -65,6 +66,11 @@ export class CoursesRepository extends Repository<Course> {
                 '(LOWER(course.title) LIKE LOWER(:search) OR LOWER(course.description) LIKE LOWER(:search))',
                 { search: `%${search}%` },
             );
+        }
+
+        // Lọc theo người tạo (userId)
+        if (userId) {
+            queryBuilder.andWhere('user.userId = :userId', { userId });
         }
 
         // 2. Lọc chính xác theo Status

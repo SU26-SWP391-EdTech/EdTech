@@ -9,6 +9,7 @@ import { Roles } from 'src/common/decorators/roles/roles.decorator';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/common/decorators/public.decorator';
 import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('Courses')
@@ -16,6 +17,8 @@ import { Throttle } from '@nestjs/throttler';
 export class CoursesController {
     constructor(private readonly coursesService: CoursesService) { }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(RoleEnum.COURSE_PROVIDER)
     @Post()
     @Roles(RoleEnum.COURSE_PROVIDER)
     @Throttle({ default: { limit: 3, ttl: 60000 } })
@@ -39,6 +42,7 @@ export class CoursesController {
 
     // Endpoint: GET /courses (Ví dụ: GET /courses?search=javascript&page=1&limit=5)
 
+    @Public()
     @Get('search')
     @ApiOperation({ summary: 'Search courses' })
     @ApiResponse({ status: 200, description: 'Courses returned successfully' })
@@ -47,6 +51,7 @@ export class CoursesController {
     }
 
     // Endpoint: GET /courses/:id
+    @Public()
     @Get(':id')
     @ApiOperation({ summary: 'Get course detail' })
     @ApiResponse({ status: 200, description: 'Course returned successfully' })
@@ -55,18 +60,23 @@ export class CoursesController {
         return this.coursesService.findOne(id);
     }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Patch(':id')
     @Roles(RoleEnum.COURSE_PROVIDER, RoleEnum.ACADEMIC_MANAGER)
+    @UseInterceptors(FileInterceptor('thumbnailUrl'))
     @ApiOperation({ summary: 'Update a course' })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({ type: UpdateCourseDto })
     @ApiResponse({ status: 200, description: 'Course updated successfully' })
     @ApiResponse({ status: 400, description: 'Invalid request data' })
     @ApiResponse({ status: 404, description: 'Course not found' })
     update(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateCourseDto: UpdateCourseDto,
-        @Req() req
+        @Req() req,
+        @UploadedFile() file?: Express.Multer.File,
     ) {
-        return this.coursesService.update(id, updateCourseDto, req.user.userId);
+        return this.coursesService.update(id, updateCourseDto,req.user.userId, file);
     }
 
     @Delete(':id')

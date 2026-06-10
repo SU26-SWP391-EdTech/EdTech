@@ -1,0 +1,10 @@
+export { HeroDashboardMockup } from './HeroDashboardMockup';
+export { LargeDashboardMockup } from './LargeDashboardMockup';
+export { HeroSection } from './HeroSection';
+export { TrustSection } from './TrustSection';
+export { FeaturesSection } from './FeaturesSection';
+export { LearningPathsSection } from './LearningPathsSection';
+export { HowItWorksSection } from './HowItWorksSection';
+export { TestimonialsSection } from './TestimonialsSection';
+export { Footer } from './Footer';
+export * from './landingData';

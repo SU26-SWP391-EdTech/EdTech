@@ -15,7 +15,7 @@ export class Lesson {
     lessonId!: string;
 
     // course 1-n lesson
-    @ManyToOne(() => Course, (course) => course.lessons, {nullable: false})
+    @ManyToOne(() => Course, (course) => course.lessons, {nullable: false, onDelete: 'CASCADE'})
     @JoinColumn({ name: 'course_id' })
     course!: Course;
 

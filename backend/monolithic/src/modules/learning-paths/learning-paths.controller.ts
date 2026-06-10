@@ -9,6 +9,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AddCourseToLearningPathDto } from './dto/add-course-to-learning-path.dto';
 import { UpdateLearningPathDto } from './dto/update-learning-path.dto';
 import { UpdateCoursePositionDto } from './dto/update-course-position.dto';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Learning paths')
 @Controller('learning-paths')
@@ -98,7 +99,7 @@ export class LearningPathsController {
   }
 
   // Get courses in a learning path
-  @UseGuards(JwtAuthGuard)
+  @Public()
   @Get(':id/courses')
   @ApiOperation({
     summary: 'Get courses in a learning path',

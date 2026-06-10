@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDown, LogOut, UserCircle, Settings, BarChart2 } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
-import { SearchBar } from '../shared/SearchBar';
 import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { ACADEMIC_MANAGER_NAV } from '../config/nav-config';
@@ -11,10 +10,23 @@ import { useAuthStore } from '../../../stores/auth.stores';
 
 export function AcademicManagerHeader() {
     const navigate = useNavigate();
+    const location = useLocation();
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
-    const [active, setActive] = useState('dashboard');
     const [open, setOpen] = useState(false);
+
+    // Determine active item based on current URL path
+    const getActiveTab = () => {
+        const path = location.pathname;
+        if (path === '/academic') return 'dashboard';
+        if (path === '/academic/pending-courses') return 'pending-courses';
+        if (path === '/academic/courses') return 'courses';
+        if (path === '/academic/learning-paths') return 'learning-paths';
+        if (path === '/academic/providers') return 'providers';
+        return '';
+    };
+
+    const active = getActiveTab();
 
     const ACC = '#D97706'; // Academic Manager Accent: Amber
     const ACTIVE_BG = '#FEF3C7';
@@ -38,14 +50,20 @@ export function AcademicManagerHeader() {
                             activeBg={ACTIVE_BG}
                             badge={(item as any).badge}
                             count={(item as any).count}
-                            onClick={() => setActive(item.id)}
+                            onClick={() => {
+                                if (item.id === 'courses') {
+                                    navigate('/academic/courses');
+                                } else if (item.id === 'pending-courses') {
+                                    navigate('/academic/pending-courses');
+                                } else if (item.id === 'dashboard') {
+                                    navigate('/academic');
+                                }
+                            }}
                         />
                     ))}
                 </nav>
 
                 <div className="flex-1" />
-
-                <SearchBar placeholder="Search submissions, paths..." accentColor={ACC} />
 
                 <NotifBell count={8} accentColor={ACC} />
 
