@@ -76,7 +76,7 @@ export class CoursesController {
         @Req() req,
         @UploadedFile() file?: Express.Multer.File,
     ) {
-        return this.coursesService.update(id, updateCourseDto,req.user.userId, file);
+        return this.coursesService.update(id, updateCourseDto, req.user.userId, file);
     }
 
     @Delete(':id')

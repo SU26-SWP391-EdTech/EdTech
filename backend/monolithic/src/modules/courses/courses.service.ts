@@ -46,11 +46,11 @@ export class CoursesService {
       createCourseDto.thumbnailUrl = uploaded.secure_url;
     }
 
-        return this.coursesRepository.createCourse({
-            ...createCourseDto,
-            user: courseProvider,
-        });
-    }
+    return this.coursesRepository.createCourse({
+      ...createCourseDto,
+      user: courseProvider,
+    });
+  }
 
   async findAll(): Promise<Course[]> {
     return this.coursesRepository.findAllCourses();
@@ -70,7 +70,7 @@ export class CoursesService {
     id: number,
     updateCourseDto: UpdateCourseDto,
     currentUserId: number,
-    file?: Express.Multer.File
+    file?: Express.Multer.File,
   ): Promise<Course> {
     const course = await this.coursesRepository.findOne({
       where: {
@@ -90,43 +90,47 @@ export class CoursesService {
     if (file) {
       const uploaded = await this.cloudinaryService.uploadImage(file);
       updateCourseDto.thumbnailUrl = uploaded.secure_url;
-     }
-
+    }
 
     Object.assign(course, updateCourseDto);
 
     return this.coursesRepository.saveCourse(course);
   }
 
-    async remove(id: number): Promise<{ message: string }> {
-        const course = await this.findOne(id);
-        await this.coursesRepository.manager.transaction(async (transactionalEntityManager) => {
-            // Delete lessons
-            await transactionalEntityManager.createQueryBuilder()
-                .delete()
-                .from(Lesson)
-                .where('course_id = :id', { id })
-                .execute();
+  async remove(id: number): Promise<{ message: string }> {
+    const course = await this.findOne(id);
+    await this.coursesRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        // Delete lessons
+        await transactionalEntityManager
+          .createQueryBuilder()
+          .delete()
+          .from(Lesson)
+          .where('course_id = :id', { id })
+          .execute();
 
-            // Delete enrollments
-            await transactionalEntityManager.createQueryBuilder()
-                .delete()
-                .from(Enrollment)
-                .where('course_id = :id', { id })
-                .execute();
+        // Delete enrollments
+        await transactionalEntityManager
+          .createQueryBuilder()
+          .delete()
+          .from(Enrollment)
+          .where('course_id = :id', { id })
+          .execute();
 
-            // Delete learning path course relations
-            await transactionalEntityManager.createQueryBuilder()
-                .delete()
-                .from(LearningPathCourse)
-                .where('course_id = :id', { id })
-                .execute();
+        // Delete learning path course relations
+        await transactionalEntityManager
+          .createQueryBuilder()
+          .delete()
+          .from(LearningPathCourse)
+          .where('course_id = :id', { id })
+          .execute();
 
-            // Finally delete the course itself
-            await transactionalEntityManager.remove(course);
-        });
-        return { message: `Course ID ${id} has been deleted` };
-    }
+        // Finally delete the course itself
+        await transactionalEntityManager.remove(course);
+      },
+    );
+    return { message: `Course ID ${id} has been deleted` };
+  }
 
   public async approveCourse(id: number, reviewerId: number): Promise<Course> {
     const course = await this.coursesRepository.findCourseById(id);
