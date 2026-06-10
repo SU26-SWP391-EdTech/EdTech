@@ -5,6 +5,7 @@ import { getUsers, createUser, updateUser, deleteUser } from '../../services/use
 export function useUserManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('All Roles');
@@ -117,7 +118,7 @@ export function useUserManagement() {
     password?: string;
   }) => {
     try {
-      setLoading(true);
+      setSaving(true);
       if (selectedUser) {
         await updateUser(selectedUser.id, {
           fullName: userData.name,
@@ -140,7 +141,7 @@ export function useUserManagement() {
       console.error('Failed to save user', err);
       alert(err.response?.data?.message || 'Failed to save user. Please try again.');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
@@ -160,6 +161,7 @@ export function useUserManagement() {
   return {
     users,
     loading,
+    saving,
     error,
     search,
     setSearch,

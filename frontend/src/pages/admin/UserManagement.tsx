@@ -14,6 +14,7 @@ export function UserManagement() {
   const {
     users,
     loading,
+    saving,
     error,
     search,
     setSearch,
@@ -41,6 +42,12 @@ export function UserManagement() {
 
   return (
     <>
+      {saving && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center gap-4">
+          <div className="w-14 h-14 border-4 border-white border-t-transparent rounded-full animate-spin" />
+          <p className="text-white text-base font-semibold animate-pulse">Saving user & uploading photo, please wait...</p>
+        </div>
+      )}
       <div className="bg-[#F8FAFC] min-h-screen">
         <div className="max-w-[1376px] mx-auto px-8 py-8">
 
