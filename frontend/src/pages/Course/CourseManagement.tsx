@@ -167,13 +167,13 @@ export function CourseManagement() {
                                             <thead>
                                                 <tr className="bg-[#F9FAFB] border-b border-[#F3F4F6]">
                                                     <th className="text-left px-2 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '4%' }}></th>
-                                                    <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '35%' }}>
+                                                    <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '25%' }}>
                                                         <button onClick={() => toggleSort('title')} className="flex items-center gap-1 hover:text-[#111827]">
                                                             Course <ArrowUpDown className="w-3 h-3" />
                                                         </button>
                                                     </th>
-                                                    <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '14%' }}>Provider</th>
-                                                    <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '14%' }}>Status</th>
+                                                    <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '12%' }}>Provider</th>
+                                                    <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '12%' }}>Status</th>
                                                     {!isPendingPage && (
                                                         <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '12%' }}>
                                                             <button onClick={() => toggleSort('students')} className="flex items-center gap-1 hover:text-[#111827]">
@@ -227,9 +227,9 @@ export function CourseManagement() {
                                                         <td className="px-4 py-3">
                                                             <div className="flex items-center gap-3">
                                                                 <CourseThumbnail course={course} size="sm" />
-                                                                <div className="min-w-0">
-                                                                    <p className="text-sm text-[#111827] truncate" style={{ fontWeight: 600 }}>{course.title}</p>
-                                                                    <p className="text-[10px] text-[#9CA3AF] truncate mt-0.5">{course.description}</p>
+                                                                <div className="min-w-0 max-w-[200px] sm:max-w-[260px] lg:max-w-[320px]">
+                                                                    <p className="text-sm text-[#111827] truncate" style={{ fontWeight: 600 }} title={course.title}>{course.title}</p>
+                                                                    <p className="text-[10px] text-[#9CA3AF] truncate mt-0.5" title={course.description}>{course.description}</p>
                                                                     <div className="flex items-center gap-1.5 mt-1">
                                                                         <StarRating rating={course.rating} />
                                                                         {course.rating > 0 && <span className="text-[#E5E7EB]">·</span>}
@@ -246,7 +246,7 @@ export function CourseManagement() {
                                                                     style={{ backgroundColor: course.providerColor, fontSize: '9px', fontWeight: 700 }}>
                                                                     {course.providerInitials}
                                                                 </div>
-                                                                <span className="text-xs text-[#374151] truncate" style={{ fontWeight: 500 }}>{course.provider.split(' ')[0]}</span>
+                                                                <span className="text-xs text-[#374151] truncate max-w-[100px]" style={{ fontWeight: 500 }} title={course.provider}>{course.provider.split(' ')[0]}</span>
                                                             </div>
                                                         </td>
 
