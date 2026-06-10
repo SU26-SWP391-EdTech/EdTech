@@ -1,5 +1,7 @@
 .env
 node_modules
+#package.json is for scripts only
+.package-lock.json
 all-project-code.txt
 
 
