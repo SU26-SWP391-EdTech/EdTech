@@ -36,7 +36,7 @@ export class CoursesService {
 
         return this.coursesRepository.createCourse({
             ...createCourseDto,
-            user: courseProvider, 
+            user: courseProvider,
         });
     }
 
