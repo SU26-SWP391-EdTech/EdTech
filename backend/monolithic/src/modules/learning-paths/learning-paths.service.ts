@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -10,13 +11,15 @@ import { LearningPath } from './entities/learning-path.entity';
 import { AddCourseToLearningPathDto } from './dto/add-course-to-learning-path.dto';
 import { LearningPathCourse } from './entities/learning-path-course.entity';
 import { CoursesRepository } from '../courses/courses.repository';
+import { UpdateLearningPathDto } from './dto/update-learning-path.dto';
+import { UpdateCoursePositionDto } from './dto/update-course-position.dto';
 
 @Injectable()
 export class LearningPathsService {
   constructor(
     private readonly learningPathsRepository: LearningPathsRepository,
     private readonly courseRepository: CoursesRepository,
-  ) {}
+  ) { }
 
   async create(
     createLearningPathDto: CreateLearningPathDto,
@@ -127,5 +130,47 @@ export class LearningPathsService {
     return await this.learningPathsRepository.getCoursesByLearningPathId(
       learningPathId,
     );
+  }
+
+  public async updateLearningPath(user: User, learningPathId: number, dto: UpdateLearningPathDto): Promise<LearningPath> {
+    const learningPath = await this.learningPathsRepository.getLearningPathById(learningPathId);
+
+    if (!learningPath) {
+      throw new NotFoundException('Learning path not found');
+    }
+    const updateLearningPath = await this.learningPathsRepository.updateLearningPath(learningPathId, dto, user);
+    return updateLearningPath;
+  }
+
+  public async updateCoursePosition(user: User, learningPathId: number, courseId: number, dto: UpdateCoursePositionDto): Promise<object> {
+    const { newPosition } = dto;
+
+    const learningPath: LearningPath | null = await this.learningPathsRepository.getLearningPathById(learningPathId);
+    if (!learningPath) {
+      throw new NotFoundException('Learning path not found');
+    }
+
+    const currentCourseNode: LearningPathCourse | null = await this.learningPathsRepository.getLearningPathCourse(learningPathId, courseId);
+
+    if (!currentCourseNode) {
+      throw new NotFoundException('Course not found in learning path');
+    }
+
+    const currentPosition: number = currentCourseNode.position;
+
+    if (currentPosition === newPosition) {
+      throw new ConflictException('Course position is already the same');
+    }
+
+    const countNodeInPath: number = await this.learningPathsRepository.countCoursesInLearningPath(learningPathId);
+    if (newPosition < 1 || newPosition > countNodeInPath) {
+      throw new BadRequestException('Invalid position');
+    }
+
+    await this.learningPathsRepository.swapCoursePosition(learningPathId, currentCourseNode, newPosition, user);
+
+    return ({
+      message: 'Course position updated successfully'
+    })
   }
 }
