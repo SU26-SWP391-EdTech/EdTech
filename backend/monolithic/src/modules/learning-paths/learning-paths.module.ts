@@ -6,6 +6,7 @@ import { LearningPathsController } from './learning-paths.controller';
 import { LearningPathsService } from './learning-paths.service';
 import { LearningPathsRepository } from './learning-paths.repository';
 import { CoursesModule } from '../courses/courses.module';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Module({
     imports: [
@@ -13,7 +14,7 @@ import { CoursesModule } from '../courses/courses.module';
         CoursesModule
     ],
     controllers: [LearningPathsController],
-    providers: [LearningPathsService, LearningPathsRepository],
+    providers: [LearningPathsService, LearningPathsRepository, CloudinaryService],
     exports: [LearningPathsService, LearningPathsRepository]
 })
 export class LearningPathsModule {}

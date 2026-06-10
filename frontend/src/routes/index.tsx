@@ -28,6 +28,7 @@ import { UserProfile } from '../pages/Users/UserProfile';
 import { CourseManagement } from '../pages/Course/CourseManagement';
 import { CourseDetail } from '../pages/Course/CourseDetail';
 import { CreateCoursePage } from '../pages/Course/createCourse';
+import { LearningPathManagement } from '../pages/LearningPath/LearningPathManagement';
 
 // Role navigation pages 
 import { GuestLayout } from '../layouts/Dashboard/GuestLayout';
@@ -291,6 +292,10 @@ export const router = createBrowserRouter([
             {
                 path: 'learning-path/:id',
                 element: <LearningPathDetail />
+            },
+            {
+                path: 'learning-paths',
+                element: <LearningPathManagement />
             },
             {
                 path: 'providers/:id',

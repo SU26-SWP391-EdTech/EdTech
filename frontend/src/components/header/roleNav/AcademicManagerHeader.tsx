@@ -55,6 +55,8 @@ export function AcademicManagerHeader() {
                                     navigate('/academic/courses');
                                 } else if (item.id === 'pending-courses') {
                                     navigate('/academic/pending-courses');
+                                } else if (item.id === 'learning-paths') {
+                                    navigate('/academic/learning-paths');
                                 } else if (item.id === 'dashboard') {
                                     navigate('/academic');
                                 }
