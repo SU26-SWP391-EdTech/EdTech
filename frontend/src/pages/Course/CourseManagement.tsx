@@ -1,19 +1,17 @@
-import { useState, useMemo, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
     Search, Plus, X, ArrowUpDown,
     BookOpen, Users, CheckCircle2, FileText,
     Monitor, Database, Palette, Megaphone, Briefcase,
-    Settings, Inbox, Edit2, Trash2
+    Settings, Edit2, Trash2, GripVertical
 } from 'lucide-react';
-import { useAuthStore } from '../../stores/auth.stores';
-import { searchCourses, deleteCourse } from '../../services/course/course.service';
-import type { BackendCourse } from '../../services/course/course.service';
-import toast from 'react-hot-toast';
+import { useCourseManagement } from '../../components/CourseManagement/useCourseManagement';
+import { MOCK_COURSES } from '../../components/CourseManagement/useCourseManagement';
 
 import type { Course, CourseStatus, Category } from '../../components/CourseManagement/types';
 import { StatusBadge } from '../../components/CourseManagement/StatusBadge';
-import { CategoryBadge } from '../../components/CourseManagement/CategoryBadge';
 import { CourseThumbnail } from '../../components/CourseManagement/CourseThumbnail';
 import { StarRating } from '../../components/CourseManagement/StarRating';
 import { FilterSelect } from '../../components/CourseManagement/FilterSelect';
@@ -21,188 +19,53 @@ import { CoursePreviewPanel } from '../../components/CourseManagement/CoursePrev
 import { CourseModal } from '../../components/CourseManagement/CourseModal';
 import { DeleteCourseConfirmModal } from '../../components/CourseManagement/DeleteCourseConfirmModal';
 
-/* ─── Mock data ─── */
-export const MOCK_COURSES: Course[] = [];
 
-const CATEGORIES = ['All Categories', 'Web Development', 'Data Science', 'Design', 'Marketing', 'Business', 'DevOps'];
+
 const STATUSES = ['All Status', 'Published', 'Draft', 'Pending Review', 'Rejected'];
 
-const categoryCfg: Record<Category, { cls: string; icon: React.ReactNode }> = {
-    'Web Development': { cls: 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]', icon: <Monitor className="w-3 h-3" /> },
-    'Data Science': { cls: 'bg-[#F5F3FF] text-[#7C3AED] border-[#DDD6FE]', icon: <Database className="w-3 h-3" /> },
-    'Design': { cls: 'bg-[#FFF1F3] text-[#E11D48] border-[#FECDD3]', icon: <Palette className="w-3 h-3" /> },
-    'Marketing': { cls: 'bg-[#FFFBEB] text-[#D97706] border-[#FDE68A]', icon: <Megaphone className="w-3 h-3" /> },
-    'Business': { cls: 'bg-[#F0FDF4] text-[#16A34A] border-[#BBF7D0]', icon: <Briefcase className="w-3 h-3" /> },
-    'DevOps': { cls: 'bg-[#F0F9FF] text-[#0891B2] border-[#BAE6FD]', icon: <Settings className="w-3 h-3" /> },
-};
+export { MOCK_COURSES };
 
 export function CourseManagement() {
-    const location = useLocation();
-    const isProvider = location.pathname.startsWith('/provider');
+    const [selectedRejectCourseId, setSelectedRejectCourseId] = useState<number | null>(null);
+    const [rejectReason, setRejectReason] = useState('');
+    const [showRejectModal, setShowRejectModal] = useState(false);
 
-    const user = useAuthStore((state) => state.user);
-    const [courses, setCourses] = useState<Course[]>(MOCK_COURSES);
-    const [isLoading, setIsLoading] = useState(false);
+    const {
+        isProvider,
+        navigate,
+        isLoading,
+        search,
+        setSearch,
+        statusFilter,
+        setStatusFilter,
+        selectedId,
+        setSelectedId,
+        showModal,
+        setShowModal,
+        selectedCourseForEdit,
+        setSelectedCourseForEdit,
+        isViewOnly,
+        setIsViewOnly,
+        showDeleteModal,
+        setShowDeleteModal,
+        selectedCourseForDelete,
+        setSelectedCourseForDelete,
+        deleteLoading,
+        fetchCourses,
+        handleDeleteCourse,
+        filtered,
+        selectedCourse,
+        stats,
+        toggleSort,
+        draggedCourseIndex,
+        setDraggedCourseIndex,
+        handleCourseDragOver,
+        isPendingPage,
+        handleApproveCourse,
+        handleRejectCourse,
+    } = useCourseManagement();
 
-    const [search, setSearch] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState('All Categories');
-    const [statusFilter, setStatusFilter] = useState('All Status');
-    const [selectedId, setSelectedId] = useState<number>(1);
-    const [showModal, setShowModal] = useState(false);
-    const [selectedCourseForEdit, setSelectedCourseForEdit] = useState<Course | undefined>(undefined);
-    const [isViewOnly, setIsViewOnly] = useState(false);
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [selectedCourseForDelete, setSelectedCourseForDelete] = useState<Course | undefined>(undefined);
-    const [deleteLoading, setDeleteLoading] = useState(false);
-    const [sortField, setSortField] = useState<'title' | 'students' | 'created' | 'updated'>('created');
-    const [sortAsc, setSortAsc] = useState(false);
-
-    const fetchCourses = async () => {
-        setIsLoading(true);
-        try {
-            const params: any = {};
-            if (isProvider && user?.userId) {
-                params.userId = user.userId;
-            }
-            const res = await searchCourses(params);
-            const backendCourses = res.data?.items || [];
-            const mapped: Course[] = backendCourses.map((item: BackendCourse): Course => {
-                const initials = item.user?.fullName ? item.user.fullName.split(' ').map(n => n[0]).join('') : 'U';
-                const formattedDuration = item.duration ? `${Math.floor(item.duration / 60)}h ${item.duration % 60}m` : '0h';
-                const formattedCreated = new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                const formattedUpdated = item.updatedAt
-                    ? new Date(item.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                    : formattedCreated;
-
-                let statusVal: CourseStatus = 'Draft';
-                if (item.status === 'approved') statusVal = 'Published';
-                else if (item.status === 'pending') statusVal = 'Pending Review';
-                else if (item.status === 'rejected') statusVal = 'Rejected';
-
-                return {
-                    id: item.courseId,
-                    title: item.title,
-                    description: item.description || '',
-                    provider: item.user?.fullName || 'Unknown',
-                    providerInitials: initials,
-                    providerColor: '#7C3AED',
-                    category: 'Web Development' as Category,
-                    status: statusVal,
-                    students: item.enrollmentCount || 0,
-                    rating: 0,
-                    duration: formattedDuration,
-                    lessons: item.totalLessons || 0,
-                    created: formattedCreated,
-                    updated: formattedUpdated,
-                    thumbBg: 'linear-gradient(135deg,#1E40AF,#3B82F6)',
-                    thumbIcon: <Monitor className="w-7 h-7 text-white/90" />,
-                    progress: 0,
-                    language: item.language || 'English',
-                    thumbnailUrl: item.thumbnailUrl,
-                    projectUrl: item.projectUrl,
-                };
-            });
-
-            const merged = [...mapped];
-            MOCK_COURSES.forEach(mock => {
-                if (!merged.some(m => m.id === mock.id)) {
-                    merged.push(mock);
-                }
-            });
-
-            setCourses(merged);
-
-            if (mapped.length > 0) {
-                setSelectedId(mapped[0].id);
-            } else if (MOCK_COURSES.length > 0) {
-                setSelectedId(MOCK_COURSES[0].id);
-            }
-        } catch (err) {
-            console.error('Failed to fetch courses:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchCourses();
-    }, [isProvider, user?.userId]);
-
-    const handleDeleteCourse = async () => {
-        if (!selectedCourseForDelete) return;
-        setDeleteLoading(true);
-        try {
-            const mockIndex = MOCK_COURSES.findIndex(c => c.id === selectedCourseForDelete.id);
-            if (mockIndex !== -1) {
-                MOCK_COURSES.splice(mockIndex, 1);
-                toast.success('Course deleted successfully');
-            } else {
-                await deleteCourse(selectedCourseForDelete.id);
-                toast.success('Course deleted successfully');
-            }
-            setShowDeleteModal(false);
-            setSelectedCourseForDelete(undefined);
-            fetchCourses();
-        } catch (err: any) {
-            console.error('Failed to delete course:', err);
-            toast.error(err.response?.data?.message || 'Failed to delete course');
-        } finally {
-            setDeleteLoading(false);
-        }
-    };
-
-    const filtered = useMemo(() => {
-        return courses
-            .filter(c => {
-                const q = search.toLowerCase();
-                const matchQ = !q || c.title.toLowerCase().includes(q) || c.provider.toLowerCase().includes(q) || c.description.toLowerCase().includes(q);
-                const matchCat = categoryFilter === 'All Categories' || c.category === categoryFilter;
-                const matchSt = statusFilter === 'All Status' || c.status === statusFilter;
-                return matchQ && matchCat && matchSt;
-            })
-            .sort((a, b) => {
-                const dir = sortAsc ? 1 : -1;
-                if (sortField === 'students') return (a.students - b.students) * dir;
-                if (sortField === 'title') return a.title.localeCompare(b.title) * dir;
-                if (sortField === 'created') return (new Date(a.created).getTime() - new Date(b.created).getTime()) * dir;
-                if (sortField === 'updated') return (new Date(a.updated).getTime() - new Date(b.updated).getTime()) * dir;
-                return (a.id - b.id) * dir;
-            });
-    }, [courses, search, categoryFilter, statusFilter, sortField, sortAsc]);
-
-    const fallbackCourse: Course = {
-        id: 0,
-        title: 'No Course Selected',
-        description: 'Please create or select a course.',
-        provider: 'N/A',
-        providerInitials: 'N/A',
-        providerColor: '#6B7280',
-        category: 'Web Development' as Category,
-        status: 'Draft',
-        students: 0,
-        rating: 0,
-        duration: '0h',
-        lessons: 0,
-        created: '—',
-        updated: '—',
-        thumbBg: 'linear-gradient(135deg,#9CA3AF,#6B7280)',
-        thumbIcon: <Monitor className="w-7 h-7 text-white/90" />,
-        progress: 0,
-        language: 'English',
-    };
-    const selectedCourse = courses.find(c => c.id === selectedId) ?? courses[0] ?? fallbackCourse;
-
-    const stats = {
-        total: courses.length,
-        published: courses.filter(c => c.status === 'Published').length,
-        draft: courses.filter(c => c.status === 'Draft').length,
-        enrollments: courses.reduce((s, c) => s + c.students, 0),
-    };
-
-    const toggleSort = (field: typeof sortField) => {
-        if (sortField === field) setSortAsc(a => !a);
-        else { setSortField(field); setSortAsc(false); }
-    };
+    const [courseDragEnabled, setCourseDragEnabled] = useState(false);
 
     return (
         <>
@@ -213,12 +76,16 @@ export function CourseManagement() {
                     <div className="mb-7">
                         <div className="flex items-end justify-between">
                             <div>
-                                <h1 className="text-[#111827] mb-1" style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2 }}>Course Management</h1>
-                                <p className="text-[#6B7280] text-sm">Review, publish, and organize all courses across the platform from one place.</p>
+                                <h1 className="text-[#111827] mb-1" style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2 }}>
+                                    {isPendingPage ? 'Pending Course Review' : 'Course Management'}
+                                </h1>
+                                <p className="text-[#6B7280] text-sm">
+                                    {isPendingPage ? 'Review, approve, or reject courses awaiting verification.' : 'Review, publish, and organize all courses across the platform from one place.'}
+                                </p>
                             </div>
                             <div className="flex items-center gap-2.5">
                                 {isProvider && (
-                                    <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
+                                    <button onClick={() => navigate('/provider/courses/create')} className="flex items-center gap-2 px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
                                         <Plus className="w-4 h-4" /> Create Course
                                     </button>
                                 )}
@@ -227,6 +94,7 @@ export function CourseManagement() {
                     </div>
 
                     {/* ── Stats Cards ── */}
+<<<<<<< HEAD
                     <div className="grid grid-cols-4 gap-4 mb-6">
                         {[
                             { label: 'Total Courses', value: stats.total, icon: <BookOpen className="w-4 h-4 text-[#6B7280]" />, change: '+2 this month', up: true },
@@ -240,12 +108,29 @@ export function CourseManagement() {
                                     <span className={`text-xs px-2 py-1 rounded-lg ${s.up === true ? 'bg-[#F0FDF4] text-[#16A34A]' : s.up === false ? 'bg-[#FEF2F2] text-[#DC2626]' : 'bg-[#FFFBEB] text-[#D97706]'}`} style={{ fontWeight: 500 }}>
                                         {s.change}
                                     </span>
+=======
+                    {!isPendingPage && (
+                        <div className="grid grid-cols-4 gap-4 mb-6 animate-in fade-in duration-200">
+                            {[
+                                { label: 'Total Courses', value: stats.total, icon: <BookOpen className="w-4 h-4 text-[#6B7280]" />, change: '+2 this month', up: true },
+                                { label: 'Published Courses', value: stats.published, icon: <CheckCircle2 className="w-4 h-4 text-[#16A34A]" />, change: `${Math.round((stats.published / stats.total) * 100)}% of total`, up: true },
+                                { label: 'Draft / Pending', value: stats.draft + MOCK_COURSES.filter(c => c.status === 'Pending Review').length, icon: <FileText className="w-4 h-4 text-[#D97706]" />, change: 'Awaiting review', up: null },
+                                { label: 'Total Enrollments', value: stats.enrollments.toLocaleString(), icon: <Users className="w-4 h-4 text-[#E11D48]" />, change: '+18.4% vs last mo', up: true },
+                            ].map((s, idx) => (
+                                <div key={idx} className="bg-white border border-[#E5E7EB] rounded-2xl p-5 hover:shadow-sm transition-shadow">
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="p-2 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl">{s.icon}</div>
+                                        <span className={`text-xs px-2 py-1 rounded-lg ${s.up === true ? 'bg-[#F0FDF4] text-[#16A34A]' : s.up === false ? 'bg-[#FEF2F2] text-[#DC2626]' : 'bg-[#FFFBEB] text-[#D97706]'}`} style={{ fontWeight: 500 }}>
+                                            {s.change}
+                                        </span>
+                                    </div>
+                                    <p className="text-[#111827]" style={{ fontSize: '26px', fontWeight: 700, lineHeight: 1.1 }}>{s.value}</p>
+                                    <p className="text-[#6B7280] text-sm mt-0.5">{s.label}</p>
+>>>>>>> origin/test/frontend
                                 </div>
-                                <p className="text-[#111827]" style={{ fontSize: '26px', fontWeight: 700, lineHeight: 1.1 }}>{s.value}</p>
-                                <p className="text-[#6B7280] text-sm mt-0.5">{s.label}</p>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
 
                     {/* ── Main Grid ── */}
                     <div className="grid grid-cols-12 gap-5">
@@ -264,20 +149,18 @@ export function CourseManagement() {
                                         className="w-full pl-9 pr-4 py-2 bg-[#F8FAFC] border border-[#E5E7EB] rounded-lg text-sm placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 transition-colors"
                                     />
                                 </div>
+                                {!isPendingPage && (
+                                    <>
+                                        <div className="h-5 w-px bg-[#E5E7EB]" />
+                                        <FilterSelect value={statusFilter} options={STATUSES} onChange={setStatusFilter} />
+                                    </>
+                                )}
                                 <div className="h-5 w-px bg-[#E5E7EB]" />
-                                <FilterSelect value={categoryFilter} options={CATEGORIES} onChange={setCategoryFilter} />
-                                <FilterSelect value={statusFilter} options={STATUSES} onChange={setStatusFilter} />
-                                <div className="h-5 w-px bg-[#E5E7EB]" />
-                                <button onClick={() => toggleSort('students')} className="flex items-center gap-1.5 px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#6B7280] hover:bg-[#F8FAFC] hover:border-[#D1D5DB] transition-colors" style={{ fontWeight: 500 }}>
+                                <button onClick={() => toggleSort(isPendingPage ? 'created' : 'students')} className="flex items-center gap-1.5 px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#6B7280] hover:bg-[#F8FAFC] hover:border-[#D1D5DB] transition-colors" style={{ fontWeight: 500 }}>
                                     <ArrowUpDown className="w-3.5 h-3.5" /> Sort
                                 </button>
                                 <div className="ml-auto flex items-center gap-2">
                                     <span className="text-xs text-[#9CA3AF] shrink-0">{filtered.length} courses</span>
-                                    {(search || categoryFilter !== 'All Categories' || statusFilter !== 'All Status') && (
-                                        <button onClick={() => { setSearch(''); setCategoryFilter('All Categories'); setStatusFilter('All Status'); }} className="flex items-center gap-1 text-xs text-[#E11D48]" style={{ fontWeight: 500 }}>
-                                            <X className="w-3 h-3" /> Clear
-                                        </button>
-                                    )}
                                 </div>
                             </div>
 
@@ -295,32 +178,37 @@ export function CourseManagement() {
                                         </div>
                                         <p className="text-sm text-[#111827]" style={{ fontWeight: 600 }}>No courses found</p>
                                         <p className="text-xs text-[#6B7280] mt-1 mb-4">Try adjusting your search or filter.</p>
-                                        <button onClick={() => { setSearch(''); setCategoryFilter('All Categories'); setStatusFilter('All Status'); }} className="px-3.5 py-2 bg-[#F8FAFC] border border-[#E5E7EB] text-[#374151] rounded-lg text-xs" style={{ fontWeight: 500 }}>
-                                            Clear filters
-                                        </button>
                                     </div>
                                 ) : (
                                     <>
                                         <table className="w-full min-w-[800px]">
                                             <thead>
                                                 <tr className="bg-[#F9FAFB] border-b border-[#F3F4F6]">
-                                                    <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '30%' }}>
+                                                    <th className="text-left px-2 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '4%' }}></th>
+                                                    <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '35%' }}>
                                                         <button onClick={() => toggleSort('title')} className="flex items-center gap-1 hover:text-[#111827]">
                                                             Course <ArrowUpDown className="w-3 h-3" />
                                                         </button>
                                                     </th>
-                                                    <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '12%' }}>Provider</th>
-                                                    <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '14%' }}>Category</th>
-                                                    <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '12%' }}>Status</th>
-                                                    <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '10%' }}>
-                                                        <button onClick={() => toggleSort('students')} className="flex items-center gap-1 hover:text-[#111827]">
-                                                            Students <ArrowUpDown className="w-3 h-3" />
-                                                        </button>
-                                                    </th>
-                                                    <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '12%' }}>
-                                                        <button onClick={() => toggleSort('updated')} className="flex items-center gap-1 hover:text-[#111827]">
-                                                            Update At <ArrowUpDown className="w-3 h-3" />
-                                                        </button>
+                                                    <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '14%' }}>Provider</th>
+                                                    <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '14%' }}>Status</th>
+                                                    {!isPendingPage && (
+                                                        <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '12%' }}>
+                                                            <button onClick={() => toggleSort('students')} className="flex items-center gap-1 hover:text-[#111827]">
+                                                                Students <ArrowUpDown className="w-3 h-3" />
+                                                            </button>
+                                                        </th>
+                                                    )}
+                                                    <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '15%' }}>
+                                                        {isPendingPage ? (
+                                                            <button onClick={() => toggleSort('created')} className="flex items-center gap-1 hover:text-[#111827]">
+                                                                Created At <ArrowUpDown className="w-3 h-3" />
+                                                            </button>
+                                                        ) : (
+                                                            <button onClick={() => toggleSort('updated')} className="flex items-center gap-1 hover:text-[#111827]">
+                                                                Update At <ArrowUpDown className="w-3 h-3" />
+                                                            </button>
+                                                        )}
                                                     </th>
                                                     <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '10%' }}>Actions</th>
                                                 </tr>
@@ -329,9 +217,30 @@ export function CourseManagement() {
                                                 {filtered.map((course, i) => (
                                                     <tr
                                                         key={course.id}
+                                                        draggable={courseDragEnabled}
+                                                        onDragStart={(e) => {
+                                                            setDraggedCourseIndex(i);
+                                                            e.dataTransfer.effectAllowed = 'move';
+                                                        }}
+                                                        onDragOver={(e) => {
+                                                            e.preventDefault();
+                                                            if (draggedCourseIndex === null || draggedCourseIndex === i) return;
+                                                            handleCourseDragOver(draggedCourseIndex, i);
+                                                        }}
+                                                        onDragEnd={() => {
+                                                            setDraggedCourseIndex(null);
+                                                        }}
                                                         onClick={() => setSelectedId(course.id)}
-                                                        className={`group cursor-pointer transition-colors ${i < filtered.length - 1 ? 'border-b border-[#F3F4F6]' : ''} ${selectedId === course.id ? 'bg-[#FFF8F9] border-l-2 border-l-[#E11D48]' : 'hover:bg-[#FAFAFA]'}`}
+                                                        className={`group cursor-pointer transition-colors ${i < filtered.length - 1 ? 'border-b border-[#F3F4F6]' : ''} ${selectedId === course.id ? 'bg-[#FFF8F9] border-l-2 border-l-[#E11D48]' : 'hover:bg-[#FAFAFA]'} ${draggedCourseIndex === i ? 'opacity-40 bg-[#FAFAFA]' : ''}`}
                                                     >
+                                                        {/* Drag Handle */}
+                                                        <td className="px-2 py-3 text-center align-middle">
+                                                            <GripVertical
+                                                                className="w-3.5 h-3.5 text-[#9CA3AF] cursor-grab hover:text-[#E11D48] transition-colors inline-block"
+                                                                onMouseEnter={() => setCourseDragEnabled(true)}
+                                                                onMouseLeave={() => setCourseDragEnabled(false)}
+                                                            />
+                                                        </td>
                                                         {/* Course */}
                                                         <td className="px-4 py-3">
                                                             <div className="flex items-center gap-3">
@@ -359,57 +268,80 @@ export function CourseManagement() {
                                                             </div>
                                                         </td>
 
-                                                        {/* Category */}
-                                                        <td className="px-4 py-3">
-                                                            <CategoryBadge category={course.category} />
-                                                        </td>
-
                                                         {/* Status */}
                                                         <td className="px-4 py-3">
                                                             <StatusBadge status={course.status} />
                                                         </td>
 
                                                         {/* Students */}
-                                                        <td className="px-4 py-3">
-                                                            <div className="flex items-center gap-1.5">
-                                                                <span className="text-sm text-[#374151]" style={{ fontWeight: course.students > 0 ? 600 : 400 }}>
-                                                                    {course.students > 0 ? course.students.toLocaleString() : '—'}
-                                                                </span>
-                                                            </div>
-                                                        </td>
+                                                        {!isPendingPage && (
+                                                            <td className="px-4 py-3">
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <span className="text-sm text-[#374151]" style={{ fontWeight: course.students > 0 ? 600 : 400 }}>
+                                                                        {course.students > 0 ? course.students.toLocaleString() : '—'}
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                        )}
 
-                                                        {/* Update At */}
+                                                        {/* Date (Created / Updated) */}
                                                         <td className="px-4 py-3">
-                                                            <span className="text-xs text-[#374151]">{course.updated}</span>
+                                                            <span className="text-xs text-[#374151]">{isPendingPage ? course.created : course.updated}</span>
                                                         </td>
 
                                                         {/* Actions */}
                                                         <td className="px-4 py-3">
-                                                            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                <button
-                                                                    onClick={e => {
-                                                                        e.stopPropagation();
-                                                                        setSelectedCourseForEdit(course);
-                                                                        setIsViewOnly(false);
-                                                                        setShowModal(true);
-                                                                    }}
-                                                                    className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors"
-                                                                    title="Edit"
-                                                                >
-                                                                    <Edit2 className="w-3.5 h-3.5 text-[#6B7280]" />
-                                                                </button>
-                                                                <button
-                                                                    onClick={e => {
-                                                                        e.stopPropagation();
-                                                                        setSelectedCourseForDelete(course);
-                                                                        setShowDeleteModal(true);
-                                                                    }}
-                                                                    className="p-1.5 hover:bg-[#FEF2F2] rounded-lg transition-colors"
-                                                                    title="Delete"
-                                                                >
-                                                                    <Trash2 className="w-3.5 h-3.5 text-[#FCA5A5]" />
-                                                                </button>
-                                                            </div>
+                                                            {isPendingPage ? (
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <button
+                                                                        onClick={e => {
+                                                                            e.stopPropagation();
+                                                                            handleApproveCourse(course.id);
+                                                                        }}
+                                                                        className="p-1.5 hover:bg-[#F0FDF4] rounded-lg transition-colors group/btn"
+                                                                        title="Approve"
+                                                                    >
+                                                                        <CheckCircle2 className="w-4 h-4 text-[#16A34A] transition-transform group-hover/btn:scale-110" />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={e => {
+                                                                            e.stopPropagation();
+                                                                            setSelectedRejectCourseId(course.id);
+                                                                            setShowRejectModal(true);
+                                                                        }}
+                                                                        className="p-1.5 hover:bg-[#FEF2F2] rounded-lg transition-colors group/btn"
+                                                                        title="Reject"
+                                                                    >
+                                                                        <X className="w-4 h-4 text-[#EF4444] transition-transform group-hover/btn:scale-110" />
+                                                                    </button>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                    <button
+                                                                        onClick={e => {
+                                                                            e.stopPropagation();
+                                                                            setSelectedCourseForEdit(course);
+                                                                            setIsViewOnly(false);
+                                                                            setShowModal(true);
+                                                                        }}
+                                                                        className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors"
+                                                                        title="Edit"
+                                                                    >
+                                                                        <Edit2 className="w-3.5 h-3.5 text-[#6B7280]" />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={e => {
+                                                                            e.stopPropagation();
+                                                                            setSelectedCourseForDelete(course);
+                                                                            setShowDeleteModal(true);
+                                                                        }}
+                                                                        className="p-1.5 hover:bg-[#FEF2F2] rounded-lg transition-colors"
+                                                                        title="Delete"
+                                                                    >
+                                                                        <Trash2 className="w-3.5 h-3.5 text-[#FCA5A5]" />
+                                                                    </button>
+                                                                </div>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -449,47 +381,6 @@ export function CourseManagement() {
                                 course={selectedCourse}
                             />
 
-                            {/* Empty State Card */}
-                            <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
-                                <p className="text-[10px] text-[#9CA3AF] mb-3 uppercase tracking-wide" style={{ fontWeight: 600 }}>EMPTY STATE</p>
-                                <div className="flex flex-col items-center text-center py-3">
-                                    <div className="w-12 h-12 bg-[#F8FAFC] border border-[#E5E7EB] rounded-2xl flex items-center justify-center mb-3">
-                                        <Inbox className="w-6 h-6 text-[#D1D5DB]" />
-                                    </div>
-                                    <p className="text-sm text-[#111827] mb-1" style={{ fontWeight: 600 }}>No courses yet</p>
-                                    <p className="text-xs text-[#6B7280] mb-4" style={{ lineHeight: 1.5 }}>
-                                        {isProvider
-                                            ? "Create your first course and start enrolling learners on the platform."
-                                            : "There are no courses currently available on the platform."}
-                                    </p>
-                                    {isProvider && (
-                                        <button onClick={() => setShowModal(true)} className="flex items-center gap-1.5 px-3.5 py-2 bg-[#E11D48] text-white rounded-lg text-xs hover:bg-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
-                                            <Plus className="w-3.5 h-3.5" /> Create First Course
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Category distribution */}
-                            <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
-                                <p className="text-xs text-[#111827] mb-3" style={{ fontWeight: 600 }}>Courses by Category</p>
-                                {(Object.keys(categoryCfg) as Category[]).map(cat => {
-                                    const count = courses.filter(c => c.category === cat).length;
-                                    if (!count) return null;
-                                    const cfg = categoryCfg[cat];
-                                    return (
-                                        <div key={cat} className="flex items-center gap-2 mb-2.5">
-                                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] border ${cfg.cls} shrink-0 w-28`} style={{ fontWeight: 500 }}>
-                                                {cfg.icon} {cat.split(' ')[0]}
-                                            </span>
-                                            <div className="flex-1 h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
-                                                <div className="h-full rounded-full bg-[#E11D48]/60" style={{ width: `${(count / courses.length) * 100}%` }} />
-                                            </div>
-                                            <span className="text-xs text-[#9CA3AF] w-4 text-right shrink-0">{count}</span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -519,6 +410,57 @@ export function CourseManagement() {
                     onConfirm={handleDeleteCourse}
                     loading={deleteLoading}
                 />
+            )}
+
+            {showRejectModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200" onClick={() => {
+                    setShowRejectModal(false);
+                    setRejectReason('');
+                    setSelectedRejectCourseId(null);
+                }}>
+                    <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl relative animate-in fade-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                        <h3 className="text-lg text-[#111827] mb-2" style={{ fontWeight: 600 }}>Reject Course</h3>
+                        <p className="text-sm text-[#6B7280] mb-4">Please provide a reason for rejecting this course. This feedback will be sent to the provider.</p>
+                        <textarea
+                            value={rejectReason}
+                            onChange={e => setRejectReason(e.target.value)}
+                            rows={4}
+                            className="w-full px-3.5 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 transition-all mb-4"
+                            placeholder="Enter rejection reason here..."
+                        />
+                        <div className="flex items-center justify-end gap-2.5">
+                            <button
+                                onClick={() => {
+                                    setShowRejectModal(false);
+                                    setRejectReason('');
+                                    setSelectedRejectCourseId(null);
+                                }}
+                                className="px-4 py-2 border border-[#E5E7EB] text-[#374151] rounded-lg text-sm hover:bg-[#F8FAFC]"
+                                style={{ fontWeight: 500 }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (!rejectReason.trim()) {
+                                        toast.error('Rejection reason is required.');
+                                        return;
+                                    }
+                                    if (selectedRejectCourseId !== null) {
+                                        handleRejectCourse(selectedRejectCourseId, rejectReason.trim());
+                                    }
+                                    setShowRejectModal(false);
+                                    setRejectReason('');
+                                    setSelectedRejectCourseId(null);
+                                }}
+                                className="px-4 py-2 bg-[#EF4444] text-white rounded-lg text-sm hover:bg-[#DC2626]"
+                                style={{ fontWeight: 500 }}
+                            >
+                                Reject Course
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
         </>

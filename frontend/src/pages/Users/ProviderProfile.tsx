@@ -1,20 +1,35 @@
 import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Award, BookOpen, Mail, Star, Users } from 'lucide-react';
-
-const LOCAL_MOCK_COURSES: any[] = [];
-const LOCAL_MOCK_PROVIDER_PROFILES: any[] = [];
+import { MOCK_COURSES, MOCK_PROVIDER_PROFILES } from '../../db/data';
+import { useAuthStore } from '../../stores/auth.stores';
 
 export function ProviderProfile() {
   const navigate = useNavigate();
   const { id } = useParams();
   const providerId = Number(id);
 
-  const provider = LOCAL_MOCK_PROVIDER_PROFILES.find(item => item.userId === providerId);
+  const user = useAuthStore((state) => state.user);
+  const role = user?.roleName?.toLowerCase() || 'guest';
+
+  const provider = MOCK_PROVIDER_PROFILES.find(item => item.userId === providerId);
   const providerCourses = useMemo(
-    () => LOCAL_MOCK_COURSES.filter(course => course.user?.userId === providerId),
+    () => MOCK_COURSES.filter(course => course.user?.userId === providerId),
     [providerId],
   );
+
+  const getExplorePath = () => {
+    if (role === 'learner') return '/learner/explore';
+    if (role === 'course provider') return '/provider/explore';
+    return '/explore';
+  };
+
+  const getCourseDetailPath = (courseId: number) => {
+    if (role === 'learner') return `/learner/courses/detail?id=${courseId}`;
+    if (role === 'course provider') return `/provider/courses/detail?id=${courseId}`;
+    if (role === 'academic manager') return `/academic/courses/detail?id=${courseId}`;
+    return `/courses/detail?id=${courseId}`;
+  };
 
   if (!provider) {
     return (
@@ -23,7 +38,7 @@ export function ProviderProfile() {
           <h1 className="text-xl font-bold text-[#111827] mb-2">Provider not found</h1>
           <p className="text-sm text-[#6B7280] mb-5">This course provider profile does not exist in the mock data.</p>
           <button
-            onClick={() => navigate('/explore')}
+            onClick={() => navigate(getExplorePath())}
             className="px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm font-medium hover:bg-[#BE123C] transition-colors"
           >
             Browse courses
@@ -49,7 +64,7 @@ export function ProviderProfile() {
                 ) : initials}
               </div>
               <button
-                onClick={() => navigate('/explore')}
+                onClick={() => navigate(getExplorePath())}
                 className="px-4 py-2 bg-white border border-[#E5E7EB] text-[#111827] rounded-lg text-sm font-medium hover:bg-[#F8FAFC] transition-colors"
               >
                 Explore courses
@@ -112,7 +127,7 @@ export function ProviderProfile() {
             {providerCourses.map((course) => (
               <button
                 key={course.courseId}
-                onClick={() => navigate(`/courses/detail?id=${course.courseId}`)}
+                onClick={() => navigate(getCourseDetailPath(course.courseId))}
                 className="text-left border border-[#E5E7EB] rounded-xl p-4 hover:border-[#E11D48]/30 hover:shadow-md transition-all"
               >
                 <p className="text-sm font-bold text-[#111827] line-clamp-2 mb-2">{course.title}</p>

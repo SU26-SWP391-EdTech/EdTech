@@ -3,7 +3,7 @@ import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../stores/auth.stores';
 import toast from 'react-hot-toast';
 import type { Module, LessonStatus } from './types';
-import { getCourseById } from '../../services/course/course.service';
+import { getCourseById, approveCourse, rejectCourse } from '../../services/course/course.service';
 import { getLessonsByCourse } from '../../services/lesson/lesson.service';
 import { getMyEnrollments, enrollCourse } from '../../services/enrollment/enrollment.service';
 
@@ -223,6 +223,28 @@ export function useCourseDetail() {
     navigate(`/learner/lesson?courseId=${matchedCourse.courseId}&lessonId=${firstLessonId}`);
   };
 
+  const handleApproveCourse = async (id: number) => {
+    try {
+      await approveCourse(id);
+      toast.success('Course approved successfully!');
+      await loadData();
+    } catch (e: any) {
+      console.log('Backend approve failed', e);
+      toast.error(e.response?.data?.message || 'Failed to approve course.');
+    }
+  };
+
+  const handleRejectCourse = async (id: number, reason: string) => {
+    try {
+      await rejectCourse(id);
+      toast.success('Course rejected successfully!');
+      await loadData();
+    } catch (e: any) {
+      console.log('Backend reject failed', e);
+      toast.error(e.response?.data?.message || 'Failed to reject course.');
+    }
+  };
+
   return {
     matchedCourse,
     providerProfile,
@@ -248,6 +270,7 @@ export function useCourseDetail() {
     getCourseDetailPath,
     getProviderProfilePath,
     navigate,
-    isLoading,
+    handleApproveCourse,
+    handleRejectCourse,
   };
 }
