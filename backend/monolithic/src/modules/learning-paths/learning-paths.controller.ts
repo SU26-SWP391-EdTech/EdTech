@@ -46,6 +46,17 @@ export class LearningPathsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER)
   @Post(':id/courses')
+  @ApiOperation({
+    summary: 'Add a course to a learning path',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Course added to learning path successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Learning path or course not found',
+  })
   public async addCourse(
     @Param('id', ParseIntPipe)
     learningPathId: number,
