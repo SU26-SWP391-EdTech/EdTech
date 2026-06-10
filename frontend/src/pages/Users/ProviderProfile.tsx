@@ -1,8 +1,18 @@
-import { useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Award, BookOpen, Mail, Star, Users } from 'lucide-react';
-import { MOCK_COURSES, MOCK_PROVIDER_PROFILES } from '../../db/data';
 import { useAuthStore } from '../../stores/auth.stores';
+import { getAcademicProfile } from '../../services/user/user.service';
+import { searchCourses } from '../../services/course.service';
+
+interface MappedCourse {
+  courseId: number;
+  title: string;
+  description: string;
+  duration: string;
+  totalLessons: number;
+  enrollmentCount: number;
+}
 
 export function ProviderProfile() {
   const navigate = useNavigate();
@@ -12,11 +22,58 @@ export function ProviderProfile() {
   const user = useAuthStore((state) => state.user);
   const role = user?.roleName?.toLowerCase() || 'guest';
 
-  const provider = MOCK_PROVIDER_PROFILES.find(item => item.userId === providerId);
-  const providerCourses = useMemo(
-    () => MOCK_COURSES.filter(course => course.user?.userId === providerId),
-    [providerId],
-  );
+  const [provider, setProvider] = useState<{
+    fullName: string;
+    email: string;
+    avatarUrl: string | null;
+    expertise?: string;
+    experienceYears?: number;
+    rating?: number;
+    bio?: string;
+  } | null>(null);
+  const [providerCourses, setProviderCourses] = useState<MappedCourse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProviderData = async () => {
+      setIsLoading(true);
+      try {
+        const [profileRes, coursesRes] = await Promise.all([
+          getAcademicProfile(providerId),
+          searchCourses({ userId: providerId })
+        ]);
+
+        setProvider({
+          fullName: profileRes.fullName,
+          email: profileRes.email,
+          avatarUrl: profileRes.avatarUrl,
+          expertise: profileRes.expertise || 'Expert Instructor',
+          experienceYears: profileRes.experienceYears || 5,
+          rating: 4.8,
+          bio: 'Passionate educator focused on delivering high-quality learning experiences and helping students master modern software development.',
+        });
+
+        const items = coursesRes.data?.items || [];
+        const mapped = items.map((item: any) => ({
+          courseId: item.courseId,
+          title: item.title,
+          description: item.description || '',
+          duration: item.duration ? `${Math.floor(item.duration / 60)}h` : '0h',
+          totalLessons: item.totalLessons || 0,
+          enrollmentCount: item.enrollmentCount || 0,
+        }));
+        setProviderCourses(mapped);
+      } catch (err) {
+        console.error('Failed to load provider profile:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (providerId) {
+      loadProviderData();
+    }
+  }, [providerId]);
 
   const getExplorePath = () => {
     if (role === 'learner') return '/learner/explore';
@@ -31,12 +88,20 @@ export function ProviderProfile() {
     return `/courses/detail?id=${courseId}`;
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#E11D48] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   if (!provider) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] px-8 py-16">
         <div className="max-w-3xl mx-auto bg-white border border-[#E5E7EB] rounded-2xl p-8 text-center">
           <h1 className="text-xl font-bold text-[#111827] mb-2">Provider not found</h1>
-          <p className="text-sm text-[#6B7280] mb-5">This course provider profile does not exist in the mock data.</p>
+          <p className="text-sm text-[#6B7280] mb-5">This course provider profile does not exist.</p>
           <button
             onClick={() => navigate(getExplorePath())}
             className="px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm font-medium hover:bg-[#BE123C] transition-colors"
@@ -59,8 +124,8 @@ export function ProviderProfile() {
           <div className="px-8 pb-8">
             <div className="flex items-end justify-between -mt-12 mb-5">
               <div className="w-24 h-24 rounded-2xl bg-[#0EA5E9] border-4 border-white shadow-lg flex items-center justify-center text-white text-3xl font-extrabold">
-                {provider.avatar ? (
-                  <img src={provider.avatar} alt={provider.fullName} className="w-full h-full object-cover rounded-2xl" />
+                {provider.avatarUrl ? (
+                  <img src={provider.avatarUrl} alt={provider.fullName} className="w-full h-full object-cover rounded-2xl" />
                 ) : initials}
               </div>
               <button
@@ -121,7 +186,7 @@ export function ProviderProfile() {
         <section className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden shadow-sm">
           <div className="px-6 py-4 border-b border-[#F3F4F6]">
             <h2 className="text-sm font-bold text-[#111827]">Courses by {provider.fullName}</h2>
-            <p className="text-xs text-[#9CA3AF] mt-0.5">Courses are sourced from the current mock dataset.</p>
+            <p className="text-xs text-[#9CA3AF] mt-0.5">Courses are dynamically loaded from the database.</p>
           </div>
           <div className="grid grid-cols-3 gap-4 p-6">
             {providerCourses.map((course) => (
@@ -133,7 +198,7 @@ export function ProviderProfile() {
                 <p className="text-sm font-bold text-[#111827] line-clamp-2 mb-2">{course.title}</p>
                 <p className="text-xs text-[#6B7280] line-clamp-2 mb-3">{course.description}</p>
                 <div className="flex items-center justify-between text-xs text-[#9CA3AF]">
-                  <span>{course.duration}h</span>
+                  <span>{course.duration}</span>
                   <span>{course.totalLessons} lessons</span>
                 </div>
               </button>

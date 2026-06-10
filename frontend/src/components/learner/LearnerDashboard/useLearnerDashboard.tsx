@@ -36,7 +36,7 @@ export function useLearnerDashboard() {
                 const enrolledPathIds = pathsData.filter(path => {
                     const pathCourses = path.learningPathCourses || [];
                     if (pathCourses.length === 0) return false;
-                    return pathCourses.some(pc => 
+                    return pathCourses.some(pc =>
                         enrollmentsData.some(e => e.course?.courseId === pc.courseId)
                     );
                 }).map(p => p.learningPathId);
@@ -145,7 +145,7 @@ export function useLearnerDashboard() {
     const enrolledPathIds = learningPaths.filter(path => {
         const pathCourses = path.learningPathCourses || [];
         if (pathCourses.length === 0) return false;
-        return pathCourses.some(pc => 
+        return pathCourses.some(pc =>
             enrollments.some(e => e.course?.courseId === pc.courseId)
         );
     }).map(p => p.learningPathId);

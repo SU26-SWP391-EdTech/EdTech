@@ -1,7 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MOCK_COURSES } from './CourseManagement';
-import { createCourse } from '../../services/course.service';
+import { createCourse, searchCourses } from '../../services/course.service';
 import toast from 'react-hot-toast';
 import {
     ChevronDown, Upload, Plus, Send, AlertTriangle, CheckCircle2,
@@ -84,6 +83,24 @@ export function CreateCoursePage() {
     const [draggedLessonInfo, setDraggedLessonInfo] = useState<{ mIdx: number; lIdx: number } | null>(null);
     const [dragEnabled, setDragEnabled] = useState(false);
     const [lessonDragEnabled, setLessonDragEnabled] = useState(false);
+
+    const [availableCourses, setAvailableCourses] = useState<{ id: number; title: string }[]>([]);
+
+    useEffect(() => {
+        const fetchAvailableCourses = async () => {
+            try {
+                const res = await searchCourses();
+                const items = res.data?.items || [];
+                setAvailableCourses(items.map((item: any) => ({
+                    id: item.courseId,
+                    title: item.title,
+                })));
+            } catch (err) {
+                console.error('Failed to fetch available courses:', err);
+            }
+        };
+        fetchAvailableCourses();
+    }, []);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -469,7 +486,7 @@ export function CreateCoursePage() {
                                     <Field label="Prerequisites" hint="Select recommended prerequisite courses">
                                         <div className="space-y-2">
                                             {prerequisiteCourseIds.map(id => {
-                                                const pc = MOCK_COURSES.find(c => c.id === id);
+                                                const pc = availableCourses.find(c => c.id === id);
                                                 if (!pc) return null;
                                                 return (
                                                     <div key={id} className="flex items-center justify-between px-3 py-1.5 bg-white border border-[#E5E7EB] rounded-lg">
@@ -497,7 +514,7 @@ export function CreateCoursePage() {
                                                 className="w-full px-3 py-2 bg-white border border-[#E5E7EB] rounded-lg text-xs text-[#6B7280] focus:outline-none focus:ring-1 focus:ring-[#E11D48] focus:border-[#E11D48]"
                                             >
                                                 <option value="">+ Add prerequisite course...</option>
-                                                {MOCK_COURSES.map(c => (
+                                                {availableCourses.map(c => (
                                                     <option key={c.id} value={c.id} disabled={prerequisiteCourseIds.includes(c.id)}>
                                                         {c.title}
                                                     </option>

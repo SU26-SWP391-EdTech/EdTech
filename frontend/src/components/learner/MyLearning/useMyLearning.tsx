@@ -29,23 +29,23 @@ export function useMyLearning() {
             try {
                 setIsLoading(true);
                 setError(null);
-                
+
                 const [enrolls, paths] = await Promise.all([
                     getMyEnrollments(),
                     getLearningPaths(),
                 ]);
 
                 setEnrollments(enrolls);
-                
+
                 // Only include learning paths where the user has at least one enrolled course
                 const enrolledPaths = paths.filter(path => {
                     const pathCourses = path.learningPathCourses || [];
                     if (pathCourses.length === 0) return false;
-                    return pathCourses.some(pc => 
+                    return pathCourses.some(pc =>
                         enrolls.some(e => e.course?.courseId === pc.courseId)
                     );
                 });
-                
+
                 setLearningPaths(enrolledPaths);
             } catch (err: any) {
                 console.error('Failed to fetch learning progress:', err);

@@ -9,100 +9,6 @@ import {
     Monitor, Database, Palette, Megaphone, Briefcase, Settings
 } from 'lucide-react';
 
-/* ─── Mock data ─── */
-export const MOCK_COURSES: Course[] = [
-    {
-        id: 1, title: 'React & TypeScript Mastery',
-        description: 'Build production-ready apps with modern React patterns',
-        provider: 'James Wilson', providerInitials: 'JW', providerColor: '#7C3AED',
-        category: 'Web Development', status: 'Published',
-        students: 1240, rating: 4.8, duration: '14h 20m', lessons: 32, created: 'Jan 15, 2026', updated: 'Jan 16, 2026',
-        thumbBg: 'linear-gradient(135deg,#1E40AF,#3B82F6)', thumbIcon: React.createElement(Monitor, { className: "w-7 h-7 text-white/90" }),
-        progress: 82, language: 'English',
-    },
-    {
-        id: 2, title: 'Data Science with Python',
-        description: 'From data wrangling to machine learning in Python',
-        provider: 'Marcus Davis', providerInitials: 'MD', providerColor: '#0891B2',
-        category: 'Data Science', status: 'Published',
-        students: 980, rating: 4.6, duration: '18h 45m', lessons: 41, created: 'Jan 28, 2026', updated: 'Jan 28, 2026',
-        thumbBg: 'linear-gradient(135deg,#5B21B6,#8B5CF6)', thumbIcon: React.createElement(Database, { className: "w-7 h-7 text-white/90" }),
-        progress: 74, language: 'English',
-    },
-    {
-        id: 3, title: 'UX Design Fundamentals',
-        description: 'User research, wireframing, and prototyping essentials',
-        provider: 'Priya Nair', providerInitials: 'PN', providerColor: '#DB2777',
-        category: 'Design', status: 'Published',
-        students: 740, rating: 4.9, duration: '10h 10m', lessons: 24, created: 'Feb 4, 2026', updated: 'Feb 5, 2026',
-        thumbBg: 'linear-gradient(135deg,#BE185D,#EC4899)', thumbIcon: React.createElement(Palette, { className: "w-7 h-7 text-white/90" }),
-        progress: 91, language: 'English',
-    },
-    {
-        id: 4, title: 'Advanced SQL & Databases',
-        description: 'Query optimization, indexing, and schema design',
-        provider: 'Carlos Rivera', providerInitials: 'CR', providerColor: '#9333EA',
-        category: 'Data Science', status: 'Draft',
-        students: 0, rating: 0, duration: '9h 00m', lessons: 20, created: 'Feb 20, 2026', updated: 'Feb 20, 2026',
-        thumbBg: 'linear-gradient(135deg,#0F766E,#14B8A6)', thumbIcon: React.createElement(Database, { className: "w-7 h-7 text-white/90" }),
-        progress: 0, language: 'English',
-    },
-    {
-        id: 5, title: 'Digital Marketing Strategy',
-        description: 'SEO, paid ads, and analytics-driven growth tactics',
-        provider: 'Lena Park', providerInitials: 'LP', providerColor: '#B45309',
-        category: 'Marketing', status: 'Pending Review',
-        students: 0, rating: 0, duration: '7h 30m', lessons: 18, created: 'Mar 1, 2026', updated: 'Mar 1, 2026',
-        thumbBg: 'linear-gradient(135deg,#B45309,#F59E0B)', thumbIcon: React.createElement(Megaphone, { className: "w-7 h-7 text-white/90" }),
-        progress: 0, language: 'English',
-    },
-    {
-        id: 6, title: 'Cloud Architecture on AWS',
-        description: 'Design scalable, resilient cloud systems on AWS',
-        provider: 'Derek Foster', providerInitials: 'DF', providerColor: '#EA580C',
-        category: 'DevOps', status: 'Published',
-        students: 620, rating: 4.7, duration: '16h 00m', lessons: 36, created: 'Mar 12, 2026', updated: 'Mar 12, 2026',
-        thumbBg: 'linear-gradient(135deg,#1D4ED8,#6366F1)', thumbIcon: React.createElement(Settings, { className: "w-7 h-7 text-white/90" }),
-        progress: 63, language: 'English',
-    },
-    {
-        id: 7, title: 'Product Management 101',
-        description: 'Strategy, roadmapping, and stakeholder communication',
-        provider: 'Yasmin Al-Hassan', providerInitials: 'YH', providerColor: '#0284C7',
-        category: 'Business', status: 'Draft',
-        students: 0, rating: 0, duration: '11h 15m', lessons: 26, created: 'Apr 2, 2026', updated: 'Apr 2, 2026',
-        thumbBg: 'linear-gradient(135deg,#065F46,#10B981)', thumbIcon: React.createElement(Briefcase, { className: "w-7 h-7 text-white/90" }),
-        progress: 0, language: 'English',
-    },
-    {
-        id: 8, title: 'Node.js Backend Engineering',
-        description: 'REST APIs, authentication, and microservices in Node',
-        provider: 'James Wilson', providerInitials: 'JW', providerColor: '#7C3AED',
-        category: 'Web Development', status: 'Rejected',
-        students: 0, rating: 0, duration: '12h 40m', lessons: 28, created: 'Apr 18, 2026', updated: 'Apr 18, 2026',
-        thumbBg: 'linear-gradient(135deg,#374151,#6B7280)', thumbIcon: React.createElement(Monitor, { className: "w-7 h-7 text-white/90" }),
-        progress: 0, language: 'English',
-    },
-    {
-        id: 9, title: 'Machine Learning Basics',
-        description: 'Supervised & unsupervised learning with scikit-learn',
-        provider: 'Marcus Davis', providerInitials: 'MD', providerColor: '#0891B2',
-        category: 'Data Science', status: 'Published',
-        students: 890, rating: 4.5, duration: '20h 00m', lessons: 44, created: 'May 5, 2026', updated: 'May 6, 2026',
-        thumbBg: 'linear-gradient(135deg,#4C1D95,#7C3AED)', thumbIcon: React.createElement(Database, { className: "w-7 h-7 text-white/90" }),
-        progress: 78, language: 'English',
-    },
-    {
-        id: 10, title: 'Figma for Product Teams',
-        description: 'Component libraries, auto-layout, and design handoff',
-        provider: 'Priya Nair', providerInitials: 'PN', providerColor: '#DB2777',
-        category: 'Design', status: 'Pending Review',
-        students: 0, rating: 0, duration: '8h 20m', lessons: 19, created: 'May 14, 2026', updated: 'May 14, 2026',
-        thumbBg: 'linear-gradient(135deg,#9D174D,#E11D48)', thumbIcon: React.createElement(Palette, { className: "w-7 h-7 text-white/90" }),
-        progress: 0, language: 'English',
-    },
-];
-
 export function useCourseManagement() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -110,12 +16,12 @@ export function useCourseManagement() {
     const isPendingPage = location.pathname.includes('pending-courses');
 
     const user = useAuthStore((state) => state.user);
-    const [courses, setCourses] = useState<Course[]>(MOCK_COURSES);
+    const [courses, setCourses] = useState<Course[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState(isPendingPage ? 'Pending Review' : 'All Status');
-    const [selectedId, setSelectedId] = useState<number>(1);
+    const [selectedId, setSelectedId] = useState<number | undefined>(undefined);
     const [showModal, setShowModal] = useState(false);
     const [selectedCourseForEdit, setSelectedCourseForEdit] = useState<Course | undefined>(undefined);
     const [isViewOnly, setIsViewOnly] = useState(false);
@@ -131,6 +37,9 @@ export function useCourseManagement() {
             const params: any = {};
             if (isProvider && user?.userId) {
                 params.userId = user.userId;
+            }
+            if (isPendingPage) {
+                params.status = 'pending';
             }
             const res = await searchCourses(params);
             const backendCourses = res.data?.items || [];
@@ -171,19 +80,14 @@ export function useCourseManagement() {
                 };
             });
 
-            const merged = [...mapped];
-            MOCK_COURSES.forEach(mock => {
-                if (!merged.some(m => m.id === mock.id)) {
-                    merged.push(mock);
-                }
+            setCourses(mapped);
+
+            const initialFiltered = mapped.filter(c => {
+                if (isPendingPage) return c.status === 'Pending Review';
+                return true;
             });
-
-            setCourses(merged);
-
-            if (mapped.length > 0) {
-                setSelectedId(mapped[0].id);
-            } else if (MOCK_COURSES.length > 0) {
-                setSelectedId(MOCK_COURSES[0].id);
+            if (initialFiltered.length > 0) {
+                setSelectedId(initialFiltered[0].id);
             }
         } catch (err) {
             console.error('Failed to fetch courses:', err);
@@ -194,20 +98,14 @@ export function useCourseManagement() {
 
     useEffect(() => {
         fetchCourses();
-    }, [isProvider, user?.userId]);
+    }, [isProvider, isPendingPage, user?.userId]);
 
     const handleDeleteCourse = async () => {
         if (!selectedCourseForDelete) return;
         setDeleteLoading(true);
         try {
-            const mockIndex = MOCK_COURSES.findIndex(c => c.id === selectedCourseForDelete.id);
-            if (mockIndex !== -1) {
-                MOCK_COURSES.splice(mockIndex, 1);
-                toast.success('Course deleted successfully');
-            } else {
-                await deleteCourse(selectedCourseForDelete.id);
-                toast.success('Course deleted successfully');
-            }
+            await deleteCourse(selectedCourseForDelete.id);
+            toast.success('Course deleted successfully');
             setShowDeleteModal(false);
             setSelectedCourseForDelete(undefined);
             fetchCourses();
@@ -237,12 +135,13 @@ export function useCourseManagement() {
             });
     }, [courses, search, statusFilter, sortField, sortAsc]);
 
-    const selectedCourse = courses.find(c => c.id === selectedId) ?? courses[0] ?? MOCK_COURSES[0];
+    const selectedCourse = filtered.find(c => c.id === selectedId) ?? filtered[0];
 
     const stats = {
         total: courses.length,
         published: courses.filter(c => c.status === 'Published').length,
         draft: courses.filter(c => c.status === 'Draft').length,
+        pending: courses.filter(c => c.status === 'Pending Review').length,
         enrollments: courses.reduce((s, c) => s + c.students, 0),
     };
 
@@ -272,57 +171,23 @@ export function useCourseManagement() {
     const handleApproveCourse = async (courseId: number) => {
         try {
             await approveCourse(courseId);
-        } catch (e) {
-            console.log('Backend approve failed, updating mock state', e);
+            setCourses(prev => prev.map(c => c.id === courseId ? { ...c, status: 'Published' } : c));
+            toast.success('Course approved successfully!');
+        } catch (e: any) {
+            console.error('Failed to approve course:', e);
+            toast.error(e.response?.data?.message || 'Failed to approve course');
         }
-        
-        // Update MOCK_COURSES in useCourseManagement:
-        const mockIndex = MOCK_COURSES.findIndex(c => c.id === courseId);
-        if (mockIndex !== -1) {
-            MOCK_COURSES[mockIndex].status = 'Published';
-        }
-        
-        // Update MOCK_COURSES in db/data.ts:
-        try {
-            const { MOCK_COURSES: dbMockCourses } = await import('../../db/data');
-            const dbIndex = dbMockCourses.findIndex(c => c.courseId === courseId || c.id === courseId);
-            if (dbIndex !== -1) {
-                dbMockCourses[dbIndex].status = 'approved' as any;
-            }
-        } catch (e) {
-            console.error(e);
-        }
-        
-        setCourses(prev => prev.map(c => c.id === courseId ? { ...c, status: 'Published' } : c));
-        toast.success('Course approved successfully!');
     };
 
     const handleRejectCourse = async (courseId: number, reason: string) => {
         try {
             await rejectCourse(courseId);
-        } catch (e) {
-            console.log('Backend reject failed, updating mock state', e);
+            setCourses(prev => prev.map(c => c.id === courseId ? { ...c, status: 'Rejected' } : c));
+            toast.success('Course rejected successfully!');
+        } catch (e: any) {
+            console.error('Failed to reject course:', e);
+            toast.error(e.response?.data?.message || 'Failed to reject course');
         }
-        
-        // Update MOCK_COURSES in useCourseManagement:
-        const mockIndex = MOCK_COURSES.findIndex(c => c.id === courseId);
-        if (mockIndex !== -1) {
-            MOCK_COURSES[mockIndex].status = 'Rejected';
-        }
-        
-        // Update MOCK_COURSES in db/data.ts:
-        try {
-            const { MOCK_COURSES: dbMockCourses } = await import('../../db/data');
-            const dbIndex = dbMockCourses.findIndex(c => c.courseId === courseId || c.id === courseId);
-            if (dbIndex !== -1) {
-                dbMockCourses[dbIndex].status = 'rejected' as any;
-            }
-        } catch (e) {
-            console.error(e);
-        }
-        
-        setCourses(prev => prev.map(c => c.id === courseId ? { ...c, status: 'Rejected' } : c));
-        toast.success('Course rejected successfully!');
     };
 
     return {

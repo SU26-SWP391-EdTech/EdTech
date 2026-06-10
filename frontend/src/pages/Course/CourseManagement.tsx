@@ -8,7 +8,6 @@ import {
     Settings, Edit2, Trash2, GripVertical
 } from 'lucide-react';
 import { useCourseManagement } from '../../components/CourseManagement/useCourseManagement';
-import { MOCK_COURSES } from '../../components/CourseManagement/useCourseManagement';
 
 import type { Course, CourseStatus, Category } from '../../components/CourseManagement/types';
 import { StatusBadge } from '../../components/CourseManagement/StatusBadge';
@@ -23,8 +22,6 @@ import { DeleteCourseConfirmModal } from '../../components/CourseManagement/Dele
 
 const STATUSES = ['All Status', 'Published', 'Draft', 'Pending Review', 'Rejected'];
 
-export { MOCK_COURSES };
-
 export function CourseManagement() {
     const [selectedRejectCourseId, setSelectedRejectCourseId] = useState<number | null>(null);
     const [rejectReason, setRejectReason] = useState('');
@@ -33,6 +30,7 @@ export function CourseManagement() {
     const {
         isProvider,
         navigate,
+        courses,
         isLoading,
         search,
         setSearch,
@@ -98,7 +96,7 @@ export function CourseManagement() {
                             {[
                                 { label: 'Total Courses', value: stats.total, icon: <BookOpen className="w-4 h-4 text-[#6B7280]" />, change: '+2 this month', up: true },
                                 { label: 'Published Courses', value: stats.published, icon: <CheckCircle2 className="w-4 h-4 text-[#16A34A]" />, change: `${Math.round((stats.published / stats.total) * 100)}% of total`, up: true },
-                                { label: 'Draft / Pending', value: stats.draft + MOCK_COURSES.filter(c => c.status === 'Pending Review').length, icon: <FileText className="w-4 h-4 text-[#D97706]" />, change: 'Awaiting review', up: null },
+                                { label: 'Draft / Pending', value: stats.draft + stats.pending, icon: <FileText className="w-4 h-4 text-[#D97706]" />, change: 'Awaiting review', up: null },
                                 { label: 'Total Enrollments', value: stats.enrollments.toLocaleString(), icon: <Users className="w-4 h-4 text-[#E11D48]" />, change: '+18.4% vs last mo', up: true },
                             ].map((s, idx) => (
                                 <div key={idx} className="bg-white border border-[#E5E7EB] rounded-2xl p-5 hover:shadow-sm transition-shadow">

@@ -270,6 +270,7 @@ export function useCourseDetail() {
     getCourseDetailPath,
     getProviderProfilePath,
     navigate,
+    isLoading,
     handleApproveCourse,
     handleRejectCourse,
   };

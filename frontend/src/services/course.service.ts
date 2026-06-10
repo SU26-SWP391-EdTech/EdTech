@@ -44,7 +44,6 @@ export async function createCourse(formData: FormData): Promise<BackendCourse> {
   return response.data;
 }
 
-// Tìm kiếm/Lọc danh sách khóa học
 export async function searchCourses(params?: {
   search?: string;
   status?: string;
@@ -55,7 +54,7 @@ export async function searchCourses(params?: {
   sortOrder?: 'ASC' | 'DESC';
   userId?: number;
 }): Promise<SearchCoursesResponse> {
-  const response = await api.get('/courses', { params });
+  const response = await api.get('/courses/search', { params });
   return response.data;
 }
 

@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import type { User, Role, Status } from './types';
+import { getUsers, createUser, updateUser, deleteUser } from '../../services/user/user.service';
 
 export function useUserManagement() {
   const [users, setUsers] = useState<User[]>([]);
@@ -20,9 +21,10 @@ export function useUserManagement() {
 
   const mapBackendUserToFrontend = (u: any): User => {
     let role: Role = 'Learner';
-    if (u.role?.roleName === 'admin') role = 'Admin';
-    else if (u.role?.roleName === 'course provider') role = 'Course Provider';
-    else if (u.role?.roleName === 'academic manager') role = 'Academic Manager';
+    const backendRole = u.role?.roleName || '';
+    if (backendRole === 'admin') role = 'Admin';
+    else if (backendRole === 'course provider') role = 'Course Provider';
+    else if (backendRole === 'academic manager') role = 'Academic Manager';
 
     const status: Status = u.isEmailVerified ? 'Active' : 'Inactive';
 
@@ -69,14 +71,7 @@ export function useUserManagement() {
     try {
       setLoading(true);
       setError(null);
-
-      const stored = sessionStorage.getItem('mock_users');
-      const data = stored ? JSON.parse(stored) : [];
-
-      if (!stored) {
-        sessionStorage.setItem('mock_users', JSON.stringify([]));
-      }
-
+      const data = await getUsers();
       setUsers(data.map(mapBackendUserToFrontend));
     } catch (err: any) {
       console.error('Failed to fetch users', err);
@@ -122,65 +117,43 @@ export function useUserManagement() {
     password?: string;
   }) => {
     try {
-      const stored = sessionStorage.getItem('mock_users');
-      let currentList = stored ? JSON.parse(stored) : [];
-
+      setLoading(true);
       if (selectedUser) {
-        currentList = currentList.map((u: any) => {
-          if (u.userId === selectedUser.id) {
-            return {
-              ...u,
-              fullName: userData.name,
-              avatar: userData.avatar || u.avatar,
-              isEmailVerified: userData.status === 'Active',
-              updatedAt: new Date().toISOString()
-            };
-          }
-          return u;
+        await updateUser(selectedUser.id, {
+          fullName: userData.name,
+          avatar_url: userData.avatar,
+          isEmailVerified: userData.status === 'Active',
         });
       } else {
-        const newId = currentList.length ? Math.max(...currentList.map((u: any) => u.userId)) + 1 : 1;
-        const newUser = {
-          userId: newId,
+        await createUser({
           fullName: userData.name,
           email: userData.email,
-          role: { roleName: mapFrontendRoleToBackend(userData.role) },
+          password: userData.password,
+          roleName: mapFrontendRoleToBackend(userData.role),
+          avatar_url: userData.avatar,
           isEmailVerified: userData.status === 'Active',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          avatar: userData.avatar || null
-        };
-        currentList.push(newUser);
+        });
       }
-
-      sessionStorage.setItem('mock_users', JSON.stringify(currentList));
       setShowModal(false);
       await fetchUsers();
     } catch (err: any) {
+      console.error('Failed to save user', err);
       alert(err.response?.data?.message || 'Failed to save user. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteUser = async (id: number) => {
     try {
-      const stored = sessionStorage.getItem('mock_users');
-      let currentList = stored ? JSON.parse(stored) : [];
-
-      currentList = currentList.map((u: any) => {
-        if (u.userId === id) {
-          return {
-            ...u,
-            isEmailVerified: false,
-            updatedAt: new Date().toISOString()
-          };
-        }
-        return u;
-      });
-      sessionStorage.setItem('mock_users', JSON.stringify(currentList));
-
+      setLoading(true);
+      await updateUser(id, { isEmailVerified: false });
       await fetchUsers();
     } catch (err: any) {
+      console.error('Failed to deactivate user', err);
       alert(err.response?.data?.message || 'Failed to deactivate user.');
+    } finally {
+      setLoading(false);
     }
   };
 
