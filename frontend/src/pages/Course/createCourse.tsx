@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createCourse, searchCourses } from '../../services/course.service';
+import { createLesson } from '../../services/lesson/lesson.service';
 import toast from 'react-hot-toast';
 import {
     ChevronDown, Upload, Plus, Send, AlertTriangle, CheckCircle2,
@@ -80,6 +81,110 @@ export function CreateCoursePage() {
     const [lessonDragEnabled, setLessonDragEnabled] = useState(false);
 
     const [availableCourses, setAvailableCourses] = useState<{ id: number; title: string }[]>([]);
+    const [hasDraft, setHasDraft] = useState(false);
+
+    const saveDraftToLocalStorage = (currentModules = modules) => {
+        const draft = {
+            title,
+            description,
+            language,
+            durationHours,
+            durationMinutes,
+            projectUrl,
+            outcomes,
+            prerequisiteCourseIds,
+            thumbnailPreview,
+            modules: currentModules
+        };
+        localStorage.setItem('create_course_draft', JSON.stringify(draft));
+    };
+
+    const handleResumeDraft = () => {
+        const saved = localStorage.getItem('create_course_draft');
+        if (saved) {
+            try {
+                const draft = JSON.parse(saved);
+                if (draft.title) setTitle(draft.title);
+                if (draft.description) setDescription(draft.description);
+                if (draft.language) setLanguage(draft.language);
+                if (draft.durationHours) setDurationHours(Number(draft.durationHours) || 0);
+                if (draft.durationMinutes) setDurationMinutes(Number(draft.durationMinutes) || 0);
+                if (draft.projectUrl) setProjectUrl(draft.projectUrl);
+                if (draft.outcomes) setOutcomes(draft.outcomes);
+                if (draft.prerequisiteCourseIds) setPrerequisiteCourseIds(draft.prerequisiteCourseIds);
+                if (draft.thumbnailPreview) setThumbnailPreview(draft.thumbnailPreview);
+                if (draft.modules) setModules(draft.modules);
+                toast.success('Course draft loaded successfully!');
+            } catch (e) {
+                console.error('Failed to load course draft:', e);
+            }
+        }
+        setHasDraft(false);
+    };
+
+    const handleDiscardDraft = () => {
+        localStorage.removeItem('create_course_draft');
+        setHasDraft(false);
+        toast.success('Draft discarded.');
+    };
+
+    useEffect(() => {
+        const saved = localStorage.getItem('create_course_draft');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.title || parsed.description || (parsed.modules && parsed.modules.length > 0)) {
+                    setHasDraft(true);
+                }
+            } catch (e) {}
+        }
+    }, []);
+
+    useEffect(() => {
+        const temp = localStorage.getItem('temp_created_lesson');
+        if (temp) {
+            try {
+                const { targetModuleId, lesson } = JSON.parse(temp);
+                if (targetModuleId && lesson) {
+                    setModules((prevModules) => {
+                        const updated = prevModules.map((m) => {
+                            if (m.id === targetModuleId) {
+                                const existingLessons = m.lessons || [];
+                                const exists = existingLessons.some((l) => l.id === lesson.id);
+                                const updatedLessons = exists
+                                    ? existingLessons.map((l) => l.id === lesson.id ? lesson : l)
+                                    : [...existingLessons, lesson];
+                                return { ...m, lessons: updatedLessons };
+                            }
+                            return m;
+                        });
+                        
+                        const saved = localStorage.getItem('create_course_draft');
+                        if (saved) {
+                            try {
+                                const draft = JSON.parse(saved);
+                                localStorage.setItem('create_course_draft', JSON.stringify({
+                                    ...draft,
+                                    modules: updated
+                                }));
+                            } catch (err) {}
+                        }
+                        return updated;
+                    });
+                    localStorage.removeItem('temp_created_lesson');
+                    toast.success('Lesson saved to course draft successfully!');
+                }
+            } catch (e) {
+                console.error('Failed to parse temp lesson:', e);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!hasDraft && (title || description || modules.length > 0 || outcomes.length > 0 || prerequisiteCourseIds.length > 0)) {
+            saveDraftToLocalStorage();
+        }
+    }, [title, description, language, durationHours, durationMinutes, projectUrl, outcomes, prerequisiteCourseIds, modules, thumbnailPreview, hasDraft]);
 
     useEffect(() => {
         const fetchAvailableCourses = async () => {
@@ -144,11 +249,42 @@ export function CreateCoursePage() {
             if (projectUrl) {
                 formData.append('projectUrl', projectUrl);
             }
-            if (thumbnailFile) {
-                formData.append('thumbnailUrl', thumbnailFile);
+            
+            let fileToUpload = thumbnailFile;
+            if (!fileToUpload && thumbnailPreview && thumbnailPreview.startsWith('data:image')) {
+                try {
+                    const res = await fetch(thumbnailPreview);
+                    const blob = await res.blob();
+                    fileToUpload = new File([blob], 'thumbnail.png', { type: blob.type });
+                } catch (e) {
+                    console.error('Failed to convert preview to file:', e);
+                }
+            }
+            if (fileToUpload) {
+                formData.append('thumbnailUrl', fileToUpload);
             }
 
-            await createCourse(formData);
+            const newCourse = await createCourse(formData);
+            
+            // Now, save all lessons that were added locally to this course!
+            for (const mod of modules) {
+                for (const l of mod.lessons) {
+                    try {
+                        const payload = {
+                            title: l.title,
+                            description: l.description || '',
+                            content: l.content || '',
+                            videoUrl: l.videoUrl || '',
+                            videoDuration: l.duration ? parseInt(l.duration) * 60 : undefined,
+                        };
+                        await createLesson(newCourse.courseId, payload);
+                    } catch (err) {
+                        console.error('Failed to auto-create lesson during course creation:', err);
+                    }
+                }
+            }
+
+            localStorage.removeItem('create_course_draft');
             toast.success('Course created successfully!');
             navigate('/provider/courses');
         } catch (err: any) {
@@ -248,6 +384,32 @@ export function CreateCoursePage() {
                         </button>
                     </div>
                 </div>
+
+                {hasDraft && (
+                    <div className="mb-5 flex items-center justify-between gap-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                        <div className="flex items-center gap-3">
+                            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+                            <div>
+                                <h4 className="text-sm font-semibold text-amber-900">Unsaved draft detected</h4>
+                                <p className="text-xs text-amber-700">Would you like to resume your unsaved course draft?</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={handleResumeDraft}
+                                className="px-3 py-1.5 bg-amber-600 text-white rounded-lg text-xs font-semibold hover:bg-amber-700 transition-colors"
+                            >
+                                Resume
+                            </button>
+                            <button
+                                onClick={handleDiscardDraft}
+                                className="px-3 py-1.5 bg-white border border-amber-200 text-amber-700 rounded-lg text-xs font-semibold hover:bg-amber-50 transition-colors"
+                            >
+                                Discard
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Left Form */}
                 <div className="grid grid-cols-12 gap-5">
@@ -445,11 +607,28 @@ export function CreateCoursePage() {
                                                         <button title={l.locked ? 'Locked — preview disabled' : 'Free preview'} className={`p-1 rounded ${l.locked ? 'text-[#9CA3AF]' : 'text-[#10B981]'}`}>
                                                             {l.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
                                                         </button>
-                                                        <IconBtn title="Edit"><Pencil className="w-3.5 h-3.5" /></IconBtn>
+                                                        <IconBtn
+                                                            title="Edit"
+                                                            onClick={() => {
+                                                                saveDraftToLocalStorage();
+                                                                const backUrl = encodeURIComponent(window.location.pathname + window.location.search);
+                                                                navigate(`/provider/lessons/create?redirectBack=${backUrl}&targetModuleId=${m.id}&lessonId=${l.id}`);
+                                                            }}
+                                                        >
+                                                            <Pencil className="w-3.5 h-3.5" />
+                                                        </IconBtn>
                                                         <IconBtn title="Delete" danger onClick={() => deleteLesson(m.id, l.id)}><Trash2 className="w-3.5 h-3.5" /></IconBtn>
                                                     </div>
                                                 ))}
-                                                <button onClick={() => setShowAddLesson(true)} className="w-full flex items-center justify-center gap-1.5 py-2 text-xs text-[#E11D48] hover:bg-[#FEF2F2] rounded-lg transition-colors" style={{ fontWeight: 600 }}>
+                                                <button
+                                                    onClick={() => {
+                                                        saveDraftToLocalStorage();
+                                                        const backUrl = encodeURIComponent(window.location.pathname + window.location.search);
+                                                        navigate(`/provider/lessons/create?redirectBack=${backUrl}&targetModuleId=${m.id}`);
+                                                    }}
+                                                    className="w-full flex items-center justify-center gap-1.5 py-2 text-xs text-[#E11D48] hover:bg-[#FEF2F2] rounded-lg transition-colors"
+                                                    style={{ fontWeight: 600 }}
+                                                >
                                                     <Plus className="w-3.5 h-3.5" />
                                                     Add Lesson
                                                 </button>

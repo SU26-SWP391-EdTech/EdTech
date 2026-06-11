@@ -17,6 +17,7 @@ export interface CreateLessonDto {
     description?: string;
     videoDuration?: number;
     content?: string;
+    videoUrl?: string;
 }
 
 export interface UpdateLessonDto {
@@ -24,6 +25,7 @@ export interface UpdateLessonDto {
     description?: string;
     videoDuration?: number;
     content?: string;
+    videoUrl?: string;
 }
 
 // 1. Tạo bài học mới trong một khóa học (Có hỗ trợ upload file video)
@@ -33,6 +35,7 @@ export async function createLesson(courseId: number, data: CreateLessonDto, file
     if (data.description) formData.append('description', data.description);
     if (data.videoDuration !== undefined) formData.append('videoDuration', String(data.videoDuration));
     if (data.content) formData.append('content', data.content);
+    if (data.videoUrl) formData.append('videoUrl', data.videoUrl);
     if (file) {
         formData.append('videoUrl', file);
     }
@@ -69,6 +72,7 @@ export async function updateLesson(
     if (data.description) formData.append('description', data.description);
     if (data.videoDuration !== undefined) formData.append('videoDuration', String(data.videoDuration));
     if (data.content) formData.append('content', data.content);
+    if (data.videoUrl) formData.append('videoUrl', data.videoUrl);
     if (file) {
         formData.append('videoUrl', file);
     }
