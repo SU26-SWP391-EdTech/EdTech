@@ -61,8 +61,8 @@ export class LessonsController {
     @ApiResponse({ status: 200, description: 'Lesson returned successfully' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 404, description: 'Lesson not found' })
-    async findOne(@Param('id', ParseIntPipe) id: number) {
-        return await this.lessonsService.findOne(id);
+    async findOne(@Param('id', ParseIntPipe) id: number, @Req() req) {
+        return await this.lessonsService.findLesson(id, req.user.userId);
     }
 
 

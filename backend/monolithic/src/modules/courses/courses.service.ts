@@ -26,6 +26,7 @@ export class CoursesService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
+  //create course
   async create(
     createCourseDto: CreateCourseDto,
     userId: number,
@@ -66,6 +67,8 @@ export class CoursesService {
     return course;
   }
 
+  //update course
+
   async update(
     id: number,
     updateCourseDto: UpdateCourseDto,
@@ -97,41 +100,52 @@ export class CoursesService {
     return this.coursesRepository.saveCourse(course);
   }
 
-  async remove(id: number): Promise<{ message: string }> {
-    const course = await this.findOne(id);
-    await this.coursesRepository.manager.transaction(
-      async (transactionalEntityManager) => {
-        // Delete lessons
-        await transactionalEntityManager
-          .createQueryBuilder()
-          .delete()
-          .from(Lesson)
-          .where('course_id = :id', { id })
-          .execute();
+  //remove course
 
-        // Delete enrollments
-        await transactionalEntityManager
-          .createQueryBuilder()
-          .delete()
-          .from(Enrollment)
-          .where('course_id = :id', { id })
-          .execute();
-
-        // Delete learning path course relations
-        await transactionalEntityManager
-          .createQueryBuilder()
-          .delete()
-          .from(LearningPathCourse)
-          .where('course_id = :id', { id })
-          .execute();
-
-        // Finally delete the course itself
-        await transactionalEntityManager.remove(course);
+  async remove(id: number, userId: number): Promise<{ message: string }> {
+    const course = await this.coursesRepository.findOne({
+      where: {
+        courseId: id,
+        user: {
+          userId,
+        },
       },
-    );
-    return { message: `Course ID ${id} has been deleted` };
+    });
+
+    if (!course) {
+      throw new ForbiddenException(
+        'Course not found or you do not own this course',
+      );
+    }
+
+    await this.coursesRepository.manager.transaction(async (manager) => {
+      await manager.delete(Lesson, {
+        course: {
+          courseId: id,
+        },
+      });
+
+      await manager.delete(Enrollment, {
+        course: {
+          courseId: id,
+        },
+      });
+
+      await manager.delete(LearningPathCourse, {
+        course: {
+          courseId: id,
+        },
+      });
+
+      await manager.delete(Course, id);
+    });
+
+    return {
+      message: `Course ID ${id} has been deleted successfully`,
+    };
   }
 
+  //approve course
   public async approveCourse(id: number, reviewerId: number): Promise<Course> {
     const course = await this.coursesRepository.findCourseById(id);
 
@@ -191,6 +205,13 @@ export class CoursesService {
 
   async search(dto: SearchCourseDto) {
     const { data, total } = await this.coursesRepository.searchCourses(dto);
+
+    if(total==0){
+      return {
+        statusCode: 200,
+        message: 'Course does not exist',
+      };
+    }
 
     return {
       statusCode: 200,

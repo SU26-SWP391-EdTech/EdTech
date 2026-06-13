@@ -44,17 +44,4 @@ export class EnrollmentsController {
         return await this.enrollmentsService.getEnrollmentDetail(user.userId, courseId);
     }
 
-    //update progress
-    @Patch('progress/:courseId')
-    @ApiOperation({ summary: 'Update enrollment progress by course' })
-    @ApiResponse({ status: 200, description: 'Progress updated successfully' })
-    @ApiResponse({ status: 401, description: 'Unauthorized' })
-    @ApiResponse({ status: 404, description: 'Enrollment not found' })
-    async updateProgress(
-        @CurrentUser() user: JwtPayloadUser,
-        @Param('courseId', ParseIntPipe) courseId: number,
-        @Body('progress', ParseIntPipe) progress: number,
-    ) {
-        return await this.enrollmentsService.updateProgress(user.userId, courseId, progress);
-    }
 }

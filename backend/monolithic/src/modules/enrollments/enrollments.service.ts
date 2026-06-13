@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { EnrollmentsRepository } from './enrollments.repository';
 import { Course } from '../courses/entities/course.entity';
 import { EnrollCourseDto } from './dto/enroll-course.dto';
 import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
 import { Enrollment } from './entities/enrollment.entity';
+import { CourseStatus } from 'src/common/enums/course.enum';
 
 @Injectable()
 export class EnrollmentsService {
@@ -14,46 +15,90 @@ export class EnrollmentsService {
 
         @InjectRepository(Course)
         private readonly courseRepo: Repository<Course>,
+        private dataSource:DataSource,
     ) { }
 
-    async enrollCourse(userId: number, id: number): Promise<Enrollment> {
-
+    async enrollCourse(
+        userId: number,
+        courseId: number,
+      ): Promise<Enrollment> {
         const course = await this.courseRepo.findOne({
-            where: { courseId: id },
+          where: { courseId },
         });
-
+      
         if (!course) {
-            throw new NotFoundException(`Not found course with ID ${id}`);
+          throw new NotFoundException(
+            `Course with ID ${courseId} not found`,
+          );
         }
-
-        const existingEnrollment = await this.enrollmentsRepo.findByUserAndCourse(userId, id);
-
-        if (existingEnrollment) {
-            if (existingEnrollment.status === EnrollmentStatus.ACTIVE) {
-                throw new BadRequestException('You have already enrolled in this course!');
+      
+        if (course.status !== CourseStatus.APPROVED) {
+          throw new BadRequestException(
+            'This course is not available for enrollment',
+          );
+        }
+      
+        const existingEnrollment =
+          await this.enrollmentsRepo.findByUserAndCourse(
+            userId,
+            courseId,
+          );
+      
+        if (
+          existingEnrollment &&
+          existingEnrollment.status === EnrollmentStatus.ACTIVE
+        ) {
+          throw new BadRequestException(
+            'You have already enrolled in this course',
+          );
+        }
+      
+        return await this.dataSource.transaction(
+          async (manager): Promise<Enrollment> => {
+            let enrollment: Enrollment;
+      
+            if (existingEnrollment) {
+              existingEnrollment.status =
+                EnrollmentStatus.ACTIVE;
+              existingEnrollment.progress = 0;
+              existingEnrollment.enrolledAt = new Date();
+      
+              enrollment = await manager.save(
+                Enrollment,
+                existingEnrollment,
+              );
+            } else {
+              enrollment = manager.create(Enrollment, {
+                user: {
+                  userId,
+                },
+                course: {
+                  courseId,
+                },
+                status: EnrollmentStatus.ACTIVE,
+                progress: 0,
+                enrolledAt: new Date(),
+              });
+      
+              enrollment = await manager.save(
+                Enrollment,
+                enrollment,
+              );
             }
-            existingEnrollment.status = EnrollmentStatus.ACTIVE;
-            existingEnrollment.enrolledAt = new Date();
-            existingEnrollment.progress = 0;
-
-            course.enrollmentCount = (course.enrollmentCount || 0) + 1;
-            await this.courseRepo.save(course);
-
-            return await this.enrollmentsRepo.save(existingEnrollment);
-        }
-
-        const newEnrollment = this.enrollmentsRepo.create(userId, id);
-        newEnrollment.status = EnrollmentStatus.ACTIVE;
-        newEnrollment.progress = 0;
-        newEnrollment.enrolledAt = new Date();
-
-        const savedEnrollment = await this.enrollmentsRepo.save(newEnrollment);
-
-        course.enrollmentCount = (course.enrollmentCount || 0) + 1;
-        await this.courseRepo.save(course);
-
-        return savedEnrollment;
-    }
+      
+            await manager.increment(
+              Course,
+              {
+                courseId,
+              },
+              'enrollmentCount',
+              1,
+            );
+      
+            return enrollment;
+          },
+        );
+      }
 
     async getMyEnrollments(userId: number): Promise<Enrollment[]> {
         return await this.enrollmentsRepo.findMyEnrollments(userId);
@@ -69,19 +114,4 @@ export class EnrollmentsService {
         return enrollment;
     }
 
-    async updateProgress(userId: number, courseId: number, progress: number): Promise<Enrollment> {
-        const enrollment = await this.enrollmentsRepo.findByUserAndCourse(userId, courseId);
-        if (!enrollment) {
-            throw new NotFoundException(`You are not enrolled in course ${courseId}`);
-        }
-        enrollment.progress = progress;
-        enrollment.lastAccessedAt = new Date();
-        if (progress >= 100) {
-            enrollment.status = EnrollmentStatus.COMPLETED;
-            enrollment.completedAt = new Date();
-        } else {
-            enrollment.status = EnrollmentStatus.ACTIVE;
-        }
-        return await this.enrollmentsRepo.save(enrollment);
-    }
 }

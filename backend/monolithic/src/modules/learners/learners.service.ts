@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UseInterceptors } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { EditLearnerProfileDto } from './dto/edit-learner-profile.dto';
@@ -18,7 +18,12 @@ export class LearnersService {
     private cloudinaryService:CloudinaryService,
   ){}
 
-  async updateProfile(id: number, dto: UpdateLearnerInfoDto) {
+  async updateProfile(id: number, userId: number , dto: UpdateLearnerInfoDto) {
+
+    if(userId !== id ){
+      throw new BadRequestException("You can't update another learner profile")
+    }
+
     let learner = await this.learnerRepository.findOne({ where: { userId: id } });
 
     if (!learner) {
@@ -39,7 +44,11 @@ export class LearnersService {
     return this.learnerRepository.save(learner);
 }
 
-  async editLearnerProfile(id: number, dto: EditLearnerProfileDto, file?: Express.Multer.File){
+  async editLearnerProfile(id: number, dto: EditLearnerProfileDto, userId: number, file?: Express.Multer.File){
+      if(userId !== id ){
+        throw new BadRequestException("You can't update another learner profile");
+      }
+
       const user = await this.userRepository.findOne({
         where: {
           userId: id,
@@ -51,8 +60,7 @@ export class LearnersService {
       }
       
       if (file) {
-        const uploaded =
-          await this.cloudinaryService.uploadImage(file);
+        const uploaded = await this.cloudinaryService.uploadImage(file);
         user.avatar = uploaded.secure_url;
       } else if (dto.avatarUrl) {
         user.avatar = dto.avatarUrl;

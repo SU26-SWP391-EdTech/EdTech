@@ -131,11 +131,11 @@ export class UsersService implements OnApplicationBootstrap {
   }
 
   async changePassword(id: number, dto: ChangePasswordDto) {
-    const user = await this.userRepo.findOne({
-      where: {
-        userId: id,
-      },
-    });
+    const user = await this.userRepo
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.userId = :id', { id })
+      .getOne();
 
     if (!user) throw new NotFoundException('User not exist');
 

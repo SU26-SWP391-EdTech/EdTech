@@ -24,6 +24,7 @@ import { GetAcademicUserProfileDto } from './dto/get-academic-user-profile.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { RoleEnum } from 'src/common/enums/role.enum';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Users')
 @Controller('user')
@@ -31,6 +32,7 @@ import { RoleEnum } from 'src/common/enums/role.enum';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiResponse({ status: 200, description: 'User returned successfully' })
@@ -41,6 +43,7 @@ export class UsersController {
   }
 
   @Get()
+  @Roles(RoleEnum.COURSE_PROVIDER, RoleEnum.ACADEMIC_MANAGER, RoleEnum.ADMIN)
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Users returned successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -107,7 +110,7 @@ export class UsersController {
   ) {
     return this.usersService.editAcademicUserProfile(id, dto, file);
   }
-  
+  @Public()
   @Get('academic-user/:id')
   @ApiOperation({ summary: 'View academic user profile' })
   @ApiResponse({ status: 200, description: 'Academic user profile returned successfully' })

@@ -11,6 +11,7 @@ import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import { Throttle } from '@nestjs/throttler';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
 @ApiTags('Courses')
 @Controller('courses')
@@ -33,6 +34,7 @@ export class CoursesController {
         return this.coursesService.create(createCourseDto, req.user.userId, file);
     }
 
+    @Roles(RoleEnum.ACADEMIC_MANAGER, RoleEnum.COURSE_PROVIDER, RoleEnum.ADMIN)
     @Get()
     @ApiOperation({ summary: 'Get all courses' })
     @ApiResponse({ status: 200, description: 'All Courses returned successfully' })
@@ -84,8 +86,8 @@ export class CoursesController {
     @ApiOperation({ summary: 'Delete a course' })
     @ApiResponse({ status: 200, description: 'Course deleted successfully' })
     @ApiResponse({ status: 404, description: 'Course not found' })
-    remove(@Param('id', ParseIntPipe) id: number) {
-        return this.coursesService.remove(id);
+    remove(@Param('id', ParseIntPipe) id: number, @CurrentUser('userId') userId: number) {
+        return this.coursesService.remove(id, userId);
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)

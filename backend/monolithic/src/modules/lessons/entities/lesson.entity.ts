@@ -12,7 +12,7 @@ import {
 @Entity('lessons')
 export class Lesson {
     @PrimaryGeneratedColumn({name: 'lesson_id'})
-    lessonId!: string;
+    lessonId!: number;
 
     // course 1-n lesson
     @ManyToOne(() => Course, (course) => course.lessons, {nullable: false, onDelete: 'CASCADE'})

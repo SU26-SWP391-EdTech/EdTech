@@ -6,10 +6,11 @@ import { LessonsController } from './lessons.controller';
 import { LessonsService } from './lessons.service';
 import { LessonsRepository } from './lessons.repository';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { Enrollment } from '../enrollments/entities/enrollment.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Lesson, Course]),
+        TypeOrmModule.forFeature([Lesson, Course, Enrollment]),
     ],
     controllers: [LessonsController],
     providers: [
