@@ -48,21 +48,21 @@ khi nhập courseId toàn bị lỗi "Validation failed (numeric string is expec
 
 - Hiên thị các khóa học đang ở trạng thái không phải approve
 
-### B-12: /api/learning-paths/{id} (Đăng)
+### B-12: /api/learning-paths/{id} GET (Đăng) 
 
 - Hiên thị các khóa học đang ở trạng thái không phải approve
-
+- NOTE: thật ra cái này không cần lắm vì learner -> click vào 1 learning-path -> show đc all courses (B-11)
 ## AM
 
-### B-1: /api/enrollments/enroll/{id} (Đăng) POST
+### B-1: /api/enrollments/enroll/{id} (Thảo) POST
 
 - Course đang ở status không phải approve mà vẫn enroll đc
 - Cấm AM CP Admin enroll course
-### B-2: /api/learning-path/{id}/courses (Đăng)
+### B-2: /api/learning-path/{id}/courses (Đăng) POST -- DONE
 
 - course đang không phải APPROVE nhưng vẫn thêm vào đc learning path
 
-### B-3: /api/learning-paths/{id}/courses (Đăng)
+### B-3: /api/learning-paths/{id}/courses (Đăng) POST -- DONE
 
 - Khi thêm course vào learning path thì phải check xem position đó có course hay chưa
 
@@ -70,7 +70,7 @@ khi nhập courseId toàn bị lỗi "Validation failed (numeric string is expec
 
 ## CP
 
-### B-1: /api/enrollments/enroll/{id} (Đăng) POST
+### B-1: /api/enrollments/enroll/{id} (Thảo) POST
 
 - Course đang ở status không phải approve mà vẫn enroll đc
 

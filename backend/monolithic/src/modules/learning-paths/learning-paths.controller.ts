@@ -111,6 +111,7 @@ export class LearningPathsController {
     return this.learningPathsService.getAll();
   }
 
+  // Get learning path detail by ID
   @Public()
   @Get(':id')
   @ApiOperation({
@@ -148,6 +149,7 @@ export class LearningPathsController {
     return this.learningPathsService.getCoursesInLearningPath(learningPathId);
   }
 
+  // update learning path
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER)
   @Patch(':id')
@@ -170,6 +172,7 @@ export class LearningPathsController {
     return this.learningPathsService.updateLearningPath(req.user, learningPathId, dto);
   }
 
+  // update course position in a learning path
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER)
   @Patch(':id/courses/:courseId/position')

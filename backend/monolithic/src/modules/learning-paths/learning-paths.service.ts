@@ -14,6 +14,7 @@ import { CoursesRepository } from '../courses/courses.repository';
 import { UpdateLearningPathDto } from './dto/update-learning-path.dto';
 import { UpdateCoursePositionDto } from './dto/update-course-position.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { CourseStatus } from 'src/common/enums/course.enum';
 
 @Injectable()
 export class LearningPathsService {
@@ -51,11 +52,7 @@ export class LearningPathsService {
       .replace(/(^-|-$)+/g, ''); // Remove leading and trailing hyphens
   }
 
-  public async addCourse(
-    learningPathId: number,
-    dto: AddCourseToLearningPathDto,
-    user: User,
-  ): Promise<LearningPathCourse> {
+  public async addCourse(learningPathId: number, dto: AddCourseToLearningPathDto, user: User,): Promise<LearningPathCourse> {
     const { courseId, position } = dto;
 
     const learningPath =
@@ -69,6 +66,10 @@ export class LearningPathsService {
 
     if (!course) {
       throw new NotFoundException('Course not found');
+    }
+
+    if (course?.status !== CourseStatus.APPROVED) {
+      throw new BadRequestException('Course is not approved');
     }
 
     // 3. Check duplicate
@@ -131,9 +132,13 @@ export class LearningPathsService {
       throw new NotFoundException('Learning path not found');
     }
 
-    return await this.learningPathsRepository.getCoursesByLearningPathId(
-      learningPathId,
-    );
+    const arrLeaningPathCourse: LearningPathCourse[] = await this.learningPathsRepository.getCoursesByLearningPathId(learningPathId);
+
+    if (arrLeaningPathCourse.length === 0) {
+      throw new NotFoundException('Learning path has no courses were approved');
+    }
+
+    return arrLeaningPathCourse;
   }
 
   public async getAll(): Promise<LearningPath[]> {
