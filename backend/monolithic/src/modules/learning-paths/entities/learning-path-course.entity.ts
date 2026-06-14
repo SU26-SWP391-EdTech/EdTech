@@ -5,6 +5,7 @@ import { User } from 'src/modules/users/entities/user.entity';
 
 @Entity('learning_path_courses')
 @Unique(['learningPathId', 'position'])
+@Unique(['learningPathId', 'courseId'])
 export class LearningPathCourse {
   @PrimaryColumn({ name: 'learning_path_id' })
   learningPathId!: number;
@@ -22,6 +23,7 @@ export class LearningPathCourse {
 
   @ManyToOne(() => Course, (course) => course.learningPathCourses, {
     nullable: false,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'course_id' })
   course!: Course;

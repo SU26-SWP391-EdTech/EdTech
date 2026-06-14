@@ -9,13 +9,20 @@ import { Roles } from 'src/common/decorators/roles/roles.decorator';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/common/decorators/public.decorator';
+import { Throttle } from '@nestjs/throttler';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
 @ApiTags('Courses')
 @Controller('courses')
 export class CoursesController {
     constructor(private readonly coursesService: CoursesService) { }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(RoleEnum.COURSE_PROVIDER)
     @Post()
+    @Roles(RoleEnum.COURSE_PROVIDER)
+    @Throttle({ default: { limit: 3, ttl: 60000 } })
     @UseInterceptors(FileInterceptor('thumbnailUrl'))
     @ApiOperation({ summary: 'Create a course' })
     @ApiConsumes('multipart/form-data')
@@ -24,11 +31,21 @@ export class CoursesController {
     @ApiResponse({ status: 400, description: 'Invalid request data' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     create(@Req() req, @Body() createCourseDto: CreateCourseDto, @UploadedFile() file?: Express.Multer.File) {
-        return this.coursesService.create(createCourseDto, req.user.id, file);
+        return this.coursesService.create(createCourseDto, req.user.userId, file);
+    }
+
+    @Roles(RoleEnum.ACADEMIC_MANAGER, RoleEnum.COURSE_PROVIDER, RoleEnum.ADMIN)
+    @Get()
+    @ApiOperation({ summary: 'Get all courses' })
+    @ApiResponse({ status: 200, description: 'All Courses returned successfully' })
+    async findAllCourse(){
+        return this.coursesService.findAll();
     }
 
     // Endpoint: GET /courses (Ví dụ: GET /courses?search=javascript&page=1&limit=5)
-    @Get()
+
+    @Public()
+    @Get('search')
     @ApiOperation({ summary: 'Search courses' })
     @ApiResponse({ status: 200, description: 'Courses returned successfully' })
     async search(@Query() query: SearchCourseDto) {
@@ -36,6 +53,7 @@ export class CoursesController {
     }
 
     // Endpoint: GET /courses/:id
+    @Public()
     @Get(':id')
     @ApiOperation({ summary: 'Get course detail' })
     @ApiResponse({ status: 200, description: 'Course returned successfully' })
@@ -44,24 +62,32 @@ export class CoursesController {
         return this.coursesService.findOne(id);
     }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Patch(':id')
+    @Roles(RoleEnum.COURSE_PROVIDER, RoleEnum.ACADEMIC_MANAGER)
+    @UseInterceptors(FileInterceptor('thumbnailUrl'))
     @ApiOperation({ summary: 'Update a course' })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({ type: UpdateCourseDto })
     @ApiResponse({ status: 200, description: 'Course updated successfully' })
     @ApiResponse({ status: 400, description: 'Invalid request data' })
     @ApiResponse({ status: 404, description: 'Course not found' })
     update(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateCourseDto: UpdateCourseDto,
+        @Req() req,
+        @UploadedFile() file?: Express.Multer.File,
     ) {
-        return this.coursesService.update(id, updateCourseDto);
+        return this.coursesService.update(id, updateCourseDto, req.user.userId, file);
     }
 
     @Delete(':id')
+    @Roles(RoleEnum.COURSE_PROVIDER, RoleEnum.ACADEMIC_MANAGER)
     @ApiOperation({ summary: 'Delete a course' })
     @ApiResponse({ status: 200, description: 'Course deleted successfully' })
     @ApiResponse({ status: 404, description: 'Course not found' })
-    remove(@Param('id', ParseIntPipe) id: number) {
-        return this.coursesService.remove(id);
+    remove(@Param('id', ParseIntPipe) id: number, @CurrentUser('userId') userId: number) {
+        return this.coursesService.remove(id, userId);
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)

@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
   OnApplicationBootstrap,
-  Logger
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -22,7 +22,7 @@ import { UpdateAcademicUserInfoDto } from './dto/update-academic-user-info.dto';
 import { RoleEnum } from 'src/common/enums/role.enum';
 
 @Injectable()
-export class UsersService implements OnApplicationBootstrap{
+export class UsersService implements OnApplicationBootstrap {
   constructor(
     @InjectRepository(User)
     private userRepo: Repository<User>,
@@ -31,7 +31,7 @@ export class UsersService implements OnApplicationBootstrap{
     @InjectRepository(UserProfile)
     private userProfileRepo: Repository<UserProfile>,
     private cloudinaryService: CloudinaryService,
-  ) { }
+  ) {}
 
   private readonly logger = new Logger(UsersService.name);
 
@@ -63,7 +63,9 @@ export class UsersService implements OnApplicationBootstrap{
 
     let avatar = dto.avatar_url;
     if (dto.avatar_url && dto.avatar_url.startsWith('data:image/')) {
-      const uploaded = await this.cloudinaryService.uploadBase64(dto.avatar_url);
+      const uploaded = await this.cloudinaryService.uploadBase64(
+        dto.avatar_url,
+      );
       avatar = uploaded.secure_url;
     }
 
@@ -73,7 +75,8 @@ export class UsersService implements OnApplicationBootstrap{
       fullName: dto.fullName,
       avatar: avatar,
       role: role,
-      isEmailVerified: dto.isEmailVerified !== undefined ? dto.isEmailVerified : false,
+      isEmailVerified:
+        dto.isEmailVerified !== undefined ? dto.isEmailVerified : false,
     });
     return await this.userRepo.save(newUser);
   }
@@ -110,7 +113,9 @@ export class UsersService implements OnApplicationBootstrap{
     }
     if (dto.avatar_url) {
       if (dto.avatar_url.startsWith('data:image/')) {
-        const uploaded = await this.cloudinaryService.uploadBase64(dto.avatar_url);
+        const uploaded = await this.cloudinaryService.uploadBase64(
+          dto.avatar_url,
+        );
         user.avatar = uploaded.secure_url;
       } else {
         user.avatar = dto.avatar_url;
@@ -126,11 +131,11 @@ export class UsersService implements OnApplicationBootstrap{
   }
 
   async changePassword(id: number, dto: ChangePasswordDto) {
-    const user = await this.userRepo.findOne({
-      where: {
-        userId: id,
-      },
-    });
+    const user = await this.userRepo
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.userId = :id', { id })
+      .getOne();
 
     if (!user) throw new NotFoundException('User not exist');
 
@@ -187,7 +192,7 @@ export class UsersService implements OnApplicationBootstrap{
     }
 
     if (file) {
-      const uploaded = await this.cloudinaryService.uploadFile(file);
+      const uploaded = await this.cloudinaryService.uploadImage(file);
       academicUser.avatar = uploaded.secure_url;
     } else if (dto.avatarUrl) {
       academicUser.avatar = dto.avatarUrl;
@@ -214,7 +219,10 @@ export class UsersService implements OnApplicationBootstrap{
       academicUser.userProfile = await this.userProfileRepo.save(profile);
     }
 
-    return await this.userRepo.save(academicUser);
+    return this.userRepo.findOne({
+      where: { userId: id },
+      relations: ['userProfile'],
+    });
   }
 
   async viewAcademicUserProfile(id: number, dto: GetAcademicUserProfileDto) {
@@ -241,10 +249,10 @@ export class UsersService implements OnApplicationBootstrap{
     await this.createDefaultAdmin();
   }
 
-  private async createDefaultAdmin(){
+  private async createDefaultAdmin() {
     const userCount = await this.userRepo.count();
 
-    if(userCount > 0){
+    if (userCount > 0) {
       this.logger.log('Users already exist, skip admin seeding');
       return;
     }
@@ -252,7 +260,7 @@ export class UsersService implements OnApplicationBootstrap{
     const adminRole = await this.roleRepo.findOne({
       where: { roleName: RoleEnum.ADMIN },
     });
-    
+
     if (!adminRole) {
       throw new Error('ADMIN role not found');
     }

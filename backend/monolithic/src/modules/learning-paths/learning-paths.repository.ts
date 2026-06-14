@@ -6,6 +6,7 @@ import { CreateLearningPathDto } from './dto/create-learning-path.dto';
 import { User } from 'src/modules/users/entities/user.entity';
 import { LearningPathCourse } from './entities/learning-path-course.entity';
 import { UpdateLearningPathDto } from './dto/update-learning-path.dto';
+import { CourseStatus } from 'src/common/enums/course.enum';
 
 @Injectable()
 export class LearningPathsRepository {
@@ -16,7 +17,7 @@ export class LearningPathsRepository {
     @InjectRepository(LearningPathCourse)
     private readonly learningPathCourseRepo: Repository<LearningPathCourse>,
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   async createLearningPath(
     createLearningPathDto: CreateLearningPathDto,
@@ -35,7 +36,13 @@ export class LearningPathsRepository {
   public async getLearningPathById(id: number): Promise<LearningPath | null> {
     return this.learningPathRepo.findOne({
       where: { learningPathId: id },
-      // relations: ['learningPathCourses'],
+      relations: ['learningPathCourses', 'learningPathCourses.course'],
+    });
+  }
+
+  public async getAll(): Promise<LearningPath[]> {
+    return this.learningPathRepo.find({
+      relations: ['learningPathCourses', 'learningPathCourses.course'],
     });
   }
 
@@ -78,7 +85,12 @@ export class LearningPathsRepository {
     learningPathId: number,
   ): Promise<LearningPathCourse[]> {
     return await this.learningPathCourseRepo.find({
-      where: { learningPathId },
+      where: {
+        learningPathId,
+        course: {
+          status: CourseStatus.APPROVED,
+        }
+      },
       relations: ['course'],
       order: { position: 'ASC' },
     });

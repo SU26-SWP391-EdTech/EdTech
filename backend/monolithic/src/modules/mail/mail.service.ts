@@ -6,8 +6,7 @@ export class MailService {
   constructor(private readonly mailerService: MailerService) {}
 
   async sendVerificationEmail(email: string, token: string) {
-    //Hien tai chua co frontend nen test vao api cua backend luon sau nay da co frontend roi thi moi doi lai url
-    const verifyLink = `http://localhost:${process.env.PORT}/verify-email?token=${token}`; 
+    const verifyLink = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
 
     await this.mailerService.sendMail({
       to: email,

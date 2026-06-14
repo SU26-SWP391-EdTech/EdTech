@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronDown, LogOut, UserCircle, Settings, Plus, BarChart2 } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ChevronDown, LogOut, UserCircle, Settings, BarChart2 } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
-import { SearchBar } from '../shared/SearchBar';
 import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { PROVIDER_NAV } from '../config/nav-config';
@@ -11,10 +10,22 @@ import { useAuthStore } from '../../../stores/auth.stores';
 
 export function ProviderHeader() {
     const navigate = useNavigate();
+    const location = useLocation();
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
-    const [active, setActive] = useState('dashboard');
     const [open, setOpen] = useState(false);
+
+    // Determine active item based on current URL path
+    const getActiveTab = () => {
+        const path = location.pathname;
+        if (path === '/provider') return 'dashboard';
+        if (path === '/provider/explore') return 'explore';
+        if (path === '/provider/courses') return 'courses';
+        if (path === '/provider/students') return 'students';
+        return '';
+    };
+
+    const active = getActiveTab();
 
     const ACC = '#0EA5E9'; // Provider Accent: Sky Blue
     const ACTIVE_BG = '#E0F2FE';
@@ -38,30 +49,24 @@ export function ProviderHeader() {
                             activeBg={ACTIVE_BG}
                             badge={(item as any).badge}
                             count={(item as any).count}
-                            onClick={() => setActive(item.id)}
+                            onClick={() => {
+                                if (item.id === 'courses') {
+                                    navigate('/provider/courses');
+                                } else if (item.id === 'dashboard') {
+                                    navigate('/provider');
+                                } else if (item.id === 'explore') {
+                                    navigate('/provider/explore');
+                                }
+                            }}
                         />
                     ))}
                 </nav>
 
                 <div className="flex-1" />
 
-                <SearchBar placeholder="Search courses, reviews..." accentColor={ACC} />
-
                 <NotifBell count={5} accentColor={ACC} />
 
                 <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
-
-                <button
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-sm flex-shrink-0 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                    style={{
-                        backgroundColor: ACC,
-                        fontWeight: 500,
-                        boxShadow: `0 2px 8px ${ACC}35`,
-                    }}
-                >
-                    <Plus className="w-4 h-4" />
-                    New Course
-                </button>
 
                 <div className="relative flex-shrink-0">
                     <button

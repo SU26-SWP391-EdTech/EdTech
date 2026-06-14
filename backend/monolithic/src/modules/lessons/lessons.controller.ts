@@ -22,6 +22,8 @@ import { Roles } from 'src/common/decorators/roles/roles.decorator';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Lessons')
 @Controller('lessons')
@@ -31,6 +33,7 @@ export class LessonsController {
 
 
     @Post(':id')
+    @Throttle({ default: { limit: 10, ttl: 60000 } })
     @Roles(RoleEnum.COURSE_PROVIDER)
     @UseInterceptors(FileInterceptor('videoUrl'))
     @ApiOperation({ summary: 'Create a lesson in a course' })
@@ -44,6 +47,7 @@ export class LessonsController {
         return await this.lessonsService.create(courseId, createLessonDto, file);
     }
 
+    @Public()
     @Get('course/:courseId')
     @ApiOperation({ summary: 'Get all lessons by course' })
     @ApiResponse({ status: 200, description: 'Lessons returned successfully' })
@@ -57,8 +61,8 @@ export class LessonsController {
     @ApiResponse({ status: 200, description: 'Lesson returned successfully' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 404, description: 'Lesson not found' })
-    async findOne(@Param('id', ParseIntPipe) id: number) {
-        return await this.lessonsService.findOne(id);
+    async findOne(@Param('id', ParseIntPipe) id: number, @Req() req) {
+        return await this.lessonsService.findLesson(id, req.user.userId);
     }
 
 

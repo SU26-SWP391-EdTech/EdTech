@@ -13,6 +13,7 @@ import {
   OneToOne,
   OneToMany,
   UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { UserProfile } from './user-profile.entity';
 import { LearningPath } from 'src/modules/learning-paths/entities/learning-path.entity';
@@ -49,7 +50,9 @@ export class User {
   })
   email!: string;
 
-  @Column({ name: 'password' })
+  @Column({ name: 'password',
+    select: false,
+   })
   password!: string;
 
   @Column({
@@ -93,6 +96,9 @@ export class User {
   
   @UpdateDateColumn({ name: 'updated_at' , nullable: true })
   updatedAt!: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  deletedAt!: Date;
 
   // user 1-1 userProfile
   @OneToOne(() => UserProfile, (userProfile) => userProfile.user, { nullable: false })

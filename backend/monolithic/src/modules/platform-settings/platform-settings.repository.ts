@@ -1,8 +1,9 @@
-import { Injectable } from "@nestjs/common";
+import { ConflictException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { PlatformSetting } from "./entities/platform-setting.entity";
 import { UpdatePlatformSettingDto } from "./dto/update-platform-setting.dto";
+import { CreatePlatformSettingDto } from "./dto/create-platform-setting.dto";
 
 @Injectable()
 export class PlatformSettingsRepository {
@@ -10,6 +11,24 @@ export class PlatformSettingsRepository {
         @InjectRepository(PlatformSetting)
         private readonly repository: Repository<PlatformSetting>
     ) {}
+
+    public async createSetting(data: CreatePlatformSettingDto): Promise<PlatformSetting>{
+        const existing = await this.getPlatformSetting();
+        if (existing) {
+            throw new ConflictException('Platform setting already exists');
+        }
+
+        const created = await this.repository.create({
+            platformName: data.platformName,
+            platformEmail: data.platformEmail,
+            logoUrl: data.logoUrl,
+            bannerUrl: data.bannerUrl,
+            description: data.description
+        })
+        await this.repository.save(created);
+
+        return created as PlatformSetting;
+    }
 
     public async getPlatformSetting(): Promise<PlatformSetting | null> {
         const settings = await this.repository.find({

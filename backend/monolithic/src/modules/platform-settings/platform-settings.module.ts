@@ -4,17 +4,20 @@ import { PlatformSetting } from './entities/platform-setting.entity';
 import { PlatformSettingsController } from './platform-settings.controller';
 import { PlatformSettingsService } from './platform-settings.service';
 import { PlatformSettingsRepository } from './platform-settings.repository';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Module({
     imports: [TypeOrmModule.forFeature([PlatformSetting])],
     controllers: [PlatformSettingsController],
     providers: [
         PlatformSettingsService, 
-        PlatformSettingsRepository
+        PlatformSettingsRepository,
+        CloudinaryService
     ],
     exports: [
         PlatformSettingsService, 
-        PlatformSettingsRepository
+        PlatformSettingsRepository,
+        CloudinaryService
     ],
 })
 export class PlatformSettingsModule { }

@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDown, LogOut, UserCircle, Settings } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
-import { SearchBar } from '../shared/SearchBar';
 import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { ADMIN_NAV } from '../config/nav-config';
@@ -22,9 +21,11 @@ export function AdminHeader() {
 
     // Determine active item based on current URL path
     const getActiveTab = () => {
-        if (location.pathname.includes('/usermanagement')) return 'users';
-        if (location.pathname.includes('/analytics')) return 'analytics';
-        return 'dashboard';
+        const path = location.pathname;
+        if (path === '/admin') return 'dashboard';
+        if (path === '/admin/usermanagement') return 'users';
+        if (path === '/admin/analytics') return 'analytics';
+        return '';
     };
 
     const active = getActiveTab();
@@ -63,8 +64,6 @@ export function AdminHeader() {
                 </nav>
 
                 <div className="flex-1" />
-
-                <SearchBar placeholder="Search admin panels..." accentColor={ACC} />
 
                 <NotifBell count={8} accentColor={ACC} />
 
@@ -106,7 +105,7 @@ export function AdminHeader() {
 
                                 {[
                                     { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/admin/adminprofile') },
-                                    { icon: <Settings className="w-4 h-4" />, label: 'System Settings' },
+                                    { icon: <Settings className="w-4 h-4" />, label: 'System Settings', onClick: () => navigate('/admin/settings') },
                                 ].map((item) => (
                                     <button
                                         key={item.label}
@@ -122,7 +121,7 @@ export function AdminHeader() {
                                 ))}
 
                                 <div className="border-t border-[#F3F4F6] mt-1">
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             logout();
                                             navigate('/login');

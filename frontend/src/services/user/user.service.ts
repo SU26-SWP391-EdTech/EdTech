@@ -1,4 +1,4 @@
-import api from '../lib/axios';
+import api from '../../lib/axios';
 
 export interface UserResponse {
   userId: number;
@@ -81,28 +81,9 @@ export async function editAcademicProfile(id: number, formData: FormData) {
   return response.data;
 }
 
-export interface LearnerProfileResponse {
-  fullName: string;
-  email: string;
-  avatarUrl: string | null;
-  learningGoal?: string;
-  level?: string;
-  bio?: string;
-  createdAt: string;
-}
-
-// Lấy hồ sơ học viên (Learner Profile)
-export async function getLearnerProfile(id: number): Promise<LearnerProfileResponse> {
-  const response = await api.get(`/learners/${id}`);
+// Cập nhật thông tin học thuật cơ bản (dạng JSON)
+export async function updateAcademicProfile(id: number, data: { expertise?: string; experienceYears?: number }) {
+  const response = await api.patch(`/user/update-academic-user-profile/${id}`, data);
   return response.data;
 }
 
-// Chỉnh sửa hồ sơ học viên (Hỗ trợ upload ảnh/file dạng FormData)
-export async function editLearnerProfile(id: number, formData: FormData) {
-  const response = await api.patch(`/learners/edit-profile/${id}`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  return response.data;
-}

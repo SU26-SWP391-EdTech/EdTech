@@ -22,14 +22,35 @@ export class CloudinaryService {
     });
   }
 
-  async uploadFile(
+  async uploadImage(
     file: Express.Multer.File,
   ): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
           {
-            folder: 'avatars',
+            folder: 'images',
+            resource_type: 'image'
+          },
+          (error, result) => {
+            if (error) return reject(error);
+  
+            resolve(result as UploadApiResponse);
+          },
+        )
+        .end(file.buffer);
+    });
+  }
+
+  async uploadVideo(
+    file: Express.Multer.File,
+  ): Promise<UploadApiResponse> {
+    return new Promise((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          {
+            folder: 'videos',
+            resource_type: 'video'
           },
           (error, result) => {
             if (error) return reject(error);
@@ -49,6 +70,7 @@ export class CloudinaryService {
         base64Str,
         {
           folder: 'avatars',
+          resource_type: 'image'
         },
         (error, result) => {
           if (error) return reject(error);

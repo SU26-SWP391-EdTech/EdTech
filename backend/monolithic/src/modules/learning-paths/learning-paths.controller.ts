@@ -9,6 +9,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AddCourseToLearningPathDto } from './dto/add-course-to-learning-path.dto';
 import { UpdateLearningPathDto } from './dto/update-learning-path.dto';
 import { UpdateCoursePositionDto } from './dto/update-course-position.dto';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Learning paths')
 @Controller('learning-paths')
@@ -97,8 +98,39 @@ export class LearningPathsController {
     return this.learningPathsService.removeCourse(learningPathId, courseId);
   }
 
+  @Public()
+  @Get()
+  @ApiOperation({
+    summary: 'Get all learning paths',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all learning paths',
+  })
+  async getAll() {
+    return this.learningPathsService.getAll();
+  }
+
+  // Get learning path detail by ID
+  @Public()
+  @Get(':id')
+  @ApiOperation({
+    summary: 'Get learning path detail by ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Learning path details',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Learning path not found',
+  })
+  async getById(@Param('id', ParseIntPipe) id: number) {
+    return this.learningPathsService.getLearningPathById(id);
+  }
+
   // Get courses in a learning path
-  @UseGuards(JwtAuthGuard)
+  @Public()
   @Get(':id/courses')
   @ApiOperation({
     summary: 'Get courses in a learning path',
@@ -117,6 +149,7 @@ export class LearningPathsController {
     return this.learningPathsService.getCoursesInLearningPath(learningPathId);
   }
 
+  // update learning path
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER)
   @Patch(':id')
@@ -139,6 +172,7 @@ export class LearningPathsController {
     return this.learningPathsService.updateLearningPath(req.user, learningPathId, dto);
   }
 
+  // update course position in a learning path
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER)
   @Patch(':id/courses/:courseId/position')

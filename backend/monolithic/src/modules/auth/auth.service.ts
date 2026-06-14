@@ -19,7 +19,9 @@ import { LoginDto } from './dto/login.dto';
 import { BaseRegisterDto } from './dto/base-register.dto';
 import { MailService } from '../mail/mail.service';
 import { JwtService } from '@nestjs/jwt';
-import { VerifyEmailDto } from '../mail/dto/verifyEmail.dto';
+import { RoleEnum } from 'src/common/enums/role.enum';
+import { PlatformSettingsService } from '../platform-settings/platform-settings.service';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -34,6 +36,7 @@ export class AuthService {
 
     private mailService: MailService,
     private jwtService: JwtService,
+    private platformSettingsService: PlatformSettingsService,
   ) { }
 
   //validate fields
@@ -87,10 +90,12 @@ export class AuthService {
   async login(loginDto: LoginDto, res: Response) {
     const { email, password } = loginDto;
 
-    const user = await this.userRepository.findOne({
-      where: { email },
-      relations: ['role'],
-    });
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.email = :email', { email })
+      .leftJoinAndSelect('user.role', 'role')
+      .getOne();
 
     if (!user) {
       throw new UnauthorizedException('Email or password is not true');
@@ -117,11 +122,18 @@ export class AuthService {
     // Tạo token và set cookie
     const token = setTokenCookie(res, userData);
 
+    let requiresPlatformSetup = false;
+    if (user.role.roleName === RoleEnum.ADMIN) {
+      const configured = await this.platformSettingsService.isConfigured();
+      requiresPlatformSetup = !configured;
+    }
+
     return {
       success: true,
       message: 'Login succesfully',
       token: token,
       user: userData,
+      requiresPlatformSetup,
     };
   }
 
@@ -142,6 +154,10 @@ export class AuthService {
       throw new NotFoundException("Role doesn't exist");
     }
 
+    if(role.roleName==RoleEnum.ADMIN||role.roleName==RoleEnum.ACADEMIC_MANAGER){
+      throw new BadRequestException('You do not have permission to set admin and academic manager role');
+    }
+
     if (password.length < 8) throw new BadRequestException("Password length must more than 8 characters");
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -159,6 +175,12 @@ export class AuthService {
         isEmailVerified: false,
       });
 
+      const emailVerifyToken = randomBytes(32).toString('hex');
+      newUser.emailVerificationToken = emailVerifyToken;
+      newUser.emailVerificationExpiresAt = new Date(
+        Date.now() + 24 * 60 * 60 * 1000,
+      );
+
       const savedUser = await queryRunner.manager.save(newUser);
 
       const userData = {
@@ -170,18 +192,6 @@ export class AuthService {
         avatarUrl: savedUser.avatar,
         isEmailVerified: false,
       };
-
-      const emailVerifyToken = this.jwtService.sign(
-        {
-          sub: savedUser.userId,
-          email: savedUser.email,
-          type: 'email-verification',
-        },
-        {
-          secret: process.env.JWT_SECRET,
-          expiresIn: '15m',
-        },
-      );
 
       await this.mailService.sendVerificationEmail(
         savedUser.email,
@@ -214,19 +224,9 @@ export class AuthService {
 
   async verifyEmail(token: string) {
 
-    const payload = this.jwtService.verify(token,
-      {
-        secret: process.env.JWT_SECRET
-      },
-    );
-
-    if (payload.type !== 'email-verification') {
-      throw new UnauthorizedException();
-    }
-
     const user = await this.userRepository.findOne({
       where: {
-        userId: payload.sub,
+        emailVerificationToken: token,
       }
     });
 
@@ -234,7 +234,16 @@ export class AuthService {
       throw new NotFoundException();
     }
 
+    if (
+      user.emailVerificationExpiresAt &&
+      user.emailVerificationExpiresAt < new Date()
+    ) {
+      throw new BadRequestException('Token expired');
+    }
+
     user.isEmailVerified = true;
+    user.emailVerificationToken = null as any;
+    user.emailVerificationExpiresAt = null as any;
 
     await this.userRepository.save(user);
 

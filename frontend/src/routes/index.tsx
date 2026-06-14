@@ -11,10 +11,24 @@ import { VerifyEmail } from '../pages/auth/VerifyEmail';
 
 // Admin pages
 import { UserManagement } from '../pages/admin/UserManagement';
+import { PlatformSetup } from '../pages/admin/PlatformSetup';
+
+// Learner page
+import { LearnerProfile } from '../pages/Users/LearnerProfile';
+import { MyLearning } from '../pages/learner/MyLearning';
+import { LearnerDashboard } from '../pages/learner/LearnerDashboard';
+import { ExplorePage } from '../pages/Users/ExplorePage';
+import { LearningPathDetail } from '../pages/LearningPath/LearningPathDetail';
+import { ProviderProfile } from '../pages/Users/ProviderProfile';
 
 // User Profile page
-import { LearnerProfile } from '../pages/Users/LearnerProfile';
 import { UserProfile } from '../pages/Users/UserProfile';
+
+// Course pages
+import { CourseManagement } from '../pages/Course/CourseManagement';
+import { CourseDetail } from '../pages/Course/CourseDetail';
+import { CreateCoursePage } from '../pages/Course/createCourse';
+import { LearningPathManagement } from '../pages/LearningPath/LearningPathManagement';
 
 // Role navigation pages 
 import { GuestLayout } from '../layouts/Dashboard/GuestLayout';
@@ -23,6 +37,33 @@ import { DashboardLayout } from '../layouts/Dashboard/Dashboard';
 // Role Guards
 import { GuestGuard, LearnerGuard, ProviderGuard, AdminGuard, AcademicGuard } from '../components/auth/RoleGuards';
 import { AdminProfile } from '../pages/admin/AdminProfile';
+import { PlatformSettings } from '../pages/admin/PlatformSettings';
+
+
+import { useAuthStore } from '../stores/auth.stores';
+import { LessonPage } from '../pages/Lesson/LessonPage';
+import { CreateLessonPage } from '../pages/Lesson/CreateLesson';
+
+function HomeRedirect() {
+    const user = useAuthStore((state) => state.user);
+
+    if (!user) {
+        return <LandingPage />;
+    }
+
+    switch (user.roleName?.toLowerCase()) {
+        case 'admin':
+            return <Navigate to="/admin" replace />;
+        case 'learner':
+            return <Navigate to="/learner" replace />;
+        case 'course provider':
+            return <Navigate to="/provider" replace />;
+        case 'academic manager':
+            return <Navigate to="/academic" replace />;
+        default:
+            return <LandingPage />;
+    }
+}
 
 export const router = createBrowserRouter([
     // ==========================================
@@ -34,11 +75,23 @@ export const router = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <LandingPage />
+                element: <HomeRedirect />
             },
             {
                 path: "explore",
-                element: <div>Trang tìm kiếm khóa học công khai</div>
+                element: <ExplorePage />
+            },
+            {
+                path: "courses/detail",
+                element: <CourseDetail />
+            },
+            {
+                path: "learning-path/:id",
+                element: <LearningPathDetail />
+            },
+            {
+                path: "providers/:id",
+                element: <ProviderProfile />
             }
         ]
     },
@@ -81,11 +134,35 @@ export const router = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <h1>Home learner</h1>
+                element: <LearnerDashboard />
             },
             {
                 path: 'learnerprofile',
                 element: <LearnerProfile />
+            },
+            {
+                path: 'my-learning',
+                element: <MyLearning />
+            },
+            {
+                path: 'explore',
+                element: <ExplorePage />
+            },
+            {
+                path: 'courses/detail',
+                element: <CourseDetail />
+            },
+            {
+                path: 'learning-path/:id',
+                element: <LearningPathDetail />
+            },
+            {
+                path: 'providers/:id',
+                element: <ProviderProfile />
+            },
+            {
+                path: 'lesson',
+                element: <LessonPage />
             }
         ]
     },
@@ -105,6 +182,38 @@ export const router = createBrowserRouter([
             {
                 path: 'userprofile',
                 element: <UserProfile />
+            },
+            {
+                path: 'courses',
+                element: <CourseManagement />
+            },
+            {
+                path: 'courses/create',
+                element: <CreateCoursePage />
+            },
+            {
+                path: 'courses/detail',
+                element: <CourseDetail />
+            },
+            {
+                path: 'courses/lessons',
+                element: <CourseManagement />
+            },
+            {
+                path: 'lessons/create',
+                element: <CreateLessonPage />
+            },
+            {
+                path: 'explore',
+                element: <ExplorePage />
+            },
+            {
+                path: 'learning-path/:id',
+                element: <LearningPathDetail />
+            },
+            {
+                path: 'providers/:id',
+                element: <ProviderProfile />
             }
         ]
     },
@@ -132,6 +241,18 @@ export const router = createBrowserRouter([
             {
                 path: 'adminprofile',
                 element: <AdminProfile />
+            },
+            {
+                path: 'settings',
+                element: <PlatformSettings />
+            },
+            {
+                path: 'providers/:id',
+                element: <ProviderProfile />
+            },
+            {
+                path: 'setup',
+                element: <PlatformSetup />,
             }
         ]
     },
@@ -151,6 +272,34 @@ export const router = createBrowserRouter([
             {
                 path: 'userprofile',
                 element: <UserProfile />
+            },
+            {
+                path: 'courses',
+                element: <CourseManagement />
+            },
+            {
+                path: 'pending-courses',
+                element: <CourseManagement />
+            },
+            {
+                path: 'courses/detail',
+                element: <CourseDetail />
+            },
+            {
+                path: 'courses/lessons',
+                element: <CourseManagement />
+            },
+            {
+                path: 'learning-path/:id',
+                element: <LearningPathDetail />
+            },
+            {
+                path: 'learning-paths',
+                element: <LearningPathManagement />
+            },
+            {
+                path: 'providers/:id',
+                element: <ProviderProfile />
             }
         ]
     },

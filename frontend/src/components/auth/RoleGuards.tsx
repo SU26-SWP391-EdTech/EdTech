@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/auth.stores';
+import { ScrollToTop } from '../ScrollToTop';
 
 interface GuardProps {
   children?: ReactNode;
@@ -26,28 +27,25 @@ function LoadingSpinner() {
  * Nếu đã đăng nhập, tự động chuyển hướng đến trang dashboard tương ứng.
  */
 export function GuestGuard({ children }: GuardProps) {
-  const { isAuthenticated, user, isLoading } = useAuthStore();
-
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
+  const { isAuthenticated, user } = useAuthStore();
 
   if (isAuthenticated && user) {
     return <Navigate to={getDefaultRoute(user.roleName)} replace />;
   }
 
-  return children ? <>{children}</> : <Outlet />;
+  return (
+    <>
+      <ScrollToTop />
+      {children ? <>{children}</> : <Outlet />}
+    </>
+  );
 }
 
 /**
  * LearnerGuard: Chỉ cho phép người dùng có vai trò 'learner' (Học viên).
  */
 export function LearnerGuard({ children }: GuardProps) {
-  const { isAuthenticated, user, isLoading } = useAuthStore();
-
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
+  const { isAuthenticated, user } = useAuthStore();
 
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
@@ -64,11 +62,7 @@ export function LearnerGuard({ children }: GuardProps) {
  * ProviderGuard: Chỉ cho phép người dùng có vai trò 'course provider' (Giảng viên/Nhà cung cấp).
  */
 export function ProviderGuard({ children }: GuardProps) {
-  const { isAuthenticated, user, isLoading } = useAuthStore();
-
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
+  const { isAuthenticated, user } = useAuthStore();
 
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
@@ -85,11 +79,8 @@ export function ProviderGuard({ children }: GuardProps) {
  * AdminGuard: Chỉ cho phép người dùng có vai trò 'admin' (Quản trị viên).
  */
 export function AdminGuard({ children }: GuardProps) {
-  const { isAuthenticated, user, isLoading } = useAuthStore();
-
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
+  const { isAuthenticated, user, requiresPlatformSetup } = useAuthStore();
+  const location = useLocation();
 
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
@@ -99,6 +90,10 @@ export function AdminGuard({ children }: GuardProps) {
     return <Navigate to={getDefaultRoute(user.roleName)} replace />;
   }
 
+  if (requiresPlatformSetup && !location.pathname.endsWith('/admin/setup')) {
+    return <Navigate to="/admin/setup" replace />;
+  }
+
   return children ? <>{children}</> : <Outlet />;
 }
 
@@ -106,11 +101,7 @@ export function AdminGuard({ children }: GuardProps) {
  * AcademicGuard: Chỉ cho phép người dùng có vai trò 'academic manager' (Quản lý đào tạo).
  */
 export function AcademicGuard({ children }: GuardProps) {
-  const { isAuthenticated, user, isLoading } = useAuthStore();
-
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
+  const { isAuthenticated, user } = useAuthStore();
 
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;

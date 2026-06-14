@@ -29,8 +29,13 @@ export function SignIn() {
     setError('');
 
     try {
-      const user = await login({ email: trimmedEmail, password: trimmedPassword });
-      if (user.roleName === 'admin') {
+      const { user, requiresPlatformSetup } = await login({
+        email: trimmedEmail,
+        password: trimmedPassword,
+      });
+      if (user.roleName === 'admin' && requiresPlatformSetup) {
+        navigate('/admin/setup');
+      } else if (user.roleName === 'admin') {
         navigate('/admin');
       } else if (user.roleName === 'course provider') {
         navigate('/provider');

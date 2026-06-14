@@ -13,22 +13,27 @@ import { LearningPathCourse } from './entities/learning-path-course.entity';
 import { CoursesRepository } from '../courses/courses.repository';
 import { UpdateLearningPathDto } from './dto/update-learning-path.dto';
 import { UpdateCoursePositionDto } from './dto/update-course-position.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { CourseStatus } from 'src/common/enums/course.enum';
 
 @Injectable()
 export class LearningPathsService {
   constructor(
     private readonly learningPathsRepository: LearningPathsRepository,
     private readonly courseRepository: CoursesRepository,
+    private readonly cloudinaryService: CloudinaryService,
   ) { }
 
   async create(
     createLearningPathDto: CreateLearningPathDto,
     user: User,
   ): Promise<LearningPath> {
-    const slug = this.generateSlug(createLearningPathDto.title);
+    if (createLearningPathDto.bannerUrl && createLearningPathDto.bannerUrl.startsWith('data:image/')) {
+      const upload = await this.cloudinaryService.uploadBase64(createLearningPathDto.bannerUrl);
+      createLearningPathDto.bannerUrl = upload.secure_url;
+    }
 
-    // In a real application, you should check if the slug already exists and handle collisions
-    // e.g., append a random string or number to make it unique.
+    const slug = this.generateSlug(createLearningPathDto.title);
 
     return await this.learningPathsRepository.createLearningPath(
       createLearningPathDto,
@@ -47,11 +52,7 @@ export class LearningPathsService {
       .replace(/(^-|-$)+/g, ''); // Remove leading and trailing hyphens
   }
 
-  public async addCourse(
-    learningPathId: number,
-    dto: AddCourseToLearningPathDto,
-    user: User,
-  ): Promise<LearningPathCourse> {
+  public async addCourse(learningPathId: number, dto: AddCourseToLearningPathDto, user: User,): Promise<LearningPathCourse> {
     const { courseId, position } = dto;
 
     const learningPath =
@@ -65,6 +66,10 @@ export class LearningPathsService {
 
     if (!course) {
       throw new NotFoundException('Course not found');
+    }
+
+    if (course?.status !== CourseStatus.APPROVED) {
+      throw new BadRequestException('Course is not approved');
     }
 
     // 3. Check duplicate
@@ -127,9 +132,25 @@ export class LearningPathsService {
       throw new NotFoundException('Learning path not found');
     }
 
-    return await this.learningPathsRepository.getCoursesByLearningPathId(
-      learningPathId,
-    );
+    const arrLeaningPathCourse: LearningPathCourse[] = await this.learningPathsRepository.getCoursesByLearningPathId(learningPathId);
+
+    if (arrLeaningPathCourse.length === 0) {
+      throw new NotFoundException('Learning path has no courses were approved');
+    }
+
+    return arrLeaningPathCourse;
+  }
+
+  public async getAll(): Promise<LearningPath[]> {
+    return await this.learningPathsRepository.getAll();
+  }
+
+  public async getLearningPathById(id: number): Promise<LearningPath> {
+    const learningPath = await this.learningPathsRepository.getLearningPathById(id);
+    if (!learningPath) {
+      throw new NotFoundException('Learning path not found');
+    }
+    return learningPath;
   }
 
   public async updateLearningPath(user: User, learningPathId: number, dto: UpdateLearningPathDto): Promise<LearningPath> {
@@ -138,6 +159,12 @@ export class LearningPathsService {
     if (!learningPath) {
       throw new NotFoundException('Learning path not found');
     }
+
+    if (dto.bannerUrl && dto.bannerUrl.startsWith('data:image/')) {
+      const upload = await this.cloudinaryService.uploadBase64(dto.bannerUrl);
+      dto.bannerUrl = upload.secure_url;
+    }
+
     const updateLearningPath = await this.learningPathsRepository.updateLearningPath(learningPathId, dto, user);
     return updateLearningPath;
   }

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -11,15 +12,22 @@ import { CreateLessonDto } from './dto/create-lesson.dto';
 import { UpdateLessonDto } from './dto/update-lesson.dto';
 import { Lesson } from './entities/lesson.entity';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
+import { Enrollment } from '../enrollments/entities/enrollment.entity';
+import { EnrollmentsRepository } from '../enrollments/enrollments.repository';
 
 @Injectable()
 export class LessonsService {
   constructor(
     private readonly lessonsRepo: LessonsRepository,
 
+    @InjectRepository(Lesson)
+    private readonly lessonRepo: Repository<Lesson>,
     @InjectRepository(Course)
     private readonly courseRepo: Repository<Course>,
     private readonly cloudinaryService: CloudinaryService,
+    @InjectRepository(Enrollment)
+    private readonly enrollmentsRepo: Repository<Enrollment>,
   ) {}
 
   async create(
@@ -38,16 +46,14 @@ export class LessonsService {
       throw new NotFoundException(`Not found course with ID ${id}`);
     }
 
-    if (!file) {
-      throw new BadRequestException('Video is required');
+    if (file) {
+      const uploadedVideo = await this.cloudinaryService.uploadVideo(file);
+      lessonData.videoUrl = uploadedVideo.secure_url;
     }
-
-    const uploadedVideo = await this.cloudinaryService.uploadFile(file);
-    lessonData.videoUrl=uploadedVideo.secure_url;
 
     return await this.lessonsRepo.createLesson({
       ...lessonData,
-      course
+      course,
     });
   }
 
@@ -67,6 +73,48 @@ export class LessonsService {
       throw new NotFoundException(`Not found lesson with ID ${id}`);
     }
 
+    return lesson;
+  }
+  
+
+  async findLesson(
+    lessonId: number,
+    userId: number,
+  ): Promise<Lesson> {
+    
+    const lesson = await this.lessonRepo.findOne({
+      where: {
+        lessonId,
+      },
+      relations: {
+        course: true,
+      },
+    });
+  
+    if (!lesson) {
+      throw new NotFoundException(
+        `Lesson with ID ${lessonId} not found`,
+      );
+    }
+  
+    const enrollment = await this.enrollmentsRepo.findOne({
+      where: {
+        user: {
+          userId,
+        },
+        course: {
+          courseId: lesson.course.courseId,
+        },
+        status: EnrollmentStatus.ACTIVE,
+      },
+    });
+  
+    if (!enrollment) {
+      throw new ForbiddenException(
+        'You must enroll in this course before accessing lessons',
+      );
+    }
+  
     return lesson;
   }
 
@@ -92,7 +140,7 @@ export class LessonsService {
     }
 
     if (file) {
-      const uploadedVideo = await this.cloudinaryService.uploadFile(file);
+      const uploadedVideo = await this.cloudinaryService.uploadImage(file);
       dto.videoUrl = uploadedVideo.secure_url;
     }
 

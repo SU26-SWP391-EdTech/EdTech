@@ -75,4 +75,13 @@ export class SearchCourseDto {
     @IsOptional()
     @IsEnum(SortOrder)
     sortOrder?: SortOrder = SortOrder.DESC;
+
+    @ApiPropertyOptional({
+        example: 1,
+        description: 'ID người tạo khóa học (Provider)',
+    })
+    @IsOptional()
+    @Type(() => Number)
+    @IsInt()
+    userId?: number;
 }

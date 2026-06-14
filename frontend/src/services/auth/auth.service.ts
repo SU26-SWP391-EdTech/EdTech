@@ -10,9 +10,17 @@ export interface User {
     avatarUrl: string | null;
 }
 
-export async function login(credentials: { email: string; password: string }) {
-    const response = await api.post('/auth/login', credentials);
-    return response.data; // Trả về { success, message, token, user }
+export interface LoginResponse {
+    success: boolean;
+    message: string;
+    token: string;
+    user: User;
+    requiresPlatformSetup: boolean;
+}
+
+export async function login(credentials: { email: string; password: string }): Promise<LoginResponse> {
+    const response = await api.post<LoginResponse>('/auth/login', credentials);
+    return response.data;
 }
 
 export async function register(data: { fullName: string; email: string; password: string; roleName: string }) {
@@ -29,3 +37,9 @@ export async function logout() {
     const response = await api.post('/auth/logout');
     return response.data;
 }
+
+export async function getMe(): Promise<{ success: boolean; user: User }> {
+    const response = await api.get('/auth/me');
+    return response.data;
+}
+
