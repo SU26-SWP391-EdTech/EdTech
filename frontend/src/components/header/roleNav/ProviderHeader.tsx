@@ -73,9 +73,13 @@ export function ProviderHeader() {
                         onClick={() => setOpen(!open)}
                         className="flex items-center gap-2 p-1 pr-2.5 rounded-xl hover:bg-[#F8FAFC] transition-colors"
                     >
-                        <div className="w-8 h-8 rounded-lg bg-[#0EA5E9] flex items-center justify-center text-white text-xs font-bold">
-                            {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'P'}
-                        </div>
+                        {user?.avatarUrl ? (
+                            <img src={user.avatarUrl} alt={user.fullName} className="w-8 h-8 rounded-lg object-cover" />
+                        ) : (
+                            <div className="w-8 h-8 rounded-lg bg-[#0EA5E9] flex items-center justify-center text-white text-xs font-bold">
+                                {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'P'}
+                            </div>
+                        )}
 
                         <div className="hidden xl:block text-left">
                             <p className="text-xs text-[#111827] leading-none font-medium">

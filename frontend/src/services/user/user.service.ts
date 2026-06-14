@@ -7,6 +7,7 @@ export interface UserResponse {
   avatar: string | null;
   createdAt: string;
   isEmailVerified: boolean;
+  avatarUrl: string | null;
   role: {
     roleId: number;
     roleName: 'admin' | 'learner' | 'course provider' | 'academic manager';
