@@ -6,6 +6,8 @@ import type { JwtPayloadUser } from 'src/common/decorators/current-user.decorato
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
+import { Roles } from 'src/common/decorators/roles/roles.decorator';
+import { RoleEnum } from 'src/common/enums/role.enum';
 
 @ApiTags('Enrollments')
 @Controller('enrollments')
@@ -14,6 +16,7 @@ export class EnrollmentsController {
     constructor(private readonly enrollmentsService: EnrollmentsService) { }
     //enroll course
     @Post('enroll/:id')
+    @Roles(RoleEnum.LEARNER)
     @Throttle({ default: { limit: 3, ttl: 60000 } })
     @ApiOperation({ summary: 'Enroll current user in a course' })
     @ApiResponse({ status: 201, description: 'Enrollment created successfully' })
@@ -25,6 +28,7 @@ export class EnrollmentsController {
     }
     //get my enrollments
     @Get('myenrollments')
+    @Roles(RoleEnum.LEARNER)
     @ApiOperation({ summary: 'Get current user enrollments' })
     @ApiResponse({ status: 200, description: 'Enrollments returned successfully' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -33,6 +37,7 @@ export class EnrollmentsController {
     }
     //get enrollment detail
     @Get('course/:courseId')
+    @Roles(RoleEnum.LEARNER)
     @ApiOperation({ summary: 'Get enrollment detail by course' })
     @ApiResponse({ status: 200, description: 'Enrollment detail returned successfully' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
