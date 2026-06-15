@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, ArrowRight } from 'lucide-react';
-import type { LearningPath } from '../utils/learningPathHelpers';
+import type { LearningPath } from '../../../utils/learning-path/learningPathHelpers';
 
 interface RoadmapViewProps {
   path: LearningPath | undefined;

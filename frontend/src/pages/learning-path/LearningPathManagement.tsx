@@ -1,8 +1,8 @@
 import { Search, Eye, Edit2, Trash2, Plus, X, BookOpen, Clock, TrendingUp, Inbox, Target } from 'lucide-react';
-import { useLearningPath } from './hooks/useLearningPath';
-import { RoadmapView } from './components/RoadmapView';
-import { CreatePathModal } from './components/CreatePathModal';
-import { DeleteConfirmModal } from './components/DeleteConfirmModal';
+import { useLearningPath } from '../../hooks/learning-path/useLearningPath';
+import { RoadmapView } from '../../components/learning-path/management/RoadmapView';
+import { CreatePathModal } from '../../components/learning-path/management/CreatePathModal';
+import { DeleteConfirmModal } from '../../components/learning-path/management/DeleteConfirmModal';
 
 export function LearningPathManagement() {
   const {

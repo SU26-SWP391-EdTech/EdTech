@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Check, Play, ChevronUp, ChevronDown } from 'lucide-react';
-import type { Module } from './useLearningPathDetail';
+import type { Module } from '../../../hooks/learning-path/useLearningPathDetail';
 
 interface ModuleAccordionProps {
   module: Module;

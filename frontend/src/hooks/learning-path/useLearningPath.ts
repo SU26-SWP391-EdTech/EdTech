@@ -6,11 +6,11 @@ import {
   addCourseToLearningPath,
   removeCourseFromLearningPath,
   getCoursesInLearningPath
-} from '../../../services/learning-path/learning-path.service';
-import { searchCourses } from '../../../services/course/course.service';
-import type { Course } from '../../../services/course/course.service';
-import { mapBackendToFrontend } from '../utils/learningPathHelpers';
-import type { LearningPath } from '../utils/learningPathHelpers';
+} from '../../services/learning-path/learning-path.service';
+import { searchCourses } from '../../services/course/course.service';
+import type { Course } from '../../services/course/course.service';
+import { mapBackendToFrontend } from '../../utils/learning-path/learningPathHelpers';
+import type { LearningPath } from '../../utils/learning-path/learningPathHelpers';
 
 export function useLearningPath() {
   const [search, setSearch] = useState('');

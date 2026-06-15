@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Code, Layers, Database, Shield } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useAuthStore } from '../../stores/auth.stores';
+import { useAuthStore } from '../../stores/auth/auth.stores';
 import type { Course } from '../../services/course/course.service';
 import type { Enrollment } from '../../services/enrollment/enrollment.service';
 import { getMyEnrollments, enrollCourse } from '../../services/enrollment/enrollment.service';

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { X, Monitor, Image, BookOpen, ChevronDown, Target } from 'lucide-react';
 import type { Course } from '../../../services/course/course.service';
-import type { LearningPath } from '../utils/learningPathHelpers';
+import type { LearningPath } from '../../../utils/learning-path/learningPathHelpers';
 
 interface CreatePathModalProps {
   onClose: () => void;

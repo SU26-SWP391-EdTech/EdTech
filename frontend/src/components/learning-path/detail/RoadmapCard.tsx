@@ -1,6 +1,6 @@
 import React from 'react';
 import { Clock, PlayCircle, Play, ArrowRight, Lock, Check, Radio } from 'lucide-react';
-import type { CourseNode } from './useLearningPathDetail';
+import type { CourseNode } from '../../../hooks/learning-path/useLearningPathDetail';
 
 interface RoadmapCardProps {
   node: CourseNode;
