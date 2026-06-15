@@ -4,7 +4,7 @@ import {
     HowItWorksSection,
     TestimonialsSection,
     Footer,
-} from '../../components/LandingPage';
+} from '../../components/landing';
 
 export function LandingPage() {
     return (
