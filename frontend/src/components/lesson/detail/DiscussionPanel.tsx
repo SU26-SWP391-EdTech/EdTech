@@ -1,5 +1,5 @@
 import { ThumbsUp, MessageSquare } from 'lucide-react';
-import type { Question } from './types';
+import type { Question } from '../../../types/lesson/lesson.types';
 
 interface DiscussionPanelProps {
   questionText: string;

@@ -1,5 +1,5 @@
 import { CheckCircle2, Circle, Lock, PlayCircle } from 'lucide-react';
-import type { Lesson } from './types';
+import type { Lesson } from '../../../types/lesson/lesson.types';
 
 interface LessonStatusIconProps {
   status: Lesson['status'];

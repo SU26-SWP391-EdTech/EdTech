@@ -1,7 +1,7 @@
 import { ChevronDown } from 'lucide-react';
 import { LessonStatusIcon } from './LessonStatusIcon';
 import { ModuleProgress } from './ModuleProgress';
-import type { Lesson, Module } from './types';
+import type { Lesson, Module } from '../../../types/lesson/lesson.types';
 
 interface CurriculumSidebarProps {
   modules: Module[];

@@ -1,5 +1,5 @@
 import { Copy, Check, AlertCircle } from 'lucide-react';
-import type { Lesson } from './types';
+import type { Lesson } from '../../../types/lesson/lesson.types';
 
 interface LessonTabsProps {
   activeTab: 'content' | 'notes' | 'discussion';

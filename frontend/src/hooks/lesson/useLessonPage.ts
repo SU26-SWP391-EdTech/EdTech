@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import type { Lesson, MockEnrollment, Module, Note } from './types';
+import type { Lesson, MockEnrollment, Module, Note } from '../../types/lesson/lesson.types';
 import {
   getMockCode,
   getQuizQuestionsForCourse,
   getYoutubeEmbedUrl,
   SAVED_NOTES
-} from './lessonUtils';
-import { useAuthStore } from '../../stores/auth.stores';
+} from '../../utils/lesson/lessonUtils';
+import { useAuthStore } from '../../stores/auth/auth.stores';
 import { getCourseById } from '../../services/course/course.service';
 import { getLessonsByCourse } from '../../services/lesson/lesson.service';
 import { getMyEnrollments, updateEnrollmentProgress } from '../../services/enrollment/enrollment.service';

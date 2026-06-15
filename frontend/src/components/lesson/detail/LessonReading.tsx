@@ -1,6 +1,6 @@
 import { BookOpen, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
-import type { Lesson } from './types';
+import type { Lesson } from '../../../types/lesson/lesson.types';
 
 interface LessonReadingProps {
   activeLesson: Lesson;

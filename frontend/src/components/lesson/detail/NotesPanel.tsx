@@ -1,5 +1,5 @@
 import { Clock, FileText, Trash2 } from 'lucide-react';
-import type { Note } from './types';
+import type { Note } from '../../../types/lesson/lesson.types';
 
 interface NotesPanelProps {
   notes: Note[];

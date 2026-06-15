@@ -1,6 +1,6 @@
 import { ChevronLeft, CheckCircle2, PlayCircle, BookOpen, GraduationCap, Clock, Bookmark } from 'lucide-react';
 import toast from 'react-hot-toast';
-import type { Lesson, Module } from './types';
+import type { Lesson, Module } from '../../../types/lesson/lesson.types';
 
 interface LessonHeaderProps {
   courseId: number;

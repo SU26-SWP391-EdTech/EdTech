@@ -1,4 +1,4 @@
-import type { Note, Question } from './types';
+import type { Note, Question } from '../../types/lesson/lesson.types';
 
 // ─── DOMAIN MOCK CODE GENERATORS ──────────────────────────────────────────────
 
