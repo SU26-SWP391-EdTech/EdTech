@@ -86,8 +86,8 @@ export class CoursesController {
     @ApiOperation({ summary: 'Delete a course' })
     @ApiResponse({ status: 200, description: 'Course deleted successfully' })
     @ApiResponse({ status: 404, description: 'Course not found' })
-    remove(@Param('id', ParseIntPipe) id: number, @CurrentUser('userId') userId: number) {
-        return this.coursesService.remove(id, userId);
+    remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
+        return this.coursesService.remove(id, req.user.userId);
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
