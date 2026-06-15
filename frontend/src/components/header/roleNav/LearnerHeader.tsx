@@ -6,8 +6,8 @@ import { Logo } from '../shared/Logo';
 import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { LEARNER_NAV } from '../config/nav-config';
-import { useAuthStore } from '../../../stores/auth.stores';
-import { getContinueLessonUrl } from '../../LessonPage/lessonUtils';
+import { useAuthStore } from '../../../stores/auth/auth.stores';
+import { getContinueLessonUrl } from '../../../utils/lesson/lessonUtils';
 
 export function LearnerHeader() {
     const navigate = useNavigate();

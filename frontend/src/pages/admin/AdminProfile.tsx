@@ -1,6 +1,6 @@
-import { EditProfileModal } from '../../components/AdminProfile/EditProfileModal';
-import { ProfileCard } from '../../components/AdminProfile/ProfileCard';
-import { useAdminProfile } from '../../components/AdminProfile/useAdminProfile';
+import { EditProfileModal } from '../../components/user/profile/admin/EditProfileModal';
+import { ProfileCard } from '../../components/user/profile/admin/ProfileCard';
+import { useAdminProfile } from '../../hooks/user/useAdminProfile';
 
 export function AdminProfile() {
     const { profile, loading, showEdit, setShowEdit, handleSave } = useAdminProfile();

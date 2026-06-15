@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { login as loginApi, register as registerApi, verifyEmail as verifyEmailApi, logout as logoutApi, getMe } from '../services/auth/auth.service';
-import type { User } from '../services/auth/auth.service';
+import { login as loginApi, register as registerApi, verifyEmail as verifyEmailApi, logout as logoutApi, getMe } from '../../services/auth/auth.service';
+import type { User } from '../../services/auth/auth.service';
 
 export type { User };
 

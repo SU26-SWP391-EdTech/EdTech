@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom';
-import { useLearnerDashboard } from '../../components/learner/LearnerDashboard/useLearnerDashboard';
-import DashboardStatCard from '../../components/learner/LearnerDashboard/DashboardStatCard';
-import DashboardHeader from '../../components/learner/LearnerDashboard/DashboardHeader';
-import ContinueLearningSection from '../../components/learner/LearnerDashboard/ContinueLearningSection';
-import LearningRoadmapSection from '../../components/learner/LearnerDashboard/LearningRoadmapSection';
-import { getContinueLessonUrl } from '../../components/LessonPage/lessonUtils';
+import { useLearnerDashboard } from '../../hooks/user/useLearnerDashboard';
+import DashboardStatCard from '../../components/user/dashboard/learner/DashboardStatCard';
+import DashboardHeader from '../../components/user/dashboard/learner/DashboardHeader';
+import ContinueLearningSection from '../../components/user/dashboard/learner/ContinueLearningSection';
+import LearningRoadmapSection from '../../components/user/dashboard/learner/LearningRoadmapSection';
+import { getContinueLessonUrl } from '../../utils/lesson/lessonUtils';
 
 export function LearnerDashboard() {
     const navigate = useNavigate();

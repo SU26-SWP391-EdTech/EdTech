@@ -6,7 +6,7 @@ import { Logo } from '../shared/Logo';
 import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { ACADEMIC_MANAGER_NAV } from '../config/nav-config';
-import { useAuthStore } from '../../../stores/auth.stores';
+import { useAuthStore } from '../../../stores/auth/auth.stores';
 
 export function AcademicManagerHeader() {
     const navigate = useNavigate();

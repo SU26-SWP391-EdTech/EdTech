@@ -1,13 +1,13 @@
 import { Sparkles } from 'lucide-react';
-import { useMyLearning } from '../../components/learner/MyLearning/useMyLearning';
-import MyLearningHeader from '../../components/learner/MyLearning/MyLearningHeader';
-import MyLearningStats from '../../components/learner/MyLearning/MyLearningStats';
-import MyLearningPathsSection from '../../components/learner/MyLearning/MyLearningPathsSection';
-import EnrolledCoursesSection from '../../components/learner/MyLearning/EnrolledCoursesSection';
-import ContinueHighlight from '../../components/learner/MyLearning/ContinueHighlight';
-import AllPathsView from '../../components/learner/MyLearning/AllPathsView';
-import AllCoursesView from '../../components/learner/MyLearning/AllCoursesView';
-import { getContinueLessonUrl } from '../../components/LessonPage/lessonUtils';
+import { useMyLearning } from '../../hooks/course/useMyLearning';
+import MyLearningHeader from '../../components/course/my-learning/MyLearningHeader';
+import MyLearningStats from '../../components/course/my-learning/MyLearningStats';
+import MyLearningPathsSection from '../../components/course/my-learning/MyLearningPathsSection';
+import EnrolledCoursesSection from '../../components/course/my-learning/EnrolledCoursesSection';
+import ContinueHighlight from '../../components/course/my-learning/ContinueHighlight';
+import AllPathsView from '../../components/course/my-learning/AllPathsView';
+import AllCoursesView from '../../components/course/my-learning/AllCoursesView';
+import { getContinueLessonUrl } from '../../utils/lesson/lessonUtils';
 
 export function MyLearning() {
     const {

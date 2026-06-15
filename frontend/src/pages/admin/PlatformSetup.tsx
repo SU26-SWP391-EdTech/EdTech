@@ -7,7 +7,7 @@ import {
   Trash2, X, AlertTriangle, Check, Database,
   Code2, GraduationCap, RotateCcw
 } from 'lucide-react';
-import { useAuthStore } from '../../stores/auth.stores';
+import { useAuthStore } from '../../stores/auth/auth.stores';
 import {
   createPlatformSettings,
   getPlatformSettings,
@@ -17,7 +17,6 @@ import {
 } from '../../services/platform-setting/platform-setting.service';
 
 /* MARKER-MAKE-KIT-INVOKED */
-
 type SetupStep = 'setup-required' | 'configured';
 
 interface PlatformData {

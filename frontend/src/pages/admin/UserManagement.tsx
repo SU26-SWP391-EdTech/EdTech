@@ -1,11 +1,11 @@
 import { Download, Plus, Search, ArrowUpDown, Eye, Edit2, Trash2, X, AlertCircle } from 'lucide-react';
-import { useUserManagement } from '../../components/UserManagement/useUserManagement';
-import { RoleBadge } from '../../components/UserManagement/RoleBadge';
-import { StatusBadge } from '../../components/UserManagement/StatusBadge';
-import { FilterSelect } from '../../components/UserManagement/FilterSelect';
-import { UserModal } from '../../components/UserManagement/UserModal';
-import { ViewUserModal } from '../../components/UserManagement/ViewUserModal';
-import { DeleteConfirmationModal } from '../../components/UserManagement/DeleteConfirmationModal';
+import { useUserManagement } from '../../hooks/user/useUserManagement';
+import { RoleBadge } from '../../components/user/management/RoleBadge';
+import { StatusBadge } from '../../components/user/management/StatusBadge';
+import { FilterSelect } from '../../components/user/management/FilterSelect';
+import { UserModal } from '../../components/user/management/UserModal';
+import { ViewUserModal } from '../../components/user/management/ViewUserModal';
+import { DeleteConfirmationModal } from '../../components/user/management/DeleteConfirmationModal';
 
 const ROLES = ['All Roles', 'Admin', 'Learner', 'Academic Manager', 'Course Provider'];
 const STATUSES = ['All Status', 'Active', 'Inactive'];

@@ -6,7 +6,7 @@ import { Logo } from '../shared/Logo';
 import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { ADMIN_NAV } from '../config/nav-config';
-import { useAuthStore } from '../../../stores/auth.stores';
+import { useAuthStore } from '../../../stores/auth/auth.stores';
 
 export function AdminHeader() {
     const navigate = useNavigate();
