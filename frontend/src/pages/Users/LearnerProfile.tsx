@@ -8,34 +8,32 @@ import { useLearnerProfile } from '../../hooks/learner/useLearnerProfile';
 import { useAuthStore } from '../../stores/auth.stores';
 
 export function LearnerProfile() {
-   const currentUser = useAuthStore((state) => state.user);
-   const userId = currentUser?.userId;
-   const {
-     profile,
-     user,
-     editing,
-     setEditing,
-     fullName,
-     setFullName,
-     bio,
-     setBio,
-     goal,
-     setGoal,
-     save,
-     loading,
-     error,
-     enrollments,
-     learningPaths,
-     completedCount,
-     avgProgress,
-     toast,
-     setToast,
-     cancel,
-     avatarFile,
-     setAvatarFile,
-   } = useLearnerProfile(userId);
+  const currentUser = useAuthStore((state) => state.user);
+  const userId = currentUser?.userId;
+  const {
+    profile,
+    user,
+    editing,
+    setEditing,
+    fullName,
+    setFullName,
+    bio,
+    setBio,
+    goal,
+    setGoal,
+    save,
+    isSaving,
+    enrollments,
+    learningPaths,
+    completedCount,
+    avgProgress,
+    toast,
+    setToast,
+    cancel,
+    avatarFile,
+    setAvatarFile,
+  } = useLearnerProfile(userId);
 
-   console.log("userId hiện tại là:", userId);
   return (
     <div style={{ fontFamily: "'Inter',sans-serif", background: '#F8FAFC', minHeight: '100vh', padding: '28px 32px' }}>
       <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 20, alignItems: 'start' }}>
@@ -43,21 +41,22 @@ export function LearnerProfile() {
         {/* Left card */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Profile */}
-          <ProfileMini 
+          <ProfileMini
             profile={profile}
             user={user}
             fullName={fullName}
             editing={editing}
             setEditing={setEditing}
             setFullName={setFullName}
-            save={save} 
+            save={save}
+            isSaving={isSaving}
             cancel={cancel}
             avatarFile={avatarFile}
             setAvatarFile={setAvatarFile}
           />
 
           {/* Stats */}
-          <StatsLearner 
+          <StatsLearner
             enrolledCount={enrollments.length}
             completedCount={completedCount}
             avgProgress={avgProgress}
@@ -67,7 +66,7 @@ export function LearnerProfile() {
         {/* Right */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* About */}
-          <AboutLearner 
+          <AboutLearner
             profile={profile}
             goal={goal}
             bio={bio}
@@ -77,12 +76,12 @@ export function LearnerProfile() {
           />
 
           {/* Enrollments */}
-          <Enrollments 
+          <Enrollments
             enrollments={enrollments}
           />
 
           {/* Learning Paths */}
-          <LearningPaths 
+          <LearningPaths
             learningPaths={learningPaths}
             enrollments={enrollments}
           />

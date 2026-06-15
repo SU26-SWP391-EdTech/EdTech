@@ -24,6 +24,11 @@ export async function updateLearnerProfile(id: number, data: { learningGoal?: st
 
 //patch upload media file
 export async function editLearnerProfile(id: number, data: FormData | { fullName: string; bio?: string; learningGoal?: string }): Promise<any> {
-    const response = await api.patch(`/learners/edit-profile/${id}`, data);
+    const isFormData = data instanceof FormData;
+    const response = await api.patch(`/learners/edit-profile/${id}`, data, {
+        headers: isFormData ? {
+            'Content-Type': 'multipart/form-data',
+        } : undefined,
+    });
     return response.data;
 }

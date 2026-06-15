@@ -2,7 +2,7 @@ import { CheckCircle2, Edit3, Mail, Save, X } from 'lucide-react';
 import type { LearnerProfileMini } from '../../../types/learner/learner-profile.types';
 
 
-const ProfileMini = ({ profile, fullName, editing, setEditing, setFullName, save, cancel, user, avatarFile, setAvatarFile }: LearnerProfileMini) => {
+const ProfileMini = ({ profile, fullName, editing, setEditing, setFullName, save, isSaving, cancel, user, avatarFile, setAvatarFile }: LearnerProfileMini) => {
     const initials = fullName ? fullName.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
     const currentAvatarUrl = profile?.avatarUrl || user?.avatarUrl || user?.avatar || '';
     const hasAvatar = !!(currentAvatarUrl && currentAvatarUrl.trim() !== "" && currentAvatarUrl !== "null");
@@ -58,8 +58,21 @@ const ProfileMini = ({ profile, fullName, editing, setEditing, setFullName, save
             <p style={{ fontSize: 11.5, color: '#9CA3AF', marginBottom: 14 }}>Member since {formatDate(user?.createdAt)}</p>
             {editing ? (
                 <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={save} style={{ flex: 1, padding: '8px', background: '#E11D48', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 12.5, fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}><Save size={13} /> Save</button>
-                    <button onClick={cancel} style={{ flex: 1, padding: '8px', border: '1px solid #E5E7EB', borderRadius: 8, cursor: 'pointer', fontSize: 12.5, fontWeight: 500, color: '#374151', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}><X size={13} /> Cancel</button>
+                    <button onClick={save} disabled={isSaving} style={{ flex: 1,  padding: '8px', background: isSaving ? '#FDA4AF' : '#E11D48', border: 'none', borderRadius: 8, cursor: isSaving ? 'not-allowed' : 'pointer', fontSize: 12.5, fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                        {isSaving ? (
+                            <>
+                                <span style={{ width: 12, height: 12, border: '2px solid #fff', borderTop: '2px solid transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite' }}></span>
+                                <span>Saving...</span>
+                            </>
+                        ) : (
+                            <>
+                                <Save size={13} /> Save
+                            </>
+                        )}
+                    </button>
+                    <button onClick={cancel} disabled={isSaving} style={{ flex: 1,  padding: '8px', border: '1px solid #E5E7EB', borderRadius: 8, cursor: isSaving ? 'not-allowed' : 'pointer', fontSize: 12.5, fontWeight: 500, color: '#374151', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                        <X size={13} /> Cancel
+                    </button>
                 </div>
             ) : (
                 <button onClick={() => setEditing(true)} style={{ width: '100%', padding: '8px', border: '1px solid #E5E7EB', borderRadius: 8, cursor: 'pointer', fontSize: 12.5, fontWeight: 500, color: '#374151', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}><Edit3 size={13} /> Edit Profile</button>

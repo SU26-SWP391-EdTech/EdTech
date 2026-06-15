@@ -15,6 +15,7 @@ export function useLearnerProfile(userId: number) {
     const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
 
     const [loading, setLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const [editing, setEditing] = useState(false);
@@ -72,6 +73,7 @@ export function useLearnerProfile(userId: number) {
     }, [userId])
 
     const save = async () => {
+        setIsSaving(true);
         try {
             let updatedData;
             if (avatarFile) {
@@ -80,11 +82,6 @@ export function useLearnerProfile(userId: number) {
                 formData.append('bio', bio);
                 formData.append('learningGoal', goal);
                 formData.append('avatarUrl', avatarFile);
-
-                // In ra các trường của FormData để debug
-                for (const [key, value] of formData.entries()) {
-                    console.log(`[DEBUG FormData] ${key}:`, value);
-                }
 
                 updatedData = await editLearnerProfile(userId, formData);
             } else {
@@ -102,7 +99,12 @@ export function useLearnerProfile(userId: number) {
                 setUser({ ...user, fullName: updatedData.fullName, avatarUrl: updatedData.avatarUrl });
             }
             if (profile) {
-                setProfile({ ...profile, bio: updatedData.bio, learningGoal: updatedData.learningGoal });
+                setProfile({
+                    ...profile,
+                    bio: updatedData.bio,
+                    learningGoal: updatedData.learningGoal,
+                    avatarUrl: updatedData.avatarUrl
+                });
             }
 
             // Cập nhật useAuthStore để đồng bộ trên toàn ứng dụng (ví dụ: header, sidebar)
@@ -127,6 +129,8 @@ export function useLearnerProfile(userId: number) {
                 console.error("Validation error details:", JSON.stringify(err.response.data));
             }
             setError(err.message || "Failed to save profile");
+        } finally {
+            setIsSaving(false);
         }
     }
 
@@ -156,6 +160,7 @@ export function useLearnerProfile(userId: number) {
         toast,
         setToast,
         save,
+        isSaving,
         cancel,
         avatarFile,
         setAvatarFile,

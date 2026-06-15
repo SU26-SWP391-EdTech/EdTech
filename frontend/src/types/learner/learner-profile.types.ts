@@ -12,6 +12,7 @@ export interface LearnerProfileMini {
     setEditing: (val: boolean) => void;
     setFullName: (val: string) => void;
     save: () => void;
+    isSaving?: boolean;
     cancel: () => void;
     avatarFile: File | null;
     setAvatarFile: (val: File | null) => void;
