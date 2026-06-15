@@ -1,16 +1,16 @@
 import toast from 'react-hot-toast';
-import { useLessonPage } from '../../components/LessonPage/useLessonPage';
-import { LessonHeader } from '../../components/LessonPage/LessonHeader';
-import { LessonPlayer } from '../../components/LessonPage/LessonPlayer';
-import { LessonReading } from '../../components/LessonPage/LessonReading';
-import { LessonQuiz } from '../../components/LessonPage/LessonQuiz';
-import { LessonAssignment } from '../../components/LessonPage/LessonAssignment';
-import { LessonSummaryNav } from '../../components/LessonPage/LessonSummaryNav';
-import { LessonTabs } from '../../components/LessonPage/LessonTabs';
-import { NotesPanel } from '../../components/LessonPage/NotesPanel';
-import { DiscussionPanel } from '../../components/LessonPage/DiscussionPanel';
-import { CurriculumSidebar } from '../../components/LessonPage/CurriculumSidebar';
-import { QUESTIONS } from '../../components/LessonPage/lessonUtils';
+import { useLessonPage } from '../../hooks/lesson/useLessonPage';
+import { LessonHeader } from '../../components/lesson/detail/LessonHeader';
+import { LessonPlayer } from '../../components/lesson/detail/LessonPlayer';
+import { LessonReading } from '../../components/lesson/detail/LessonReading';
+import { LessonQuiz } from '../../components/lesson/detail/LessonQuiz';
+import { LessonAssignment } from '../../components/lesson/detail/LessonAssignment';
+import { LessonSummaryNav } from '../../components/lesson/detail/LessonSummaryNav';
+import { LessonTabs } from '../../components/lesson/detail/LessonTabs';
+import { NotesPanel } from '../../components/lesson/detail/NotesPanel';
+import { DiscussionPanel } from '../../components/lesson/detail/DiscussionPanel';
+import { CurriculumSidebar } from '../../components/lesson/detail/CurriculumSidebar';
+import { QUESTIONS } from '../../utils/lesson/lessonUtils';
 
 export function LessonPage() {
   const lesson = useLessonPage();

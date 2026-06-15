@@ -7,16 +7,16 @@ import {
     Monitor, Database, Palette, Megaphone, Briefcase,
     Settings, Edit2, Trash2, GripVertical
 } from 'lucide-react';
-import { useCourseManagement } from '../../components/CourseManagement/useCourseManagement';
+import { useCourseManagement } from '../../hooks/course/useCourseManagement';
 
-import type { Course, CourseStatus, Category } from '../../components/CourseManagement/types';
-import { StatusBadge } from '../../components/CourseManagement/StatusBadge';
-import { CourseThumbnail } from '../../components/CourseManagement/CourseThumbnail';
-import { StarRating } from '../../components/CourseManagement/StarRating';
-import { FilterSelect } from '../../components/CourseManagement/FilterSelect';
-import { CoursePreviewPanel } from '../../components/CourseManagement/CoursePreviewPanel';
-import { CourseModal } from '../../components/CourseManagement/CourseModal';
-import { DeleteCourseConfirmModal } from '../../components/CourseManagement/DeleteCourseConfirmModal';
+import type { Course, CourseStatus, Category } from '../../types/course/course-management.types';
+import { StatusBadge } from '../../components/course/management/StatusBadge';
+import { CourseThumbnail } from '../../components/course/management/CourseThumbnail';
+import { StarRating } from '../../components/course/management/StarRating';
+import { FilterSelect } from '../../components/course/management/FilterSelect';
+import { CoursePreviewPanel } from '../../components/course/management/CoursePreviewPanel';
+import { CourseModal } from '../../components/course/management/CourseModal';
+import { DeleteCourseConfirmModal } from '../../components/course/management/DeleteCourseConfirmModal';
 
 
 

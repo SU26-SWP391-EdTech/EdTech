@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { useCourseDetail } from '../../components/CourseDetail/useCourseDetail';
-import { CourseHero } from '../../components/CourseDetail/CourseHero';
-import { CourseOverview } from '../../components/CourseDetail/CourseOverview';
-import { CourseOutcomes } from '../../components/CourseDetail/CourseOutcomes';
-import { CourseCurriculum } from '../../components/CourseDetail/CourseCurriculum';
-import { CourseProviderCard } from '../../components/CourseDetail/CourseProviderCard';
-import { RelatedCourses } from '../../components/CourseDetail/RelatedCourses';
+import { useCourseDetail } from '../../hooks/course/useCourseDetail';
+import { CourseHero } from '../../components/course/detail/CourseHero';
+import { CourseOverview } from '../../components/course/detail/CourseOverview';
+import { CourseOutcomes } from '../../components/course/detail/CourseOutcomes';
+import { CourseCurriculum } from '../../components/course/detail/CourseCurriculum';
+import { CourseProviderCard } from '../../components/course/detail/CourseProviderCard';
+import { RelatedCourses } from '../../components/course/detail/RelatedCourses';
 
 export function CourseDetail() {
   const [showRejectModal, setShowRejectModal] = useState(false);

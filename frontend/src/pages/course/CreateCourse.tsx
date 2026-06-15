@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createCourse, searchCourses } from '../../services/course.service';
+import { createCourse, searchCourses } from '../../services/course/course.service';
 import { createLesson } from '../../services/lesson/lesson.service';
 import toast from 'react-hot-toast';
 import {
@@ -136,7 +136,7 @@ export function CreateCoursePage() {
                 if (parsed.title || parsed.description || (parsed.modules && parsed.modules.length > 0)) {
                     setHasDraft(true);
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
     }, []);
 
@@ -158,7 +158,7 @@ export function CreateCoursePage() {
                             }
                             return m;
                         });
-                        
+
                         const saved = localStorage.getItem('create_course_draft');
                         if (saved) {
                             try {
@@ -167,7 +167,7 @@ export function CreateCoursePage() {
                                     ...draft,
                                     modules: updated
                                 }));
-                            } catch (err) {}
+                            } catch (err) { }
                         }
                         return updated;
                     });
@@ -249,7 +249,7 @@ export function CreateCoursePage() {
             if (projectUrl) {
                 formData.append('projectUrl', projectUrl);
             }
-            
+
             let fileToUpload = thumbnailFile;
             if (!fileToUpload && thumbnailPreview && thumbnailPreview.startsWith('data:image')) {
                 try {
@@ -265,7 +265,7 @@ export function CreateCoursePage() {
             }
 
             const newCourse = await createCourse(formData);
-            
+
             // Now, save all lessons that were added locally to this course!
             for (const mod of modules) {
                 for (const l of mod.lessons) {

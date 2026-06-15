@@ -1,11 +1,11 @@
 import { Save, Rocket, CheckCircle2, X } from 'lucide-react';
-import { useCreateLesson, checklist } from './components/useCreateLesson';
-import { LessonInfoSection } from './components/LessonInfoSection';
-import { LessonTypeSection } from './components/LessonTypeSection';
-import { LessonContentSection } from './components/LessonContentSection';
-import { PublishModal } from './components/PublishModal';
-import { AddResourceModal } from './components/AddResourceModal';
-import { AddQuizModal } from './components/AddQuizModal';
+import { useCreateLesson, checklist } from '../../hooks/lesson/useCreateLesson';
+import { LessonInfoSection } from '../../components/lesson/create/LessonInfoSection';
+import { LessonTypeSection } from '../../components/lesson/create/LessonTypeSection';
+import { LessonContentSection } from '../../components/lesson/create/LessonContentSection';
+import { PublishModal } from '../../components/lesson/create/PublishModal';
+import { AddResourceModal } from '../../components/lesson/create/AddResourceModal';
+import { AddQuizModal } from '../../components/lesson/create/AddQuizModal';
 
 export function CreateLessonPage() {
   const hook = useCreateLesson();
