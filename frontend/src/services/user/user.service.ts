@@ -72,12 +72,16 @@ export async function getAcademicProfile(id: number): Promise<AcademicProfileRes
   return response.data;
 }
 
-// Chỉnh sửa hồ sơ học thuật (Hỗ trợ upload ảnh/file dạng FormData)
-export async function editAcademicProfile(id: number, formData: FormData) {
-  const response = await api.patch(`/user/edit-academic-user-profile/${id}`, formData, {
-    headers: {
+// Chỉnh sửa hồ sơ học thuật (Hỗ trợ upload ảnh/file dạng FormData hoặc JSON)
+export async function editAcademicProfile(
+  id: number,
+  data: FormData | { fullName: string; expertise?: string; experienceYears?: number }
+) {
+  const isFormData = data instanceof FormData;
+  const response = await api.patch(`/user/edit-academic-user-profile/${id}`, data, {
+    headers: isFormData ? {
       'Content-Type': 'multipart/form-data',
-    },
+    } : undefined,
   });
   return response.data;
 }

@@ -180,8 +180,8 @@ export const router = createBrowserRouter([
                 element: <h1>Home Provider</h1>
             },
             {
-                path: 'userprofile',
-                element: <UserProfile />
+                path: 'profile',
+                element: <ProviderProfile />
             },
             {
                 path: 'courses',
@@ -211,10 +211,6 @@ export const router = createBrowserRouter([
                 path: 'learning-path/:id',
                 element: <LearningPathDetail />
             },
-            {
-                path: 'providers/:id',
-                element: <ProviderProfile />
-            }
         ]
     },
     // --- CHO QUẢN TRỊ VIÊN (ADMIN) ---
