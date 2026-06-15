@@ -24,7 +24,6 @@ export function ExplorePage() {
         enrolledPathIds,
         isEnrolled,
         handleEnroll,
-        handleEnrollPath,
         getCourseLevel,
         getCourseGradient,
         user,
@@ -134,7 +133,6 @@ export function ExplorePage() {
                                                 accent={colors[index % colors.length]}
                                                 isPathEnrolled={userEnrolledInPath}
                                                 personalProgress={personalProgress}
-                                                onEnroll={() => handleEnrollPath(path)}
                                             />
                                         );
                                     })}

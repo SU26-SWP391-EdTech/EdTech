@@ -21,7 +21,6 @@ export function LearningPathDetail() {
     activeCourse,
     currentModules,
     handleEnrollSingleCourse,
-    handleEnrollAllPath,
     handleStartLesson,
     handleContinueCourse,
   } = useLearningPathDetail();
@@ -49,7 +48,6 @@ export function LearningPathDetail() {
         remainingLessons={remainingLessons}
         bookmarked={bookmarked}
         onBookmarkToggle={() => setBookmarked(!bookmarked)}
-        onEnrollAllPath={handleEnrollAllPath}
       />
 
       {/* Main Roadmap & Modules Layout */}

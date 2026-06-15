@@ -2,13 +2,11 @@ import { Play, Calendar } from 'lucide-react';
 
 interface DashboardHeaderProps {
     fullName?: string;
-    onContinueClick: () => void;
     onViewScheduleClick?: () => void;
 }
 
 export default function DashboardHeader({
     fullName = 'Learner',
-    onContinueClick,
     onViewScheduleClick
 }: DashboardHeaderProps) {
     return (
@@ -18,14 +16,6 @@ export default function DashboardHeader({
                     Welcome back, {fullName} 👋
                 </h1>
                 <div className="flex items-center gap-3">
-                    <button 
-                        onClick={onContinueClick}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-[#E11D48] text-white rounded-xl text-sm hover:bg-[#BE123C] transition-colors" 
-                        style={{ fontWeight: 600 }}
-                    >
-                        <Play className="w-4 h-4 fill-white" />
-                        Continue Learning
-                    </button>
                     <button 
                         onClick={onViewScheduleClick}
                         className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#E5E7EB] text-[#374151] rounded-xl text-sm hover:bg-[#F8FAFC] transition-colors" 

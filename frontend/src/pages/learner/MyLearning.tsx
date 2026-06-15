@@ -52,14 +52,6 @@ export function MyLearning() {
                         <MyLearningHeader
                             hasEnrollments={!!displayEnrollment}
                             onExploreMoreClick={() => navigate('/learner/explore')}
-                            onContinueClick={() => {
-                                if (displayEnrollment) {
-                                    const url = getContinueLessonUrl(displayEnrollment.course.courseId, enrollments);
-                                    navigate(url);
-                                } else {
-                                    navigate('/learner/explore');
-                                }
-                            }}
                         />
 
                         {enrollments.length === 0 ? (

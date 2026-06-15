@@ -1,15 +1,11 @@
-import { Play } from 'lucide-react';
-
 interface MyLearningHeaderProps {
     hasEnrollments: boolean;
     onExploreMoreClick: () => void;
-    onContinueClick: () => void;
 }
 
 export default function MyLearningHeader({
     hasEnrollments,
     onExploreMoreClick,
-    onContinueClick,
 }: MyLearningHeaderProps) {
     return (
         <div className="flex items-end justify-between mb-8">
@@ -29,16 +25,6 @@ export default function MyLearningHeader({
                 >
                     Explore More
                 </button>
-                {hasEnrollments && (
-                    <button 
-                        onClick={onContinueClick}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors" 
-                        style={{ fontWeight: 500 }}
-                    >
-                        <Play className="w-4 h-4 fill-white" />
-                        Continue Learning
-                    </button>
-                )}
             </div>
         </div>
     );

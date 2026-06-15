@@ -13,7 +13,6 @@ interface ExplorePathCardProps {
     accent: string;
     isPathEnrolled: boolean;
     personalProgress: number;
-    onEnroll: () => void;
 }
 
 export default function ExplorePathCard({
@@ -27,8 +26,7 @@ export default function ExplorePathCard({
     completion,
     accent,
     isPathEnrolled,
-    personalProgress,
-    onEnroll
+    personalProgress
 }: ExplorePathCardProps) {
     const navigate = useNavigate();
     const showProgress = isPathEnrolled ? personalProgress : completion;
@@ -90,17 +88,10 @@ export default function ExplorePathCard({
                 >
                     View Detail
                 </button>
-                {isPathEnrolled && personalProgress === 100 ? (
-                    <div className="flex-1 py-2 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-100 text-center flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                {isPathEnrolled && personalProgress === 100 && (
+                    <div className="py-2 px-3 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-100 text-center flex items-center justify-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         Completed ✓
                     </div>
-                ) : (
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onEnroll(); }}
-                        className="flex-1 py-2 bg-[#E11D48] text-white hover:bg-[#BE123C] text-xs font-semibold rounded-lg transition-colors text-center"
-                    >
-                        {isPathEnrolled ? 'Resume Path' : 'Enroll Path'}
-                    </button>
                 )}
             </div>
         </div>

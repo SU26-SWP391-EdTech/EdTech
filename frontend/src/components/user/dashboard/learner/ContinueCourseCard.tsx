@@ -12,7 +12,6 @@ interface ContinueCourseCardProps {
     gradient: string;
     initials: string;
     idx: number;
-    onContinue: () => void;
     onClick?: () => void;
 }
 
@@ -26,7 +25,6 @@ export default function ContinueCourseCard({
     gradient,
     initials,
     idx,
-    onContinue,
     onClick
 }: ContinueCourseCardProps) {
     return (
@@ -69,17 +67,6 @@ export default function ContinueCourseCard({
                     <span>·</span>
                     <span>{duration}</span>
                 </div>
-                <button 
-                    onClick={(event) => {
-                        event.stopPropagation();
-                        onContinue();
-                    }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F8FAFC] group-hover:bg-[#E11D48] text-[#374151] group-hover:text-white rounded-lg text-xs transition-all" 
-                    style={{ fontWeight: 500 }}
-                >
-                    <Play className="w-3 h-3 fill-current" />
-                    Continue
-                </button>
             </div>
         </div>
     );

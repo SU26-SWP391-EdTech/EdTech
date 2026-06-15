@@ -4,7 +4,6 @@ import DashboardStatCard from '../../components/user/dashboard/learner/Dashboard
 import DashboardHeader from '../../components/user/dashboard/learner/DashboardHeader';
 import ContinueLearningSection from '../../components/user/dashboard/learner/ContinueLearningSection';
 import LearningRoadmapSection from '../../components/user/dashboard/learner/LearningRoadmapSection';
-import { getContinueLessonUrl } from '../../utils/lesson/lessonUtils';
 
 export function LearnerDashboard() {
     const navigate = useNavigate();
@@ -18,27 +17,11 @@ export function LearnerDashboard() {
         enrollments
     } = useLearnerDashboard();
 
-    const handleContinueCourse = (courseId: number) => {
-        const url = getContinueLessonUrl(courseId, enrollments);
-        navigate(url);
-    };
-
-    const handleHeaderContinue = () => {
-        if (continueCourses.length > 0) {
-            handleContinueCourse(continueCourses[0].courseId);
-        } else if (enrollments && enrollments.length > 0) {
-            handleContinueCourse(enrollments[0].course.courseId);
-        } else {
-            navigate('/learner/explore');
-        }
-    };
-
     return (
         <main className="max-w-[1440px] mx-auto px-8 py-8 space-y-8">
             {/* Header */}
             <DashboardHeader 
                 fullName={profile?.fullName}
-                onContinueClick={handleHeaderContinue}
             />
 
             {/* Stats */}
@@ -62,7 +45,7 @@ export function LearnerDashboard() {
                 <ContinueLearningSection
                     continueCourses={continueCourses}
                     onViewAllClick={() => navigate('/learner/my-learning#enrolled-courses')}
-                    onContinueClick={handleContinueCourse}
+                    onCourseClick={(courseId) => navigate(`/learner/courses/detail?id=${courseId}`)}
                     onBrowseClick={() => navigate('/learner/explore')}
                 />
 

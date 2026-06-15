@@ -239,38 +239,6 @@ export function useLearningPathDetail() {
     }
   };
 
-  const handleEnrollAllPath = async () => {
-    if (!user) {
-      toast.error('Please sign in to enroll.');
-      navigate('/login');
-      return;
-    }
-
-    const role = user.roleName?.toLowerCase();
-    if (role !== 'learner') {
-      toast.error(`As a ${user.roleName}, you cannot enroll in paths.`);
-      return;
-    }
-
-    const unenrolled = roadmapNodes.filter(n => n.state === 'upcoming' || n.state === 'locked');
-    if (unenrolled.length === 0) {
-      toast.success('You are already enrolled in all courses of this path!');
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      await Promise.all(unenrolled.map(n => enrollCourse(n.id)));
-      toast.success(`Successfully enrolled in ${unenrolled.length} remaining courses!`);
-      
-      const activeEnrollments = await getMyEnrollments();
-      setEnrollments(activeEnrollments);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to enroll in learning path.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleStartLesson = (lessonTitle: string) => {
     if (!user) {
@@ -314,7 +282,6 @@ export function useLearningPathDetail() {
     activeCourse,
     currentModules,
     handleEnrollSingleCourse,
-    handleEnrollAllPath,
     handleStartLesson,
     handleContinueCourse,
   };

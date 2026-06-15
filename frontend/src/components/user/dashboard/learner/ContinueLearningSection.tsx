@@ -17,14 +17,14 @@ interface CourseData {
 interface ContinueLearningSectionProps {
     continueCourses: CourseData[];
     onViewAllClick: () => void;
-    onContinueClick: (courseId: number) => void;
+    onCourseClick: (courseId: number) => void;
     onBrowseClick: () => void;
 }
 
 export default function ContinueLearningSection({
     continueCourses,
     onViewAllClick,
-    onContinueClick,
+    onCourseClick,
     onBrowseClick
 }: ContinueLearningSectionProps) {
     return (
@@ -54,8 +54,7 @@ export default function ContinueLearningSection({
                             gradient={course.gradient}
                             initials={course.initials}
                             idx={idx}
-                            onContinue={() => onContinueClick(course.courseId)}
-                            onClick={() => onContinueClick(course.courseId)}
+                            onClick={() => onCourseClick(course.courseId)}
                         />
                     ))
                 ) : (

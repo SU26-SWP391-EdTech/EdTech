@@ -121,43 +121,6 @@ export function useExplore() {
         return enrollments.some(e => e.course?.courseId === courseId);
     };
 
-    const handleEnrollPath = async (path: LearningPath) => {
-        if (!user) {
-            toast.error('Please sign in to enroll in learning paths.');
-            navigate('/login');
-            return;
-        }
-
-        const role = user.roleName?.toLowerCase();
-        if (role !== 'learner') {
-            toast.error(`As a ${user.roleName}, you cannot enroll in paths.`);
-            return;
-        }
-
-        const pathCourses = path.learningPathCourses || [];
-        if (pathCourses.length === 0) return;
-
-        // Sort courses by position to find the first course in the learning path
-        const sortedPathCourses = [...pathCourses].sort((a, b) => a.position - b.position);
-        const firstCourse = sortedPathCourses[0];
-
-        if (isEnrolled(firstCourse.courseId)) {
-            toast.success('You are already enrolled in the first course of this path!');
-            return;
-        }
-
-        try {
-            setIsLoading(true);
-            await enrollCourse(firstCourse.courseId);
-            toast.success(`Successfully enrolled in ${path.title}!`);
-            await loadData();
-        } catch (error: any) {
-            console.error('Path enrollment error:', error);
-            toast.error(error.response?.data?.message || 'Failed to enroll in path.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     // Filters
     const filteredCourses = courses.filter((course) => {
@@ -214,7 +177,6 @@ export function useExplore() {
         enrolledPathIds,
         isEnrolled,
         handleEnroll,
-        handleEnrollPath,
         getCourseLevel,
         getCourseGradient,
         user,

@@ -22,7 +22,6 @@ export function AcademicManagerHeader() {
         if (path === '/academic/pending-courses') return 'pending-courses';
         if (path === '/academic/courses') return 'courses';
         if (path === '/academic/learning-paths') return 'learning-paths';
-        if (path === '/academic/providers') return 'providers';
         return '';
     };
 
@@ -67,7 +66,7 @@ export function AcademicManagerHeader() {
 
                 <div className="flex-1" />
 
-                <NotifBell count={8} accentColor={ACC} />
+                {/* <NotifBell count={8} accentColor={ACC} /> */}
 
                 <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
 

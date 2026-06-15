@@ -107,10 +107,9 @@ export function ProviderHeader() {
                                 </div>
 
                                 {[
-                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/provider/userprofile') },
+                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/provider/profile') },
                                     { icon: <UserCircle className="w-4 h-4" />, label: 'My Studio' },
                                     { icon: <BarChart2 className="w-4 h-4" />, label: 'Analytics' },
-                                    { icon: <Settings className="w-4 h-4" />, label: 'Settings' },
                                 ].map((item) => (
                                     <button
                                         key={item.label}

@@ -11,7 +11,6 @@ interface PathHeroBannerProps {
   remainingLessons: number;
   bookmarked: boolean;
   onBookmarkToggle: () => void;
-  onEnrollAllPath: () => void;
 }
 
 export default function PathHeroBanner({
@@ -22,8 +21,7 @@ export default function PathHeroBanner({
   remainingHours,
   remainingLessons,
   bookmarked,
-  onBookmarkToggle,
-  onEnrollAllPath
+  onBookmarkToggle
 }: PathHeroBannerProps) {
   return (
     <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#1E3A8A,#2563EB,#3B82F6)' }}>
@@ -103,13 +101,6 @@ export default function PathHeroBanner({
             <p className="text-center text-white/70 text-xs mb-4">
               <span className="text-white animate-pulse" style={{ fontWeight: 700 }}>{remainingHours}h</span> remaining · <span className="text-white" style={{ fontWeight: 700 }}>{remainingLessons}</span> lessons left
             </p>
-            <button 
-              onClick={onEnrollAllPath}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-[#E11D48] text-white rounded-xl text-sm hover:bg-[#BE123C] transition-colors mb-2" 
-              style={{ fontWeight: 600 }}
-            >
-              <Play className="w-4 h-4 fill-white" /> {overallProgress > 0 ? 'Continue Roadmap' : 'Enroll Learning Path'}
-            </button>
             <div className="flex gap-2">
               <button
                 onClick={onBookmarkToggle}
