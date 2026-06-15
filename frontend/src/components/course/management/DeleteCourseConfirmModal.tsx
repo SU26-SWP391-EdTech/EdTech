@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import type { Course } from './types';
+import type { Course } from '../../../types/course/course-management.types';
 
 interface DeleteCourseConfirmModalProps {
   course: Course;

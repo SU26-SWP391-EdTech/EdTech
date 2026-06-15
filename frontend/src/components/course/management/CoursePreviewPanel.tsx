@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Clock, PlayCircle, Users, Globe } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 import { StarRating } from './StarRating';
-import type { Course } from './types';
+import type { Course } from '../../../types/course/course-management.types';
 
 interface CoursePreviewPanelProps {
   course?: Course;

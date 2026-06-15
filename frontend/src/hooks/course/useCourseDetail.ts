@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { useAuthStore } from '../../stores/auth.stores';
+import { useAuthStore } from '../../stores/auth/auth.stores';
 import toast from 'react-hot-toast';
-import type { Module, LessonStatus } from './types';
+import type { Module, LessonStatus } from '../../types/course/course-detail.types';
 import { getCourseById, approveCourse, rejectCourse } from '../../services/course/course.service';
 import { getLessonsByCourse } from '../../services/lesson/lesson.service';
 import { getMyEnrollments, enrollCourse } from '../../services/enrollment/enrollment.service';

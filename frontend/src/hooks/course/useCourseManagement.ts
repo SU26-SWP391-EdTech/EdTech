@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../stores/auth.stores';
-import { searchCourses, deleteCourse, approveCourse, rejectCourse } from '../../services/course.service';
-import type { BackendCourse } from '../../services/course.service';
+import { useAuthStore } from '../../stores/auth/auth.stores';
+import { searchCourses, deleteCourse, approveCourse, rejectCourse } from '../../services/course/course.service';
+import type { BackendCourse } from '../../services/course/course.service';
 import toast from 'react-hot-toast';
-import type { Course, CourseStatus, Category } from './types';
+import type { Course, CourseStatus, Category } from '../../types/course/course-management.types';
 import {
     Monitor, Database, Palette, Megaphone, Briefcase, Settings
 } from 'lucide-react';

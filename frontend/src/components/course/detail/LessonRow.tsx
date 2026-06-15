@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, Video, BookOpen, ClipboardList, FileText } from 'lucide-react';
-import type { Lesson, LessonType } from './types';
+import type { Lesson, LessonType } from '../../types/course/course-detail.types';
 import { StatusIcon } from './StatusIcon';
 
 interface LessonRowProps {

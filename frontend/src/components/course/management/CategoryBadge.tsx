@@ -1,5 +1,5 @@
 import { Monitor, Database, Palette, Megaphone, Briefcase, Settings } from 'lucide-react';
-import type { Category } from './types';
+import type { Category } from '../../../types/course/course-management.types';
 
 const categoryCfg: Record<Category, { cls: string; icon: React.ReactNode }> = {
   'Web Development': { cls: 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]', icon: <Monitor className="w-3 h-3" /> },

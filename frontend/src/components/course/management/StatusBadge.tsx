@@ -1,5 +1,5 @@
 import { Check, FileText, AlertCircle, Ban } from 'lucide-react';
-import type { CourseStatus } from './types';
+import type { CourseStatus } from '../../../types/course/course-management.types';
 
 const statusCfg: Record<CourseStatus, { cls: string; dot: string; icon: React.ReactNode }> = {
   'Published': { cls: 'bg-[#F0FDF4] text-[#16A34A] border-[#BBF7D0]', dot: '#16A34A', icon: <Check className="w-2.5 h-2.5" /> },

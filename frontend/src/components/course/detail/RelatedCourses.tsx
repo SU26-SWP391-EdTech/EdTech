@@ -1,5 +1,5 @@
 import { BookOpen, Star } from 'lucide-react';
-import type { Course } from '../../services/course/course.service';
+import type { Course } from '../../../services/course/course.service';
 import { Card } from './Card';
 
 interface RelatedCoursesProps {

@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { X, Image, AlertCircle, BookOpen, ChevronDown } from 'lucide-react';
-import { createCourse, updateCourse } from '../../services/course/course.service';
-import type { Course, CourseStatus, Category } from './types';
+import { createCourse, updateCourse } from '../../../services/course/course.service';
+import type { Course, CourseStatus, Category } from '../../../types/course/course-management.types';
 import toast from 'react-hot-toast';
 
 const CATEGORIES = ['Web Development', 'Data Science', 'Design', 'Marketing', 'Business', 'DevOps'];

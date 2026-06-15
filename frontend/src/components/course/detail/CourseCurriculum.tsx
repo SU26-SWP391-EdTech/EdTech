@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Card } from './Card';
-import type { Module } from './types';
+import type { Module } from '../../types/course/course-detail.types';
 import { LessonRow } from './LessonRow';
 
 interface CourseCurriculumProps {
