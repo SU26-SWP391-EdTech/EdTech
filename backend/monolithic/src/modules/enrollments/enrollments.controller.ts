@@ -8,6 +8,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { Roles } from 'src/common/decorators/roles/roles.decorator';
 import { RoleEnum } from 'src/common/enums/role.enum';
+import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 
 @ApiTags('Enrollments')
 @Controller('enrollments')
@@ -15,6 +16,7 @@ import { RoleEnum } from 'src/common/enums/role.enum';
 export class EnrollmentsController {
     constructor(private readonly enrollmentsService: EnrollmentsService) { }
     //enroll course
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Post('enroll/:id')
     @Roles(RoleEnum.LEARNER)
     @Throttle({ default: { limit: 3, ttl: 60000 } })
@@ -27,6 +29,7 @@ export class EnrollmentsController {
         return await this.enrollmentsService.enrollCourse(user.userId, id);
     }
     //get my enrollments
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Get('myenrollments')
     @Roles(RoleEnum.LEARNER)
     @ApiOperation({ summary: 'Get current user enrollments' })
@@ -36,6 +39,7 @@ export class EnrollmentsController {
         return await this.enrollmentsService.getMyEnrollments(user.userId);
     }
     //get enrollment detail
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Get('course/:courseId')
     @Roles(RoleEnum.LEARNER)
     @ApiOperation({ summary: 'Get enrollment detail by course' })
