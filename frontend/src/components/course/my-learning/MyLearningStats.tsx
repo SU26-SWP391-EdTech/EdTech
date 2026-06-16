@@ -1,43 +1,30 @@
-import { BookOpen, Route, CheckCircle2 } from 'lucide-react';
-import StatCard from './StatCard';
+import { BookOpen, CheckCircle2, PlayCircle } from 'lucide-react';
+import type { MyLearningStats as MyLearningStatsValue } from '../../../types/learner/my-learning.types';
 
 interface MyLearningStatsProps {
-    inProgressCoursesCount: number;
-    pathsEnrolledCount: number;
-    completedCoursesCount: number;
+    stats: MyLearningStatsValue;
 }
 
-export default function MyLearningStats({
-    inProgressCoursesCount,
-    pathsEnrolledCount,
-    completedCoursesCount,
-}: MyLearningStatsProps) {
+export function MyLearningStats({ stats }: MyLearningStatsProps) {
+    const items = [
+        { label: 'Enrolled', value: stats.enrolled, Icon: BookOpen, color: '#7C3AED', bg: '#F5F3FF' },
+        { label: 'In Progress', value: stats.inProgress, Icon: PlayCircle, color: '#E11D48', bg: '#FFF1F3' },
+        { label: 'Completed', value: stats.completed, Icon: CheckCircle2, color: '#16A34A', bg: '#DCFCE7' },
+    ];
+
     return (
-        <div className="grid grid-cols-3 gap-4 mb-8">
-            <StatCard 
-                icon={<BookOpen className="w-4 h-4" />} 
-                label="Courses in Progress" 
-                value={inProgressCoursesCount.toString()} 
-                delta={`${inProgressCoursesCount} active`} 
-                color="#E11D48" 
-                tint="#FEF2F2" 
-            />
-            <StatCard 
-                icon={<Route className="w-4 h-4" />} 
-                label="Learning Paths Enrolled" 
-                value={pathsEnrolledCount.toString()} 
-                delta={`${pathsEnrolledCount} active`} 
-                color="#F59E0B" 
-                tint="#FFFBEB" 
-            />
-            <StatCard 
-                icon={<CheckCircle2 className="w-4 h-4" />} 
-                label="Completed Courses" 
-                value={completedCoursesCount.toString()} 
-                delta={`${completedCoursesCount} done`} 
-                color="#10B981" 
-                tint="#ECFDF5" 
-            />
+        <div className="mb-5 grid grid-cols-1 gap-3 md:grid-cols-3">
+            {items.map(({ label, value, Icon, color, bg }) => (
+                <div key={label} className="flex items-center gap-4 rounded-xl border border-[#E5E7EB] bg-white p-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ background: bg }}>
+                        <Icon className="h-[18px] w-[18px]" style={{ color }} />
+                    </div>
+                    <div>
+                        <p className="text-[22px] font-bold text-[#111827]">{value}</p>
+                        <p className="text-xs text-[#6B7280]">{label}</p>
+                    </div>
+                </div>
+            ))}
         </div>
     );
 }

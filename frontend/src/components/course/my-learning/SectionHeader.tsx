@@ -1,34 +1,25 @@
-import { ChevronRight } from 'lucide-react';
-
 interface SectionHeaderProps {
     title: string;
-    subtitle: string;
-    actionLabel: string;
+    subtitle?: string;
+    actionLabel?: string;
     onAction?: () => void;
 }
 
-export default function SectionHeader({
-    title,
-    subtitle,
-    actionLabel,
-    onAction
-}: SectionHeaderProps) {
+export default function SectionHeader({ title, subtitle, actionLabel, onAction }: SectionHeaderProps) {
     return (
-        <div className="flex items-end justify-between mb-4">
+        <div className="mb-4 flex items-end justify-between gap-4">
             <div>
-                <h2 className="text-[18px] text-[#111827]" style={{ fontWeight: 600, letterSpacing: '-0.01em' }}>
-                    {title}
-                </h2>
-                <p className="text-xs text-[#6B7280] mt-0.5">{subtitle}</p>
+                <h2 className="text-lg font-semibold text-[#111827]">{title}</h2>
+                {subtitle && <p className="mt-1 text-sm text-[#6B7280]">{subtitle}</p>}
             </div>
-            <button
-                onClick={onAction}
-                className="flex items-center gap-1 text-sm text-[#6B7280] hover:text-[#E11D48] transition-colors"
-                style={{ fontWeight: 500 }}
-            >
-                {actionLabel}
-                <ChevronRight className="w-4 h-4" />
-            </button>
+            {actionLabel && (
+                <button
+                    onClick={onAction}
+                    className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-1.5 text-sm font-medium text-[#374151] hover:bg-[#F8FAFC]"
+                >
+                    {actionLabel}
+                </button>
+            )}
         </div>
     );
 }

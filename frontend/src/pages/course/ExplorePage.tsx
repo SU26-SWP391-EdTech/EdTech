@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Play, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useExplore } from '../../hooks/course/useExplore';
 import SectionHeader from '../../components/course/my-learning/SectionHeader';
 import HeroDiscovery from '../../components/course/explore/HeroDiscovery';
@@ -31,10 +31,10 @@ export function ExplorePage() {
 
     return (
         <div className="min-h-screen bg-[#FAFAFA]">
-            <main className="max-w-[1440px] mx-auto px-8 py-8">
+            <main className="max-w-[1440px] mx-auto px-8 pt-4 pb-8">
 
                 {/* Page Header */}
-                <div className="flex items-end justify-between mb-7">
+                <div className="mb-5">
                     <div>
                         <h1 className="text-[32px] text-[#111827] mb-1.5" style={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
                             Explore
@@ -42,19 +42,6 @@ export function ExplorePage() {
                         <p className="text-[#6B7280] text-[15px]">
                             Discover courses, learning paths, and skills tailored to your goals.
                         </p>
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                        {user?.roleName?.toLowerCase() === 'learner' && (
-                            <>
-                                <button onClick={() => navigate('/learner/my-learning')} className="px-4 py-2.5 bg-white border border-[#E5E7EB] text-[#111827] rounded-lg text-sm hover:bg-[#F8FAFC] transition-colors" style={{ fontWeight: 500 }}>
-                                    View My Learning
-                                </button>
-                                <button onClick={() => navigate('/learner/my-learning')} className="flex items-center gap-2 px-4 py-2.5 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
-                                    <Play className="w-4 h-4 fill-white" />
-                                    Continue Learning
-                                </button>
-                            </>
-                        )}
                     </div>
                 </div>
 

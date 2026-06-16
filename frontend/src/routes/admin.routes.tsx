@@ -1,6 +1,6 @@
 import type { RouteObject } from 'react-router-dom';
 import { AdminGuard } from '../components/auth/RoleGuards';
-import { DashboardLayout } from '../layouts/dashboard/Dashboard';
+import { DashboardLayout } from '../layouts/Dashboard/Dashboard';
 import { AdminProfile } from '../pages/admin/AdminProfile';
 import { PlatformSettings } from '../pages/admin/PlatformSettings';
 import { PlatformSetup } from '../pages/admin/PlatformSetup';

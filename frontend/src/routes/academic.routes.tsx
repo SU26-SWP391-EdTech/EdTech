@@ -1,6 +1,6 @@
 import type { RouteObject } from 'react-router-dom';
 import { AcademicGuard } from '../components/auth/RoleGuards';
-import { DashboardLayout } from '../layouts/dashboard/Dashboard';
+import { DashboardLayout } from '../layouts/Dashboard/Dashboard';
 import { CourseDetail } from '../pages/course/CourseDetail';
 import { CourseManagement } from '../pages/course/CourseManagement';
 import { LearningPathDetail } from '../pages/learning-path/LearningPathDetail';

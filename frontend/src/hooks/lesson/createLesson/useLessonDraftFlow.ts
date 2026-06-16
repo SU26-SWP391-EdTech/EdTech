@@ -20,11 +20,16 @@ export function useLessonDraftFlow({
 
     useEffect(() => {
         if (isCourseBuilder) {
-            const draft = readCourseDraft();
-
-            if (draft?.title) {
-                setDraftCourseTitle(draft.title);
+            const queryCourseTitle = searchParams.get('courseTitle');
+            if (queryCourseTitle) {
+                setDraftCourseTitle(queryCourseTitle);
+                return;
             }
+
+            const draft = readCourseDraft();
+            setDraftCourseTitle(draft?.title || null);
+        } else {
+            setDraftCourseTitle(null);
         }
     }, [searchParams, isCourseBuilder]);
 

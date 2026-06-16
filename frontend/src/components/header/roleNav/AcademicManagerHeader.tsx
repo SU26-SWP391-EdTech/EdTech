@@ -7,6 +7,7 @@ import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { ACADEMIC_MANAGER_NAV } from '../config/nav-config';
 import { useAuthStore } from '../../../stores/auth/auth.stores';
+import { getUserRoleLabel } from '../../../utils/user/roleUtils';
 
 export function AcademicManagerHeader() {
     const navigate = useNavigate();
@@ -14,6 +15,7 @@ export function AcademicManagerHeader() {
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
     const [open, setOpen] = useState(false);
+    const roleLabel = getUserRoleLabel(user, 'Academic Manager');
 
     // Determine active item based on current URL path
     const getActiveTab = () => {
@@ -88,7 +90,7 @@ export function AcademicManagerHeader() {
                                 {user?.fullName || 'Manager'}
                             </p>
                             <p className="text-[10px] text-[#9CA3AF] mt-0.5 leading-none">
-                                Academic Manager
+                                {roleLabel}
                             </p>
                         </div>
 

@@ -44,19 +44,21 @@ export function CreateCoursePage() {
     const [availableCourses, setAvailableCourses] = useState<{ id: number; title: string }[]>([]);
     const [hasDraft, setHasDraft] = useState(false);
 
+    const getCurrentCourseDraft = (currentLessons = lessons) => ({
+        title,
+        description,
+        language,
+        durationHours,
+        durationMinutes,
+        projectUrl,
+        outcomes,
+        prerequisiteCourseIds,
+        thumbnailPreview,
+        lessons: currentLessons,
+    });
+
     const saveDraftToLocalStorage = (currentLessons = lessons) => {
-        writeCourseDraft({
-            title,
-            description,
-            language,
-            durationHours,
-            durationMinutes,
-            projectUrl,
-            outcomes,
-            prerequisiteCourseIds,
-            thumbnailPreview,
-            lessons: currentLessons
-        });
+        writeCourseDraft(getCurrentCourseDraft(currentLessons));
     };
 
     const handleResumeDraft = () => {
@@ -200,15 +202,7 @@ export function CreateCoursePage() {
             const formData = await buildCourseFormData({
                 status,
                 thumbnailFile,
-                draft: {
-                    title,
-                    description,
-                    language,
-                    durationHours,
-                    durationMinutes,
-                    projectUrl,
-                    thumbnailPreview,
-                },
+                draft: getCurrentCourseDraft(),
             });
 
             let courseId = editId;
@@ -291,15 +285,43 @@ export function CreateCoursePage() {
         setLessons(updated);
     };
 
-    const openLessonEditor = (lessonId?: string) => {
-        if (!editId) {
-            toast.error('Please save the course before adding lessons to the database.');
-            return;
+    const ensureCourseExistsForLesson = async () => {
+        if (editId) return editId;
+
+        if (!title.trim()) {
+            toast.error('Course Title is required before creating a lesson.');
+            return null;
         }
 
-        const backUrl = encodeURIComponent(window.location.pathname + window.location.search);
+        setIsSubmitting(true);
+        try {
+            const formData = await buildCourseFormData({
+                status: 'draft',
+                thumbnailFile,
+                draft: getCurrentCourseDraft(),
+            });
+
+            const newCourse = await createCourse(formData);
+            clearCourseDraft();
+            toast.success('Course draft saved. You can now create lessons.');
+            return newCourse.courseId;
+        } catch (err: any) {
+            console.error('Failed to create course draft before lesson:', err);
+            toast.error(err.response?.data?.message || 'Failed to save course draft before creating lesson.');
+            return null;
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const openLessonEditor = async (lessonId?: string) => {
+        const courseId = await ensureCourseExistsForLesson();
+        if (!courseId) return;
+
+        const backUrl = encodeURIComponent(`/provider/courses/create?id=${courseId}`);
         const lessonParam = lessonId ? `&lessonId=${lessonId}` : '';
-        navigate(`/provider/lessons/create?redirectBack=${backUrl}&isCourseBuilder=true&courseId=${editId}${lessonParam}`);
+        const courseTitleParam = !editId && title.trim() ? `&courseTitle=${encodeURIComponent(title.trim())}` : '';
+        navigate(`/provider/lessons/create?redirectBack=${backUrl}&isCourseBuilder=true&courseId=${courseId}${lessonParam}${courseTitleParam}`);
     };
 
     return (
@@ -373,7 +395,7 @@ export function CreateCoursePage() {
                 <div className="grid grid-cols-12 gap-5">
                     <div className="col-span-12 space-y-5">
                         {/* Section 1 — Basic Info */}
-                        <FormCard step={1} title="Basic Information" status="valid" description="Tell learners what your course is about.">
+                        <FormCard step={1} title="Basic Information" description="Tell learners what your course is about.">
                             <div className="grid grid-cols-2 gap-4">
                                 <Field label="Course title" required full>
                                     <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Spring Boot REST API Masterclass" />
@@ -446,7 +468,7 @@ export function CreateCoursePage() {
                         </FormCard>
 
                         {/* Section 2 — Course Curriculum */}
-                        <FormCard step={2} title="Course Curriculum" status="warning" description="Manage all lessons in this course." action={
+                        <FormCard step={2} title="Course Curriculum" description="Manage all lessons in this course." action={
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => {
@@ -457,7 +479,7 @@ export function CreateCoursePage() {
                                     style={{ fontWeight: 500 }}
                                 >
                                     <Plus className="w-3.5 h-3.5" />
-                                    Add Lesson
+                                    Create Lesson
                                 </button>
                             </div>
                         }>
@@ -477,7 +499,7 @@ export function CreateCoursePage() {
                                         style={{ fontWeight: 500 }}
                                     >
                                         <Plus className="w-3.5 h-3.5" />
-                                        Add Lesson
+                                        Create Lesson
                                     </button>
                                 </div>
                             ) : (
@@ -577,16 +599,9 @@ export function CreateCoursePage() {
     );
 }
 
-function FormCard({ step, title, status, description, children, action }: {
-    step: number; title: string; status: 'valid' | 'warning' | 'incomplete' | 'error'; description: string; children: React.ReactNode; action?: React.ReactNode;
+function FormCard({ step, title, description, children, action }: {
+    step: number; title: string; description: string; children: React.ReactNode; action?: React.ReactNode;
 }) {
-    const statusMap = {
-        valid: { tint: '#ECFDF5', color: '#10B981', label: 'Complete' },
-        warning: { tint: '#FFFBEB', color: '#F59E0B', label: 'Needs attention' },
-        incomplete: { tint: '#F1F5F9', color: '#6B7280', label: 'Incomplete' },
-        error: { tint: '#FEF2F2', color: '#E11D48', label: 'Errors' },
-    } as const;
-    const s = statusMap[status];
     return (
         <section className="bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden">
             <header className="flex items-start justify-between gap-3 px-5 py-4 border-b border-[#F1F5F9]">
@@ -597,10 +612,6 @@ function FormCard({ step, title, status, description, children, action }: {
                     <div>
                         <div className="flex items-center gap-2">
                             <h2 className="text-base text-[#111827]" style={{ fontWeight: 600 }}>{title}</h2>
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]" style={{ background: s.tint, color: s.color, fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}>
-                                <span className="w-1 h-1 rounded-full" style={{ background: s.color }} />
-                                {s.label}
-                            </span>
                         </div>
                         <p className="text-xs text-[#6B7280] mt-0.5">{description}</p>
                     </div>

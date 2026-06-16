@@ -16,6 +16,7 @@ export interface LearnerProfileMini {
     cancel: () => void;
     avatarFile: File | null;
     setAvatarFile: (val: File | null) => void;
+    canEdit: boolean;
 }
 
 //Enrollments
@@ -37,6 +38,7 @@ export interface LearnerAbout {
     setBio: (val: string) => void;
     goal: string;
     setGoal: (val: string) => void; 
+    canEdit: boolean;
 }
 
 //Stats

@@ -5,9 +5,10 @@ import { getUserById, type UserResponse } from '../../services/user/user.service
 import { getMyEnrollments, type Enrollment } from '../../services/enrollment/enrollment.service';
 import { getLearningPaths, type LearningPath } from '../../services/learning-path/learning-path.service';
 import { useAuthStore } from '../../stores/auth/auth.stores';
+import toast from 'react-hot-toast';
 
 
-export function useLearnerProfile(userId: number) {
+export function useLearnerProfile(userId?: number) {
 
     const [profile, setProfile] = useState<LearnerProfile | null>(null);
     const [user, setUser] = useState<UserResponse | null>(null);
@@ -22,8 +23,11 @@ export function useLearnerProfile(userId: number) {
     const [fullName, setFullName] = useState('');
     const [bio, setBio] = useState('');
     const [goal, setGoal] = useState('');
-    const [toast, setToast] = useState(false);
+    const [toastActive, setToastActive] = useState(false);
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
+
+    const loggedInUser = useAuthStore((state) => state.user);
+    const canEdit = !!(loggedInUser && userId && loggedInUser.userId === userId);
 
     const completedCount = enrollments.filter(e => e.completedAt).length;
     const avgProgress = enrollments.reduce((s, e) => s + e.progress, 0) / enrollments.length;
@@ -121,14 +125,16 @@ export function useLearnerProfile(userId: number) {
             
             setAvatarFile(null);
             setEditing(false);
-            setToast(true);
-            setTimeout(() => setToast(false), 3000);
+            setToastActive(true);
+            setTimeout(() => setToastActive(false), 3000);
+            toast.success("Profile saved successfully!");
         } catch (err: any) {
             console.error("Failed to save profile:", err);
             if (err.response && err.response.data) {
                 console.error("Validation error details:", JSON.stringify(err.response.data));
             }
             setError(err.message || "Failed to save profile");
+            toast.error(err.response?.data?.message || "Failed to save profile");
         } finally {
             setIsSaving(false);
         }
@@ -157,8 +163,8 @@ export function useLearnerProfile(userId: number) {
         setBio,
         goal,
         setGoal,
-        toast,
-        setToast,
+        toast: toastActive,
+        setToast: setToastActive,
         save,
         isSaving,
         cancel,
@@ -166,5 +172,6 @@ export function useLearnerProfile(userId: number) {
         setAvatarFile,
         completedCount,
         avgProgress,
+        canEdit,
     }
 }

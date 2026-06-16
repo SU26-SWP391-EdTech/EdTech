@@ -1,8 +1,9 @@
 import type { AcademicProfileResponse, UserResponse } from "../../services/user/user.service";
 import type { BackendCourse } from "../../services/course/course.service";
+import type { LearnerProfile } from "../../services/learner/learner.services";
 
 export interface ProviderProfileMini {
-    profile: AcademicProfileResponse | null;
+    profile: AcademicProfileResponse | LearnerProfile | null;
     user: UserResponse | null;
     fullName: string;
     editing: boolean;

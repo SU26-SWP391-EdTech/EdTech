@@ -58,7 +58,7 @@ export function useLessonPersistence({
             draftFlow.isCourseBuilder &&
             (!Number.isFinite(explicitCourseId) || explicitCourseId <= 0)
         ) {
-            showFeedback('Please save the course before adding lessons to the database.');
+            showFeedback('Missing course id. Go back to the course builder and create the lesson again.');
             return null;
         }
 

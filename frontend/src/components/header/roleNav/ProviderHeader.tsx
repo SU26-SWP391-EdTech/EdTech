@@ -7,6 +7,7 @@ import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { PROVIDER_NAV } from '../config/nav-config';
 import { useAuthStore } from '../../../stores/auth/auth.stores';
+import { getUserRoleLabel } from '../../../utils/user/roleUtils';
 
 export function ProviderHeader() {
     const navigate = useNavigate();
@@ -14,6 +15,7 @@ export function ProviderHeader() {
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
     const [open, setOpen] = useState(false);
+    const roleLabel = getUserRoleLabel(user, 'Course Provider');
 
     // Determine active item based on current URL path
     const getActiveTab = () => {
@@ -85,7 +87,7 @@ export function ProviderHeader() {
                                 {user?.fullName || 'Your User Name'}
                             </p>
                             <p className="text-[10px] text-[#9CA3AF] mt-0.5 leading-none">
-                                Course Provider
+                                {roleLabel}
                             </p>
                         </div>
 

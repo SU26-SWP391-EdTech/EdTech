@@ -1,10 +1,38 @@
 import { Edit3, Mail, Save, X } from 'lucide-react';
-import type { ProviderProfileMini } from '../../../types/user/provider-profile.types';
+import { getUserRoleLabel } from '../../../../utils/user/roleUtils';
 
-const ProfileMini = ({ profile, fullName, editing, setEditing, setFullName, save, isSaving, cancel, user, avatarFile, setAvatarFile, canEdit }: ProviderProfileMini) => {
+interface ProfileMiniProps {
+    profile: {
+        avatarUrl?: string | null;
+    } | null;
+    user: {
+        email?: string | null;
+        avatar?: string | null;
+        avatarUrl?: string | null;
+        createdAt?: string | null;
+        roleName?: string | null;
+        role?: {
+            roleName?: string | null;
+        } | null;
+    } | null;
+    fullName: string;
+    editing: boolean;
+    setEditing: (val: boolean) => void;
+    setFullName: (val: string) => void;
+    save: () => void;
+    isSaving?: boolean;
+    cancel: () => void;
+    avatarFile: File | null;
+    setAvatarFile: (val: File | null) => void;
+    canEdit: boolean;
+    roleLabel?: string;
+}
+
+const ProfileMini = ({ profile, fullName, editing, setEditing, setFullName, save, isSaving, cancel, user, avatarFile, setAvatarFile, canEdit, roleLabel: roleLabelOverride }: ProfileMiniProps) => {
     const initials = fullName ? fullName.split(' ').map(n => n[0]).join('').toUpperCase() : 'P';
     const currentAvatarUrl = profile?.avatarUrl || user?.avatarUrl || user?.avatar || '';
     const hasAvatar = !!(currentAvatarUrl && currentAvatarUrl.trim() !== "" && currentAvatarUrl !== "null");
+    const roleLabel = roleLabelOverride || getUserRoleLabel(user);
     
     const formatDate = (dateString?: string) => {
         if (!dateString) return '';
@@ -48,7 +76,9 @@ const ProfileMini = ({ profile, fullName, editing, setEditing, setFullName, save
             ) : (
                 <p style={{ fontSize: 17, fontWeight: 700, color: '#111827', marginBottom: 4 }}>{fullName}</p>
             )}
-            <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 8 }}>Course Provider</p>
+            <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 8, textTransform: 'capitalize' }}>
+                {roleLabel}
+            </p> 
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center', marginBottom: 12 }}>
                 <Mail size={13} style={{ color: '#9CA3AF' }} />
                 <span style={{ fontSize: 12.5, color: '#6B7280' }}>{user?.email}</span>

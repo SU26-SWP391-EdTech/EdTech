@@ -9,6 +9,7 @@ export interface ProfileData {
   experienceYear: string;
   createdAt: string;
   role: string;
+  roleName: string;
 }
 
 export type CourseStatus = 'Completed' | 'In Progress' | 'Not Started';

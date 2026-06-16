@@ -88,6 +88,7 @@ export function ProviderProfile() {
                         avatarFile={avatarFile}
                         setAvatarFile={setAvatarFile}
                         canEdit={canEdit}
+                        roleLabel="Course Provider"
                     />
                     
                     <AboutProvider

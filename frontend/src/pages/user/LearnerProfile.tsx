@@ -32,6 +32,7 @@ export function LearnerProfile() {
     cancel,
     avatarFile,
     setAvatarFile,
+    canEdit,
   } = useLearnerProfile(userId);
 
   return (
@@ -53,6 +54,8 @@ export function LearnerProfile() {
             cancel={cancel}
             avatarFile={avatarFile}
             setAvatarFile={setAvatarFile}
+            canEdit={canEdit}
+            roleLabel="Learner"
           />
 
           {/* Stats */}
@@ -73,6 +76,7 @@ export function LearnerProfile() {
             setGoal={setGoal}
             setBio={setBio}
             editing={editing}
+            canEdit={canEdit}
           />
 
           {/* Enrollments */}

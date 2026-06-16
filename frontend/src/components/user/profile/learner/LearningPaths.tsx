@@ -5,12 +5,12 @@ const LearningPaths = ({ learningPaths, enrollments }: LearnerLearningPaths) => 
     return (
         <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14 }}>
             <div style={{ padding: '16px 22px', borderBottom: '1px solid #F3F4F6' }}>
-                <p style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Enrolled Learning Paths</p>
+                <p style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Learning Paths</p>
             </div>
             <div>
                 {learningPaths.length === 0 ? (
                     <div style={{ padding: '24px', textAlign: 'center', color: '#9CA3AF', fontSize: 13.5 }}>
-                        Bạn chưa đăng ký tham gia lộ trình học tập nào.
+                        You haven't enrolled in any learning paths yet.
                     </div>
                 ) : (
                     <div>

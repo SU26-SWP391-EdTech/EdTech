@@ -1,5 +1,5 @@
 import type { RouteObject } from 'react-router-dom';
-import { GuestLayout } from '../layouts/dashboard/GuestLayout';
+import { GuestLayout } from '../layouts/Dashboard/GuestLayout';
 import { CourseDetail } from '../pages/course/CourseDetail';
 import { ExplorePage } from '../pages/course/ExplorePage';
 import { LearningPathDetail } from '../pages/learning-path/LearningPathDetail';

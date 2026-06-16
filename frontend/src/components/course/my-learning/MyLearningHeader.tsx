@@ -1,30 +1,27 @@
+import { Search } from 'lucide-react';
+import type { MyLearningStats } from '../../../types/learner/my-learning.types';
+
 interface MyLearningHeaderProps {
-    hasEnrollments: boolean;
-    onExploreMoreClick: () => void;
+    stats: MyLearningStats;
+    search: string;
+    onSearchChange: (value: string) => void;
 }
 
-export default function MyLearningHeader({
-    hasEnrollments,
-    onExploreMoreClick,
-}: MyLearningHeaderProps) {
+export function MyLearningHeader({ search, onSearchChange }: MyLearningHeaderProps) {
     return (
-        <div className="flex items-end justify-between mb-8">
+        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-                <h1 className="text-[32px] text-[#111827] mb-1.5" style={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
-                    My Learning
-                </h1>
-                <p className="text-[#6B7280] text-[15px]">
-                    Track your enrolled courses, learning paths, progress, and saved content.
-                </p>
+                <h1 className="text-[24px] font-bold text-[#111827] tracking-[-0.01em]">My Learning</h1>
             </div>
-            <div className="flex items-center gap-2.5">
-                <button
-                    onClick={onExploreMoreClick}
-                    className="px-4 py-2.5 bg-white border border-[#E5E7EB] text-[#111827] rounded-lg text-sm hover:bg-[#F8FAFC] transition-colors"
-                    style={{ fontWeight: 500 }}
-                >
-                    Explore More
-                </button>
+
+            <div className="flex w-full items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 md:w-[280px]">
+                <Search className="h-4 w-4 text-[#9CA3AF]" />
+                <input
+                    value={search}
+                    onChange={(event) => onSearchChange(event.target.value)}
+                    placeholder="Search your courses..."
+                    className="w-full border-0 bg-transparent text-sm outline-none placeholder:text-[#9CA3AF]"
+                />
             </div>
         </div>
     );

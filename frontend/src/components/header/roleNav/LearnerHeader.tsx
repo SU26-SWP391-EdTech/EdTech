@@ -7,6 +7,7 @@ import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { LEARNER_NAV } from '../config/nav-config';
 import { useAuthStore } from '../../../stores/auth/auth.stores';
+import { getUserRoleLabel } from '../../../utils/user/roleUtils';
 
 export function LearnerHeader() {
     const navigate = useNavigate();
@@ -14,6 +15,7 @@ export function LearnerHeader() {
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
     const [open, setOpen] = useState(false);
+    const roleLabel = getUserRoleLabel(user, 'Learner');
 
     // Determine active item based on current URL path
     const getActiveTab = () => {
@@ -46,7 +48,6 @@ export function LearnerHeader() {
                             active={active === item.id}
                             accentColor={ACC}
                             activeBg={ACTIVE_BG}
-                            badge={item.badge}
                             onClick={() => {
                                 if (item.id === 'my-learning') {
                                     navigate('/learner/my-learning');
@@ -90,7 +91,7 @@ export function LearnerHeader() {
                                 {user?.fullName || 'Your User Name'}
                             </p>
                             <p className="text-[10px] text-[#9CA3AF] mt-0.5 leading-none">
-                                Level 4 · 40%
+                                {roleLabel}
                             </p>
                         </div>
 
@@ -113,7 +114,6 @@ export function LearnerHeader() {
                                 {[
                                     { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/learner/learnerprofile') },
                                     { icon: <BookOpen className="w-4 h-4" />, label: 'My Learning', onClick: () => navigate('/learner/my-learning') },
-                                    { icon: <Settings className="w-4 h-4" />, label: 'Settings' },
                                 ].map((item) => (
                                     <button
                                         key={item.label}

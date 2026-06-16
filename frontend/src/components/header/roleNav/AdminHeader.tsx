@@ -7,6 +7,7 @@ import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { ADMIN_NAV } from '../config/nav-config';
 import { useAuthStore } from '../../../stores/auth/auth.stores';
+import { getUserRoleLabel } from '../../../utils/user/roleUtils';
 
 export function AdminHeader() {
     const navigate = useNavigate();
@@ -15,6 +16,7 @@ export function AdminHeader() {
     const logout = useAuthStore((s) => s.logout);
 
     const [open, setOpen] = useState(false);
+    const roleLabel = getUserRoleLabel(user, 'Admin');
 
     const ACC = '#7C3AED'; // Admin Accent: Purple
     const ACTIVE_BG = '#EDE9FE';
@@ -87,7 +89,7 @@ export function AdminHeader() {
                                 {user?.fullName || 'Admin User'}
                             </p>
                             <p className="text-[10px] text-[#9CA3AF] mt-0.5 leading-none">
-                                Platform SuperAdmin
+                                {roleLabel}
                             </p>
                         </div>
 
