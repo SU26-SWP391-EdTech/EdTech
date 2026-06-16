@@ -1,3 +1,4 @@
+import { BookOpen, Video } from 'lucide-react';
 import { LessonStatusIcon } from './LessonStatusIcon';
 import type { Lesson, Module } from '../../../types/lesson/lesson.types';
 
@@ -43,6 +44,14 @@ export function CurriculumSidebar({
                 }`}
               >
                 <LessonStatusIcon status={lesson.status} />
+                <div className="flex w-9 flex-shrink-0 items-center gap-1">
+                  {(lesson.hasVideo || lesson.type === 'Video' || lesson.type === 'Video & Reading') && (
+                    <Video className="h-3.5 w-3.5 text-[#E11D48]" />
+                  )}
+                  {(lesson.hasReading || lesson.type === 'Reading' || lesson.type === 'Video & Reading') && (
+                    <BookOpen className="h-3.5 w-3.5 text-[#6366F1]" />
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <span
                     className={`text-xs truncate block ${

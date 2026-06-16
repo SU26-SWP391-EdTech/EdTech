@@ -13,6 +13,16 @@ import { getCourseById } from '../../services/course/course.service';
 import { getLessonsByCourse } from '../../services/lesson/lesson.service';
 import { getMyEnrollments, updateEnrollmentProgress } from '../../services/enrollment/enrollment.service';
 
+function getLessonType(lesson: any) {
+  const hasVideo = Boolean(lesson.videoUrl);
+  const hasReading = Boolean(lesson.content);
+
+  if (hasVideo && hasReading) return 'Video & Reading';
+  if (hasVideo) return 'Video';
+  if (hasReading) return 'Reading';
+  return 'Reading';
+}
+
 export function useLessonPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -70,10 +80,12 @@ export function useLessonPage() {
         id: String(l.lessonId),
         title: l.title,
         duration: l.videoDuration ? `${Math.round(l.videoDuration / 60)}m` : '15m',
-        type: l.content ? 'Reading' : 'Video',
+        type: getLessonType(l),
         preview: false,
         videoUrl: l.videoUrl || '',
         content: l.content || '',
+        hasVideo: Boolean(l.videoUrl),
+        hasReading: Boolean(l.content),
       })),
     }
   ];
@@ -291,32 +303,6 @@ export function useLessonPage() {
       persistLessonCompletion(activeLesson);
     }
   };
-
-  // 30 seconds auto-completion timer
-  useEffect(() => {
-    if (!activeLesson || activeLesson.status === 'completed') {
-      return;
-    }
-
-    const canCompleteByViewing =
-      activeLesson.type === 'Reading' ||
-      (activeLesson.type === 'Video' && Boolean(youtubeEmbedUrl));
-
-    if (!canCompleteByViewing) {
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      persistLessonCompletion(activeLesson, false);
-      toast.success(
-        activeLesson.type === 'Reading'
-          ? 'Reading completed after 30 seconds.'
-          : 'Video lesson completed.'
-      );
-    }, 30000);
-
-    return () => window.clearTimeout(timer);
-  }, [activeLesson?.id, activeLesson?.type, activeLesson?.status, youtubeEmbedUrl]);
 
   const handleLessonClick = (lesson: Lesson) => {
     if (lesson.status === 'locked') {

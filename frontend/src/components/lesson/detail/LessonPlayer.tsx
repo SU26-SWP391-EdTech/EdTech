@@ -5,7 +5,7 @@ interface LessonPlayerProps {
   activeLesson?: Lesson;
   activeVideoUrl?: string;
   youtubeEmbedUrl: string | null;
-  onNativeVideoEnded: () => void;
+  onNativeVideoEnded?: () => void;
 }
 
 export function LessonPlayer({

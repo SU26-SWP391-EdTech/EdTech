@@ -1,4 +1,3 @@
-import toast from 'react-hot-toast';
 import { useLessonPage } from '../../hooks/lesson/useLessonPage';
 import { LessonHeader } from '../../components/lesson/detail/LessonHeader';
 import { LessonPlayer } from '../../components/lesson/detail/LessonPlayer';
@@ -6,11 +5,7 @@ import { LessonReading } from '../../components/lesson/detail/LessonReading';
 import { LessonQuiz } from '../../components/lesson/detail/LessonQuiz';
 import { LessonAssignment } from '../../components/lesson/detail/LessonAssignment';
 import { LessonSummaryNav } from '../../components/lesson/detail/LessonSummaryNav';
-import { LessonTabs } from '../../components/lesson/detail/LessonTabs';
-import { NotesPanel } from '../../components/lesson/detail/NotesPanel';
-import { DiscussionPanel } from '../../components/lesson/detail/DiscussionPanel';
 import { CurriculumSidebar } from '../../components/lesson/detail/CurriculumSidebar';
-import { QUESTIONS } from '../../utils/lesson/lessonUtils';
 
 export function LessonPage() {
   const lesson = useLessonPage();
@@ -98,12 +93,6 @@ export function LessonPage() {
                       activeLesson={lesson.activeLesson!}
                       activeVideoUrl={lesson.activeVideoUrl}
                       youtubeEmbedUrl={lesson.youtubeEmbedUrl}
-                      onNativeVideoEnded={() => {
-                        if (lesson.activeLesson) {
-                          lesson.persistLessonCompletion(lesson.activeLesson, false);
-                          toast.success('Video lesson completed.');
-                        }
-                      }}
                     />
                   )}
                   {hasReading && (
@@ -124,37 +113,6 @@ export function LessonPage() {
               onNextLesson={lesson.handleNextLesson}
             />
 
-            {/* CONTENT TABS */}
-            <LessonTabs
-              activeTab={lesson.activeTab}
-              onTabChange={lesson.setActiveTab}
-              activeLesson={lesson.activeLesson}
-              mockCodeInfo={lesson.mockCodeInfo}
-              copiedCode={lesson.copiedCode}
-              onCopyCode={lesson.handleCopyCode}
-              questionsCount={QUESTIONS.length}
-              notesPanel={
-                <NotesPanel
-                  notes={lesson.notes}
-                  noteText={lesson.noteText}
-                  videoProgress={lesson.videoProgress}
-                  onNoteTextChange={lesson.setNoteText}
-                  onAddNote={lesson.handleAddNote}
-                  onDeleteNote={lesson.handleDeleteNote}
-                />
-              }
-              discussionPanel={
-                <DiscussionPanel
-                  questionText={lesson.questionText}
-                  onQuestionTextChange={lesson.setQuestionText}
-                  onPostQuestion={() => {
-                    toast.success('Question posted successfully!');
-                    lesson.setQuestionText('');
-                  }}
-                  questions={QUESTIONS}
-                />
-              }
-            />
           </div>
 
           {/* ── RIGHT SIDEBAR ─────────────────────────────────────────────── */}

@@ -4,6 +4,7 @@ import { Card } from './Card';
 interface CourseProviderCardProps {
   instructorName: string;
   instructorAvatar: string;
+  instructorAvatarUrl?: string;
   expertise?: string;
   bio?: string;
   rating?: number;
@@ -13,6 +14,7 @@ interface CourseProviderCardProps {
 export function CourseProviderCard({
   instructorName,
   instructorAvatar,
+  instructorAvatarUrl,
   expertise,
   bio,
   rating = 4.8,
@@ -21,9 +23,13 @@ export function CourseProviderCard({
   return (
     <Card title="Course Provider">
       <div className="flex items-start gap-4">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#F59E0B] to-[#D97706] flex items-center justify-center text-white text-lg flex-shrink-0" style={{ fontWeight: 700 }}>
-          {instructorAvatar}
-        </div>
+        {instructorAvatarUrl ? (
+          <img src={instructorAvatarUrl} alt={instructorName} className="w-16 h-16 rounded-2xl object-cover flex-shrink-0" />
+        ) : (
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#F59E0B] to-[#D97706] flex items-center justify-center text-white text-lg flex-shrink-0" style={{ fontWeight: 700 }}>
+            {instructorAvatar}
+          </div>
+        )}
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-0.5">
             <h3 className="text-base text-[#111827]" style={{ fontWeight: 600 }}>{instructorName}</h3>

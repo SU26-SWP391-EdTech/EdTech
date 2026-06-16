@@ -9,6 +9,9 @@ export interface Lesson {
   status: LessonStatus;
   preview?: boolean;
   videoUrl?: string;
+  content?: string;
+  hasVideo?: boolean;
+  hasReading?: boolean;
 }
 
 export interface Module {

@@ -8,6 +8,27 @@ import { getLessonsByCourse } from '../../services/lesson/lesson.service';
 import { getMyEnrollments, enrollCourse } from '../../services/enrollment/enrollment.service';
 import { getAcademicProfile } from '../../services/user/user.service';
 
+function getLessonType(lesson: any) {
+  const hasVideo = Boolean(lesson.videoUrl);
+  const hasReading = Boolean(lesson.content);
+
+  if (hasVideo && hasReading) return 'Video & Reading';
+  if (hasVideo) return 'Video';
+  if (hasReading) return 'Reading';
+  return 'Reading';
+}
+
+function getLessonDurationMinutes(lesson: any) {
+  return lesson.videoDuration ? Math.round(Number(lesson.videoDuration) / 60) : 0;
+}
+
+function formatCourseHours(totalMinutes: number) {
+  const hours = totalMinutes / 60;
+  if (hours === 0) return '0 hours';
+  if (hours < 1) return `${totalMinutes} min`;
+  return `${Number.isInteger(hours) ? hours : hours.toFixed(1)} hours`;
+}
+
 export function useCourseDetail() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -156,6 +177,8 @@ export function useCourseDetail() {
   const enrolled = isEnrolled;
 
   const totalLessons = lessonsList.length;
+  const totalLessonMinutes = lessonsList.reduce((sum, lesson) => sum + getLessonDurationMinutes(lesson), 0);
+  const courseDurationLabel = formatCourseHours(totalLessonMinutes);
   // Estimate completed lessons from progress percentage
   const completedLessons = enrolled ? Math.round((progressVal / 100) * totalLessons) : 0;
 
@@ -191,8 +214,12 @@ export function useCourseDetail() {
           title: l.title,
           status,
           preview: l.preview || false,
-          type: (l.type || (l.content ? 'Reading' : 'Video')) as any,
-          duration: l.duration || (l.videoDuration ? `${Math.round(l.videoDuration / 60)}m` : '15m'),
+          type: getLessonType(l) as any,
+          duration: l.duration || (getLessonDurationMinutes(l) ? `${getLessonDurationMinutes(l)}m` : '0m'),
+          videoUrl: l.videoUrl || '',
+          content: l.content || '',
+          hasVideo: Boolean(l.videoUrl),
+          hasReading: Boolean(l.content),
         };
       }),
     }
@@ -200,6 +227,7 @@ export function useCourseDetail() {
 
   const instructorName = matchedCourse.user?.fullName || 'Tech Mentors';
   const instructorAvatar = instructorName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase();
+  const instructorAvatarUrl = providerProfile?.avatarUrl || matchedCourse.user?.avatarUrl || matchedCourse.user?.avatar || '';
 
   const getCourseDetailPath = (id: number) => {
     if (role === 'learner') return `/learner/courses/detail?id=${id}`;
@@ -267,6 +295,8 @@ export function useCourseDetail() {
     dynamicCurriculum,
     instructorName,
     instructorAvatar,
+    instructorAvatarUrl,
+    courseDurationLabel,
     skills,
     outcomes,
     handleEnroll,

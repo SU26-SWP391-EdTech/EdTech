@@ -1,5 +1,4 @@
-import { ChevronLeft, CheckCircle2, PlayCircle, BookOpen, GraduationCap, Clock, Bookmark } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { ChevronLeft, CheckCircle2, PlayCircle, BookOpen, GraduationCap, Clock } from 'lucide-react';
 import type { Lesson, Module } from '../../../types/lesson/lesson.types';
 
 interface LessonHeaderProps {
@@ -91,14 +90,6 @@ export function LessonHeader({
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <button 
-                className="flex items-center gap-2 px-4 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] hover:bg-[#F8FAFC] transition-colors whitespace-nowrap" 
-                style={{ fontWeight: 500 }} 
-                onClick={() => toast.success('Notes saved to workspace.')}
-              >
-                <Bookmark className="w-4 h-4" />
-                Save Notes
-              </button>
               <button
                 onClick={onMarkComplete}
                 disabled={isCompleted}

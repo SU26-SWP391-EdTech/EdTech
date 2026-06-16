@@ -1,8 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, Video, BookOpen, ClipboardList, FileText } from 'lucide-react';
-import type { Lesson, LessonType } from '../../types/course/course-detail.types';
+import type { Lesson } from '../../../types/course/course-detail.types';
 import { StatusIcon } from './StatusIcon';
+import { useAuthStore } from '../../../stores/auth/auth.stores';
 
 interface LessonRowProps {
   lesson: Lesson;
@@ -11,16 +12,20 @@ interface LessonRowProps {
 
 export function LessonRow({ lesson, courseId }: LessonRowProps) {
   const navigate = useNavigate();
-  const isVideo = lesson.type === 'Video' || lesson.type === 'Video & Reading';
-  const isReading = lesson.type === 'Reading' || lesson.type === 'Video & Reading';
+  const role = useAuthStore((state) => state.user?.roleName?.toLowerCase() || 'guest');
+  const isVideo = lesson.hasVideo || lesson.type === 'Video' || lesson.type === 'Video & Reading';
+  const isReading = lesson.hasReading || lesson.type === 'Reading' || lesson.type === 'Video & Reading';
   const isQuiz = lesson.type === 'Quiz';
   const isAssignment = lesson.type === 'Assignment';
 
-
-
-
   const isCurrent = lesson.status === 'current';
   const isLocked = lesson.status === 'locked';
+  const lessonPath = (() => {
+    if (role === 'course provider') return `/provider/lesson?courseId=${courseId}&lessonId=${lesson.id}`;
+    if (role === 'academic manager') return `/academic/lesson?courseId=${courseId}&lessonId=${lesson.id}`;
+    if (role === 'admin') return `/admin/lesson?courseId=${courseId}&lessonId=${lesson.id}`;
+    return `/learner/lesson?courseId=${courseId}&lessonId=${lesson.id}`;
+  })();
 
   return (
     <div
@@ -28,39 +33,34 @@ export function LessonRow({ lesson, courseId }: LessonRowProps) {
         if (isLocked) {
           return;
         }
-        navigate(`/learner/lesson?courseId=${courseId}&lessonId=${lesson.id}`);
+        navigate(lessonPath);
       }}
       className={`flex items-center gap-3 px-4 py-2.5 border-t border-[#F1F5F9] transition-colors ${
         isCurrent ? 'bg-[#FEF2F2]' : 'hover:bg-[#FAFAFA]'
       } ${isLocked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
     >
       <StatusIcon status={lesson.status} />
-      <span className="flex items-center gap-2 text-[11px]" style={{ fontWeight: 600, textTransform: 'uppercase' }}>
+      <span className="flex items-center gap-1.5 text-[11px] w-12" style={{ fontWeight: 600, textTransform: 'uppercase' }}>
         {isVideo && (
-          <span className="flex items-center gap-1" style={{ color: '#E11D48' }}>
+          <span className="flex items-center" title="Video" style={{ color: '#E11D48' }}>
             <Video className="w-3.5 h-3.5" />
-            Video
           </span>
         )}
         {isReading && (
-          <span className="flex items-center gap-1" style={{ color: '#6366F1' }}>
+          <span className="flex items-center" title="Reading" style={{ color: '#6366F1' }}>
             <BookOpen className="w-3.5 h-3.5" />
-            Reading
           </span>
         )}
         {isQuiz && (
-          <span className="flex items-center gap-1" style={{ color: '#F59E0B' }}>
+          <span className="flex items-center" title="Quiz" style={{ color: '#F59E0B' }}>
             <ClipboardList className="w-3.5 h-3.5" />
-            Quiz
           </span>
         )}
         {isAssignment && (
-          <span className="flex items-center gap-1" style={{ color: '#10B981' }}>
+          <span className="flex items-center" title="Assignment" style={{ color: '#10B981' }}>
             <FileText className="w-3.5 h-3.5" />
-            Assignment
           </span>
         )}
-
       </span>
       <span className={`text-sm flex-1 ${isCurrent ? 'text-[#E11D48]' : 'text-[#111827]'}`} style={{ fontWeight: isCurrent ? 600 : 500 }}>
         {lesson.title}

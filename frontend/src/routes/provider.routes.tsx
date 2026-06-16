@@ -8,6 +8,7 @@ import { ExplorePage } from '../pages/course/ExplorePage';
 import { MyCoursesPage } from '../pages/course/MyCoursePage';
 import { LearningPathDetail } from '../pages/learning-path/LearningPathDetail';
 import { CreateLessonPage } from '../pages/lesson/CreateLesson';
+import { LessonPage } from '../pages/lesson/LessonPage';
 import { ProviderProfile } from '../pages/user/ProviderProfile';
 
 export const providerRoutes: RouteObject = {
@@ -25,6 +26,7 @@ export const providerRoutes: RouteObject = {
         { path: 'courses/detail', element: <CourseDetail /> },
         { path: 'courses/lessons', element: <CourseManagement /> },
         { path: 'lessons/create', element: <CreateLessonPage /> },
+        { path: 'lesson', element: <LessonPage /> },
         { path: 'explore', element: <ExplorePage /> },
         { path: 'learning-path/:id', element: <LearningPathDetail /> },
     ],

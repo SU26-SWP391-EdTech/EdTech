@@ -11,6 +11,8 @@ interface CourseHeroProps {
   handleEnroll: () => void;
   instructorName: string;
   instructorAvatar: string;
+  instructorAvatarUrl?: string;
+  durationLabel: string;
   onContinueCourse: () => void;
   onApprove?: () => void;
   onReject?: () => void;
@@ -26,6 +28,8 @@ export function CourseHero({
   handleEnroll,
   instructorName,
   instructorAvatar,
+  instructorAvatarUrl,
+  durationLabel,
   onContinueCourse,
   onApprove,
   onReject,
@@ -55,14 +59,18 @@ export function CourseHero({
 
               <div className="flex flex-wrap items-center gap-5 mb-5 text-sm text-white/70">
                 <span className="flex items-center gap-1.5"><Users className="w-4 h-4" />{(course.enrollmentCount || 0).toLocaleString()} learners</span>
-                <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" />{course.duration || 0} hours</span>
-                <span className="flex items-center gap-1.5"><BookOpen className="w-4 h-4" />{course.totalLessons || 0} lessons</span>
+                <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" />{durationLabel}</span>
+                <span className="flex items-center gap-1.5"><BookOpen className="w-4 h-4" />{totalLessons} lessons</span>
                 <span className="flex items-center gap-1.5"><Languages className="w-4 h-4" />{course.language || 'English'}</span>
                 <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" />Updated {new Date(course.updatedAt || course.createdAt || Date.now()).toLocaleDateString('en-US', {month: 'short', day: '2-digit', year: 'numeric'})}</span>
               </div>
 
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F59E0B] to-[#D97706] flex items-center justify-center text-white text-sm" style={{ fontWeight: 600 }}>{instructorAvatar}</div>
+                {instructorAvatarUrl ? (
+                  <img src={instructorAvatarUrl} alt={instructorName} className="w-10 h-10 rounded-full object-cover" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F59E0B] to-[#D97706] flex items-center justify-center text-white text-sm" style={{ fontWeight: 600 }}>{instructorAvatar}</div>
+                )}
                 <div>
                   <p className="text-sm text-white" style={{ fontWeight: 500 }}>{instructorName}</p>
                   <p className="text-xs text-white/60">Course Provider · Verified instructor</p>
@@ -128,7 +136,7 @@ export function CourseHero({
             <div className="col-span-5 relative">
               <div className="aspect-video rounded-xl overflow-hidden relative bg-slate-800 border border-white/10 shadow-2xl">
                 <img
-                  src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=60"
+                  src={course.thumbnailUrl || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=60'}
                   alt="Course preview"
                   className="w-full h-full object-cover opacity-90"
                 />

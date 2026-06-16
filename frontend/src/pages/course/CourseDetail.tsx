@@ -24,6 +24,8 @@ export function CourseDetail() {
     dynamicCurriculum,
     instructorName,
     instructorAvatar,
+    instructorAvatarUrl,
+    courseDurationLabel,
     outcomes,
     handleEnroll,
     handleContinueCourse,
@@ -58,6 +60,8 @@ export function CourseDetail() {
         handleEnroll={handleEnroll}
         instructorName={instructorName}
         instructorAvatar={instructorAvatar}
+        instructorAvatarUrl={instructorAvatarUrl}
+        durationLabel={courseDurationLabel}
         onContinueCourse={handleContinueCourse}
         onApprove={() => handleApproveCourse(matchedCourse.courseId)}
         onReject={() => setShowRejectModal(true)}
@@ -73,7 +77,7 @@ export function CourseDetail() {
           <CourseCurriculum
             curriculum={dynamicCurriculum}
             totalLessons={totalLessons}
-            duration={matchedCourse.duration || 0}
+            durationLabel={courseDurationLabel}
             enrolled={enrolled}
             courseId={matchedCourse.courseId}
           />
@@ -81,6 +85,7 @@ export function CourseDetail() {
           <CourseProviderCard
             instructorName={instructorName}
             instructorAvatar={instructorAvatar}
+            instructorAvatarUrl={instructorAvatarUrl}
             expertise={providerProfile?.expertise}
             bio={providerProfile?.bio}
             rating={providerProfile?.rating}

@@ -5,6 +5,7 @@ import { CourseDetail } from '../pages/course/CourseDetail';
 import { CourseManagement } from '../pages/course/CourseManagement';
 import { LearningPathDetail } from '../pages/learning-path/LearningPathDetail';
 import { LearningPathManagement } from '../pages/learning-path/LearningPathManagement';
+import { LessonPage } from '../pages/lesson/LessonPage';
 import { ProviderProfile } from '../pages/user/ProviderProfile';
 import { UserProfile } from '../pages/user/UserProfile';
 
@@ -22,6 +23,7 @@ export const academicRoutes: RouteObject = {
         { path: 'pending-courses', element: <CourseManagement /> },
         { path: 'courses/detail', element: <CourseDetail /> },
         { path: 'courses/lessons', element: <CourseManagement /> },
+        { path: 'lesson', element: <LessonPage /> },
         { path: 'learning-path/:id', element: <LearningPathDetail /> },
         { path: 'learning-paths', element: <LearningPathManagement /> },
         { path: 'providers/:id', element: <ProviderProfile /> },

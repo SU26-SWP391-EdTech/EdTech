@@ -4,6 +4,7 @@ export interface CourseUser {
   userId: number;
   fullName: string;
   avatar: string | null;
+  avatarUrl?: string | null;
 }
 
 export interface BackendCourse {

@@ -6,6 +6,8 @@ export interface Lesson {
   preview?: boolean;
   videoUrl?: string;
   content?: string;
+  hasVideo?: boolean;
+  hasReading?: boolean;
   status: 'completed' | 'current' | 'upcoming' | 'locked';
 }
 
