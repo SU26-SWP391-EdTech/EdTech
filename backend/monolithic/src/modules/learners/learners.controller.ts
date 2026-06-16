@@ -8,9 +8,7 @@ import { UpdateLearnerInfoDto } from './dto/update-learner-info.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { Roles } from 'src/common/decorators/roles/roles.decorator';
-import { Role } from '../roles/entities/role.entity';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
 
 
@@ -31,8 +29,8 @@ export class LearnersController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Learner not found' })
-  async updateProfile(@Param('id') id:number, @CurrentUser('userId') userId: number, @Body() dto: UpdateLearnerInfoDto){
-    return this.learnersService.updateProfile(id, userId, dto);
+  async updateProfile(@Param('id') id:number, @Req() req, @Body() dto: UpdateLearnerInfoDto){
+    return this.learnersService.updateProfile(id, req.user.userId, dto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -62,13 +60,13 @@ export class LearnersController {
   async editLearnerProfile(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: EditLearnerProfileDto,
-    @CurrentUser('userId') userId: number,
+    @Req() req,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     return this.learnersService.editLearnerProfile(
       id,
       dto,
-      userId,
+      req.user.userId,
       file,
     );
   }
