@@ -107,7 +107,7 @@ export class CoursesService {
       where: {
         courseId: id,
         user: {
-          userId,
+          userId: userId,
         },
       },
     });
