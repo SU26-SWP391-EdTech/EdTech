@@ -34,6 +34,7 @@ export class CoursesController {
         return this.coursesService.create(createCourseDto, req.user.userId, file);
     }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(RoleEnum.ACADEMIC_MANAGER, RoleEnum.COURSE_PROVIDER, RoleEnum.ADMIN)
     @Get()
     @ApiOperation({ summary: 'Get all courses' })
@@ -82,6 +83,7 @@ export class CoursesController {
         return this.coursesService.update(id, updateCourseDto, req.user.userId, file);
     }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Delete(':id')
     @Roles(RoleEnum.COURSE_PROVIDER, RoleEnum.ACADEMIC_MANAGER)
     @ApiOperation({ summary: 'Delete a course' })
