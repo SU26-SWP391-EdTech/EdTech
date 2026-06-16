@@ -156,6 +156,7 @@ export function useLessonPage() {
         type: l.type || 'Video',
         preview: l.preview || false,
         videoUrl: l.videoUrl || '',
+        content: l.content || '',
         status,
       };
     });

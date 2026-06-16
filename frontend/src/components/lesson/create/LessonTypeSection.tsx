@@ -1,43 +1,77 @@
-import { Video, BookOpen, ClipboardCheck } from 'lucide-react';
-import type { LessonType } from '../../../hooks/lesson/useCreateLesson';
-
-const lessonTypes: { id: LessonType; icon: React.FC<{ size: number; color?: string }>; title: string; desc: string }[] = [
-  { id: 'video', icon: Video, title: 'Video Lesson', desc: 'Upload or link a video lecture' },
-  { id: 'reading', icon: BookOpen, title: 'Reading Lesson', desc: 'Written content, articles, or notes' },
-  { id: 'quiz', icon: ClipboardCheck, title: 'Quiz', desc: 'Knowledge check with questions' },
-];
+import { Video, BookOpen } from 'lucide-react';
 
 interface Props {
-  lessonType: LessonType;
-  setLessonType: (t: LessonType) => void;
+  hasVideo: boolean;
+  setHasVideo: (b: boolean) => void;
+  hasReading: boolean;
+  setHasReading: (b: boolean) => void;
 }
 
-export function LessonTypeSection({ lessonType, setLessonType }: Props) {
+export function LessonTypeSection({ hasVideo, setHasVideo, hasReading, setHasReading }: Props) {
+  const handleToggleVideo = () => {
+    if (hasVideo && !hasReading) return;
+    setHasVideo(!hasVideo);
+  };
+
+  const handleToggleReading = () => {
+    if (hasReading && !hasVideo) return;
+    setHasReading(!hasReading);
+  };
+
   return (
     <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14, padding: '22px 26px', marginBottom: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Lesson Type</h2>
+      <div style={{ marginBottom: 18 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Lesson Content Options</h2>
+        <p style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>Select the content type(s) included in this lesson (choose at least one).</p>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-        {lessonTypes.map(lt => {
-          const selected = lessonType === lt.id;
-          return (
-            <button
-              key={lt.id}
-              onClick={() => setLessonType(lt.id)}
-              style={{
-                textAlign: 'left', padding: '14px 16px', borderRadius: 10,
-                border: `1.5px solid ${selected ? '#E11D48' : '#E5E7EB'}`,
-                background: selected ? '#FFF1F3' : '#FAFAFA',
-                cursor: 'pointer', transition: 'all 0.15s',
-              }}
-            >
-              <lt.icon size={18} color={selected ? '#E11D48' : '#6B7280'} />
-              <p style={{ fontSize: 13, fontWeight: 600, color: selected ? '#E11D48' : '#111827', marginTop: 8, marginBottom: 3 }}>{lt.title}</p>
-              <p style={{ fontSize: 11.5, color: '#6B7280', lineHeight: 1.4 }}>{lt.desc}</p>
-            </button>
-          );
-        })}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+        {/* Video Card */}
+        <button
+          onClick={handleToggleVideo}
+          style={{
+            textAlign: 'left', padding: '16px 20px', borderRadius: 10,
+            border: `1.5px solid ${hasVideo ? '#E11D48' : '#E5E7EB'}`,
+            background: hasVideo ? '#FFF1F3' : '#FAFAFA',
+            cursor: 'pointer', transition: 'all 0.15s',
+            display: 'flex', flexDirection: 'column', gap: 4
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <Video size={20} color={hasVideo ? '#E11D48' : '#6B7280'} />
+            <input 
+              type="checkbox" 
+              checked={hasVideo} 
+              readOnly 
+              style={{ accentColor: '#E11D48', cursor: 'pointer' }}
+            />
+          </div>
+          <p style={{ fontSize: 13.5, fontWeight: 600, color: hasVideo ? '#E11D48' : '#111827', marginTop: 8 }}>Video Lecture</p>
+          <p style={{ fontSize: 11.5, color: '#6B7280', lineHeight: 1.4 }}>Upload or link a video lesson</p>
+        </button>
+
+        {/* Reading Card */}
+        <button
+          onClick={handleToggleReading}
+          style={{
+            textAlign: 'left', padding: '16px 20px', borderRadius: 10,
+            border: `1.5px solid ${hasReading ? '#E11D48' : '#E5E7EB'}`,
+            background: hasReading ? '#FFF1F3' : '#FAFAFA',
+            cursor: 'pointer', transition: 'all 0.15s',
+            display: 'flex', flexDirection: 'column', gap: 4
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <BookOpen size={20} color={hasReading ? '#E11D48' : '#6B7280'} />
+            <input 
+              type="checkbox" 
+              checked={hasReading} 
+              readOnly 
+              style={{ accentColor: '#E11D48', cursor: 'pointer' }}
+            />
+          </div>
+          <p style={{ fontSize: 13.5, fontWeight: 600, color: hasReading ? '#E11D48' : '#111827', marginTop: 8 }}>Reading Material</p>
+          <p style={{ fontSize: 11.5, color: '#6B7280', lineHeight: 1.4 }}>Written content, articles, or documentation</p>
+        </button>
       </div>
     </div>
   );

@@ -3,10 +3,9 @@ import toast from 'react-hot-toast';
 import { useCourseDetail } from '../../hooks/course/useCourseDetail';
 import { CourseHero } from '../../components/course/detail/CourseHero';
 import { CourseOverview } from '../../components/course/detail/CourseOverview';
-import { CourseOutcomes } from '../../components/course/detail/CourseOutcomes';
 import { CourseCurriculum } from '../../components/course/detail/CourseCurriculum';
 import { CourseProviderCard } from '../../components/course/detail/CourseProviderCard';
-import { RelatedCourses } from '../../components/course/detail/RelatedCourses';
+
 
 export function CourseDetail() {
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -16,7 +15,6 @@ export function CourseDetail() {
     matchedCourse,
     providerProfile,
     providerCoursesCount,
-    providerLearnerCount,
     relatedCourses,
     role,
     enrolled,
@@ -24,13 +22,9 @@ export function CourseDetail() {
     completedLessons,
     totalLessons,
     dynamicCurriculum,
-    categoryLabel,
-    difficultyLabel,
     instructorName,
     instructorAvatar,
     outcomes,
-    prerequisites,
-    audience,
     handleEnroll,
     handleContinueCourse,
     getCourseDetailPath,
@@ -62,8 +56,6 @@ export function CourseDetail() {
         completedLessons={completedLessons}
         totalLessons={totalLessons}
         handleEnroll={handleEnroll}
-        categoryLabel={categoryLabel}
-        difficultyLabel={difficultyLabel}
         instructorName={instructorName}
         instructorAvatar={instructorAvatar}
         onContinueCourse={handleContinueCourse}
@@ -76,11 +68,7 @@ export function CourseDetail() {
         <div className="col-span-12 space-y-6">
           <CourseOverview
             description={matchedCourse.description || ''}
-            audience={audience}
-            prerequisites={prerequisites}
           />
-
-          <CourseOutcomes outcomes={outcomes} />
 
           <CourseCurriculum
             curriculum={dynamicCurriculum}
@@ -97,16 +85,12 @@ export function CourseDetail() {
             bio={providerProfile?.bio}
             rating={providerProfile?.rating}
             courseCount={providerCoursesCount}
-            learnerCount={providerLearnerCount}
-            onViewProfile={() => {
-              navigate(getProviderProfilePath(matchedCourse.user?.userId));
-            }}
           />
 
-          <RelatedCourses
-            courses={relatedCourses}
-            onViewCourse={(courseId) => navigate(getCourseDetailPath(courseId))}
-          />
+
+
+
+
         </div>
       </div>
 

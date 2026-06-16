@@ -1,5 +1,5 @@
 export type LessonStatus = 'completed' | 'current' | 'locked' | 'not-started';
-export type LessonType = 'Video' | 'Reading' | 'Quiz' | 'Assignment';
+export type LessonType = 'Video' | 'Reading' | 'Quiz' | 'Assignment' | 'Video & Reading';
 
 export interface Lesson {
   id: string;

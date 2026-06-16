@@ -12,7 +12,7 @@ interface CourseSidebarProps {
   role: string;
   handleEnroll: () => void;
   duration: number;
-  curriculumLength: number;
+
   skills: string[];
 }
 
@@ -24,7 +24,7 @@ export function CourseSidebar({
   role,
   handleEnroll,
   duration,
-  curriculumLength,
+
   skills,
 }: CourseSidebarProps) {
   return (
@@ -92,7 +92,7 @@ export function CourseSidebar({
             <div className="mt-5 pt-5 border-t border-[#F1F5F9]">
               <p className="text-xs text-[#6B7280] mb-3" style={{ fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>This course includes</p>
               <div className="space-y-2.5">
-                <Includes Icon={BookOpen} label={`${totalLessons} lessons across ${curriculumLength} modules`} />
+                <Includes Icon={BookOpen} label={`${totalLessons} lessons of curriculum content`} />
                 <Includes Icon={Video} label={`${duration} hours of learning content`} />
                 <Includes Icon={Download} label="Downloadable resources" />
                 <Includes Icon={ClipboardList} label="Quizzes & assignments" />

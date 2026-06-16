@@ -9,8 +9,6 @@ interface CourseHeroProps {
   completedLessons: number;
   totalLessons: number;
   handleEnroll: () => void;
-  categoryLabel: string;
-  difficultyLabel: string;
   instructorName: string;
   instructorAvatar: string;
   onContinueCourse: () => void;
@@ -26,8 +24,6 @@ export function CourseHero({
   completedLessons,
   totalLessons,
   handleEnroll,
-  categoryLabel,
-  difficultyLabel,
   instructorName,
   instructorAvatar,
   onContinueCourse,
@@ -42,17 +38,14 @@ export function CourseHero({
         <div className="relative px-8 py-10">
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-7 text-white">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="px-2 py-0.5 bg-[#E11D48] text-white rounded text-[10px]" style={{ fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{categoryLabel}</span>
-                <span className="px-2 py-0.5 bg-white/10 backdrop-blur text-white rounded text-[10px]" style={{ fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{difficultyLabel}</span>
-                <span className="px-2 py-0.5 bg-[#10B981]/20 text-[#86EFAC] rounded text-[10px]" style={{ fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Popular</span>
-                {enrolled && (
+              {enrolled && (
+                <div className="flex items-center gap-2 mb-3">
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white text-[#E11D48] rounded text-[10px]" style={{ fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                    <BadgeCheck className="w-3 h-3" />
-                    Enrolled
-                  </span>
-                )}
-              </div>
+                      <BadgeCheck className="w-3 h-3" />
+                      Enrolled
+                    </span>
+                </div>
+              )}
               <h1 className="text-[36px] text-white mb-2" style={{ fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
                 {course.title}
               </h1>
@@ -61,11 +54,11 @@ export function CourseHero({
               </p>
 
               <div className="flex flex-wrap items-center gap-5 mb-5 text-sm text-white/70">
-                <span className="flex items-center gap-1.5"><Users className="w-4 h-4" />{(course.enrollmentCount || 2430).toLocaleString()} learners</span>
-                <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" />{course.duration} hours</span>
-                <span className="flex items-center gap-1.5"><BookOpen className="w-4 h-4" />{course.totalLessons} lessons</span>
+                <span className="flex items-center gap-1.5"><Users className="w-4 h-4" />{(course.enrollmentCount || 0).toLocaleString()} learners</span>
+                <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" />{course.duration || 0} hours</span>
+                <span className="flex items-center gap-1.5"><BookOpen className="w-4 h-4" />{course.totalLessons || 0} lessons</span>
                 <span className="flex items-center gap-1.5"><Languages className="w-4 h-4" />{course.language || 'English'}</span>
-                <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" />Updated Jun 04, 2026</span>
+                <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" />Updated {new Date(course.updatedAt || course.createdAt || Date.now()).toLocaleDateString('en-US', {month: 'short', day: '2-digit', year: 'numeric'})}</span>
               </div>
 
               <div className="flex items-center gap-3 mb-6">
@@ -90,14 +83,6 @@ export function CourseHero({
                   </div>
                   <div className="flex items-center justify-between text-xs text-white/60">
                     <span>{completedLessons}/{totalLessons} lessons completed</span>
-                    <span>Last accessed: 2h ago</span>
-                  </div>
-                  <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] text-white/60" style={{ fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Current lesson</p>
-                      <p className="text-sm text-white" style={{ fontWeight: 500 }}>Building Your First Controller</p>
-                    </div>
-                    <span className="text-xs text-white/60">Lesson 7 of {totalLessons}</span>
                   </div>
                 </div>
               )}

@@ -1,9 +1,8 @@
-import { Save, Rocket, CheckCircle2, X } from 'lucide-react';
-import { useCreateLesson, checklist } from '../../hooks/lesson/useCreateLesson';
+import { Save, CheckCircle2, X } from 'lucide-react';
+import { useCreateLesson } from '../../hooks/lesson/createLesson';
 import { LessonInfoSection } from '../../components/lesson/create/LessonInfoSection';
 import { LessonTypeSection } from '../../components/lesson/create/LessonTypeSection';
 import { LessonContentSection } from '../../components/lesson/create/LessonContentSection';
-import { PublishModal } from '../../components/lesson/create/PublishModal';
 import { AddResourceModal } from '../../components/lesson/create/AddResourceModal';
 import { AddQuizModal } from '../../components/lesson/create/AddQuizModal';
 
@@ -15,7 +14,7 @@ export function CreateLessonPage() {
 
       <div style={{ maxWidth: 1440, margin: '0 auto', padding: '20px 24px 60px' }}>
 
-        {/* ── Page header ── */}
+        {/* Page header */}
         <div style={{
           background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14,
           padding: '20px 26px', marginBottom: 20,
@@ -27,7 +26,7 @@ export function CreateLessonPage() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             <button
-              onClick={hook.handleSaveDraft}
+              onClick={hook.handleSaveLesson}
               disabled={hook.isSaving}
               style={{
                 display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px',
@@ -36,22 +35,12 @@ export function CreateLessonPage() {
                 color: '#374151', opacity: hook.isSaving ? 0.7 : 1,
               }}
             >
-              <Save size={14} /> {hook.isSaving ? 'Saving...' : 'Save Draft'}
-            </button>
-            <button
-              onClick={hook.handlePublish}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 7, padding: '9px 18px',
-                background: '#E11D48', border: 'none', borderRadius: 8, cursor: 'pointer',
-                fontSize: 13, fontWeight: 600, color: '#fff',
-              }}
-            >
-              <Rocket size={14} /> Publish Lesson
+              <Save size={14} /> {hook.isSaving ? 'Saving...' : 'Save Lesson'}
             </button>
           </div>
         </div>
 
-        {/* ── Sections ── */}
+        {/* Sections */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
           <LessonInfoSection
@@ -76,29 +65,29 @@ export function CreateLessonPage() {
           />
 
           <LessonTypeSection
-            lessonType={hook.lessonType}
-            setLessonType={hook.setLessonType}
+            hasVideo={hook.hasVideo}
+            setHasVideo={hook.setHasVideo}
+            hasReading={hook.hasReading}
+            setHasReading={hook.setHasReading}
           />
 
           <LessonContentSection
-            lessonType={hook.lessonType}
+            hasVideo={hook.hasVideo}
             videoUrl={hook.videoUrl}
             setVideoUrl={hook.setVideoUrl}
             videoFile={hook.videoFile}
             videoUploaded={hook.videoUploaded}
             videoInputRef={hook.videoInputRef}
+            hasReading={hook.hasReading}
             content={hook.content}
             setContent={hook.setContent}
-            quizQuestions={hook.quizQuestions}
-            setQuizQuestions={hook.setQuizQuestions}
             handleVideoFileChange={hook.handleVideoFileChange}
-            onAddQuiz={() => hook.setModal('quiz')}
           />
 
         </div>
       </div>
 
-      {/* ── Modals ── */}
+      {/* Modals */}
       {hook.modal === 'resource' && (
         <AddResourceModal
           rName={hook.rName} setRName={hook.setRName}
@@ -121,18 +110,7 @@ export function CreateLessonPage() {
         />
       )}
 
-      {hook.modal === 'publish' && (
-        <PublishModal
-          selectedCourse={hook.selectedCourse}
-          checklistState={hook.checklistState}
-          checklist={checklist}
-          isSaving={hook.isSaving}
-          confirmPublish={hook.confirmPublish}
-          onClose={() => hook.setModal(null)}
-        />
-      )}
-
-      {/* ── Toast ── */}
+      {/* Toast */}
       {hook.showToast && (
         <div style={{
           position: 'fixed', bottom: 24, right: 24, background: '#111827',

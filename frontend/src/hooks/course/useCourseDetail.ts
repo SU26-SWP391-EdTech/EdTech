@@ -3,9 +3,10 @@ import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 import toast from 'react-hot-toast';
 import type { Module, LessonStatus } from '../../types/course/course-detail.types';
-import { getCourseById, approveCourse, rejectCourse } from '../../services/course/course.service';
+import { getCourseById, approveCourse, rejectCourse, searchCourses } from '../../services/course/course.service';
 import { getLessonsByCourse } from '../../services/lesson/lesson.service';
 import { getMyEnrollments, enrollCourse } from '../../services/enrollment/enrollment.service';
+import { getAcademicProfile } from '../../services/user/user.service';
 
 export function useCourseDetail() {
   const navigate = useNavigate();
@@ -21,6 +22,8 @@ export function useCourseDetail() {
   const [course, setCourse] = useState<any>(null);
   const [lessonsList, setLessonsList] = useState<any[]>([]);
   const [enrollments, setEnrollments] = useState<any[]>([]);
+  const [providerProfile, setProviderProfile] = useState<any>(null);
+  const [providerCoursesCount, setProviderCoursesCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   async function loadData() {
@@ -32,6 +35,30 @@ export function useCourseDetail() {
       ]);
       setCourse(courseData);
       setLessonsList(lessonsData);
+
+      const providerId = courseData.user?.userId;
+
+      if (providerId) {
+        const [profileResult, coursesResult] = await Promise.allSettled([
+          getAcademicProfile(providerId),
+          searchCourses({ userId: providerId, status: 'approved' }),
+        ]);
+
+        if (profileResult.status === 'fulfilled') {
+          setProviderProfile(profileResult.value);
+        } else {
+          setProviderProfile(null);
+        }
+
+        if (coursesResult.status === 'fulfilled') {
+          setProviderCoursesCount(coursesResult.value.data?.items?.length || 0);
+        } else {
+          setProviderCoursesCount(0);
+        }
+      } else {
+        setProviderProfile(null);
+        setProviderCoursesCount(0);
+      }
 
       if (role === 'learner') {
         const enrollData = await getMyEnrollments();
@@ -49,6 +76,8 @@ export function useCourseDetail() {
         enrollmentCount: 120,
         user: { userId: 4, fullName: 'Minh Tran' },
       });
+      setProviderProfile(null);
+      setProviderCoursesCount(0);
       setLessonsList([
         { lessonId: 'l1', title: 'Introduction to Node.js', videoDuration: 600, type: 'Video', duration: '10m' },
         { lessonId: 'l2', title: 'Building REST APIs', videoDuration: 900, type: 'Video', duration: '15m' },
@@ -74,34 +103,20 @@ export function useCourseDetail() {
   };
 
   const providerId = matchedCourse.user?.userId;
-  // Fallback profile for the instructor
-  const providerProfile = {
+  const resolvedProviderProfile = {
     userId: providerId,
-    fullName: matchedCourse.user?.fullName || 'Tech Mentor',
-    expertise: 'Senior Engineer & Educator',
-    bio: 'Passionate about sharing knowledge and teaching modern tech stacks to students worldwide.',
+    fullName: providerProfile?.fullName || matchedCourse.user?.fullName || 'Tech Mentor',
+    expertise: providerProfile?.expertise || 'Course Provider',
+    bio: providerProfile?.bio || '',
     rating: 4.8,
   };
-
-  const providerCoursesCount = 1;
-  const providerLearnerCount = matchedCourse.enrollmentCount || 0;
   const relatedCourses: any[] = []; // empty related courses for now or static fallback
 
-  // Rich outcomes, prerequisites, and audience fallback values so it looks premium
   const outcomes = [
     'Gain a deep understanding of core concepts and principles.',
     'Build real-world projects to apply and reinforce your knowledge.',
     'Learn industry best practices and design patterns.',
     'Establish a solid foundation for advanced studies and career growth.'
-  ];
-  const prerequisites = [
-    'Basic computer literacy and understanding of internet concepts.',
-    'A passionate mind ready to learn and build amazing things.'
-  ];
-  const audience = [
-    'Aspiring developers wishing to expand their skill sets.',
-    'Experienced professionals seeking to brush up on modern workflows.',
-    'Curious minds and students eager to master new technologies.'
   ];
   const skills = ['Technology', 'Programming', 'Development'];
 
@@ -183,12 +198,6 @@ export function useCourseDetail() {
     }
   ];
 
-  // Category and Difficulty labels
-  const categoryLabel = matchedCourse.title.toLowerCase().includes('react') || matchedCourse.title.toLowerCase().includes('next.js')
-    ? 'Frontend Development'
-    : 'Backend Development';
-  const courseDuration = matchedCourse.duration || 0;
-  const difficultyLabel = courseDuration > 15 ? 'Advanced' : courseDuration > 10 ? 'Intermediate' : 'Beginner';
   const instructorName = matchedCourse.user?.fullName || 'Tech Mentors';
   const instructorAvatar = instructorName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase();
 
@@ -247,9 +256,8 @@ export function useCourseDetail() {
 
   return {
     matchedCourse,
-    providerProfile,
+    providerProfile: resolvedProviderProfile,
     providerCoursesCount,
-    providerLearnerCount,
     relatedCourses,
     role,
     enrolled,
@@ -257,14 +265,10 @@ export function useCourseDetail() {
     completedLessons,
     totalLessons,
     dynamicCurriculum,
-    categoryLabel,
-    difficultyLabel,
     instructorName,
     instructorAvatar,
     skills,
     outcomes,
-    prerequisites,
-    audience,
     handleEnroll,
     handleContinueCourse,
     getCourseDetailPath,

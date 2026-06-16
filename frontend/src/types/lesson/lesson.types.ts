@@ -5,6 +5,7 @@ export interface Lesson {
   type?: string;
   preview?: boolean;
   videoUrl?: string;
+  content?: string;
   status: 'completed' | 'current' | 'upcoming' | 'locked';
 }
 

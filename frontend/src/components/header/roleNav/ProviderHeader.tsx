@@ -21,7 +21,6 @@ export function ProviderHeader() {
         if (path === '/provider') return 'dashboard';
         if (path === '/provider/explore') return 'explore';
         if (path === '/provider/courses') return 'courses';
-        if (path === '/provider/students') return 'students';
         return '';
     };
 
@@ -64,7 +63,7 @@ export function ProviderHeader() {
 
                 <div className="flex-1" />
 
-                <NotifBell count={5} accentColor={ACC} />
+                {/* <NotifBell count={5} accentColor={ACC} /> */}
 
                 <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
 

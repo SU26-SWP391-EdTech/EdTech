@@ -302,9 +302,13 @@ export function CourseManagement() {
                                                                     <button
                                                                         onClick={e => {
                                                                             e.stopPropagation();
-                                                                            setSelectedCourseForEdit(course);
-                                                                            setIsViewOnly(false);
-                                                                            setShowModal(true);
+                                                                            if (isProvider) {
+                                                                                navigate(`/provider/courses/create?id=${course.id}`);
+                                                                            } else {
+                                                                                setSelectedCourseForEdit(course);
+                                                                                setIsViewOnly(false);
+                                                                                setShowModal(true);
+                                                                            }
                                                                         }}
                                                                         className="p-1.5 hover:bg-[#F3F4F6] rounded-lg transition-colors"
                                                                         title="Edit"

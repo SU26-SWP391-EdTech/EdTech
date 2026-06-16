@@ -50,49 +50,68 @@ export function LessonPage() {
           {/* ── LEFT CONTENT AREA ─────────────────────────────────────────── */}
           <div className="flex-1 min-w-0 space-y-5">
             {/* VIDEO PLAYER / INTERACTIVE CONTENT AREA */}
-            {lesson.activeLesson?.type === 'Video' ? (
-              <LessonPlayer
-                activeLesson={lesson.activeLesson}
-                activeVideoUrl={lesson.activeVideoUrl}
-                youtubeEmbedUrl={lesson.youtubeEmbedUrl}
-                onNativeVideoEnded={() => {
-                  if (lesson.activeLesson) {
-                    lesson.persistLessonCompletion(lesson.activeLesson, false);
-                    toast.success('Video lesson completed.');
-                  }
-                }}
-              />
-            ) : lesson.activeLesson?.type === 'Reading' ? (
-              <LessonReading activeLesson={lesson.activeLesson} />
-            ) : lesson.activeLesson?.type === 'Quiz' ? (
-              <LessonQuiz
-                quizQuestionsList={lesson.quizQuestionsList}
-                quizAnswers={lesson.quizAnswers}
-                quizSubmitted={lesson.quizSubmitted}
-                quizScore={lesson.quizScore}
-                onSelectAnswer={(idx, option) =>
-                  lesson.setQuizAnswers((prev) => ({ ...prev, [idx]: option }))
-                }
-                onSubmitQuiz={lesson.handleQuizSubmit}
-                onRetakeQuiz={() => {
-                  lesson.setQuizAnswers({});
-                  lesson.setQuizSubmitted(false);
-                }}
-              />
-            ) : (
-              <LessonAssignment
-                assignmentSubmitted={lesson.assignmentSubmitted}
-                assignmentText={lesson.assignmentText}
-                assignmentFile={lesson.assignmentFile}
-                onAssignmentTextChange={lesson.setAssignmentText}
-                onAssignmentFileChange={lesson.setAssignmentFile}
-                onSubmitAssignment={lesson.handleAssignmentSubmit}
-                onResubmitAssignment={() => {
-                  lesson.setAssignmentSubmitted(false);
-                  lesson.setAssignmentFile(null);
-                }}
-              />
-            )}
+            {(() => {
+              const typeLower = lesson.activeLesson?.type?.toLowerCase() || '';
+              const hasVideo = typeLower === 'video' || typeLower === 'video & reading' || !!lesson.activeLesson?.videoUrl;
+              const hasReading = typeLower === 'reading' || typeLower === 'video & reading' || (!hasVideo && typeLower !== 'quiz' && typeLower !== 'assignment');
+
+              if (typeLower === 'quiz') {
+                return (
+                  <LessonQuiz
+                    quizQuestionsList={lesson.quizQuestionsList}
+                    quizAnswers={lesson.quizAnswers}
+                    quizSubmitted={lesson.quizSubmitted}
+                    quizScore={lesson.quizScore}
+                    onSelectAnswer={(idx, option) =>
+                      lesson.setQuizAnswers((prev) => ({ ...prev, [idx]: option }))
+                    }
+                    onSubmitQuiz={lesson.handleQuizSubmit}
+                    onRetakeQuiz={() => {
+                      lesson.setQuizAnswers({});
+                      lesson.setQuizSubmitted(false);
+                    }}
+                  />
+                );
+              }
+
+              if (typeLower === 'assignment') {
+                return (
+                  <LessonAssignment
+                    assignmentSubmitted={lesson.assignmentSubmitted}
+                    assignmentText={lesson.assignmentText}
+                    assignmentFile={lesson.assignmentFile}
+                    onAssignmentTextChange={lesson.setAssignmentText}
+                    onAssignmentFileChange={lesson.setAssignmentFile}
+                    onSubmitAssignment={lesson.handleAssignmentSubmit}
+                    onResubmitAssignment={() => {
+                      lesson.setAssignmentSubmitted(false);
+                      lesson.setAssignmentFile(null);
+                    }}
+                  />
+                );
+              }
+
+              return (
+                <div className="space-y-6">
+                  {hasVideo && (
+                    <LessonPlayer
+                      activeLesson={lesson.activeLesson!}
+                      activeVideoUrl={lesson.activeVideoUrl}
+                      youtubeEmbedUrl={lesson.youtubeEmbedUrl}
+                      onNativeVideoEnded={() => {
+                        if (lesson.activeLesson) {
+                          lesson.persistLessonCompletion(lesson.activeLesson, false);
+                          toast.success('Video lesson completed.');
+                        }
+                      }}
+                    />
+                  )}
+                  {hasReading && (
+                    <LessonReading activeLesson={lesson.activeLesson!} />
+                  )}
+                </div>
+              );
+            })()}
 
             {/* LESSON SUMMARY + NAVIGATION */}
             <LessonSummaryNav

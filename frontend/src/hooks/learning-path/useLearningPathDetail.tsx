@@ -8,6 +8,7 @@ import type { Enrollment } from '../../services/enrollment/enrollment.service';
 import { getMyEnrollments, enrollCourse } from '../../services/enrollment/enrollment.service';
 import type { LearningPath } from '../../services/learning-path/learning-path.service';
 import { getLearningPathById } from '../../services/learning-path/learning-path.service';
+import { getLessonsByCourse } from '../../services/lesson/lesson.service';
 
 export type NodeState = 'completed' | 'current' | 'upcoming' | 'locked';
 
@@ -43,6 +44,7 @@ export function useLearningPathDetail() {
   const [bookmarked, setBookmarked] = useState(false);
   const [liked, setLiked] = useState<Set<number>>(new Set());
   const [activeCourseId, setActiveCourseId] = useState<number | null>(null);
+  const [activeCourseLessons, setActiveCourseLessons] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadPathData() {
@@ -87,6 +89,23 @@ export function useLearningPathDetail() {
 
     loadPathData();
   }, [id, navigate, user]);
+
+  useEffect(() => {
+    async function loadActiveCourseLessons() {
+      if (!activeCourseId) {
+        setActiveCourseLessons([]);
+        return;
+      }
+      try {
+        const lessons = await getLessonsByCourse(activeCourseId);
+        setActiveCourseLessons(lessons);
+      } catch (err) {
+        console.error('Failed to load active course lessons:', err);
+        setActiveCourseLessons([]);
+      }
+    }
+    loadActiveCourseLessons();
+  }, [activeCourseId]);
 
   const pathCourses = path?.learningPathCourses || [];
 
@@ -159,39 +178,30 @@ export function useLearningPathDetail() {
   const selectedNode = roadmapNodes.find(n => n.id === activeCourseId) || roadmapNodes[0];
   const activeCourse = selectedNode?.course;
 
-  const generateModulesForCourse = (course: Course, progress: number): Module[] => {
-    if (!course) return [];
-    
-    const baseModules = [
-      { title: 'Introduction & Setup', lessonsCount: 4 },
-      { title: 'Core Abstractions & Hooks', lessonsCount: 5 },
-      { title: 'Advanced Design Patterns', lessonsCount: 4 },
-      { title: 'Testing & Deployment', lessonsCount: 5 },
-    ];
+  const generateModulesForCourse = (course: Course, progress: number, lessonsList: any[]): Module[] => {
+    if (!course || !lessonsList || lessonsList.length === 0) return [];
 
-    let lessonsPassed = Math.floor((progress / 100) * course.totalLessons);
-    let lessonsCounter = 0;
+    let lessonsPassed = Math.floor((progress / 100) * lessonsList.length);
 
-    return baseModules.map((m, idx) => {
-      const lessons = Array.from({ length: m.lessonsCount }).map((_, lIdx) => {
-        lessonsCounter++;
-        const done = lessonsCounter <= lessonsPassed;
-        return {
-          title: `${course.title} - Step ${lessonsCounter}: ${m.title} Part ${lIdx + 1}`,
-          done,
-          duration: `${10 + (lessonsCounter % 3) * 5}m`,
-        };
-      });
-
+    const lessons = lessonsList.map((l, index) => {
+      const done = index < lessonsPassed;
       return {
-        id: idx + 1,
-        title: `${m.title} (${lessons.filter(l => l.done).length}/${lessons.length} Completed)`,
-        lessons,
+        title: l.title,
+        done,
+        duration: l.duration || (l.videoDuration ? `${Math.round(l.videoDuration / 60)}m` : '15m'),
       };
     });
+
+    return [
+      {
+        id: 1,
+        title: 'Course Curriculum',
+        lessons,
+      }
+    ];
   };
 
-  const currentModules = activeCourse ? generateModulesForCourse(activeCourse, selectedNode.progress) : [];
+  const currentModules = activeCourse ? generateModulesForCourse(activeCourse, selectedNode.progress, activeCourseLessons) : [];
 
   const getCourseDetailPath = (courseId: number) => {
     const role = user?.roleName?.toLowerCase();

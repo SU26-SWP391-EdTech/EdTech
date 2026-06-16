@@ -1,6 +1,4 @@
-import { ChevronDown } from 'lucide-react';
 import { LessonStatusIcon } from './LessonStatusIcon';
-import { ModuleProgress } from './ModuleProgress';
 import type { Lesson, Module } from '../../../types/lesson/lesson.types';
 
 interface CurriculumSidebarProps {
@@ -28,64 +26,34 @@ export function CurriculumSidebar({
           <span className="text-xs text-[#9CA3AF]">{totalLessons} lessons</span>
         </div>
 
-        <div className="divide-y divide-[#F3F4F6]">
-          {modules.map(mod => {
-            const isExpanded = expandedModules.includes(String(mod.id));
+        <div className="bg-[#FAFAFA] divide-y divide-[#F3F4F6]">
+          {modules.flatMap(mod => mod.lessons).map(lesson => {
+            const isCurrent = String(lesson.id) === String(activeLesson?.id);
 
             return (
-              <div key={mod.id}>
-                <button
-                  onClick={() => onToggleModule(mod.id)}
-                  className="w-full flex items-start gap-3 px-5 py-3.5 hover:bg-[#F8FAFC] transition-colors text-left"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs text-[#111827] truncate" style={{ fontWeight: 600 }}>{mod.title}</span>
-                      <ChevronDown
-                        className={`w-3.5 h-3.5 text-[#9CA3AF] flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[11px] text-[#9CA3AF]">{mod.lessons.length} lessons</span>
-                      <ModuleProgress progress={mod.progress} />
-                    </div>
-                  </div>
-                </button>
-
-                {isExpanded && (
-                  <div className="bg-[#FAFAFA] divide-y divide-[#F3F4F6]">
-                    {mod.lessons.map(lesson => {
-                      const isCurrent = String(lesson.id) === String(activeLesson?.id);
-
-                      return (
-                        <div
-                          key={lesson.id}
-                          onClick={() => onLessonClick(lesson)}
-                          className={`flex items-center gap-3 px-5 py-2.5 cursor-pointer transition-colors ${
-                            isCurrent
-                              ? 'bg-[#FFF1F3] border-l-2 border-[#E11D48]'
-                              : lesson.status === 'locked'
-                              ? 'opacity-50 cursor-not-allowed'
-                              : 'hover:bg-[#F8FAFC]'
-                          }`}
-                        >
-                          <LessonStatusIcon status={lesson.status} />
-                          <div className="flex-1 min-w-0">
-                            <span
-                              className={`text-xs truncate block ${
-                                isCurrent ? 'text-[#E11D48]' : 'text-[#374151]'
-                              }`}
-                              style={{ fontWeight: isCurrent ? 600 : 400 }}
-                            >
-                              {lesson.title}
-                            </span>
-                          </div>
-                          <span className="text-[11px] text-[#9CA3AF] flex-shrink-0">{lesson.duration}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+              <div
+                key={lesson.id}
+                onClick={() => onLessonClick(lesson)}
+                className={`flex items-center gap-3 px-5 py-2.5 cursor-pointer transition-colors ${
+                  isCurrent
+                    ? 'bg-[#FFF1F3] border-l-2 border-[#E11D48]'
+                    : lesson.status === 'locked'
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'hover:bg-[#F8FAFC]'
+                }`}
+              >
+                <LessonStatusIcon status={lesson.status} />
+                <div className="flex-1 min-w-0">
+                  <span
+                    className={`text-xs truncate block ${
+                      isCurrent ? 'text-[#E11D48]' : 'text-[#374151]'
+                    }`}
+                    style={{ fontWeight: isCurrent ? 600 : 400 }}
+                  >
+                    {lesson.title}
+                  </span>
+                </div>
+                <span className="text-[11px] text-[#9CA3AF] flex-shrink-0">{lesson.duration}</span>
               </div>
             );
           })}

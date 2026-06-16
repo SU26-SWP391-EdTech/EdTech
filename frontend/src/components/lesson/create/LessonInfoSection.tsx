@@ -81,16 +81,7 @@ export function LessonInfoSection({
           <p style={{ fontSize: 11.5, color: '#9CA3AF', marginTop: 4 }}>Lesson title should be clear, specific, and easy for learners to understand.</p>
         </div>
 
-        {/* Description */}
-        <div style={{ gridColumn: '1 / -1' }}>
-          <Label>Short Description</Label>
-          <textarea
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            rows={3}
-            style={{ width: '100%', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#374151', outline: 'none', background: '#FAFAFA', resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6, boxSizing: 'border-box' }}
-          />
-        </div>
+
 
         {/* Select Course */}
         <div>
@@ -113,28 +104,6 @@ export function LessonInfoSection({
           )}
         </div>
 
-        {/* Select Module */}
-        <div>
-          <Label>Select Module</Label>
-          {searchParams.get('targetModuleId') ? (
-            <div style={{ padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: 8, background: '#F3F4F6', fontSize: 13, color: '#374151', fontWeight: 600 }}>
-              {(() => {
-                const saved = localStorage.getItem('create_course_draft');
-                if (saved) {
-                  try {
-                    const draft = JSON.parse(saved);
-                    const mod = draft.modules?.find((m: any) => m.id === searchParams.get('targetModuleId'));
-                    if (mod) return mod.title;
-                  } catch { }
-                }
-                return 'Selected Module';
-              })()}
-            </div>
-          ) : (
-            <SelectInput value="Course Lessons" onChange={() => { }} options={['Course Lessons']} />
-          )}
-        </div>
-
         {/* Lesson Order */}
         <div>
           <Label>Lesson Order</Label>
@@ -142,7 +111,7 @@ export function LessonInfoSection({
         </div>
 
         {/* Duration */}
-        <div>
+        <div style={{ gridColumn: '1 / -1' }}>
           <Label>Estimated Duration (min)</Label>
           <Input value={duration} onChange={setDuration} placeholder="18" />
         </div>

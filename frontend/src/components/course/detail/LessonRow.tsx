@@ -11,13 +11,13 @@ interface LessonRowProps {
 
 export function LessonRow({ lesson, courseId }: LessonRowProps) {
   const navigate = useNavigate();
-  const typeMap: Record<LessonType, { Icon: React.ComponentType<{ className?: string }>; color: string }> = {
-    Video: { Icon: Video, color: '#E11D48' },
-    Reading: { Icon: BookOpen, color: '#6366F1' },
-    Quiz: { Icon: ClipboardList, color: '#F59E0B' },
-    Assignment: { Icon: FileText, color: '#10B981' },
-  };
-  const tm = typeMap[lesson.type] || typeMap.Video;
+  const isVideo = lesson.type === 'Video' || lesson.type === 'Video & Reading';
+  const isReading = lesson.type === 'Reading' || lesson.type === 'Video & Reading';
+  const isQuiz = lesson.type === 'Quiz';
+  const isAssignment = lesson.type === 'Assignment';
+
+
+
 
   const isCurrent = lesson.status === 'current';
   const isLocked = lesson.status === 'locked';
@@ -35,9 +35,32 @@ export function LessonRow({ lesson, courseId }: LessonRowProps) {
       } ${isLocked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
     >
       <StatusIcon status={lesson.status} />
-      <span className="flex items-center gap-1.5 text-xs" style={{ color: tm.color, fontWeight: 600 }}>
-        <tm.Icon className="w-3.5 h-3.5" />
-        {lesson.type || 'Video'}
+      <span className="flex items-center gap-2 text-[11px]" style={{ fontWeight: 600, textTransform: 'uppercase' }}>
+        {isVideo && (
+          <span className="flex items-center gap-1" style={{ color: '#E11D48' }}>
+            <Video className="w-3.5 h-3.5" />
+            Video
+          </span>
+        )}
+        {isReading && (
+          <span className="flex items-center gap-1" style={{ color: '#6366F1' }}>
+            <BookOpen className="w-3.5 h-3.5" />
+            Reading
+          </span>
+        )}
+        {isQuiz && (
+          <span className="flex items-center gap-1" style={{ color: '#F59E0B' }}>
+            <ClipboardList className="w-3.5 h-3.5" />
+            Quiz
+          </span>
+        )}
+        {isAssignment && (
+          <span className="flex items-center gap-1" style={{ color: '#10B981' }}>
+            <FileText className="w-3.5 h-3.5" />
+            Assignment
+          </span>
+        )}
+
       </span>
       <span className={`text-sm flex-1 ${isCurrent ? 'text-[#E11D48]' : 'text-[#111827]'}`} style={{ fontWeight: isCurrent ? 600 : 500 }}>
         {lesson.title}

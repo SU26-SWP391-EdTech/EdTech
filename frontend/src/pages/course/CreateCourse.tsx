@@ -1,8 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createCourse, searchCourses } from '../../services/course/course.service';
-import { createLesson } from '../../services/lesson/lesson.service';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { createCourse, searchCourses, getCourseById, updateCourse } from '../../services/course/course.service';
+import { createLesson, getLessonsByCourse, updateLesson, deleteLesson as apiDeleteLesson } from '../../services/lesson/lesson.service';
 import toast from 'react-hot-toast';
+import type { CourseBuilderLesson, CourseBuilderLessonType as LessonType } from '../../types/course/create-course.types';
+import { buildCourseFormData } from '../../utils/course/courseFormData';
+import { clearCourseDraft, hasUsableCourseDraft, readCourseDraft, writeCourseDraft } from '../../utils/course/courseDraftStorage';
+import { buildLessonSyncPayload, mapBackendLessonToCourseBuilderLesson } from '../../utils/course/courseMappers';
 import {
     ChevronDown, Upload, Plus, Send, AlertTriangle, CheckCircle2,
     Circle, X, GripVertical, Pencil, Trash2, Video, BookOpen, FileText,
@@ -10,58 +14,17 @@ import {
     Lock as LockIcon, Building2, Clock
 } from 'lucide-react';
 
-type LessonType = 'Video' | 'Reading' | 'Quiz' | 'Assignment';
-
-interface Lesson {
-    id: string;
-    title: string;
-    type: LessonType;
-    duration: string;
-    locked: boolean;
-}
-
-interface Module {
-    id: string;
-    title: string;
-    description: string;
-    lessons: Lesson[];
-}
-
-const initialModules: Module[] = [
-    {
-        id: 'm1',
-        title: 'Module 1 — Getting Started with Spring Boot',
-        description: 'Set up your environment, understand Spring Boot fundamentals, and build your first app.',
-        lessons: [
-            { id: 'l1', title: 'Introduction to Spring Boot', type: 'Video', duration: '08:24', locked: false },
-            { id: 'l2', title: 'Setting up IntelliJ & Maven', type: 'Reading', duration: '10 min', locked: false },
-            { id: 'l3', title: 'Hello World Application', type: 'Video', duration: '12:10', locked: false },
-            { id: 'l4', title: 'Module Quiz', type: 'Quiz', duration: '5 min', locked: true },
-        ],
-    },
-    {
-        id: 'm2',
-        title: 'Module 2 — Building REST Controllers',
-        description: 'Learn to design and implement REST endpoints with Spring MVC.',
-        lessons: [
-            { id: 'l5', title: 'Your First REST Controller', type: 'Video', duration: '14:32', locked: false },
-            { id: 'l6', title: 'Request Mapping Deep Dive', type: 'Reading', duration: '15 min', locked: true },
-            { id: 'l7', title: 'Build a Bookstore API', type: 'Assignment', duration: '45 min', locked: true },
-        ],
-    },
-];
-
 export function CreateCoursePage() {
     const navigate = useNavigate();
-    const [modules, setModules] = useState<Module[]>([]);
+    const [searchParams] = useSearchParams();
+    const editId = searchParams.get('id') ? Number(searchParams.get('id')) : null;
+    const [deletedLessonIds, setDeletedLessonIds] = useState<number[]>([]);
+    const [lessons, setLessons] = useState<CourseBuilderLesson[]>([]);
     const [outcomes, setOutcomes] = useState<string[]>([]);
     const [skills, setSkills] = useState<string[]>([]);
-    const [showAddModule, setShowAddModule] = useState(false);
     const [showAddLesson, setShowAddLesson] = useState(false);
     const [showSubmit, setShowSubmit] = useState(false);
     const [showUnsaved, setShowUnsaved] = useState(false);
-    const [editingModule, setEditingModule] = useState<Module | null>(null);
-    const [deletingModuleId, setDeletingModuleId] = useState<string | null>(null);
 
     // Form states
     const [title, setTitle] = useState('');
@@ -75,16 +38,14 @@ export function CreateCoursePage() {
     const [dragOver, setDragOver] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [prerequisiteCourseIds, setPrerequisiteCourseIds] = useState<number[]>([]);
-    const [draggedModuleIndex, setDraggedModuleIndex] = useState<number | null>(null);
-    const [draggedLessonInfo, setDraggedLessonInfo] = useState<{ mIdx: number; lIdx: number } | null>(null);
-    const [dragEnabled, setDragEnabled] = useState(false);
+    const [draggedLessonIndex, setDraggedLessonIndex] = useState<number | null>(null);
     const [lessonDragEnabled, setLessonDragEnabled] = useState(false);
 
     const [availableCourses, setAvailableCourses] = useState<{ id: number; title: string }[]>([]);
     const [hasDraft, setHasDraft] = useState(false);
 
-    const saveDraftToLocalStorage = (currentModules = modules) => {
-        const draft = {
+    const saveDraftToLocalStorage = (currentLessons = lessons) => {
+        writeCourseDraft({
             title,
             description,
             language,
@@ -94,16 +55,39 @@ export function CreateCoursePage() {
             outcomes,
             prerequisiteCourseIds,
             thumbnailPreview,
-            modules: currentModules
-        };
-        localStorage.setItem('create_course_draft', JSON.stringify(draft));
+            lessons: currentLessons
+        });
     };
 
     const handleResumeDraft = () => {
-        const saved = localStorage.getItem('create_course_draft');
-        if (saved) {
-            try {
-                const draft = JSON.parse(saved);
+        const draft = readCourseDraft();
+        if (draft) {
+            if (draft.title) setTitle(draft.title);
+            if (draft.description) setDescription(draft.description);
+            if (draft.language) setLanguage(draft.language);
+            if (draft.durationHours) setDurationHours(Number(draft.durationHours) || 0);
+            if (draft.durationMinutes) setDurationMinutes(Number(draft.durationMinutes) || 0);
+            if (draft.projectUrl) setProjectUrl(draft.projectUrl);
+            if (draft.outcomes) setOutcomes(draft.outcomes);
+            if (draft.prerequisiteCourseIds) setPrerequisiteCourseIds(draft.prerequisiteCourseIds);
+            if (draft.thumbnailPreview) setThumbnailPreview(draft.thumbnailPreview);
+            if (draft.lessons) setLessons(draft.lessons);
+            toast.success('Course draft loaded successfully!');
+        }
+        setHasDraft(false);
+    };
+
+    const handleDiscardDraft = () => {
+        clearCourseDraft();
+        setHasDraft(false);
+        toast.success('Draft discarded.');
+    };
+
+    useEffect(() => {
+        if (editId) return;
+        const draft = readCourseDraft();
+        if (draft) {
+            if (searchParams.get('resume') === 'true') {
                 if (draft.title) setTitle(draft.title);
                 if (draft.description) setDescription(draft.description);
                 if (draft.language) setLanguage(draft.language);
@@ -113,78 +97,52 @@ export function CreateCoursePage() {
                 if (draft.outcomes) setOutcomes(draft.outcomes);
                 if (draft.prerequisiteCourseIds) setPrerequisiteCourseIds(draft.prerequisiteCourseIds);
                 if (draft.thumbnailPreview) setThumbnailPreview(draft.thumbnailPreview);
-                if (draft.modules) setModules(draft.modules);
-                toast.success('Course draft loaded successfully!');
-            } catch (e) {
-                console.error('Failed to load course draft:', e);
+                if (draft.lessons) setLessons(draft.lessons);
+                setHasDraft(false);
+            } else {
+                setHasDraft(hasUsableCourseDraft(draft));
             }
         }
-        setHasDraft(false);
-    };
-
-    const handleDiscardDraft = () => {
-        localStorage.removeItem('create_course_draft');
-        setHasDraft(false);
-        toast.success('Draft discarded.');
-    };
+    }, [editId, searchParams]);
 
     useEffect(() => {
-        const saved = localStorage.getItem('create_course_draft');
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                if (parsed.title || parsed.description || (parsed.modules && parsed.modules.length > 0)) {
-                    setHasDraft(true);
-                }
-            } catch (e) { }
-        }
-    }, []);
+        if (!editId) return;
 
-    useEffect(() => {
-        const temp = localStorage.getItem('temp_created_lesson');
-        if (temp) {
+        const loadCourseData = async () => {
+            setIsSubmitting(true);
             try {
-                const { targetModuleId, lesson } = JSON.parse(temp);
-                if (targetModuleId && lesson) {
-                    setModules((prevModules) => {
-                        const updated = prevModules.map((m) => {
-                            if (m.id === targetModuleId) {
-                                const existingLessons = m.lessons || [];
-                                const exists = existingLessons.some((l) => l.id === lesson.id);
-                                const updatedLessons = exists
-                                    ? existingLessons.map((l) => l.id === lesson.id ? lesson : l)
-                                    : [...existingLessons, lesson];
-                                return { ...m, lessons: updatedLessons };
-                            }
-                            return m;
-                        });
+                const course = await getCourseById(editId);
+                setTitle(course.title || '');
+                setDescription(course.description || '');
+                setLanguage(course.language || 'English');
+                setProjectUrl(course.projectUrl || '');
+                setThumbnailPreview(course.thumbnailUrl || null);
 
-                        const saved = localStorage.getItem('create_course_draft');
-                        if (saved) {
-                            try {
-                                const draft = JSON.parse(saved);
-                                localStorage.setItem('create_course_draft', JSON.stringify({
-                                    ...draft,
-                                    modules: updated
-                                }));
-                            } catch (err) { }
-                        }
-                        return updated;
-                    });
-                    localStorage.removeItem('temp_created_lesson');
-                    toast.success('Lesson saved to course draft successfully!');
-                }
-            } catch (e) {
-                console.error('Failed to parse temp lesson:', e);
+                const totalDuration = course.duration || 0;
+                setDurationHours(Math.floor(totalDuration / 60));
+                setDurationMinutes(totalDuration % 60);
+
+                const lessonsFromBackend = await getLessonsByCourse(editId);
+                const mappedLessons = lessonsFromBackend.map(mapBackendLessonToCourseBuilderLesson);
+
+                setLessons(mappedLessons);
+            } catch (err) {
+                console.error('Failed to load course details for edit:', err);
+                toast.error('Failed to load course details.');
+            } finally {
+                setIsSubmitting(false);
             }
-        }
-    }, []);
+        };
+
+        loadCourseData();
+    }, [editId]);
 
     useEffect(() => {
-        if (!hasDraft && (title || description || modules.length > 0 || outcomes.length > 0 || prerequisiteCourseIds.length > 0)) {
+        if (editId) return;
+        if (!hasDraft && (title || description || lessons.length > 0 || outcomes.length > 0 || prerequisiteCourseIds.length > 0)) {
             saveDraftToLocalStorage();
         }
-    }, [title, description, language, durationHours, durationMinutes, projectUrl, outcomes, prerequisiteCourseIds, modules, thumbnailPreview, hasDraft]);
+    }, [title, description, language, durationHours, durationMinutes, projectUrl, outcomes, prerequisiteCourseIds, lessons, thumbnailPreview, hasDraft]);
 
     useEffect(() => {
         const fetchAvailableCourses = async () => {
@@ -239,53 +197,55 @@ export function CreateCoursePage() {
         }
         setIsSubmitting(true);
         try {
-            const formData = new FormData();
-            formData.append('title', title);
-            formData.append('description', description);
-            formData.append('status', status);
-            formData.append('language', language);
-            const totalDuration = (Number(durationHours) * 60) + Number(durationMinutes);
-            formData.append('duration', String(totalDuration));
-            if (projectUrl) {
-                formData.append('projectUrl', projectUrl);
+            const formData = await buildCourseFormData({
+                status,
+                thumbnailFile,
+                draft: {
+                    title,
+                    description,
+                    language,
+                    durationHours,
+                    durationMinutes,
+                    projectUrl,
+                    thumbnailPreview,
+                },
+            });
+
+            let courseId = editId;
+            if (editId) {
+                await updateCourse(editId, formData);
+            } else {
+                const newCourse = await createCourse(formData);
+                courseId = newCourse.courseId;
             }
 
-            let fileToUpload = thumbnailFile;
-            if (!fileToUpload && thumbnailPreview && thumbnailPreview.startsWith('data:image')) {
+            // Sync lessons
+            for (const lid of deletedLessonIds) {
                 try {
-                    const res = await fetch(thumbnailPreview);
-                    const blob = await res.blob();
-                    fileToUpload = new File([blob], 'thumbnail.png', { type: blob.type });
-                } catch (e) {
-                    console.error('Failed to convert preview to file:', e);
+                    await apiDeleteLesson(lid);
+                } catch (err) {
+                    console.error(`Failed to delete lesson ${lid}:`, err);
                 }
             }
-            if (fileToUpload) {
-                formData.append('thumbnailUrl', fileToUpload);
-            }
 
-            const newCourse = await createCourse(formData);
-
-            // Now, save all lessons that were added locally to this course!
-            for (const mod of modules) {
-                for (const l of mod.lessons) {
-                    try {
-                        const payload = {
-                            title: l.title,
-                            description: l.description || '',
-                            content: l.content || '',
-                            videoUrl: l.videoUrl || '',
-                            videoDuration: l.duration ? parseInt(l.duration) * 60 : undefined,
-                        };
-                        await createLesson(newCourse.courseId, payload);
-                    } catch (err) {
-                        console.error('Failed to auto-create lesson during course creation:', err);
+            for (const l of lessons) {
+                try {
+                    const payload = buildLessonSyncPayload(l);
+                    const isNew = l.id.startsWith('l-');
+                    if (isNew) {
+                        await createLesson(courseId!, payload);
+                    } else {
+                        await updateLesson(courseId!, Number(l.id), payload);
                     }
+                } catch (err) {
+                    console.error('Failed to sync lesson:', err);
                 }
             }
 
-            localStorage.removeItem('create_course_draft');
-            toast.success('Course created successfully!');
+            if (!editId) {
+                clearCourseDraft();
+            }
+            toast.success(editId ? 'Course updated successfully!' : 'Course created successfully!');
             navigate('/provider/courses');
         } catch (err: any) {
             console.error(err);
@@ -295,61 +255,59 @@ export function CreateCoursePage() {
         }
     };
 
-    const handleAddModule = (title: string, description: string) => {
-        if (!title.trim()) {
-            toast.error('Module title is required.');
-            return;
-        }
-        const newModule: Module = {
-            id: `m-${Date.now()}`,
-            title: title.trim(),
-            description: description.trim(),
-            lessons: [],
-        };
-        setModules((prev) => [...prev, newModule]);
-        setShowAddModule(false);
-        toast.success('Module added successfully!');
-    };
-
-    const handleEditModule = (id: string, title: string, description: string) => {
-        if (!title.trim()) {
-            toast.error('Module title is required.');
-            return;
-        }
-        setModules((prev) =>
-            prev.map((m) =>
-                m.id === id
-                    ? { ...m, title: title.trim(), description: description.trim() }
-                    : m
-            )
-        );
-        setEditingModule(null);
-        toast.success('Module updated successfully!');
-    };
-
     const removeOutcome = (i: number) => setOutcomes((o) => o.filter((_, idx) => idx !== i));
     const removeSkill = (s: string) => setSkills((arr) => arr.filter((x) => x !== s));
-    const deleteModule = (id: string) => {
-        setModules((prev) => {
-            const filtered = prev.filter((x) => x.id !== id);
-            return filtered.map((mod, idx) => {
-                const match = mod.title.match(/^(Module \d+)\s*—\s*(.*)$/);
-                if (match) {
-                    return { ...mod, title: `Module ${idx + 1} — ${match[2]}` };
-                }
-                return { ...mod, title: `Module ${idx + 1} — ${mod.title}` };
-            });
-        });
-        toast.success('Module deleted successfully!');
+
+    const toggleLessonLock = (lessonId: string) => {
+        setLessons((prev) => prev.map((lesson) => (
+            lesson.id === lessonId
+                ? { ...lesson, locked: !lesson.locked }
+                : lesson
+        )));
     };
-    const deleteLesson = (mid: string, lid: string) => setModules((m) => m.map((x) => x.id === mid ? { ...x, lessons: x.lessons.filter((l) => l.id !== lid) } : x));
+
+    const deleteLesson = async (lid: string) => {
+        if (!lid.startsWith('l-') && editId) {
+            try {
+                await apiDeleteLesson(Number(lid));
+                toast.success('Lesson removed.');
+            } catch (err) {
+                console.error(`Failed to delete lesson ${lid}:`, err);
+                toast.error('Failed to remove lesson.');
+                return;
+            }
+        } else if (!lid.startsWith('l-')) {
+            setDeletedLessonIds(prev => [...prev, Number(lid)]);
+        }
+
+        setLessons((prev) => prev.filter((l) => l.id !== lid));
+    };
+
+    const handleLessonDragOver = (draggedIdx: number, targetIdx: number) => {
+        const updated = [...lessons];
+        const draggedItem = updated[draggedIdx];
+        updated.splice(draggedIdx, 1);
+        updated.splice(targetIdx, 0, draggedItem);
+        setLessons(updated);
+    };
+
+    const openLessonEditor = (lessonId?: string) => {
+        if (!editId) {
+            toast.error('Please save the course before adding lessons to the database.');
+            return;
+        }
+
+        const backUrl = encodeURIComponent(window.location.pathname + window.location.search);
+        const lessonParam = lessonId ? `&lessonId=${lessonId}` : '';
+        navigate(`/provider/lessons/create?redirectBack=${backUrl}&isCourseBuilder=true&courseId=${editId}${lessonParam}`);
+    };
 
     return (
         <div className="bg-[#F8FAFC] min-h-screen">
             {isSubmitting && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center gap-4">
                     <div className="w-14 h-14 border-4 border-white border-t-transparent rounded-full animate-spin" />
-                    <p className="text-white text-base font-semibold animate-pulse">Creating course & uploading image, please wait...</p>
+                    <p className="text-white text-base font-semibold animate-pulse">{editId ? 'Updating course, please wait...' : 'Creating course & uploading image, please wait...'}</p>
                 </div>
             )}
             <div className="max-w-[1376px] mx-auto px-8 py-8">
@@ -358,7 +316,7 @@ export function CreateCoursePage() {
                     <div>
                         <div className="flex items-center gap-2 mb-1.5">
                             <h1 className="text-[28px] text-[#111827]" style={{ fontWeight: 700, letterSpacing: '-0.02em' }}>
-                                Create Course
+                                {editId ? 'Edit Course' : 'Create Course'}
                             </h1>
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#FFFBEB] text-[#B45309] rounded-full text-[11px]" style={{ fontWeight: 600 }}>
                                 <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
@@ -366,7 +324,7 @@ export function CreateCoursePage() {
                             </span>
                         </div>
                         <p className="text-[#6B7280] text-sm">
-                            Build a new course, organize lessons, upload materials, and submit it for review.
+                            {editId ? 'Modify course details, organize lessons, update materials, and submit for review.' : 'Build a new course, organize lessons, upload materials, and submit it for review.'}
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -385,7 +343,7 @@ export function CreateCoursePage() {
                     </div>
                 </div>
 
-                {hasDraft && (
+                {!editId && hasDraft && (
                     <div className="mb-5 flex items-center justify-between gap-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
                         <div className="flex items-center gap-3">
                             <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
@@ -420,15 +378,12 @@ export function CreateCoursePage() {
                                 <Field label="Course title" required full>
                                     <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Spring Boot REST API Masterclass" />
                                 </Field>
-                                <Field label="Short description" hint="Shown on course cards" full required>
-                                    <Input defaultValue="Build production-grade REST APIs with Spring Boot from scratch." />
-                                </Field>
-                                <Field label="Full description" full required>
+                                <Field label="Description" full required>
                                     <Textarea
                                         rows={4}
                                         value={description}
                                         onChange={e => setDescription(e.target.value)}
-                                        placeholder="Full description of the course..."
+                                        placeholder="Describe what learners will gain from this course..."
                                     />
                                 </Field>
                                 <Field label="Language" required>
@@ -490,293 +445,134 @@ export function CreateCoursePage() {
                             </div>
                         </FormCard>
 
-                        {/* Section 2 — Course Structure */}
-                        <FormCard step={2} title="Course Structure" status="warning" description="Organize your course into modules and lessons." action={
+                        {/* Section 2 — Course Curriculum */}
+                        <FormCard step={2} title="Course Curriculum" status="warning" description="Manage all lessons in this course." action={
                             <div className="flex items-center gap-2">
-                                <button onClick={() => setShowAddModule(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#111827] text-white rounded-lg text-xs hover:bg-black transition-colors" style={{ fontWeight: 500 }}>
+                                <button
+                                    onClick={() => {
+                                        saveDraftToLocalStorage();
+                                        openLessonEditor();
+                                    }}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#E11D48] text-white rounded-lg text-xs hover:bg-[#BE123C] transition-colors"
+                                    style={{ fontWeight: 500 }}
+                                >
                                     <Plus className="w-3.5 h-3.5" />
-                                    Add Module
+                                    Add Lesson
                                 </button>
                             </div>
                         }>
-                            {modules.length === 0 ? (
+                            {lessons.length === 0 ? (
                                 <div className="border border-dashed border-[#E5E7EB] rounded-xl p-10 flex flex-col items-center text-center">
                                     <div className="w-12 h-12 rounded-xl bg-[#FEF2F2] flex items-center justify-center mb-3">
-                                        <FolderPlus className="w-5 h-5 text-[#E11D48]" />
+                                        <BookOpen className="w-5 h-5 text-[#E11D48]" />
                                     </div>
-                                    <p className="text-sm text-[#111827] mb-1" style={{ fontWeight: 600 }}>No modules added yet</p>
-                                    <p className="text-xs text-[#6B7280] mb-4">Start by creating your first module for this course.</p>
-                                    <button onClick={() => setShowAddModule(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#E11D48] text-white rounded-lg text-xs hover:bg-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
+                                    <p className="text-sm text-[#111827] mb-1" style={{ fontWeight: 600 }}>No lessons added yet</p>
+                                    <p className="text-xs text-[#6B7280] mb-4">Start by adding your first lesson for this course.</p>
+                                    <button
+                                        onClick={() => {
+                                            saveDraftToLocalStorage();
+                                            openLessonEditor();
+                                        }}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#E11D48] text-white rounded-lg text-xs hover:bg-[#BE123C] transition-colors"
+                                        style={{ fontWeight: 500 }}
+                                    >
                                         <Plus className="w-3.5 h-3.5" />
-                                        Add Module
+                                        Add Lesson
                                     </button>
                                 </div>
                             ) : (
-                                <div className="space-y-3">
-                                    {modules.map((m, mIdx) => (
+                                <div className="space-y-2">
+                                    {lessons.map((l, lIdx) => (
                                         <div
-                                            key={m.id}
-                                            draggable={dragEnabled}
+                                            key={l.id}
+                                            draggable
                                             onDragStart={(e) => {
-                                                setDraggedModuleIndex(mIdx);
+                                                setDraggedLessonIndex(lIdx);
                                                 e.dataTransfer.effectAllowed = 'move';
                                             }}
                                             onDragOver={(e) => {
                                                 e.preventDefault();
-                                                if (draggedModuleIndex === null || draggedModuleIndex === mIdx) return;
-                                                const updated = [...modules];
-                                                const draggedItem = updated[draggedModuleIndex];
-                                                updated.splice(draggedModuleIndex, 1);
-                                                updated.splice(mIdx, 0, draggedItem);
-
-                                                const renamed = updated.map((mod, idx) => {
-                                                    const match = mod.title.match(/^(Module \d+)\s*—\s*(.*)$/);
-                                                    if (match) {
-                                                        return { ...mod, title: `Module ${idx + 1} — ${match[2]}` };
-                                                    }
-                                                    return { ...mod, title: `Module ${idx + 1} — ${mod.title}` };
-                                                });
-
-                                                setDraggedModuleIndex(mIdx);
-                                                setModules(renamed);
+                                                if (draggedLessonIndex === null || draggedLessonIndex === lIdx) return;
+                                                handleLessonDragOver(draggedLessonIndex, lIdx);
+                                                setDraggedLessonIndex(lIdx);
                                             }}
                                             onDragEnd={() => {
-                                                setDraggedModuleIndex(null);
+                                                setDraggedLessonIndex(null);
                                             }}
-                                            className={`border border-[#E5E7EB] rounded-xl overflow-hidden bg-[#FAFAFA] transition-all ${draggedModuleIndex === mIdx ? 'opacity-40 scale-95 border-[#E11D48]' : ''}`}
+                                            className={`flex items-center gap-3 px-3 py-2 bg-white border border-[#E5E7EB] rounded-lg hover:border-[#E11D48]/30 transition-all group ${draggedLessonIndex === lIdx ? 'opacity-40 scale-95 border-[#E11D48]' : ''}`}
                                         >
-                                            <div className="flex items-center gap-3 px-4 py-3 bg-white border-b border-[#E5E7EB]">
-                                                <GripVertical
-                                                    className="w-4 h-4 text-[#9CA3AF] cursor-grab"
-                                                    onMouseEnter={() => setDragEnabled(true)}
-                                                    onMouseLeave={() => setDragEnabled(false)}
-                                                />
-                                                <span className="text-xs text-[#9CA3AF]" style={{ fontWeight: 600 }}>M{mIdx + 1}</span>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm text-[#111827]" style={{ fontWeight: 600 }}>{m.title}</p>
-                                                    <p className="text-xs text-[#6B7280] truncate">{m.description}</p>
-                                                </div>
-                                                <span className="px-2 py-0.5 bg-[#F1F5F9] text-[#475569] rounded text-[10px]" style={{ fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{m.lessons.length} lessons</span>
-                                                <IconBtn title="Edit" onClick={() => setEditingModule(m)}><Pencil className="w-4 h-4" /></IconBtn>
-                                                <IconBtn title="Delete" danger onClick={() => setDeletingModuleId(m.id)}><Trash2 className="w-4 h-4" /></IconBtn>
-                                            </div>
-                                            <div className="p-2 space-y-1">
-                                                {m.lessons.map((l, lIdx) => (
-                                                    <div
-                                                        key={l.id}
-                                                        draggable={lessonDragEnabled}
-                                                        onDragStart={(e) => {
-                                                            setDraggedLessonInfo({ mIdx, lIdx });
-                                                            e.dataTransfer.effectAllowed = 'move';
-                                                        }}
-                                                        onDragOver={(e) => {
-                                                            e.preventDefault();
-                                                            if (!draggedLessonInfo) return;
-                                                            if (draggedLessonInfo.mIdx !== mIdx) return; // Only allow sorting within same module
-                                                            if (draggedLessonInfo.lIdx === lIdx) return;
-
-                                                            const updated = [...modules];
-                                                            const lessons = [...updated[mIdx].lessons];
-                                                            const draggedLesson = lessons[draggedLessonInfo.lIdx];
-                                                            lessons.splice(draggedLessonInfo.lIdx, 1);
-                                                            lessons.splice(lIdx, 0, draggedLesson);
-                                                            updated[mIdx] = {
-                                                                ...updated[mIdx],
-                                                                lessons
-                                                            };
-                                                            setDraggedLessonInfo({ mIdx, lIdx });
-                                                            setModules(updated);
-                                                        }}
-                                                        onDragEnd={() => {
-                                                            setDraggedLessonInfo(null);
-                                                        }}
-                                                        className={`flex items-center gap-3 px-3 py-2 bg-white border border-[#E5E7EB] rounded-lg hover:border-[#E11D48]/30 transition-all group ${draggedLessonInfo?.mIdx === mIdx && draggedLessonInfo?.lIdx === lIdx ? 'opacity-40 scale-95 border-[#E11D48]' : ''}`}
-                                                    >
-                                                        <GripVertical
-                                                            className="w-3.5 h-3.5 text-[#9CA3AF] cursor-grab"
-                                                            onMouseEnter={() => setLessonDragEnabled(true)}
-                                                            onMouseLeave={() => setLessonDragEnabled(false)}
-                                                        />
-                                                        <span className="text-[11px] text-[#9CA3AF] w-6" style={{ fontWeight: 600 }}>{mIdx + 1}.{lIdx + 1}</span>
-                                                        <LessonTypeBadge type={l.type} />
-                                                        <span className="text-sm text-[#111827] flex-1" style={{ fontWeight: 500 }}>{l.title}</span>
-                                                        <span className="flex items-center gap-1 text-[11px] text-[#6B7280]">
-                                                            <Clock className="w-3 h-3" />
-                                                            {l.duration}
-                                                        </span>
-                                                        <button title={l.locked ? 'Locked — preview disabled' : 'Free preview'} className={`p-1 rounded ${l.locked ? 'text-[#9CA3AF]' : 'text-[#10B981]'}`}>
-                                                            {l.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
-                                                        </button>
-                                                        <IconBtn
-                                                            title="Edit"
-                                                            onClick={() => {
-                                                                saveDraftToLocalStorage();
-                                                                const backUrl = encodeURIComponent(window.location.pathname + window.location.search);
-                                                                navigate(`/provider/lessons/create?redirectBack=${backUrl}&targetModuleId=${m.id}&lessonId=${l.id}`);
-                                                            }}
-                                                        >
-                                                            <Pencil className="w-3.5 h-3.5" />
-                                                        </IconBtn>
-                                                        <IconBtn title="Delete" danger onClick={() => deleteLesson(m.id, l.id)}><Trash2 className="w-3.5 h-3.5" /></IconBtn>
-                                                    </div>
-                                                ))}
-                                                <button
-                                                    onClick={() => {
-                                                        saveDraftToLocalStorage();
-                                                        const backUrl = encodeURIComponent(window.location.pathname + window.location.search);
-                                                        navigate(`/provider/lessons/create?redirectBack=${backUrl}&targetModuleId=${m.id}`);
-                                                    }}
-                                                    className="w-full flex items-center justify-center gap-1.5 py-2 text-xs text-[#E11D48] hover:bg-[#FEF2F2] rounded-lg transition-colors"
-                                                    style={{ fontWeight: 600 }}
-                                                >
-                                                    <Plus className="w-3.5 h-3.5" />
-                                                    Add Lesson
-                                                </button>
-                                            </div>
+                                            <GripVertical
+                                                className="w-3.5 h-3.5 text-[#9CA3AF] cursor-grab"
+                                                onMouseEnter={() => setLessonDragEnabled(true)}
+                                                onMouseLeave={() => setLessonDragEnabled(false)}
+                                            />
+                                            <span className="text-[11px] text-[#9CA3AF] w-6" style={{ fontWeight: 600 }}>{(lIdx + 1).toString().padStart(2, '0')}</span>
+                                            <LessonTypeBadge type={l.type} />
+                                            <span className="text-sm text-[#111827] flex-1" style={{ fontWeight: 500 }}>{l.title}</span>
+                                            <span className="flex items-center gap-1 text-[11px] text-[#6B7280]">
+                                                <Clock className="w-3 h-3" />
+                                                {l.duration}
+                                            </span>
+                                            <button
+                                                title={l.locked ? 'Locked - preview disabled' : 'Free preview'}
+                                                onClick={() => toggleLessonLock(l.id)}
+                                                className={`p-1 rounded ${l.locked ? 'text-[#9CA3AF] hover:bg-[#F8FAFC]' : 'text-[#10B981] hover:bg-[#ECFDF5]'}`}
+                                            >
+                                                {l.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                                            </button>
+                                            <IconBtn
+                                                title="Edit"
+                                                onClick={() => {
+                                                    saveDraftToLocalStorage();
+                                                    openLessonEditor(l.id);
+                                                }}
+                                            >
+                                                <Pencil className="w-3.5 h-3.5" />
+                                            </IconBtn>
+                                            <IconBtn title="Delete" danger onClick={() => deleteLesson(l.id)}><Trash2 className="w-3.5 h-3.5" /></IconBtn>
                                         </div>
                                     ))}
                                 </div>
                             )}
                         </FormCard>
 
-                        {/* Section 3 — Learning Outcomes */}
-                        <FormCard step={3} title="Learning Outcomes" status="valid" description="Define what learners will achieve from this course.">
-                            <div className="space-y-5">
-                                <Field label="What learners will learn" required full>
-                                    <div className="space-y-2">
-                                        {outcomes.map((o, i) => (
-                                            <div key={i} className="flex items-center gap-2 px-3 py-2 bg-white border border-[#E5E7EB] rounded-lg group">
-                                                <CheckCircle2 className="w-4 h-4 text-[#10B981] flex-shrink-0" />
-                                                <input
-                                                    defaultValue={o}
-                                                    className="flex-1 text-sm text-[#111827] bg-transparent focus:outline-none"
-                                                />
-                                                <button onClick={() => removeOutcome(i)} className="opacity-0 group-hover:opacity-100 p-1 text-[#6B7280] hover:text-[#E11D48] transition-all">
-                                                    <X className="w-3.5 h-3.5" />
-                                                </button>
-                                            </div>
-                                        ))}
-                                        <button onClick={() => setOutcomes((o) => [...o, ''])} className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#E11D48] hover:bg-[#FEF2F2] rounded-lg transition-colors" style={{ fontWeight: 600 }}>
-                                            <Plus className="w-3.5 h-3.5" />
-                                            Add outcome
-                                        </button>
-                                    </div>
-                                </Field>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <Field label="Prerequisites" hint="Select recommended prerequisite courses">
-                                        <div className="space-y-2">
-                                            {prerequisiteCourseIds.map(id => {
-                                                const pc = availableCourses.find(c => c.id === id);
-                                                if (!pc) return null;
-                                                return (
-                                                    <div key={id} className="flex items-center justify-between px-3 py-1.5 bg-white border border-[#E5E7EB] rounded-lg">
-                                                        <span className="text-xs text-[#E11D48] hover:underline cursor-pointer" style={{ fontWeight: 500 }}>
-                                                            {pc.title}
-                                                        </span>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setPrerequisiteCourseIds(prev => prev.filter(x => x !== id))}
-                                                            className="text-[#9CA3AF] hover:text-[#E11D48] transition-colors"
-                                                        >
-                                                            <X className="w-3.5 h-3.5" />
-                                                        </button>
-                                                    </div>
-                                                );
-                                            })}
-                                            <select
-                                                value=""
-                                                onChange={e => {
-                                                    const id = Number(e.target.value);
-                                                    if (id && !prerequisiteCourseIds.includes(id)) {
-                                                        setPrerequisiteCourseIds(prev => [...prev, id]);
-                                                    }
-                                                }}
-                                                className="w-full px-3 py-2 bg-white border border-[#E5E7EB] rounded-lg text-xs text-[#6B7280] focus:outline-none focus:ring-1 focus:ring-[#E11D48] focus:border-[#E11D48]"
-                                            >
-                                                <option value="">+ Add prerequisite course...</option>
-                                                {availableCourses.map(c => (
-                                                    <option key={c.id} value={c.id} disabled={prerequisiteCourseIds.includes(c.id)}>
-                                                        {c.title}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </Field>
-                                    <Field label="Target learners">
-                                        <Textarea rows={3} defaultValue="Backend developers, CS students, and engineers transitioning into REST API development." />
-                                    </Field>
-                                </div>
-                                <div className="flex items-center justify-end gap-2 pt-4 border-t border-[#E5E7EB] mt-5">
-                                    <button
-                                        onClick={() => handleSubmit('draft')}
-                                        className="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-[#E5E7EB] text-[#374151] rounded-lg text-sm hover:bg-[#F8FAFC] transition-colors"
-                                        style={{ fontWeight: 500 }}
-                                        disabled={isSubmitting}
-                                    >
-                                        Save Draft
-                                    </button>
-                                    <button
-                                        onClick={() => setShowSubmit(true)}
-                                        className="flex items-center gap-1.5 px-3.5 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors"
-                                        style={{ fontWeight: 500 }}
-                                        disabled={isSubmitting}
-                                    >
-                                        <Send className="w-4 h-4" />
-                                        Submit for Review
-                                    </button>
-                                </div>
-                            </div>
-                        </FormCard>
+                        <div className="flex items-center justify-end gap-2 pt-4 border-t border-[#E5E7EB] mt-5">
+                            <button
+                                onClick={() => handleSubmit('draft')}
+                                className="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-[#E5E7EB] text-[#374151] rounded-lg text-sm hover:bg-[#F8FAFC] transition-colors"
+                                style={{ fontWeight: 500 }}
+                                disabled={isSubmitting}
+                            >
+                                Save Draft
+                            </button>
+                            <button
+                                onClick={() => setShowSubmit(true)}
+                                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors"
+                                style={{ fontWeight: 500 }}
+                                disabled={isSubmitting}
+                            >
+                                <Send className="w-4 h-4" />
+                                Submit for Review
+                            </button>
+                        </div>
 
                     </div>
                 </div>
             </div>
 
             {/* Modals */}
-            {(showAddModule || editingModule) && (
-                <AddModuleModal
-                    initialData={
-                        editingModule
-                            ? { title: editingModule.title, description: editingModule.description }
-                            : undefined
-                    }
-                    modulesCount={modules.length}
-                    onClose={() => {
-                        setShowAddModule(false);
-                        setEditingModule(null);
-                    }}
-                    onSave={(title, description) => {
-                        if (editingModule) {
-                            handleEditModule(editingModule.id, title, description);
-                        } else {
-                            handleAddModule(title, description);
-                        }
-                    }}
-                />
-            )}
-            {showAddLesson && <AddLessonModal onClose={() => setShowAddLesson(false)} />}
-            {
-                showSubmit && (
-                    <SubmitModal
-                        onClose={() => setShowSubmit(false)}
-                        onConfirm={() => {
-                            setShowSubmit(false);
-                            handleSubmit('pending');
-                        }}
-                        isSubmitting={isSubmitting}
-                    />
-                )
-            }
-            {showUnsaved && <UnsavedModal onClose={() => setShowUnsaved(false)} />}
-            {deletingModuleId && (
-                <DeleteModuleModal
-                    onClose={() => setDeletingModuleId(null)}
+            {showSubmit && (
+                <SubmitModal
+                    onClose={() => setShowSubmit(false)}
                     onConfirm={() => {
-                        deleteModule(deletingModuleId);
-                        setDeletingModuleId(null);
+                        setShowSubmit(false);
+                        handleSubmit('pending');
                     }}
+                    isSubmitting={isSubmitting}
+                    hasLessons={lessons.length > 0}
                 />
             )}
+            {showUnsaved && <UnsavedModal onClose={() => setShowUnsaved(false)} />}
         </div>
     );
 }
@@ -876,13 +672,27 @@ function IconBtn({ children, onClick, title, danger }: { children: React.ReactNo
 }
 
 function LessonTypeBadge({ type }: { type: LessonType }) {
-    const map: Record<LessonType, { Icon: React.ComponentType<{ className?: string }>; tint: string; color: string }> = {
+    if (type === 'Video & Reading') {
+        return (
+            <div className="flex gap-1">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-[#FEF2F2] text-[#E11D48]" style={{ fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}>
+                    <Video className="w-3 h-3" />
+                    Video
+                </span>
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-[#EEF2FF] text-[#6366F1]" style={{ fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}>
+                    <BookOpen className="w-3 h-3" />
+                    Reading
+                </span>
+            </div>
+        );
+    }
+    const map: Record<Exclude<LessonType, 'Video & Reading'>, { Icon: React.ComponentType<{ className?: string }>; tint: string; color: string }> = {
         Video: { Icon: Video, tint: '#FEF2F2', color: '#E11D48' },
         Reading: { Icon: BookOpen, tint: '#EEF2FF', color: '#6366F1' },
         Quiz: { Icon: ClipboardList, tint: '#FFFBEB', color: '#B45309' },
         Assignment: { Icon: FileText, tint: '#ECFDF5', color: '#047857' },
     };
-    const m = map[type];
+    const m = map[type as Exclude<LessonType, 'Video & Reading'>];
     return (
         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]" style={{ background: m.tint, color: m.color, fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}>
             <m.Icon className="w-3 h-3" />
@@ -1030,162 +840,7 @@ function Overlay({ children, onClose }: { children: React.ReactNode; onClose: ()
     );
 }
 
-interface AddModuleModalProps {
-    onClose: () => void;
-    onSave: (title: string, description: string) => void;
-    initialData?: { title: string; description: string };
-    modulesCount: number;
-}
-
-function AddModuleModal({ onClose, onSave, initialData, modulesCount }: AddModuleModalProps) {
-    const isEdit = !!initialData;
-
-    const parseTitle = () => {
-        if (!initialData) return { prefix: `Module ${modulesCount + 1}`, subtitle: '' };
-        const match = initialData.title.match(/^(Module \d+)\s*—\s*(.*)$/);
-        if (match) {
-            return { prefix: match[1], subtitle: match[2] };
-        }
-        return { prefix: 'Module', subtitle: initialData.title };
-    };
-
-    const { prefix, subtitle: initialSubtitle } = parseTitle();
-    const [subtitle, setSubtitle] = useState(initialSubtitle);
-    const [description, setDescription] = useState(initialData?.description || '');
-
-    const handleSave = () => {
-        const finalTitle = subtitle.trim() ? `${prefix} — ${subtitle.trim()}` : prefix;
-        onSave(finalTitle, description);
-    };
-
-    return (
-        <Overlay onClose={onClose}>
-            <div className="w-[520px] bg-white rounded-2xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E7EB]">
-                    <h3 className="text-base text-[#111827]" style={{ fontWeight: 600 }}>
-                        {isEdit ? 'Edit Module' : 'Add Module'}
-                    </h3>
-                    <button onClick={onClose} className="p-2 -m-2 text-[#6B7280] hover:text-[#111827]"><X className="w-5 h-5" /></button>
-                </div>
-                <div className="p-6 space-y-4">
-                    <Field label="Module title" required full>
-                        <div className="flex items-stretch bg-white border border-[#E5E7EB] rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-[#E11D48]/20 focus-within:border-[#E11D48]">
-                            <span className="bg-[#F8FAFC] border-r border-[#E5E7EB] px-3.5 py-2 text-sm text-[#6B7280] shrink-0 flex items-center justify-center font-semibold select-none">
-                                {prefix}
-                            </span>
-                            <input
-                                type="text"
-                                value={subtitle}
-                                onChange={(e) => setSubtitle(e.target.value)}
-                                className="w-full px-3 py-2 text-sm text-[#111827] focus:outline-none"
-                                placeholder="e.g. Getting Started"
-                            />
-                        </div>
-                    </Field>
-                    <Field label="Module description" full>
-                        <Textarea
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            rows={3}
-                            placeholder="What learners will cover in this module..."
-                        />
-                    </Field>
-                </div>
-                <div className="flex items-center justify-end gap-2 px-6 py-4 bg-[#FAFAFA] border-t border-[#E5E7EB]">
-                    <button onClick={onClose} className="px-4 py-2 bg-white border border-[#E5E7EB] text-[#111827] rounded-lg text-sm hover:bg-[#F8FAFC]" style={{ fontWeight: 500 }}>Cancel</button>
-                    <button onClick={handleSave} className="px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C]" style={{ fontWeight: 500 }}>
-                        {isEdit ? 'Save Changes' : 'Add Module'}
-                    </button>
-                </div>
-            </div>
-        </Overlay>
-    );
-}
-
-function AddLessonModal({ onClose }: { onClose: () => void }) {
-    const [type, setType] = useState<LessonType>('Video');
-    return (
-        <Overlay onClose={onClose}>
-            <div className="w-[640px] max-h-[88vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E7EB]">
-                    <h3 className="text-base text-[#111827]" style={{ fontWeight: 600 }}>Add Lesson</h3>
-                    <button onClick={onClose} className="p-2 -m-2 text-[#6B7280] hover:text-[#111827]"><X className="w-5 h-5" /></button>
-                </div>
-                <div className="p-6 overflow-y-auto space-y-4">
-                    <Field label="Lesson title" required full>
-                        <Input placeholder="e.g. Building Your First REST Controller" />
-                    </Field>
-                    <Field label="Lesson description" full>
-                        <Textarea rows={2} placeholder="Brief summary shown to learners..." />
-                    </Field>
-                    <div className="grid grid-cols-2 gap-4">
-                        <Field label="Lesson type" required>
-                            <div className="grid grid-cols-4 gap-1.5">
-                                {(['Video', 'Reading', 'Quiz', 'Assignment'] as LessonType[]).map((t) => (
-                                    <button
-                                        key={t}
-                                        onClick={() => setType(t)}
-                                        className={`px-2 py-2 rounded-lg text-[11px] border transition-colors ${type === t ? 'border-[#E11D48] bg-[#FEF2F2] text-[#E11D48]' : 'border-[#E5E7EB] text-[#6B7280] hover:text-[#111827]'}`}
-                                        style={{ fontWeight: 600 }}
-                                    >
-                                        {t}
-                                    </button>
-                                ))}
-                            </div>
-                        </Field>
-                        <Field label="Duration" required>
-                            <Input placeholder="e.g. 12:30 or 15 min" />
-                        </Field>
-                    </div>
-                    {type === 'Video' && (
-                        <Field label="Video upload / content URL" full>
-                            <div className="border border-dashed border-[#E5E7EB] rounded-lg p-4 flex items-center gap-3">
-                                <Video className="w-5 h-5 text-[#6B7280]" />
-                                <div className="flex-1">
-                                    <p className="text-sm text-[#111827]" style={{ fontWeight: 500 }}>Upload video file</p>
-                                    <p className="text-xs text-[#6B7280]">MP4 up to 500MB · or paste a video URL</p>
-                                </div>
-                                <button className="px-3 py-1.5 bg-white border border-[#E5E7EB] text-[#111827] rounded text-xs" style={{ fontWeight: 500 }}>Browse</button>
-                            </div>
-                        </Field>
-                    )}
-                    {type === 'Reading' && (
-                        <Field label="Reading content" full>
-                            <Textarea rows={5} placeholder="Write or paste the reading material..." />
-                        </Field>
-                    )}
-                    {type === 'Quiz' && (
-                        <Field label="Quiz selection" full>
-                            <Select>
-                                <option>Create new quiz</option>
-                                <option>Module knowledge check</option>
-                                <option>End-of-course assessment</option>
-                            </Select>
-                        </Field>
-                    )}
-                    {type === 'Assignment' && (
-                        <Field label="Assignment file" full>
-                            <div className="border border-dashed border-[#E5E7EB] rounded-lg p-4 flex items-center gap-3">
-                                <Paperclip className="w-5 h-5 text-[#6B7280]" />
-                                <div className="flex-1">
-                                    <p className="text-sm text-[#111827]" style={{ fontWeight: 500 }}>Upload assignment</p>
-                                    <p className="text-xs text-[#6B7280]">PDF, DOCX, ZIP up to 100MB</p>
-                                </div>
-                                <button className="px-3 py-1.5 bg-white border border-[#E5E7EB] text-[#111827] rounded text-xs" style={{ fontWeight: 500 }}>Browse</button>
-                            </div>
-                        </Field>
-                    )}
-                </div>
-                <div className="flex items-center justify-end gap-2 px-6 py-4 bg-[#FAFAFA] border-t border-[#E5E7EB]">
-                    <button onClick={onClose} className="px-4 py-2 bg-white border border-[#E5E7EB] text-[#111827] rounded-lg text-sm hover:bg-white" style={{ fontWeight: 500 }}>Cancel</button>
-                    <button onClick={onClose} className="px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C]" style={{ fontWeight: 500 }}>Add Lesson</button>
-                </div>
-            </div>
-        </Overlay>
-    );
-}
-
-function SubmitModal({ onClose, onConfirm, isSubmitting }: { onClose: () => void; onConfirm: () => void; isSubmitting: boolean }) {
+function SubmitModal({ onClose, onConfirm, isSubmitting, hasLessons }: { onClose: () => void; onConfirm: () => void; isSubmitting: boolean; hasLessons: boolean }) {
     return (
         <Overlay onClose={onClose}>
             <div className="w-[480px] bg-white rounded-2xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
@@ -1201,7 +856,7 @@ function SubmitModal({ onClose, onConfirm, isSubmitting }: { onClose: () => void
                         <p className="text-xs text-[#6B7280] mb-2" style={{ fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>Checklist summary</p>
                         <div className="space-y-1.5">
                             <ProgressItem label="Basic information completed" done />
-                            <ProgressItem label="At least one module added" done />
+                            <ProgressItem label="At least one lesson added" done={hasLessons} />
                             <ProgressItem label="Learning outcomes defined" done />
                             <ProgressItem label="Content policy checked" warning />
                         </div>
@@ -1234,28 +889,6 @@ function UnsavedModal({ onClose }: { onClose: () => void }) {
                 <div className="flex items-center justify-end gap-2 px-6 py-4 bg-[#FAFAFA] border-t border-[#E5E7EB]">
                     <button onClick={onClose} className="px-4 py-2 text-[#6B7280] hover:text-[#111827] text-sm" style={{ fontWeight: 500 }}>Leave without saving</button>
                     <button onClick={onClose} className="px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C]" style={{ fontWeight: 500 }}>Save Draft</button>
-                </div>
-            </div>
-        </Overlay>
-    );
-}
-
-function DeleteModuleModal({ onClose, onConfirm }: { onClose: () => void; onConfirm: () => void }) {
-    return (
-        <Overlay onClose={onClose}>
-            <div className="w-[440px] bg-white rounded-2xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                <div className="p-6">
-                    <div className="w-12 h-12 rounded-full bg-[#FEF2F2] flex items-center justify-center mb-4">
-                        <Trash2 className="w-5 h-5 text-[#E11D48]" />
-                    </div>
-                    <h3 className="text-[18px] text-[#111827] mb-1" style={{ fontWeight: 600 }}>Delete Module</h3>
-                    <p className="text-sm text-[#6B7280]">
-                        Are you sure you want to delete this module? This action cannot be undone and all lessons inside will be removed.
-                    </p>
-                </div>
-                <div className="flex items-center justify-end gap-2 px-6 py-4 bg-[#FAFAFA] border-t border-[#E5E7EB]">
-                    <button onClick={onClose} className="px-4 py-2 bg-white border border-[#E5E7EB] text-[#111827] rounded-lg text-sm hover:bg-[#F8FAFC]" style={{ fontWeight: 500 }}>Cancel</button>
-                    <button onClick={onConfirm} className="px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C]" style={{ fontWeight: 500 }}>Delete</button>
                 </div>
             </div>
         </Overlay>
