@@ -31,7 +31,7 @@ import { Public } from 'src/common/decorators/public.decorator';
 export class LessonsController {
     constructor(private readonly lessonsService: LessonsService) { }
 
-
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Post(':id')
     @Throttle({ default: { limit: 10, ttl: 60000 } })
     @Roles(RoleEnum.COURSE_PROVIDER)
@@ -65,7 +65,7 @@ export class LessonsController {
         return await this.lessonsService.findLesson(id, req.user.userId);
     }
 
-
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Patch(':courseId')
     @Roles(RoleEnum.COURSE_PROVIDER)
     @UseInterceptors(FileInterceptor('videoUrl'))
@@ -86,6 +86,7 @@ export class LessonsController {
         return await this.lessonsService.update(courseId, lessonId, updateLessonDto, file);
     }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Delete(':id')
     @Roles(RoleEnum.COURSE_PROVIDER)
     @ApiOperation({ summary: 'Delete a lesson' })
