@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Plus } from 'lucide-react';
 import { useCourseManagement } from '../../hooks/course/useCourseManagement';
 
@@ -40,14 +40,9 @@ export function CourseManagement() {
         selectedCourse,
         stats,
         toggleSort,
-        draggedCourseIndex,
-        setDraggedCourseIndex,
-        handleCourseDragOver,
         sortField,
         sortAsc,
     } = useCourseManagement();
-
-    const [courseDragEnabled, setCourseDragEnabled] = useState(false);
 
     return (
         <>
@@ -108,11 +103,6 @@ export function CourseManagement() {
                                 sortField={sortField}
                                 sortAsc={sortAsc}
                                 toggleSort={toggleSort}
-                                courseDragEnabled={courseDragEnabled}
-                                setCourseDragEnabled={setCourseDragEnabled}
-                                draggedCourseIndex={draggedCourseIndex}
-                                setDraggedCourseIndex={setDraggedCourseIndex}
-                                handleCourseDragOver={handleCourseDragOver}
                                 isProvider={isProvider}
                                 navigate={navigate}
                                 setSelectedCourseForEdit={setSelectedCourseForEdit}

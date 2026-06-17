@@ -29,16 +29,11 @@ export function PendingCourses() {
         filtered,
         selectedCourse,
         toggleSort,
-        draggedCourseIndex,
-        setDraggedCourseIndex,
-        handleCourseDragOver,
         handleApproveCourse,
         handleRejectCourse,
         sortField,
         sortAsc,
     } = useCourseManagement();
-
-    const [courseDragEnabled, setCourseDragEnabled] = useState(false);
 
     return (
         <>
@@ -90,11 +85,6 @@ export function PendingCourses() {
                                 sortField={sortField}
                                 sortAsc={sortAsc}
                                 toggleSort={toggleSort}
-                                courseDragEnabled={courseDragEnabled}
-                                setCourseDragEnabled={setCourseDragEnabled}
-                                draggedCourseIndex={draggedCourseIndex}
-                                setDraggedCourseIndex={setDraggedCourseIndex}
-                                handleCourseDragOver={handleCourseDragOver}
                                 handleApproveCourse={handleApproveCourse}
                                 setSelectedRejectCourseId={setSelectedRejectCourseId}
                                 setShowRejectModal={setShowRejectModal}

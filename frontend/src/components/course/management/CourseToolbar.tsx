@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { FilterSelect } from './FilterSelect';
 
 interface CourseToolbarProps {
@@ -20,9 +20,6 @@ export function CourseToolbar({
     setSearch,
     statusFilter,
     setStatusFilter,
-    sortField,
-    sortAsc,
-    toggleSort,
     totalFiltered,
     isPendingPage,
     statuses,
@@ -44,19 +41,6 @@ export function CourseToolbar({
                     <FilterSelect value={statusFilter} options={statuses} onChange={setStatusFilter} />
                 </>
             )}
-            <div className="h-5 w-px bg-[#E5E7EB]" />
-            <button
-                onClick={() => toggleSort('title')}
-                className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-sm transition-all duration-200 ${sortField === 'title' ? 'bg-[#FFF1F3] border-[#E11D48] text-[#E11D48]' : 'border-[#E5E7EB] text-[#6B7280] hover:bg-[#F8FAFC] hover:border-[#D1D5DB]'}`}
-                style={{ fontWeight: 500 }}
-            >
-                {sortField === 'title' ? (
-                    sortAsc ? <ArrowUp className="w-3.5 h-3.5" /> : <ArrowDown className="w-3.5 h-3.5" />
-                ) : (
-                    <ArrowUpDown className="w-3.5 h-3.5" />
-                )}
-                Sort by Name
-            </button>
             <div className="ml-auto flex items-center gap-2">
                 <span className="text-xs text-[#9CA3AF] shrink-0">{totalFiltered} courses</span>
             </div>
