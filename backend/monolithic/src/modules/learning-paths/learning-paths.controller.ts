@@ -195,4 +195,23 @@ export class LearningPathsController {
   ) {
     return this.learningPathsService.updateCoursePosition(req.user, learningPathId, courseId, dto);
   }
+
+  // Delete a learning path
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ACADEMIC_MANAGER)
+  @Delete(':id')
+  @ApiOperation({
+    summary: 'Delete a learning path',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Learning path deleted successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Learning path not found',
+  })
+  public async deleteLearningPath(@Param('id', ParseIntPipe) id: number) {
+    return this.learningPathsService.delete(id);
+  }
 }

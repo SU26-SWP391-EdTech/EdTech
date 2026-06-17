@@ -398,7 +398,7 @@ export function CreateCoursePage() {
                                     <p className="text-xs text-[#6B7280] mb-4">Start by adding your first lesson for this course.</p>
                                     <button
                                         onClick={() => {
-                                            openLessonEditor(); 
+                                            openLessonEditor();
                                         }}
                                         className="flex items-center gap-1.5 px-3 py-1.5 bg-[#E11D48] text-white rounded-lg text-xs hover:bg-[#BE123C] transition-colors"
                                         style={{ fontWeight: 500 }}

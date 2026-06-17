@@ -3,6 +3,7 @@ import { AcademicGuard } from '../components/auth/RoleGuards';
 import { DashboardLayout } from '../layouts/Dashboard/Dashboard';
 import { CourseDetail } from '../pages/course/CourseDetail';
 import { CourseManagement } from '../pages/course/CourseManagement';
+import { PendingCourses } from '../pages/course/PendingCourses';
 import { LearningPathDetail } from '../pages/learning-path/LearningPathDetail';
 import { LearningPathManagement } from '../pages/learning-path/LearningPathManagement';
 import { LessonPage } from '../pages/lesson/LessonPage';
@@ -20,7 +21,7 @@ export const academicRoutes: RouteObject = {
         { index: true, element: <h1>Home Academic</h1> },
         { path: 'userprofile', element: <UserProfile /> },
         { path: 'courses', element: <CourseManagement /> },
-        { path: 'pending-courses', element: <CourseManagement /> },
+        { path: 'pending-courses', element: <PendingCourses /> },
         { path: 'courses/detail', element: <CourseDetail /> },
         { path: 'courses/lessons', element: <CourseManagement /> },
         { path: 'lesson', element: <LessonPage /> },

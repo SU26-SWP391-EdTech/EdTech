@@ -195,11 +195,13 @@ export function CreatePathModal({
                   className="w-full appearance-none pl-3 pr-8 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 cursor-pointer"
                 >
                   <option value="">-- Select a Course to Add --</option>
-                  {allCourses.map(course => (
-                    <option key={course.courseId} value={course.courseId}>
-                      {course.title}
-                    </option>
-                  ))}
+                  {allCourses
+                    .filter(c => c.status === 'approved' && !addedCourses.some(ac => ac.courseId === c.courseId))
+                    .map(course => (
+                      <option key={course.courseId} value={course.courseId}>
+                        {course.title}
+                      </option>
+                    ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF] pointer-events-none" />
               </div>

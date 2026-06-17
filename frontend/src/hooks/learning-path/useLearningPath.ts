@@ -5,7 +5,8 @@ import {
   updateLearningPath,
   addCourseToLearningPath,
   removeCourseFromLearningPath,
-  getCoursesInLearningPath
+  getCoursesInLearningPath,
+  deleteLearningPath
 } from '../../services/learning-path/learning-path.service';
 import { searchCourses } from '../../services/course/course.service';
 import type { Course } from '../../services/course/course.service';
@@ -157,16 +158,25 @@ export function useLearningPath() {
     }
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deletingPathId !== null) {
-      setPaths(prev => prev.filter(p => p.id !== deletingPathId));
-      if (selectedId === deletingPathId) {
-        const remaining = paths.filter(p => p.id !== deletingPathId);
-        if (remaining.length > 0) {
-          setSelectedId(remaining[0].id);
-        } else {
-          setSelectedId(null);
+      setLoading(true);
+      try {
+        await deleteLearningPath(deletingPathId);
+        setPaths(prev => prev.filter(p => p.id !== deletingPathId));
+        if (selectedId === deletingPathId) {
+          const remaining = paths.filter(p => p.id !== deletingPathId);
+          if (remaining.length > 0) {
+            setSelectedId(remaining[0].id);
+          } else {
+            setSelectedId(null);
+          }
         }
+      } catch (err: any) {
+        console.error("Failed to delete learning path:", err);
+        alert(err.response?.data?.message || "Failed to delete learning path. Please try again.");
+      } finally {
+        setLoading(false);
       }
     }
     setDeletingPathId(null);

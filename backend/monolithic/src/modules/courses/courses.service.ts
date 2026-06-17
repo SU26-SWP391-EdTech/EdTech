@@ -24,7 +24,7 @@ export class CoursesService {
     private readonly coursesRepository: CoursesRepository,
     private cloudinaryService: CloudinaryService,
     @InjectRepository(User) private userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   //create course
   async create(
@@ -206,7 +206,7 @@ export class CoursesService {
   async search(dto: SearchCourseDto) {
     const { data, total } = await this.coursesRepository.searchCourses(dto);
 
-    if(total==0){
+    if (total == 0) {
       return {
         statusCode: 200,
         message: 'Course does not exist',

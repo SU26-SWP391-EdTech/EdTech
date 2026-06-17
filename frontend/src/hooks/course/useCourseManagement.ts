@@ -146,8 +146,13 @@ export function useCourseManagement() {
     };
 
     const toggleSort = (field: typeof sortField) => {
-        if (sortField === field) setSortAsc(a => !a);
-        else { setSortField(field); setSortAsc(false); }
+        console.log('toggleSort clicked: field =', field, 'current sortField =', sortField, 'current sortAsc =', sortAsc);
+        if (sortField === field) {
+            setSortAsc(prev => !prev);
+        } else {
+            setSortField(field);
+            setSortAsc(false);
+        }
     };
 
     const [draggedCourseIndex, setDraggedCourseIndex] = useState<number | null>(null);

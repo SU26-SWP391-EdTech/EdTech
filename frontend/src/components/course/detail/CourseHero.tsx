@@ -1,4 +1,4 @@
-import { BadgeCheck, Users, Clock, BookOpen, Languages, Calendar, Sparkles, Play, Share2 } from 'lucide-react';
+import { BadgeCheck, Users, Clock, BookOpen, Languages, Calendar, Sparkles, Play } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface CourseHeroProps {
@@ -96,7 +96,7 @@ export function CourseHero({
               )}
 
               <div className="flex flex-wrap items-center gap-2">
-                {(role === 'academic manager' || role === 'academic-manager') && (
+                {(role === 'academic manager' || role === 'academic-manager') && course.status === 'pending' && (
                   <>
                     <button onClick={onApprove} className="flex items-center gap-2 px-5 py-2.5 bg-[#10B981] text-white rounded-lg text-sm hover:bg-[#059669] transition-colors shadow-lg shadow-[#10B981]/30 animate-in fade-in duration-200" style={{ fontWeight: 600 }}>
                       Approve
@@ -125,10 +125,6 @@ export function CourseHero({
                     </button>
                   )
                 )}
-                <button onClick={() => toast.success('Link copied to clipboard!')} className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur border border-white/20 text-white rounded-lg text-sm hover:bg-white/15 transition-colors" style={{ fontWeight: 500 }}>
-                  <Share2 className="w-4 h-4" />
-                  Share
-                </button>
               </div>
 
             </div>

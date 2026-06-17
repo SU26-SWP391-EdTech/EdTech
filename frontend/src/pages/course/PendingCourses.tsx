@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
 import { useCourseManagement } from '../../hooks/course/useCourseManagement';
-
-import { CourseStats } from '../../components/course/management/CourseStats';
 import { CourseToolbar } from '../../components/course/management/CourseToolbar';
 import { CourseTable } from '../../components/course/management/CourseTable';
 import { CoursePreviewPanel } from '../../components/course/management/CoursePreviewPanel';
-import { CourseModal } from '../../components/course/management/CourseModal';
-import { DeleteCourseConfirmModal } from '../../components/course/management/DeleteCourseConfirmModal';
+import { RejectCourseModal } from '../../components/course/management/RejectCourseModal';
 
-const STATUSES = ['All Status', 'Published', 'Draft', 'Pending Review', 'Rejected'];
+export function PendingCourses() {
+    const [selectedRejectCourseId, setSelectedRejectCourseId] = useState<number | null>(null);
+    const [rejectReason, setRejectReason] = useState('');
+    const [showRejectModal, setShowRejectModal] = useState(false);
 
-export function CourseManagement() {
     const {
         isProvider,
         navigate,
@@ -23,26 +21,19 @@ export function CourseManagement() {
         setStatusFilter,
         selectedId,
         setSelectedId,
-        showModal,
-        setShowModal,
-        selectedCourseForEdit,
         setSelectedCourseForEdit,
-        isViewOnly,
         setIsViewOnly,
-        showDeleteModal,
-        setShowDeleteModal,
-        selectedCourseForDelete,
+        setShowModal,
         setSelectedCourseForDelete,
-        deleteLoading,
-        fetchCourses,
-        handleDeleteCourse,
+        setShowDeleteModal,
         filtered,
         selectedCourse,
-        stats,
         toggleSort,
         draggedCourseIndex,
         setDraggedCourseIndex,
         handleCourseDragOver,
+        handleApproveCourse,
+        handleRejectCourse,
         sortField,
         sortAsc,
     } = useCourseManagement();
@@ -59,23 +50,14 @@ export function CourseManagement() {
                         <div className="flex items-end justify-between">
                             <div>
                                 <h1 className="text-[#111827] mb-1" style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1.2 }}>
-                                    Course Management
+                                    Pending Course Review
                                 </h1>
                                 <p className="text-[#6B7280] text-sm">
-                                    Review, publish, and organize all courses across the platform from one place.
+                                    Review, approve, or reject courses awaiting verification.
                                 </p>
-                            </div>
-                            <div className="flex items-center gap-2.5">
-                                {isProvider && (
-                                    <button onClick={() => navigate('/provider/courses/create')} className="flex items-center gap-2 px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
-                                        <Plus className="w-4 h-4" /> Create Course
-                                    </button>
-                                )}
                             </div>
                         </div>
                     </div>
-
-                    <CourseStats stats={stats} />
 
                     {/* ── Main Grid ── */}
                     <div className="grid grid-cols-12 gap-5">
@@ -93,8 +75,8 @@ export function CourseManagement() {
                                 sortAsc={sortAsc}
                                 toggleSort={toggleSort}
                                 totalFiltered={filtered.length}
-                                isPendingPage={false}
-                                statuses={STATUSES}
+                                isPendingPage={true}
+                                statuses={['Pending Review']}
                             />
 
                             {/* Table */}
@@ -104,7 +86,7 @@ export function CourseManagement() {
                                 selectedId={selectedId}
                                 setSelectedId={setSelectedId}
                                 isLoading={isLoading}
-                                isPendingPage={false}
+                                isPendingPage={true}
                                 sortField={sortField}
                                 sortAsc={sortAsc}
                                 toggleSort={toggleSort}
@@ -113,6 +95,9 @@ export function CourseManagement() {
                                 draggedCourseIndex={draggedCourseIndex}
                                 setDraggedCourseIndex={setDraggedCourseIndex}
                                 handleCourseDragOver={handleCourseDragOver}
+                                handleApproveCourse={handleApproveCourse}
+                                setSelectedRejectCourseId={setSelectedRejectCourseId}
+                                setShowRejectModal={setShowRejectModal}
                                 isProvider={isProvider}
                                 navigate={navigate}
                                 setSelectedCourseForEdit={setSelectedCourseForEdit}
@@ -125,8 +110,6 @@ export function CourseManagement() {
 
                         {/* Right: Preview + Empty State (4 cols) */}
                         <div className="col-span-4 flex flex-col gap-4">
-
-                            {/* Selected label */}
                             <div className="flex items-center justify-between">
                                 <p className="text-xs text-[#6B7280]" style={{ fontWeight: 500 }}>
                                     COURSE PREVIEW
@@ -142,29 +125,14 @@ export function CourseManagement() {
                 </div>
             </div>
 
-            {/* ── Modal ── */}
-            {showModal && (
-                <CourseModal
-                    course={selectedCourseForEdit}
-                    isViewOnly={isViewOnly}
-                    onClose={() => {
-                        setShowModal(false);
-                        setSelectedCourseForEdit(undefined);
-                        setIsViewOnly(false);
-                    }}
-                    onSuccess={fetchCourses}
-                />
-            )}
-
-            {showDeleteModal && selectedCourseForDelete && (
-                <DeleteCourseConfirmModal
-                    course={selectedCourseForDelete}
-                    onClose={() => {
-                        setShowDeleteModal(false);
-                        setSelectedCourseForDelete(undefined);
-                    }}
-                    onConfirm={handleDeleteCourse}
-                    loading={deleteLoading}
+            {showRejectModal && (
+                <RejectCourseModal
+                    rejectReason={rejectReason}
+                    setRejectReason={setRejectReason}
+                    selectedRejectCourseId={selectedRejectCourseId}
+                    setSelectedRejectCourseId={setSelectedRejectCourseId}
+                    setShowRejectModal={setShowRejectModal}
+                    handleRejectCourse={handleRejectCourse}
                 />
             )}
         </>
