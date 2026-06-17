@@ -67,30 +67,27 @@ export class CoursesService {
     return course;
   }
 
-  async submitToReview(
-    userId: number,
-    createCourseDto: CreateCourseDto,
-    file?: Express.Multer.File,
-  ): Promise<Course> {
-    const courseProvider = await this.userRepository.findOne({
+  async submitToReview(userId: number, courseId: number): Promise<Course> {
+    const course = await this.coursesRepository.findOne({
       where: {
-        userId: userId,
+        courseId,
+        user: {
+          userId,
+        },
       },
     });
 
-    if (!courseProvider) {
-      throw new NotFoundException('User not found');
+    if (!course) {
+      throw new NotFoundException('Course not found');
     }
 
-    if (file) {
-      const uploaded = await this.cloudinaryService.uploadImage(file);
-      createCourseDto.thumbnailUrl = uploaded.secure_url;
+    if (course.status !== CourseStatus.DRAFT) {
+      throw new BadRequestException(
+        'Only draft courses can be submitted for review',
+      );
     }
 
-    return await this.coursesRepository.pendingCourse({
-      ...createCourseDto,
-      user: courseProvider,
-    });
+    return await this.coursesRepository.pendingCourse(course);
   }
 
   //update course

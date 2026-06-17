@@ -35,8 +35,7 @@ export class CoursesRepository extends Repository<Course> {
         return await this.save(course);
     }
 
-    public async pendingCourse(data: Partial<Course>) : Promise<Course>{
-        const course = this.create(data);
+    public async pendingCourse(course) : Promise<Course>{
         course.status = CourseStatus.PENDING;
         return await this.save(course);
     }
