@@ -15,6 +15,7 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
 import { Enrollment } from '../enrollments/entities/enrollment.entity';
 import { EnrollmentsRepository } from '../enrollments/enrollments.repository';
+import { RoleEnum } from 'src/common/enums/role.enum';
 
 @Injectable()
 export class LessonsService {
@@ -87,16 +88,28 @@ export class LessonsService {
         lessonId,
       },
       relations: {
-        course: true,
+        course: {
+          user: {
+            role: true,
+          },
+        },
       },
     });
-  
+    
     if (!lesson) {
       throw new NotFoundException(
         `Lesson with ID ${lessonId} not found`,
       );
     }
-  
+    
+    // Instructor sở hữu course
+    if (
+      lesson.course.user.userId === userId &&
+      lesson.course.user.role.roleName === RoleEnum.COURSE_PROVIDER
+    ) {
+      return lesson;
+    }
+    
     const enrollment = await this.enrollmentsRepo.findOne({
       where: {
         user: {
@@ -108,13 +121,13 @@ export class LessonsService {
         status: EnrollmentStatus.ACTIVE,
       },
     });
-  
+    
     if (!enrollment) {
       throw new ForbiddenException(
         'You must enroll in this course before accessing lessons',
       );
     }
-  
+    
     return lesson;
   }
 

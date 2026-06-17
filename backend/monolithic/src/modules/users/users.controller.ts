@@ -41,7 +41,8 @@ export class UsersController {
   getUser(@Param('id') id: string) {
     return this.usersService.findOne(Number(id));
   }
-
+  
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get()
   @Roles(RoleEnum.COURSE_PROVIDER, RoleEnum.ACADEMIC_MANAGER, RoleEnum.ADMIN)
   @ApiOperation({ summary: 'Get all users' })
@@ -51,6 +52,7 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Post() 
   @ApiOperation({ summary: 'Create a user' })
@@ -61,6 +63,7 @@ export class UsersController {
     return this.usersService.create(CreateUserDto);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER, RoleEnum.COURSE_PROVIDER, RoleEnum.LEARNER)
   @Patch('change-password')
   @ApiOperation({ summary: 'Change current user password' })
@@ -123,6 +126,7 @@ export class UsersController {
     return this.usersService.viewAcademicUserProfile(id, dto);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Patch(':id')
   @ApiOperation({ summary: 'Update user by ID' })
@@ -134,6 +138,7 @@ export class UsersController {
     return this.usersService.update(Number(id), UpdateUserDto);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ADMIN)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete user by ID' })
