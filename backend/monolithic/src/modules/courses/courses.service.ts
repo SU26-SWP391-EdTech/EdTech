@@ -53,6 +53,33 @@ export class CoursesService {
     });
   }
 
+  async createAndSubmitToReview(
+    createCourseDto: CreateCourseDto,
+    userId: number,
+    file?: Express.Multer.File,
+  ): Promise<Course> {
+    const courseProvider = await this.userRepository.findOne({
+      where: {
+        userId,
+      },
+    });
+
+    if (!courseProvider) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (file) {
+      const uploaded = await this.cloudinaryService.uploadImage(file);
+      createCourseDto.thumbnailUrl = uploaded.secure_url;
+    }
+
+    return this.coursesRepository.createCourse({
+      ...createCourseDto,
+      status: CourseStatus.PENDING,
+      user: courseProvider,
+    });
+  }
+
   async findAll(): Promise<Course[]> {
     return this.coursesRepository.findAllCourses();
   }
@@ -67,7 +94,7 @@ export class CoursesService {
     return course;
   }
 
-  async submitToReview(userId: number, courseId: number): Promise<Course> {
+  async submitDraftToReview(userId: number, courseId: number): Promise<Course> {
     const course = await this.coursesRepository.findOne({
       where: {
         courseId,

@@ -31,7 +31,7 @@ export class CoursesRepository extends Repository<Course> {
     }
 
     public async saveCourse(course: Course): Promise<Course> {
-        course.status = CourseStatus.DRAFT;
+        course.status = course.status || CourseStatus.DRAFT;
         return await this.save(course);
     }
 
