@@ -21,15 +21,6 @@ export class CreateCourseDto {
   description?: string;
 
   @ApiPropertyOptional({
-    enum: CourseStatus,
-    example: CourseStatus.DRAFT,
-    description: 'Trạng thái khóa học',
-  })
-  @IsOptional()
-  @IsEnum(CourseStatus, { message: 'Trạng thái khóa học không hợp lệ' })
-  status?: CourseStatus;
-
-  @ApiPropertyOptional({
     example: 'https://example.com/thumbnails/nestjs.jpg',
     description: 'URL ảnh thumbnail',
   })

@@ -67,6 +67,29 @@ export class CoursesService {
     return course;
   }
 
+  async submitToReview(userId: number, courseId: number): Promise<Course> {
+    const course = await this.coursesRepository.findOne({
+      where: {
+        courseId,
+        user: {
+          userId,
+        },
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    if (course.status !== CourseStatus.DRAFT) {
+      throw new BadRequestException(
+        'Only draft courses can be submitted for review',
+      );
+    }
+
+    return await this.coursesRepository.pendingCourse(course);
+  }
+
   //update course
 
   async update(
@@ -208,7 +231,7 @@ export class CoursesService {
 
     if (total == 0) {
       return {
-        statusCode: 200,
+        statusCode: 404,
         message: 'Course does not exist',
       };
     }
