@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 
 import type {
   LessonStatus,
@@ -22,6 +22,7 @@ export function useLessonForm() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [duration, setDuration] = useState('');
+  const [videoDurationInput, setVideoDurationInput] = useState('');
   const [status, setStatus] = useState<LessonStatus>('draft');
 
   const [videoUrl, setVideoUrl] = useState('');
@@ -35,6 +36,21 @@ export function useLessonForm() {
 
   const [titleError, setTitleError] = useState(false);
 
+  // Auto-calculate lesson duration based on video duration and reading defaults
+  useEffect(() => {
+    let calculated = 0;
+    if (hasVideo && hasReading) {
+      calculated = Number(videoDurationInput || 0) + 10;
+    } else if (hasVideo) {
+      calculated = Number(videoDurationInput || 0);
+    } else if (hasReading) {
+      calculated = 10;
+    } else {
+      calculated = 10; // default fallback
+    }
+    setDuration(calculated > 0 ? String(calculated) : '');
+  }, [hasVideo, hasReading, videoDurationInput]);
+
   const resetFormFields = useCallback(() => {
     setHasVideo(true);
     setHasReading(false);
@@ -42,6 +58,7 @@ export function useLessonForm() {
     setTitle('');
     setDescription('');
     setDuration('');
+    setVideoDurationInput('');
     setStatus('draft');
 
     setVideoUrl('');
@@ -61,13 +78,24 @@ export function useLessonForm() {
 
     setTitle(lesson.title || '');
     setDescription(lesson.description || '');
-    setDuration(
-      lesson.videoDuration
-        ? String(Math.round(lesson.videoDuration / 60))
-        : ''
-    );
 
-    setContent(lessonContent);
+    const hasVid = Boolean(lesson.videoUrl);
+    
+    // Extract clean reading content
+    let cleanReadingContent = lessonContent;
+    const firstSectionIndex = lessonContent.search(/\n*(Objectives|Resources|Quiz Questions):/);
+    if (firstSectionIndex !== -1) {
+        cleanReadingContent = lessonContent.substring(0, firstSectionIndex).trim();
+    }
+    const hasRead = Boolean(cleanReadingContent.trim());
+
+    setHasVideo(hasVid || (!hasVid && !hasRead));
+    setHasReading(hasRead);
+
+    const vidMin = lesson.videoDuration ? Math.round(lesson.videoDuration / 60) : 0;
+    setVideoDurationInput(vidMin ? String(vidMin) : '');
+
+    setContent(cleanReadingContent);
     setVideoUrl(lesson.videoUrl || '');
     setVideoUploaded(Boolean(lesson.videoUrl));
 
@@ -82,20 +110,23 @@ export function useLessonForm() {
     setQuizQuestions(
       lessonContent ? parseQuizQuestionsFromContent(lessonContent) : []
     );
-
-    const hasVid = Boolean(lesson.videoUrl);
-    const hasRead = Boolean(lesson.content);
-
-    setHasVideo(hasVid || (!hasVid && !hasRead));
-    setHasReading(hasRead);
   }, []);
 
-  function handleVideoFileChange(file?: File) {
+  const handleVideoFileChange = useCallback((file?: File) => {
     if (!file) return;
 
     setVideoFile(file);
     setVideoUploaded(true);
-  }
+
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.onloadedmetadata = () => {
+      window.URL.revokeObjectURL(video.src);
+      const minutes = Math.round(video.duration / 60) || 1;
+      setVideoDurationInput(String(minutes));
+    };
+    video.src = URL.createObjectURL(file);
+  }, []);
 
   return {
     hasVideo,
@@ -112,6 +143,9 @@ export function useLessonForm() {
 
     duration,
     setDuration,
+
+    videoDurationInput,
+    setVideoDurationInput,
 
     status,
     setStatus,

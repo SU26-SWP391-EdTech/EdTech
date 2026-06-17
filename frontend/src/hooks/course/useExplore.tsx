@@ -143,15 +143,6 @@ export function useExplore() {
         return isLearner ? !userEnrolledInPath : true;
     });
 
-    const getCourseLevel = (course: Course) => {
-        for (const path of learningPaths) {
-            if (path.learningPathCourses?.some(lpc => lpc.courseId === course.courseId)) {
-                return path.level.charAt(0).toUpperCase() + path.level.slice(1);
-            }
-        }
-        return 'Intermediate';
-    };
-
     const getCourseGradient = (index: number) => {
         const gradients = [
             'from-[#3B82F6] to-[#1D4ED8]', // Blue
@@ -177,7 +168,6 @@ export function useExplore() {
         enrolledPathIds,
         isEnrolled,
         handleEnroll,
-        getCourseLevel,
         getCourseGradient,
         user,
     };

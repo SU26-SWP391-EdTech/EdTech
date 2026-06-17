@@ -41,10 +41,16 @@ export function buildLessonApiPayload(options: {
     resources: Resource[];
     quizQuestions: QuizQuestion[];
 }) {
+    let videoSec = 0;
+    if (options.hasVideo) {
+        const totalMin = Number(options.duration || 0);
+        const videoMin = options.hasReading ? Math.max(0, totalMin - 10) : totalMin;
+        videoSec = videoMin * 60;
+    }
     return {
         title: options.title.trim(),
         description: '',
-        videoDuration: options.hasVideo && options.duration ? Math.max(0, Number(options.duration) * 60) : undefined,
+        videoDuration: options.hasVideo ? videoSec : undefined,
         content: buildLessonContent(options) || undefined,
         videoUrl: options.hasVideo ? (options.videoUrl.trim() || undefined) : undefined,
     };

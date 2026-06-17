@@ -93,6 +93,9 @@ export function useCreateLesson() {
     duration: form.duration,
     setDuration: form.setDuration,
 
+    videoDurationInput: form.videoDurationInput,
+    setVideoDurationInput: form.setVideoDurationInput,
+
     status: form.status,
 
     videoUrl: form.videoUrl,

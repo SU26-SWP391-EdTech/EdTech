@@ -4,7 +4,6 @@ import toast from 'react-hot-toast';
 import type { Lesson, MockEnrollment, Module, Note } from '../../types/lesson/lesson.types';
 import {
   getMockCode,
-  getQuizQuestionsForCourse,
   getYoutubeEmbedUrl,
   SAVED_NOTES
 } from '../../utils/lesson/lessonUtils';
@@ -74,12 +73,26 @@ export function useLessonPage() {
   const rawModules = [
     {
       id: 'm1',
-      title: 'Course Curriculum',
+      title: 'Lesson Curriculum',
       description: 'Lessons list',
       lessons: lessonsList.map(l => ({
         id: String(l.lessonId),
         title: l.title,
-        duration: l.videoDuration ? `${Math.round(l.videoDuration / 60)}m` : '15m',
+        duration: (() => {
+          const hasVideo = Boolean(l.videoUrl);
+          const hasReading = Boolean(l.content);
+          const videoMin = l.videoDuration ? Math.round(l.videoDuration / 60) : 0;
+          if (hasVideo && hasReading) {
+            return `${videoMin + 10}m`;
+          }
+          if (hasVideo) {
+            return `${videoMin}m`;
+          }
+          if (hasReading) {
+            return '10m';
+          }
+          return '10m';
+        })(),
         type: getLessonType(l),
         preview: false,
         videoUrl: l.videoUrl || '',
@@ -105,15 +118,9 @@ export function useLessonPage() {
   const [questionText, setQuestionText] = useState('');
   const [activeTab, setActiveTab] = useState<'content' | 'notes' | 'discussion'>('content');
 
-  // Quiz interactive state
-  const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
-  const [quizSubmitted, setQuizSubmitted] = useState(false);
-  const [quizScore, setQuizScore] = useState(0);
 
-  // Assignment interactive state
-  const [assignmentSubmitted, setAssignmentSubmitted] = useState(false);
-  const [assignmentText, setAssignmentText] = useState('');
-  const [assignmentFile, setAssignmentFile] = useState<File | null>(null);
+
+
 
   // Sync completedLessonIds from progressVal
   useEffect(() => {
@@ -227,15 +234,7 @@ export function useLessonPage() {
     }
   }, [activeLessonId, activeModuleId]);
 
-  // Reset interactive tabs/states when switching lessons
-  useEffect(() => {
-    setQuizAnswers({});
-    setQuizSubmitted(false);
-    setQuizScore(0);
-    setAssignmentSubmitted(false);
-    setAssignmentText('');
-    setAssignmentFile(null);
-  }, [activeLessonId]);
+
 
   const toggleModule = (id: string | number) => {
     setExpandedModules(prev =>
@@ -334,33 +333,9 @@ export function useLessonPage() {
     }
   };
 
-  const handleQuizSubmit = (questionsList: any[]) => {
-    let score = 0;
-    questionsList.forEach((q, idx) => {
-      if (quizAnswers[idx] === q.answer) {
-        score++;
-      }
-    });
-    setQuizScore(score);
-    setQuizSubmitted(true);
-    if (activeLesson) {
-      persistLessonCompletion(activeLesson, false);
-    }
-    if (score === questionsList.length) {
-      toast.success(`Perfect score! ${score}/${questionsList.length}. Lesson completed.`);
-    } else {
-      toast.error(`You scored ${score}/${questionsList.length}. Lesson completed, but you can try again.`);
-    }
-  };
 
-  const handleAssignmentSubmit = () => {
-    if (!assignmentText.trim() && !assignmentFile) return;
-    setAssignmentSubmitted(true);
-    if (activeLesson) {
-      persistLessonCompletion(activeLesson, false);
-    }
-    toast.success('Assignment submitted successfully!');
-  };
+
+
 
   const handleBackToCourse = () => {
     if (role === 'learner') {
@@ -374,7 +349,6 @@ export function useLessonPage() {
     }
   };
 
-  const quizQuestionsList = getQuizQuestionsForCourse(matchedCourse.title);
   const mockCodeInfo = getMockCode(matchedCourse.title);
 
   return {
@@ -397,12 +371,7 @@ export function useLessonPage() {
     copiedCode,
     questionText,
     activeTab,
-    quizAnswers,
-    quizSubmitted,
-    quizScore,
-    assignmentSubmitted,
-    assignmentText,
-    assignmentFile,
+    mockCodeInfo,
     hasTrackedLessonProgress,
     completedFromProgressCount,
     modules,
@@ -417,8 +386,6 @@ export function useLessonPage() {
     isCompleted,
     activeVideoUrl,
     youtubeEmbedUrl,
-    quizQuestionsList,
-    mockCodeInfo,
     setExpandedModules,
     setCompletedLessonIds,
     setNoteText,
@@ -426,12 +393,6 @@ export function useLessonPage() {
     setCopiedCode,
     setQuestionText,
     setActiveTab,
-    setQuizAnswers,
-    setQuizSubmitted,
-    setQuizScore,
-    setAssignmentSubmitted,
-    setAssignmentText,
-    setAssignmentFile,
     toggleModule,
     handleCopyCode,
     handleAddNote,
@@ -441,8 +402,6 @@ export function useLessonPage() {
     handleLessonClick,
     handlePrevLesson,
     handleNextLesson,
-    handleQuizSubmit,
-    handleAssignmentSubmit,
     handleBackToCourse,
     isLoading
   };

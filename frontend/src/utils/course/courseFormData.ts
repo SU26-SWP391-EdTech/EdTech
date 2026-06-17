@@ -18,9 +18,10 @@ export async function buildCourseFormData(options: {
     formData.append('status', status);
     formData.append('language', draft.language || 'English');
 
-    const durationHours = Number(draft.durationHours || 0);
-    const durationMinutes = Number(draft.durationMinutes || 0);
-    formData.append('duration', String((durationHours * 60) + durationMinutes));
+    const totalMinutes = (draft.lessons || []).reduce((sum, l) => {
+        return sum + (parseInt(l.duration) || 0);
+    }, 0);
+    formData.append('duration', String(totalMinutes));
 
     if (draft.projectUrl) {
         formData.append('projectUrl', draft.projectUrl);

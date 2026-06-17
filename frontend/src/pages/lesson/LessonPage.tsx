@@ -2,8 +2,6 @@ import { useLessonPage } from '../../hooks/lesson/useLessonPage';
 import { LessonHeader } from '../../components/lesson/detail/LessonHeader';
 import { LessonPlayer } from '../../components/lesson/detail/LessonPlayer';
 import { LessonReading } from '../../components/lesson/detail/LessonReading';
-import { LessonQuiz } from '../../components/lesson/detail/LessonQuiz';
-import { LessonAssignment } from '../../components/lesson/detail/LessonAssignment';
 import { LessonSummaryNav } from '../../components/lesson/detail/LessonSummaryNav';
 import { CurriculumSidebar } from '../../components/lesson/detail/CurriculumSidebar';
 
@@ -48,43 +46,7 @@ export function LessonPage() {
             {(() => {
               const typeLower = lesson.activeLesson?.type?.toLowerCase() || '';
               const hasVideo = typeLower === 'video' || typeLower === 'video & reading' || !!lesson.activeLesson?.videoUrl;
-              const hasReading = typeLower === 'reading' || typeLower === 'video & reading' || (!hasVideo && typeLower !== 'quiz' && typeLower !== 'assignment');
-
-              if (typeLower === 'quiz') {
-                return (
-                  <LessonQuiz
-                    quizQuestionsList={lesson.quizQuestionsList}
-                    quizAnswers={lesson.quizAnswers}
-                    quizSubmitted={lesson.quizSubmitted}
-                    quizScore={lesson.quizScore}
-                    onSelectAnswer={(idx, option) =>
-                      lesson.setQuizAnswers((prev) => ({ ...prev, [idx]: option }))
-                    }
-                    onSubmitQuiz={lesson.handleQuizSubmit}
-                    onRetakeQuiz={() => {
-                      lesson.setQuizAnswers({});
-                      lesson.setQuizSubmitted(false);
-                    }}
-                  />
-                );
-              }
-
-              if (typeLower === 'assignment') {
-                return (
-                  <LessonAssignment
-                    assignmentSubmitted={lesson.assignmentSubmitted}
-                    assignmentText={lesson.assignmentText}
-                    assignmentFile={lesson.assignmentFile}
-                    onAssignmentTextChange={lesson.setAssignmentText}
-                    onAssignmentFileChange={lesson.setAssignmentFile}
-                    onSubmitAssignment={lesson.handleAssignmentSubmit}
-                    onResubmitAssignment={() => {
-                      lesson.setAssignmentSubmitted(false);
-                      lesson.setAssignmentFile(null);
-                    }}
-                  />
-                );
-              }
+              const hasReading = typeLower === 'reading' || typeLower === 'video & reading' || !hasVideo;
 
               return (
                 <div className="space-y-6">

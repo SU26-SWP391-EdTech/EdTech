@@ -41,6 +41,10 @@ interface Props {
   setDescription: (v: string) => void;
   duration: string;
   setDuration: (v: string) => void;
+  videoDurationInput?: string;
+  setVideoDurationInput?: (v: string) => void;
+  hasVideo?: boolean;
+  hasReading?: boolean;
   lessonOrder: number;
   courses: BackendCourse[];
   selectedCourseId: number | null;
@@ -57,6 +61,7 @@ interface Props {
 
 export function LessonInfoSection({
   title, setTitle, description, setDescription, duration, setDuration,
+  videoDurationInput = '', setVideoDurationInput, hasVideo = true, hasReading = false,
   lessonOrder, courses, setSelectedCourseId, selectedCourse,
   draftCourseTitle, titleError, setTitleError, setEditingLessonId, setSavedLessonId,
   searchParams, navigate,
@@ -112,8 +117,33 @@ export function LessonInfoSection({
 
         {/* Duration */}
         <div style={{ gridColumn: '1 / -1' }}>
-          <Label>Estimated Duration (min)</Label>
-          <Input value={duration} onChange={setDuration} placeholder="18" />
+          {hasVideo ? (
+            <>
+              <Label>Video Duration (min)</Label>
+              <Input
+                value={videoDurationInput}
+                onChange={setVideoDurationInput || (() => {})}
+                placeholder="e.g. 15"
+              />
+              <p style={{ fontSize: 11.5, color: '#6B7280', marginTop: 5 }}>
+                {hasReading ? (
+                  <span>
+                    Total lesson duration: <strong>{duration} min</strong> (Video: {videoDurationInput || '0'} min + Default Reading: 10 min)
+                  </span>
+                ) : (
+                  <span>Total lesson duration is based solely on video: <strong>{duration || '0'} min</strong></span>
+                )}
+              </p>
+            </>
+          ) : (
+            <>
+              <Label>Estimated Duration (min)</Label>
+              <Input value="10" onChange={() => {}} placeholder="10" />
+              <p style={{ fontSize: 11.5, color: '#6B7280', marginTop: 5 }}>
+                Reading lessons have a default duration of <strong>10 minutes</strong>.
+              </p>
+            </>
+          )}
         </div>
       </div>
 

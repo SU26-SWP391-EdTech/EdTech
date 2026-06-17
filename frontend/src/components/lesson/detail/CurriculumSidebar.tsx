@@ -23,7 +23,7 @@ export function CurriculumSidebar({
     <div className="w-[360px] flex-shrink-0 space-y-4" style={{ position: 'sticky', top: 80, maxHeight: 'calc(100vh - 100px)', overflowY: 'auto' }}>
       <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#F3F4F6]">
-          <span className="text-sm text-[#111827]" style={{ fontWeight: 600 }}>Course Curriculum</span>
+          <span className="text-sm text-[#111827]" style={{ fontWeight: 600 }}>Lesson Curriculum</span>
           <span className="text-xs text-[#9CA3AF]">{totalLessons} lessons</span>
         </div>
 

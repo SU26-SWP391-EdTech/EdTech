@@ -195,7 +195,7 @@ export function useLearningPathDetail() {
     return [
       {
         id: 1,
-        title: 'Course Curriculum',
+        title: 'Lesson Curriculum',
         lessons,
       }
     ];

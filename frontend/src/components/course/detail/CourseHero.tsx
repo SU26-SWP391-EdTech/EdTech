@@ -45,9 +45,9 @@ export function CourseHero({
               {enrolled && (
                 <div className="flex items-center gap-2 mb-3">
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white text-[#E11D48] rounded text-[10px]" style={{ fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-                      <BadgeCheck className="w-3 h-3" />
-                      Enrolled
-                    </span>
+                    <BadgeCheck className="w-3 h-3" />
+                    Enrolled
+                  </span>
                 </div>
               )}
               <h1 className="text-[36px] text-white mb-2" style={{ fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
@@ -62,7 +62,7 @@ export function CourseHero({
                 <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" />{durationLabel}</span>
                 <span className="flex items-center gap-1.5"><BookOpen className="w-4 h-4" />{totalLessons} lessons</span>
                 <span className="flex items-center gap-1.5"><Languages className="w-4 h-4" />{course.language || 'English'}</span>
-                <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" />Updated {new Date(course.updatedAt || course.createdAt || Date.now()).toLocaleDateString('en-US', {month: 'short', day: '2-digit', year: 'numeric'})}</span>
+                <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" />Updated {new Date(course.updatedAt || course.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })}</span>
               </div>
 
               <div className="flex items-center gap-3 mb-6">

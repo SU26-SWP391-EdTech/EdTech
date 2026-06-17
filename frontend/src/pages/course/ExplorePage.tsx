@@ -24,7 +24,6 @@ export function ExplorePage() {
         enrolledPathIds,
         isEnrolled,
         handleEnroll,
-        getCourseLevel,
         getCourseGradient,
         user,
     } = useExplore();
@@ -149,25 +148,36 @@ export function ExplorePage() {
                                              ) : (
                                                  <div className="grid grid-cols-5 gap-4">
                                                      {(tab === 'all' ? filteredCourses.slice(0, 5) : filteredCourses).map((course, index) => {
-                                                         const difficultyLevel = getCourseLevel(course);
                                                          const roleName = user?.roleName?.toLowerCase() || 'guest';
+                                                         const getRolePrefix = (role: string) => {
+                                                             if (role === 'learner') return '/learner';
+                                                             if (role === 'course provider') return '/provider';
+                                                             if (role === 'academic manager') return '/academic';
+                                                             if (role === 'admin') return '/admin';
+                                                             return '';
+                                                         };
+                                                         const prefix = getRolePrefix(roleName);
+                                                         const formatDuration = (minutes: number) => {
+                                                             const hours = Math.floor(minutes / 60);
+                                                             const mins = minutes % 60;
+                                                             if (hours === 0) return `${mins}m`;
+                                                             if (mins === 0) return `${hours}h`;
+                                                             return `${hours}h ${mins}m`;
+                                                         };
                                                          return (
                                                              <ExploreCourseCard
                                                                  key={course.courseId}
                                                                  title={course.title}
                                                                  provider={course.user?.fullName || "Senior Instructor"}
-                                                                 rating={4.8}
-                                                                 students="8.5k"
-                                                                 duration={`${course.duration || 8}h`}
-                                                                 difficulty={difficultyLevel}
+                                                                 students={String(course.enrollmentCount || 0)}
+                                                                 duration={formatDuration(course.duration || 0)}
                                                                  tags={[course.language || 'English']}
                                                                  thumb={getCourseGradient(index)}
-                                                                 badge={index === 0 ? "Popular" : index === 1 ? "Trending" : undefined}
+                                                                 thumbnailUrl={course.thumbnailUrl}
                                                                  isEnrolled={isEnrolled(course.courseId)}
                                                                  onEnroll={() => handleEnroll(course.courseId)}
                                                                  enrolling={enrollingId === course.courseId}
                                                                  onClick={() => {
-                                                                     const prefix = roleName === 'learner' ? '/learner' : '';
                                                                      navigate(`${prefix}/courses/detail?id=${course.courseId}`);
                                                                  }}
                                                              />

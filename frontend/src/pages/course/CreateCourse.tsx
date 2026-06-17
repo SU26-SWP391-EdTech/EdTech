@@ -42,7 +42,6 @@ export function CreateCoursePage() {
     const [lessonDragEnabled, setLessonDragEnabled] = useState(false);
 
     const [availableCourses, setAvailableCourses] = useState<{ id: number; title: string }[]>([]);
-    const [hasDraft, setHasDraft] = useState(false);
 
     const getCurrentCourseDraft = (currentLessons = lessons) => ({
         title,
@@ -56,56 +55,6 @@ export function CreateCoursePage() {
         thumbnailPreview,
         lessons: currentLessons,
     });
-
-    const saveDraftToLocalStorage = (currentLessons = lessons) => {
-        writeCourseDraft(getCurrentCourseDraft(currentLessons));
-    };
-
-    const handleResumeDraft = () => {
-        const draft = readCourseDraft();
-        if (draft) {
-            if (draft.title) setTitle(draft.title);
-            if (draft.description) setDescription(draft.description);
-            if (draft.language) setLanguage(draft.language);
-            if (draft.durationHours) setDurationHours(Number(draft.durationHours) || 0);
-            if (draft.durationMinutes) setDurationMinutes(Number(draft.durationMinutes) || 0);
-            if (draft.projectUrl) setProjectUrl(draft.projectUrl);
-            if (draft.outcomes) setOutcomes(draft.outcomes);
-            if (draft.prerequisiteCourseIds) setPrerequisiteCourseIds(draft.prerequisiteCourseIds);
-            if (draft.thumbnailPreview) setThumbnailPreview(draft.thumbnailPreview);
-            if (draft.lessons) setLessons(draft.lessons);
-            toast.success('Course draft loaded successfully!');
-        }
-        setHasDraft(false);
-    };
-
-    const handleDiscardDraft = () => {
-        clearCourseDraft();
-        setHasDraft(false);
-        toast.success('Draft discarded.');
-    };
-
-    useEffect(() => {
-        if (editId) return;
-        const draft = readCourseDraft();
-        if (draft) {
-            if (searchParams.get('resume') === 'true') {
-                if (draft.title) setTitle(draft.title);
-                if (draft.description) setDescription(draft.description);
-                if (draft.language) setLanguage(draft.language);
-                if (draft.durationHours) setDurationHours(Number(draft.durationHours) || 0);
-                if (draft.durationMinutes) setDurationMinutes(Number(draft.durationMinutes) || 0);
-                if (draft.projectUrl) setProjectUrl(draft.projectUrl);
-                if (draft.outcomes) setOutcomes(draft.outcomes);
-                if (draft.prerequisiteCourseIds) setPrerequisiteCourseIds(draft.prerequisiteCourseIds);
-                if (draft.thumbnailPreview) setThumbnailPreview(draft.thumbnailPreview);
-                if (draft.lessons) setLessons(draft.lessons);
-                setHasDraft(false);
-            } else {
-                setHasDraft(hasUsableCourseDraft(draft));
-            }
-        }
-    }, [editId, searchParams]);
 
     useEffect(() => {
         if (!editId) return;
@@ -138,13 +87,6 @@ export function CreateCoursePage() {
 
         loadCourseData();
     }, [editId]);
-
-    useEffect(() => {
-        if (editId) return;
-        if (!hasDraft && (title || description || lessons.length > 0 || outcomes.length > 0 || prerequisiteCourseIds.length > 0)) {
-            saveDraftToLocalStorage();
-        }
-    }, [title, description, language, durationHours, durationMinutes, projectUrl, outcomes, prerequisiteCourseIds, lessons, thumbnailPreview, hasDraft]);
 
     useEffect(() => {
         const fetchAvailableCourses = async () => {
@@ -222,9 +164,10 @@ export function CreateCoursePage() {
                 }
             }
 
+            let idx = 1;
             for (const l of lessons) {
                 try {
-                    const payload = buildLessonSyncPayload(l);
+                    const payload = buildLessonSyncPayload(l, idx++);
                     const isNew = l.id.startsWith('l-');
                     if (isNew) {
                         await createLesson(courseId!, payload);
@@ -365,31 +308,7 @@ export function CreateCoursePage() {
                     </div>
                 </div>
 
-                {!editId && hasDraft && (
-                    <div className="mb-5 flex items-center justify-between gap-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                        <div className="flex items-center gap-3">
-                            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-                            <div>
-                                <h4 className="text-sm font-semibold text-amber-900">Unsaved draft detected</h4>
-                                <p className="text-xs text-amber-700">Would you like to resume your unsaved course draft?</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={handleResumeDraft}
-                                className="px-3 py-1.5 bg-amber-600 text-white rounded-lg text-xs font-semibold hover:bg-amber-700 transition-colors"
-                            >
-                                Resume
-                            </button>
-                            <button
-                                onClick={handleDiscardDraft}
-                                className="px-3 py-1.5 bg-white border border-amber-200 text-amber-700 rounded-lg text-xs font-semibold hover:bg-amber-50 transition-colors"
-                            >
-                                Discard
-                            </button>
-                        </div>
-                    </div>
-                )}
+
 
                 {/* Left Form */}
                 <div className="grid grid-cols-12 gap-5">
@@ -400,7 +319,7 @@ export function CreateCoursePage() {
                                 <Field label="Course title" required full>
                                     <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Spring Boot REST API Masterclass" />
                                 </Field>
-                                <Field label="Description" full required>
+                                <Field label="Description" full>
                                     <Textarea
                                         rows={4}
                                         value={description}
@@ -408,23 +327,11 @@ export function CreateCoursePage() {
                                         placeholder="Describe what learners will gain from this course..."
                                     />
                                 </Field>
-                                <Field label="Language" required>
+                                <Field label="Language">
                                     <Select value={language} onChange={e => setLanguage(e.target.value)}>
                                         <option value="English">English</option>
                                         <option value="Vietnamese">Vietnamese</option>
                                     </Select>
-                                </Field>
-                                <Field label="Estimated duration" required>
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex-1 relative">
-                                            <input type="number" value={durationHours} onChange={e => setDurationHours(Number(e.target.value))} className="w-full px-3 py-2 pr-12 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#E11D48]/20 focus:border-[#E11D48]" />
-                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#6B7280]" style={{ fontWeight: 500 }}>hours</span>
-                                        </div>
-                                        <div className="flex-1 relative">
-                                            <input type="number" value={durationMinutes} onChange={e => setDurationMinutes(Number(e.target.value))} className="w-full px-3 py-2 pr-12 bg-white border border-[#E5E7EB] rounded-lg text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#E11D48]/20 focus:border-[#E11D48]" />
-                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#6B7280]" style={{ fontWeight: 500 }}>min</span>
-                                        </div>
-                                    </div>
                                 </Field>
                                 <Field label="Course thumbnail" full>
                                     <input
@@ -467,12 +374,11 @@ export function CreateCoursePage() {
                             </div>
                         </FormCard>
 
-                        {/* Section 2 — Course Curriculum */}
-                        <FormCard step={2} title="Course Curriculum" description="Manage all lessons in this course." action={
+                        {/* Section 2 — Lesson Curriculum */}
+                        <FormCard step={2} title="Lesson Curriculum" description="Manage all lessons in this course." action={
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => {
-                                        saveDraftToLocalStorage();
                                         openLessonEditor();
                                     }}
                                     className="flex items-center gap-1.5 px-3 py-1.5 bg-[#E11D48] text-white rounded-lg text-xs hover:bg-[#BE123C] transition-colors"
@@ -492,8 +398,7 @@ export function CreateCoursePage() {
                                     <p className="text-xs text-[#6B7280] mb-4">Start by adding your first lesson for this course.</p>
                                     <button
                                         onClick={() => {
-                                            saveDraftToLocalStorage();
-                                            openLessonEditor();
+                                            openLessonEditor(); 
                                         }}
                                         className="flex items-center gap-1.5 px-3 py-1.5 bg-[#E11D48] text-white rounded-lg text-xs hover:bg-[#BE123C] transition-colors"
                                         style={{ fontWeight: 500 }}
@@ -545,7 +450,6 @@ export function CreateCoursePage() {
                                             <IconBtn
                                                 title="Edit"
                                                 onClick={() => {
-                                                    saveDraftToLocalStorage();
                                                     openLessonEditor(l.id);
                                                 }}
                                             >

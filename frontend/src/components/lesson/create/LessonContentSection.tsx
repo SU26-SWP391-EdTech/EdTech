@@ -93,7 +93,7 @@ export function LessonContentSection({
             {(videoFile || videoUrl) && (
               <div style={{ marginTop: 14 }}>
                 <label style={{ fontSize: 12.5, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 5 }}>Video Preview</label>
-                <div style={{ width: '100%', aspectRatio: '16/9', background: '#000', borderRadius: 10, overflow: 'hidden', border: '1px solid #E5E7EB' }}>
+                <div style={{ maxWidth: 360, width: '100%', aspectRatio: '16/9', background: '#000', borderRadius: 10, overflow: 'hidden', border: '1px solid #E5E7EB' }}>
                   {videoFile ? (
                     <video src={URL.createObjectURL(videoFile)} controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                   ) : getEmbedUrl(videoUrl) ? (

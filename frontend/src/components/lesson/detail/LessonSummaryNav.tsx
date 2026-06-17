@@ -1,5 +1,4 @@
-import { Target, Download, ChevronLeft, ChevronRight } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface LessonSummaryNavProps {
   matchedCourse: any;
@@ -22,35 +21,8 @@ export function LessonSummaryNav({
 }: LessonSummaryNavProps) {
   return (
     <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5">
-      <div className="flex items-start gap-5">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <Target className="w-4 h-4 text-[#E11D48]" />
-            <span className="text-[#111827] text-sm" style={{ fontWeight: 600 }}>Learning Objectives</span>
-          </div>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-            {(matchedCourse?.outcomes || []).slice(0, 6).map((obj: string, i: number) => (
-              <div key={i} className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#E11D48] mt-1.5 flex-shrink-0" />
-                <span className="text-sm text-[#374151]">{obj}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="flex-shrink-0 flex flex-col gap-2">
-          <button 
-            className="flex items-center gap-2 px-4 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] hover:bg-[#F8FAFC] transition-colors whitespace-nowrap" 
-            style={{ fontWeight: 500 }} 
-            onClick={() => toast.success('Resources downloaded successfully.')}
-          >
-            <Download className="w-4 h-4" />
-            Resources
-          </button>
-        </div>
-      </div>
-
       {/* Prev / Next navigation */}
-      <div className="flex items-center justify-between mt-5 pt-4 border-t border-[#F3F4F6]">
+      <div className="flex items-center justify-between">
         <button
           onClick={onPrevLesson}
           disabled={activeLessonIndex === 0}

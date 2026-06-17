@@ -19,7 +19,20 @@ function getLessonType(lesson: any) {
 }
 
 function getLessonDurationMinutes(lesson: any) {
-  return lesson.videoDuration ? Math.round(Number(lesson.videoDuration) / 60) : 0;
+  const hasVideo = Boolean(lesson.videoUrl);
+  const hasReading = Boolean(lesson.content);
+  const videoMin = lesson.videoDuration ? Math.round(Number(lesson.videoDuration) / 60) : 0;
+
+  if (hasVideo && hasReading) {
+    return videoMin + 10;
+  }
+  if (hasVideo) {
+    return videoMin;
+  }
+  if (hasReading) {
+    return 10;
+  }
+  return 10; // Default fallback for any lesson type
 }
 
 function formatCourseHours(totalMinutes: number) {
@@ -186,7 +199,7 @@ export function useCourseDetail() {
   const dynamicCurriculum: Module[] = [
     {
       id: 'm1',
-      title: 'Course Curriculum',
+      title: 'Lesson Curriculum',
       description: 'Lessons list',
       progress: progressVal,
       lessons: lessonsList.map((l, index) => {

@@ -1,8 +1,16 @@
-import { BookOpen, Users, Globe, Eye, Edit2, Trash2 } from "lucide-react";
+import { BookOpen, Users, Globe, Eye, Edit2, Trash2, Clock, Calendar } from "lucide-react";
 import { STATUS_CFG } from "./statusConfig";
 import type { CourseListProps } from "../../../types/course/my-course.types";
 
-
+const formatDuration = (mins: number | null) => {
+    if (!mins) return '0m';
+    const hrs = Math.floor(mins / 60);
+    const m = mins % 60;
+    if (hrs > 0) {
+        return `${hrs}h ${m}m`;
+    }
+    return `${m}m`;
+};
 
 const CourseList = ({ filtered, canDelete, setDeleteId, onView, onEdit, onSubmit, onCreateCourse }: CourseListProps) => {
     return (
@@ -40,14 +48,15 @@ const CourseList = ({ filtered, canDelete, setDeleteId, onView, onEdit, onSubmit
                                     </span>
                                 </div>
                                 <p style={{ fontSize: 12.5, color: '#6B7280', marginBottom: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.description}</p>
-                                <div style={{ display: 'flex', gap: 16 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                                         <BookOpen size={12} style={{ color: '#9CA3AF' }} />
                                         <span style={{ fontSize: 12, color: '#6B7280' }}>{c.totalLessons || 0} lessons</span>
                                     </div>
-                                    {c.duration && (
-                                        <span style={{ fontSize: 12, color: '#6B7280' }}>{Math.round(c.duration / 60)}h</span>
-                                    )}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        <Clock size={12} style={{ color: '#9CA3AF' }} />
+                                        <span style={{ fontSize: 12, color: '#6B7280' }}>{formatDuration(c.duration)}</span>
+                                    </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                                         <Globe size={12} style={{ color: '#9CA3AF' }} />
                                         <span style={{ fontSize: 12, color: '#6B7280' }}>{c.language || 'English'}</span>
@@ -58,7 +67,12 @@ const CourseList = ({ filtered, canDelete, setDeleteId, onView, onEdit, onSubmit
                                             <span style={{ fontSize: 12, color: '#6B7280' }}>{(c.enrollmentCount || 0).toLocaleString()} enrolled</span>
                                         </div>
                                     )}
-                                    <span style={{ fontSize: 12, color: '#9CA3AF' }}>Updated {c.updatedAt ? new Date(c.updatedAt).toLocaleDateString() : new Date(c.createdAt).toLocaleDateString()}</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        <Calendar size={12} style={{ color: '#9CA3AF' }} />
+                                        <span style={{ fontSize: 12, color: '#6B7280' }}>
+                                            Updated {c.updatedAt ? new Date(c.updatedAt).toLocaleDateString() : new Date(c.createdAt).toLocaleDateString()}
+                                        </span>
+                                    </div>
                                 </div>
                                 {statusKey === 'REJECTED' && (
                                     <p style={{ fontSize: 12, color: '#E11D48', marginTop: 6, fontWeight: 500 }}>

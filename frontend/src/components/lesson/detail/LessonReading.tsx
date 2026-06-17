@@ -1,4 +1,4 @@
-import { BookOpen, Download } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { Lesson } from '../../../types/lesson/lesson.types';
 
@@ -14,13 +14,6 @@ export function LessonReading({ activeLesson }: LessonReadingProps) {
           <BookOpen className="w-5 h-5" />
           <span className="text-sm font-bold uppercase tracking-wider">Assigned Reading</span>
         </div>
-        <button 
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F1F5F9] text-[#111827] rounded-lg text-xs hover:bg-[#E2E8F0] transition-colors font-medium" 
-          onClick={() => toast.success('Downloading reading resources PDF...')}
-        >
-          <Download className="w-3.5 h-3.5" />
-          Download PDF version
-        </button>
       </div>
       <div className="prose prose-slate max-w-none">
         <h2 className="text-lg font-bold text-[#111827]">{activeLesson.title}</h2>

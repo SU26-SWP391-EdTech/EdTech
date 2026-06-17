@@ -15,7 +15,7 @@ export function CourseCurriculum({ curriculum, totalLessons, durationLabel, cour
 
   return (
     <Card
-      title="Course Curriculum"
+      title="Lesson Curriculum"
       subtitle={`${totalLessons} lessons - ${durationLabel}`}
     >
       <div className="border border-[#E5E7EB] rounded-xl overflow-hidden bg-white divide-y divide-[#E5E7EB]">

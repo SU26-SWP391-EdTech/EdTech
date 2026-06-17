@@ -4,7 +4,6 @@ import { LessonInfoSection } from '../../components/lesson/create/LessonInfoSect
 import { LessonTypeSection } from '../../components/lesson/create/LessonTypeSection';
 import { LessonContentSection } from '../../components/lesson/create/LessonContentSection';
 import { AddResourceModal } from '../../components/lesson/create/AddResourceModal';
-import { AddQuizModal } from '../../components/lesson/create/AddQuizModal';
 
 export function CreateLessonPage() {
   const hook = useCreateLesson();
@@ -50,6 +49,10 @@ export function CreateLessonPage() {
             setDescription={hook.setDescription}
             duration={hook.duration}
             setDuration={hook.setDuration}
+            videoDurationInput={hook.videoDurationInput}
+            setVideoDurationInput={hook.setVideoDurationInput}
+            hasVideo={hook.hasVideo}
+            hasReading={hook.hasReading}
             lessonOrder={hook.lessonOrder}
             courses={hook.courses}
             selectedCourseId={hook.selectedCourseId}
@@ -94,18 +97,6 @@ export function CreateLessonPage() {
           rType={hook.rType} setRType={hook.setRType}
           rVisibility={hook.rVisibility} setRVisibility={hook.setRVisibility}
           onAdd={hook.handleAddResource}
-          onClose={() => hook.setModal(null)}
-        />
-      )}
-
-      {hook.modal === 'quiz' && (
-        <AddQuizModal
-          qText={hook.qText} setQText={hook.setQText}
-          qType={hook.qType} setQType={hook.setQType}
-          qOptions={hook.qOptions} setQOptions={hook.setQOptions}
-          qCorrect={hook.qCorrect} setQCorrect={hook.setQCorrect}
-          shortAnswer={hook.shortAnswer} setShortAnswer={hook.setShortAnswer}
-          onAdd={hook.handleAddQuestion}
           onClose={() => hook.setModal(null)}
         />
       )}
