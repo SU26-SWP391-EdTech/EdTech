@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '../../stores/auth/auth.stores';
-import type { ProfileData } from '../../components/user/profile/admin/EditProfileModal';
+import type { ProfileData } from '../../components/User/Profile/admin/EditProfileModal';
 import { getUserById, updateUser } from '../../services/user/user.service';
 import toast from 'react-hot-toast';
 

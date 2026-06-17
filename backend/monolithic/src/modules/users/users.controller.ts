@@ -124,6 +124,26 @@ export class UsersController {
   }
 
   @Roles(RoleEnum.ADMIN)
+  @Get('admin/dashboard')
+  @ApiOperation({ summary: 'Get admin dashboard statistics' })
+  @ApiResponse({ status: 200, description: 'Dashboard stats returned successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  getDashboardStats() {
+    return this.usersService.getAdminDashboardStats();
+  }
+
+  @Roles(RoleEnum.ADMIN)
+  @Get('admin/analytics')
+  @ApiOperation({ summary: 'Get admin analytics statistics' })
+  @ApiResponse({ status: 200, description: 'Analytics stats returned successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  getAnalyticsStats() {
+    return this.usersService.getAdminAnalyticsStats();
+  }
+
+  @Roles(RoleEnum.ADMIN)
   @Patch(':id')
   @ApiOperation({ summary: 'Update user by ID' })
   @ApiResponse({ status: 200, description: 'User updated successfully' })

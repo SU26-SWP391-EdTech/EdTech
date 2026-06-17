@@ -67,10 +67,6 @@ export function AdminHeader() {
 
                 <div className="flex-1" />
 
-                <NotifBell count={8} accentColor={ACC} />
-
-                <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
-
                 <div className="relative flex-shrink-0">
                     <button
                         onClick={() => setOpen(!open)}

@@ -7,6 +7,8 @@ import { PlatformSetup } from '../pages/admin/PlatformSetup';
 import { UserManagement } from '../pages/admin/UserManagement';
 import { LessonPage } from '../pages/lesson/LessonPage';
 import { ProviderProfile } from '../pages/user/ProviderProfile';
+import { Dashboard } from '../pages/admin/AdminDashBoard';
+import { AnalyticsDashboard } from '../pages/admin/AdminAnalytics';
 
 export const adminRoutes: RouteObject = {
     path: '/admin',
@@ -16,9 +18,9 @@ export const adminRoutes: RouteObject = {
         </AdminGuard>
     ),
     children: [
-        { index: true, element: <h1>Home Admin</h1> },
+        { index: true, element: <Dashboard /> },
         { path: 'usermanagement', element: <UserManagement /> },
-        { path: 'analytics', element: <h1>Analytics Admin</h1> },
+        { path: 'analytics', element: <AnalyticsDashboard /> },
         { path: 'adminprofile', element: <AdminProfile /> },
         { path: 'settings', element: <PlatformSettings /> },
         { path: 'lesson', element: <LessonPage /> },

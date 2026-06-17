@@ -1,10 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 import { useProviderProfile } from '../../hooks/user/useProviderProfile';
-import ProfileMini from '../../components/user/profile/shared/ProfileMini';
-import AboutProvider from '../../components/user/profile/provider/AboutProvider';
-import StatsProvider from '../../components/user/profile/provider/StatsProvider';
-import PublishedCourses from '../../components/user/profile/provider/PublishedCourses';
+import ProfileMini from '../../components/User/Profile/shared/ProfileMini';
+import AboutProvider from '../../components/User/Profile/provider/AboutProvider';
+import StatsProvider from '../../components/User/Profile/provider/StatsProvider';
+import PublishedCourses from '../../components/User/Profile/provider/PublishedCourses';
 
 export function ProviderProfile() {
     const { id } = useParams();

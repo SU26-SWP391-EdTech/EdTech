@@ -38,7 +38,7 @@ export class CoursesController {
     @Get()
     @ApiOperation({ summary: 'Get all courses' })
     @ApiResponse({ status: 200, description: 'All Courses returned successfully' })
-    async findAllCourse(){
+    async findAllCourse() {
         return this.coursesService.findAll();
     }
 
@@ -71,7 +71,7 @@ export class CoursesController {
     @ApiBody({ type: UpdateCourseDto })
     @ApiResponse({ status: 200, description: 'Course updated successfully' })
     @ApiResponse({ status: 400, description: 'Invalid request data' })
-    @ApiResponse({ status: 403, description: 'You don't have permission to access' })
+    @ApiResponse({ status: 403, description: "You don't have permission to access" })
     @ApiResponse({ status: 404, description: 'Course not found' })
     update(
         @Param('id', ParseIntPipe) id: number,
@@ -86,7 +86,7 @@ export class CoursesController {
     @Roles(RoleEnum.COURSE_PROVIDER, RoleEnum.ACADEMIC_MANAGER)
     @ApiOperation({ summary: 'Delete a course' })
     @ApiResponse({ status: 200, description: 'Course deleted successfully' })
-    @ApiResponse({ status: 403, description: 'You don't have permission to delete' })
+    @ApiResponse({ status: 403, description: "You don't have permission to delete" })
     @ApiResponse({ status: 404, description: 'Course not found' })
     remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
         return this.coursesService.remove(id, req.user.userId);
