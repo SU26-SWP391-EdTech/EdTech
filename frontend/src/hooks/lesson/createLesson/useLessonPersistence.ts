@@ -5,6 +5,7 @@ import {
     createLesson,
     updateLesson,
 } from '../../../services/lesson/lesson.service';
+import { updateCourse } from '../../../services/course/course.service';
 
 import type {
     LessonStatus,
@@ -98,6 +99,10 @@ export function useLessonPersistence({
                 );
 
             const nextLessonId = Number(saved.lessonId);
+
+            if (existingId) {
+                await updateCourse(data.selectedCourseId, { status: 'draft' });
+            }
 
             data.setSavedLessonId(nextLessonId);
 

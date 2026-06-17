@@ -1,4 +1,4 @@
-import { Upload, Link2, Bold, Italic, List, Code, CheckCircle2 } from 'lucide-react';
+import { Upload, Link2, Bold, Italic, List, Code, CheckCircle2, Trash2 } from 'lucide-react';
 
 function getEmbedUrl(url: string): string | null {
   if (!url) return null;
@@ -20,20 +20,34 @@ interface Props {
   content: string;
   setContent: (v: string) => void;
   handleVideoFileChange: (file?: File) => void;
+  clearVideo: () => void;
 }
 
 export function LessonContentSection({
   hasVideo, videoUrl, setVideoUrl, videoFile, videoUploaded,
   videoInputRef, hasReading, content, setContent,
-  handleVideoFileChange,
+  handleVideoFileChange, clearVideo,
 }: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* ── VIDEO SECTION ── */}
       {hasVideo && (
         <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14, padding: '22px 26px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
             <h2 style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Video Lecture Content</h2>
+            {(videoUploaded || videoFile || videoUrl) && (
+              <button
+                type="button"
+                onClick={clearVideo}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6, padding: '7px 10px',
+                  border: '1px solid #FECACA', borderRadius: 8, background: '#FEF2F2',
+                  color: '#B91C1C', cursor: 'pointer', fontSize: 12.5, fontWeight: 600,
+                }}
+              >
+                <Trash2 size={13} /> Remove video
+              </button>
+            )}
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

@@ -128,6 +128,13 @@ export function useLessonForm() {
     video.src = URL.createObjectURL(file);
   }, []);
 
+  const clearVideo = useCallback(() => {
+    setVideoUrl('');
+    setVideoFile(null);
+    setVideoUploaded(false);
+    setVideoDurationInput('');
+  }, []);
+
   return {
     hasVideo,
     setHasVideo,
@@ -177,6 +184,7 @@ export function useLessonForm() {
     resetFormFields,
     hydrateFromApiLesson,
     handleVideoFileChange,
+    clearVideo,
   };
 }
 

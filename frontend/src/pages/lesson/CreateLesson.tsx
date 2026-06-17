@@ -85,6 +85,7 @@ export function CreateLessonPage() {
             content={hook.content}
             setContent={hook.setContent}
             handleVideoFileChange={hook.handleVideoFileChange}
+            clearVideo={hook.clearVideo}
           />
 
         </div>

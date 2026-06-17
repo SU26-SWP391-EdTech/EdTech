@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Flame, Clock, Target, GraduationCap } from 'lucide-react';
+import { Flame, Clock, GraduationCap } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 import { getMyEnrollments, type Enrollment } from '../../services/enrollment/enrollment.service';
 import { getLearningPaths, type LearningPath } from '../../services/learning-path/learning-path.service';
@@ -33,20 +33,11 @@ export function useLearnerDashboard() {
                     return acc + Math.round(duration * (curr.progress / 100));
                 }, 0);
 
-                const enrolledPathIds = pathsData.filter(path => {
-                    const pathCourses = path.learningPathCourses || [];
-                    if (pathCourses.length === 0) return false;
-                    return pathCourses.some(pc =>
-                        enrollmentsData.some(e => e.course?.courseId === pc.courseId)
-                    );
-                }).map(p => p.learningPathId);
-
                 setProfile({
                     ...profileData,
                     streakCount: (profileData as any).streakCount ?? 0,
                     completedCourses: completedCount,
                     learningHours: totalHours,
-                    enrolledPaths: enrolledPathIds.length,
                 });
 
                 setEnrollments(enrollmentsData);
@@ -95,16 +86,6 @@ export function useLearnerDashboard() {
             bg: '#EFF6FF',
             sparkData: (profile?.learningHours ?? 0) === 0 ? [0, 0, 0, 0, 0, 0, 0] : [0, 15, 30, 45, 60, 90, profile?.learningHours ?? 0],
         },
-        {
-            id: 'paths',
-            label: 'Learning Paths Enrolled',
-            value: (profile?.enrolledPaths ?? 0).toString(),
-            sub: 'Roadmaps active',
-            icon: React.createElement(Target, { className: "w-5 h-5" }),
-            color: '#E11D48',
-            bg: '#FFF1F4',
-            sparkData: (profile?.enrolledPaths ?? 0) === 0 ? [0, 0, 0, 0, 0, 0, 0] : [0, 0, 0, 1, 1, 1, profile?.enrolledPaths ?? 0],
-        },
     ];
 
     // Continue Learning courses mapping
@@ -116,10 +97,6 @@ export function useLearnerDashboard() {
                 p.learningPathCourses?.some(lpc => lpc.courseId === enrollment.course.courseId)
             );
             const pathTitle = parentPath ? parentPath.title : 'Individual Course';
-            const total = enrollment.course.totalLessons || 10;
-            const completed = Math.round(total * (enrollment.progress / 100));
-            const remaining = total - completed;
-            const remainingHours = Math.round((enrollment.course.duration || 10) * (1 - enrollment.progress / 100));
 
             const gradients = [
                 'linear-gradient(135deg, #1E40AF 0%, #7C3AED 100%)',
@@ -133,9 +110,6 @@ export function useLearnerDashboard() {
                 title: enrollment.course.title,
                 path: pathTitle,
                 progress: enrollment.progress,
-                lesson: `Lesson ${completed + 1} of ${total}`,
-                remaining,
-                duration: `${remainingHours}h left`,
                 gradient: gradients[idx % gradients.length],
                 initials: enrollment.course.title.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
             };
@@ -154,7 +128,7 @@ export function useLearnerDashboard() {
         enrolledPathIds.includes(path.learningPathId)
     ) || null;
 
-    const pathCourses = activePath ? [...(activePath.learningPathCourses || [])].sort((a, b) => a.order - b.order) : [];
+    const pathCourses = activePath ? [...(activePath.learningPathCourses || [])].sort((a, b) => a.position - b.position) : [];
 
     let foundCurrentOrUpcoming = false;
     const roadmapNodes = pathCourses.map((lpc, idx) => {

@@ -1,4 +1,3 @@
-import { Play } from 'lucide-react';
 import CircularMini from './CircularMini';
 import ProgressBar from './ProgressBar';
 
@@ -6,9 +5,6 @@ interface ContinueCourseCardProps {
     title: string;
     path: string;
     progress: number;
-    lesson: string;
-    remaining: number;
-    duration: string;
     gradient: string;
     initials: string;
     idx: number;
@@ -19,9 +15,6 @@ export default function ContinueCourseCard({
     title,
     path,
     progress,
-    lesson,
-    remaining,
-    duration,
     gradient,
     initials,
     idx,
@@ -51,23 +44,10 @@ export default function ContinueCourseCard({
                 <CircularMini value={progress} color={idx === 0 ? '#E11D48' : idx === 1 ? '#3B82F6' : '#10B981'} />
             </div>
 
-            <div className="mb-3">
-                <p className="text-xs text-[#6B7280] truncate mb-2">
-                    <span className="text-[#9CA3AF]">Now: </span>{lesson}
-                </p>
-                <ProgressBar
-                    value={progress}
-                    color={idx === 0 ? '#E11D48' : idx === 1 ? '#3B82F6' : '#10B981'}
-                />
-            </div>
-
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 text-xs text-[#9CA3AF]">
-                    <span>{remaining} lessons left</span>
-                    <span>·</span>
-                    <span>{duration}</span>
-                </div>
-            </div>
+            <ProgressBar
+                value={progress}
+                color={idx === 0 ? '#E11D48' : idx === 1 ? '#3B82F6' : '#10B981'}
+            />
         </div>
     );
 }

@@ -178,6 +178,7 @@ export function useCreateLesson() {
     handleSaveLesson: persistence.handleSaveLesson,
 
     handleVideoFileChange: form.handleVideoFileChange,
+    clearVideo: form.clearVideo,
     handleAddResource: resourceModal.handleAddResource,
     handleAddQuestion: quizModal.handleAddQuestion,
 

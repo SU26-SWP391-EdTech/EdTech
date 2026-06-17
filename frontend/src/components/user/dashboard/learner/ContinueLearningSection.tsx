@@ -7,9 +7,6 @@ interface CourseData {
     title: string;
     path: string;
     progress: number;
-    lesson: string;
-    remaining: number;
-    duration: string;
     gradient: string;
     initials: string;
 }
@@ -48,9 +45,6 @@ export default function ContinueLearningSection({
                             title={course.title}
                             path={course.path}
                             progress={course.progress}
-                            lesson={course.lesson}
-                            remaining={course.remaining}
-                            duration={course.duration}
                             gradient={course.gradient}
                             initials={course.initials}
                             idx={idx}

@@ -263,14 +263,17 @@ export function useCourseDetail() {
       return;
     }
 
-    // Direct to the first lesson that is not completed or the very first lesson
-    const firstLessonId = lessonsList[0]?.lessonId;
-    if (!firstLessonId) {
+    const nextLesson = dynamicCurriculum
+      .flatMap(module => module.lessons)
+      .find(lesson => lesson.status === 'current' || lesson.status === 'not-started')
+      || dynamicCurriculum.flatMap(module => module.lessons)[0];
+
+    if (!nextLesson) {
       toast.error('No lesson is available for this course yet.');
       return;
     }
 
-    navigate(`/learner/lesson?courseId=${matchedCourse.courseId}&lessonId=${firstLessonId}`);
+    navigate(`/learner/lesson?courseId=${matchedCourse.courseId}&lessonId=${nextLesson.id}`);
   };
 
   const handleApproveCourse = async (id: number) => {

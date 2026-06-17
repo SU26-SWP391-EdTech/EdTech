@@ -52,7 +52,7 @@ export function buildLessonApiPayload(options: {
         description: '',
         videoDuration: options.hasVideo ? videoSec : undefined,
         content: buildLessonContent(options) || undefined,
-        videoUrl: options.hasVideo ? (options.videoUrl.trim() || undefined) : undefined,
+        videoUrl: options.hasVideo ? options.videoUrl.trim() : '',
     };
 }
 
