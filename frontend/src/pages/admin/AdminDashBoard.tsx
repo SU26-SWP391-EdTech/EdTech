@@ -27,73 +27,10 @@ const notifications = [
     { icon: <Star className="w-4 h-4 text-[#E11D48]" />, text: 'Frontend Path reached 1,000 completions', time: '3h', bg: 'bg-[#FFF1F3]', border: 'border-[#FECDD3]' },
 ];
 
-/* ─── Reusable primitives ─── */
-function StatCard({ icon, label, value, change, up, sub, sparkData }: {
-    icon: React.ReactNode; label: string; value: string; change: string;
-    up: boolean; sub: string; sparkData: { v: number }[];
-}) {
-    return (
-        <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 flex flex-col gap-3 hover:shadow-sm transition-shadow">
-            <div className="flex items-start justify-between">
-                <div className="p-2 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl">
-                    {icon}
-                </div>
-                <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs ${up ? 'bg-[#F0FDF4] text-[#16A34A]' : 'bg-[#FEF2F2] text-[#DC2626]'}`} style={{ fontWeight: 500 }}>
-                    {up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                    {change}
-                </div>
-            </div>
-            <div>
-                <p className="text-[#111827]" style={{ fontSize: '26px', fontWeight: 700, lineHeight: 1.1 }}>{value}</p>
-                <p className="text-[#6B7280] text-sm mt-0.5">{label}</p>
-            </div>
-            <div style={{ height: 40, width: '100%' }}>
-                <ResponsiveContainer width="100%" height={40}>
-                    <AreaChart data={sparkData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                        <defs>
-                            <linearGradient id={`spark-${label.replace(/\W+/g, '-').toLowerCase()}`} x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor={up ? '#16A34A' : '#DC2626'} stopOpacity={0.15} />
-                                <stop offset="100%" stopColor={up ? '#16A34A' : '#DC2626'} stopOpacity={0} />
-                            </linearGradient>
-                        </defs>
-                        <Area type="monotone" dataKey="v" stroke={up ? '#16A34A' : '#DC2626'} strokeWidth={1.5} fill={`url(#spark-${label.replace(/\W+/g, '-').toLowerCase()})`} dot={false} />
-                    </AreaChart>
-                </ResponsiveContainer>
-            </div>
-            <p className="text-xs text-[#9CA3AF]">{sub}</p>
-        </div>
-    );
-}
-
-function SectionHeader({ title, action, actionLabel }: { title: string; action?: () => void; actionLabel?: string }) {
-    return (
-        <div className="flex items-center justify-between mb-4">
-            <h3 className="text-[#111827]" style={{ fontSize: '15px', fontWeight: 600 }}>{title}</h3>
-            {actionLabel && (
-                <button onClick={action} className="flex items-center gap-1 text-xs text-[#6B7280] hover:text-[#E11D48] transition-colors" style={{ fontWeight: 500 }}>
-                    {actionLabel} <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-            )}
-        </div>
-    );
-}
-
-/* ─── Custom tooltip for recharts ─── */
-function ChartTooltip({ active, payload, label }: any) {
-    if (!active || !payload?.length) return null;
-    return (
-        <div className="bg-white border border-[#E5E7EB] rounded-xl px-3 py-2.5 shadow-lg">
-            <p className="text-xs text-[#6B7280] mb-1.5" style={{ fontWeight: 500 }}>{label}</p>
-            {payload.map((p: any, i: number) => (
-                <div key={`${p.name ?? 'entry'}-${i}`} className="flex items-center gap-2 text-xs">
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
-                    <span className="text-[#6B7280]">{p.name}:</span>
-                    <span className="text-[#111827]" style={{ fontWeight: 600 }}>{p.value.toLocaleString()}</span>
-                </div>
-            ))}
-        </div>
-    );
-}
+import { StatCard } from '../../components/admin/dashboard/StatCard';
+import { SectionHeader } from '../../components/admin/dashboard/SectionHeader';
+import { ChartTooltip } from '../../components/admin/dashboard/ChartTooltip';
+import { AddTaskModal } from '../../components/admin/dashboard/AddTaskModal';
 
 /* ─── Main component ─── */
 export function Dashboard() {
@@ -110,9 +47,7 @@ export function Dashboard() {
         return tasks;
     });
     const [showAddTaskModal, setShowAddTaskModal] = useState(false);
-    const [taskTitle, setTaskTitle] = useState('');
-    const [taskPriority, setTaskPriority] = useState<'High' | 'Medium' | 'Low'>('Medium');
-    const [taskDue, setTaskDue] = useState('Today');
+
 
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -154,18 +89,12 @@ export function Dashboard() {
     };
 
     const handleOpenAddTask = () => {
-        setTaskTitle('');
-        setTaskPriority('Medium');
-        setTaskDue('Today');
         setShowAddTaskModal(true);
     };
 
-    const handleAddTask = () => {
-        if (!taskTitle.trim()) return;
+    const handleAddTask = (taskData: { title: string; priority: 'High' | 'Medium' | 'Low'; due: string }) => {
         const newTask = {
-            title: taskTitle.trim(),
-            priority: taskPriority,
-            due: taskDue.trim() || 'Today',
+            ...taskData,
             done: false
         };
         setTaskList(prev => [newTask, ...prev]);
@@ -385,111 +314,10 @@ export function Dashboard() {
 
             {/* Modal thêm Task mới */}
             {showAddTaskModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 animate-fade-in">
-                    <div className="bg-white border border-[#E5E7EB] rounded-2xl w-full max-w-md shadow-2xl p-6 flex flex-col gap-5 transform scale-100 transition-all duration-300 animate-scale-up">
-                        <div className="flex items-center justify-between border-b border-[#F3F4F6] pb-3">
-                            <h3 className="text-base font-bold text-[#111827]">Tạo công việc mới</h3>
-                            <button
-                                onClick={() => setShowAddTaskModal(false)}
-                                className="p-1 hover:bg-[#F3F4F6] rounded-lg text-[#9CA3AF] hover:text-[#374151] transition-colors"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
-
-                        <div className="flex flex-col gap-4">
-                            {/* Title */}
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-xs font-semibold text-[#374151]">Tiêu đề công việc</label>
-                                <input
-                                    type="text"
-                                    value={taskTitle}
-                                    onChange={(e) => setTaskTitle(e.target.value)}
-                                    placeholder="Nhập tiêu đề công việc..."
-                                    autoFocus
-                                    className="w-full px-3 py-2.5 border border-[#E5E7EB] rounded-lg text-sm text-[#111827] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 transition-all placeholder:text-[#9CA3AF]"
-                                />
-                            </div>
-
-                            {/* Priority */}
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-xs font-semibold text-[#374151]">Độ ưu tiên</label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {(['High', 'Medium', 'Low'] as const).map((p) => {
-                                        const styles = {
-                                            High: {
-                                                active: 'border-[#DC2626] bg-[#FEF2F2] text-[#DC2626]',
-                                                inactive: 'border-[#E5E7EB] text-[#6B7280] hover:bg-[#FEF2F2]/50 hover:text-[#DC2626]'
-                                            },
-                                            Medium: {
-                                                active: 'border-[#D97706] bg-[#FFFBEB] text-[#D97706]',
-                                                inactive: 'border-[#E5E7EB] text-[#6B7280] hover:bg-[#FFFBEB]/50 hover:text-[#D97706]'
-                                            },
-                                            Low: {
-                                                active: 'border-[#6B7280] bg-[#F9FAFB] text-[#111827]',
-                                                inactive: 'border-[#E5E7EB] text-[#6B7280] hover:bg-[#F9FAFB] hover:text-[#111827]'
-                                            }
-                                        };
-                                        const activeClass = taskPriority === p ? styles[p].active : styles[p].inactive;
-                                        return (
-                                            <button
-                                                key={p}
-                                                type="button"
-                                                onClick={() => setTaskPriority(p)}
-                                                className={`py-2 text-xs font-semibold border rounded-xl transition-all ${activeClass}`}
-                                            >
-                                                {p === 'High' ? 'Cao' : p === 'Medium' ? 'Trung bình' : 'Thấp'}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            {/* Due Date */}
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-xs font-semibold text-[#374151]">Hạn chót</label>
-                                <input
-                                    type="text"
-                                    value={taskDue}
-                                    onChange={(e) => setTaskDue(e.target.value)}
-                                    placeholder="Ví dụ: Today, Tomorrow, May 30..."
-                                    className="w-full px-3 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#111827] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 transition-all"
-                                />
-                                <div className="flex gap-2 mt-1">
-                                    {['Today', 'Tomorrow', 'Next week'].map((opt) => (
-                                        <button
-                                            key={opt}
-                                            type="button"
-                                            onClick={() => setTaskDue(opt)}
-                                            className={`px-2.5 py-1 text-xs border rounded-lg transition-colors ${taskDue === opt ? 'border-[#E11D48] text-[#E11D48] bg-[#FFF1F3]' : 'border-[#E5E7EB] text-[#6B7280] hover:bg-[#F8FAFC]'}`}
-                                        >
-                                            {opt === 'Today' ? 'Hôm nay' : opt === 'Tomorrow' ? 'Ngày mai' : 'Tuần tới'}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="flex items-center justify-end gap-2 border-t border-[#F3F4F6] pt-4 mt-2">
-                            <button
-                                type="button"
-                                onClick={() => setShowAddTaskModal(false)}
-                                className="px-4 py-2 border border-[#E5E7EB] rounded-lg text-sm text-[#374151] hover:bg-[#F8FAFC] transition-colors"
-                            >
-                                Hủy
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleAddTask}
-                                disabled={!taskTitle.trim()}
-                                className="px-4 py-2 bg-[#E11D48] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors font-medium"
-                            >
-                                Thêm task
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <AddTaskModal
+                    onClose={() => setShowAddTaskModal(false)}
+                    onAdd={handleAddTask}
+                />
             )}
         </div>
     );
