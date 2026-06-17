@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Clock, Eye, Edit2, Trash2, Inbox } from 'lucide-react';
+import { BookOpen, Clock, Edit2, Trash2, Inbox } from 'lucide-react';
 import type { LearningPath } from '../../../utils/learning-path/learningPathHelpers';
 
 interface LearningPathListProps {
@@ -100,13 +100,6 @@ export function LearningPathList({
 
                         {/* Actions */}
                         <div className="flex flex-col gap-1.5 self-start shrink-0 ml-auto bg-gray-50 p-1.5 rounded-xl border border-gray-100 opacity-60 group-hover:opacity-100 transition-opacity">
-                            <button
-                                onClick={e => { e.stopPropagation(); setSelectedId(path.id); setViewingPath(path); }}
-                                className="p-1.5 hover:bg-white hover:shadow-sm rounded-lg text-blue-600 hover:text-blue-700 transition-all"
-                                title="View Details"
-                            >
-                                <Eye className="w-4 h-4" />
-                            </button>
                             <button
                                 onClick={e => { e.stopPropagation(); setEditingPath(path); }}
                                 className="p-1.5 hover:bg-white hover:shadow-sm rounded-lg text-gray-600 hover:text-gray-800 transition-all"

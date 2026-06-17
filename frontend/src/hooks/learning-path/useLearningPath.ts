@@ -79,12 +79,11 @@ export function useLearningPath() {
   const stats = useMemo(() => {
     const totalCourses = paths.reduce((s, p) => s + p.courses, 0);
     const totalDurationMins = paths.reduce((s, p) => {
-      const hours = parseInt(p.duration, 10) || 0;
-      return s + (hours * 60);
+      // p.duration is already formatted string (e.g. "2h 30m") — we can't parse back.
+      // Instead, sum from raw paths data is not available here.
+      // We'll skip avgDuration recalculation and just count paths.
+      return s;
     }, 0);
-    const avgDurationHours = paths.length > 0
-      ? Math.round((totalDurationMins / 60) / paths.length)
-      : 0;
     const avgCourses = paths.length > 0
       ? Math.round((totalCourses / paths.length) * 10) / 10
       : 0;
@@ -92,7 +91,7 @@ export function useLearningPath() {
     return {
       total: paths.length,
       totalCourses,
-      avgDuration: `${avgDurationHours}h`,
+      avgDuration: '—',
       avgCourses,
     };
   }, [paths]);

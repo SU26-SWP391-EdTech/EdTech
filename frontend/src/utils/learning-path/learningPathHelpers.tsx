@@ -28,6 +28,15 @@ export interface LearningPath {
   thumbnailUrl?: string;
 }
 
+// Converts minutes to display string e.g. 90 → "1h 30m", 60 → "1h", 45 → "45m"
+export const formatDuration = (minutes: number): string => {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h > 0 && m > 0) return `${h}h ${m}m`;
+  if (h > 0) return `${h}h`;
+  return `${m}m`;
+};
+
 export const mapBackendToFrontend = (bp: any): LearningPath => {
   const coursesList = bp.learningPathCourses || [];
   // Sort courses by position
@@ -36,12 +45,14 @@ export const mapBackendToFrontend = (bp: any): LearningPath => {
   const nodes: RoadmapNode[] = sortedCourses.map((lpc: any, idx: number) => ({
     id: lpc.course?.courseId || 0,
     title: lpc.course?.title || 'Unknown Course',
-    duration: lpc.course?.duration ? `${lpc.course.duration}h` : '8h',
+    duration: lpc.course?.duration ? formatDuration(lpc.course.duration) : 'N/A',
     state: idx === 0 ? 'current' : 'upcoming',
     description: lpc.course?.description || `Learn the concepts of ${lpc.course?.title || 'this course'}`
   }));
 
-  const totalDurationHours = sortedCourses.reduce((sum: number, lpc: any) => sum + (lpc.course?.duration || 8), 0);
+  // duration is stored in minutes in DB
+  const totalDurationMins = sortedCourses.reduce((sum: number, lpc: any) => sum + (lpc.course?.duration || 0), 0);
+  const totalDurationHours = Math.round(totalDurationMins / 60);
 
   // Dynamic icon and background assignment based on title keywords
   let thumbBg = 'linear-gradient(135deg,#1E40AF,#3B82F6)'; // Blue default
@@ -76,7 +87,7 @@ export const mapBackendToFrontend = (bp: any): LearningPath => {
     title: bp.title,
     description: bp.description || '',
     courses: sortedCourses.length,
-    duration: `${totalDurationHours}h`,
+    duration: totalDurationMins > 0 ? formatDuration(totalDurationMins) : 'N/A',
     enrollments: 0,
     completionRate: 0,
     avgProgress: 0,
