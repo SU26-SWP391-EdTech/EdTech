@@ -52,6 +52,20 @@ export async function createCourse(formData: FormData): Promise<BackendCourse> {
   return response.data;
 }
 
+export async function submitNewCourseToReview(formData: FormData): Promise<BackendCourse> {
+  const response = await api.post('/courses/submit-to-review', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+}
+
+export async function submitCourseToReview(id: number): Promise<BackendCourse> {
+  const response = await api.post(`/courses/${id}/submit-review`);
+  return response.data;
+}
+
 export async function searchCourses(params?: {
   search?: string;
   status?: string;

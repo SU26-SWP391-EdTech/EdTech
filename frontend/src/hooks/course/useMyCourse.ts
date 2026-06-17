@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuthStore } from "../../stores/auth/auth.stores";
-import { getMyCourses, deleteCourse, type Course, updateCourse } from "../../services/course/course.service";
+import { getMyCourses, deleteCourse, type Course, submitCourseToReview } from "../../services/course/course.service";
 
 export type CourseStatusFilter = 'ALL' | 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED';
 
@@ -61,7 +61,7 @@ export function useMyCourse() {
 
     const handleSubmitForReview = async (id: number) => {
         try {
-            await updateCourse(id, { status: 'pending' });
+            await submitCourseToReview(id);
             setCourses(prev => prev.map(c => c.courseId === id ? { ...c, status: 'pending' } : c));
         } catch (error) {
             console.error("[MyCourses] Error submitting course for review:", error);

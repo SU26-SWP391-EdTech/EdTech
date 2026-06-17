@@ -11,11 +11,10 @@ export async function buildCourseFormData(options: {
     status: 'draft' | 'pending';
     thumbnailFile: File | null;
 }): Promise<FormData> {
-    const { draft, status } = options;
+    const { draft } = options;
     const formData = new FormData();
     formData.append('title', draft.title || '');
     formData.append('description', draft.description || '');
-    formData.append('status', status);
     formData.append('language', draft.language || 'English');
 
     const totalMinutes = (draft.lessons || []).reduce((sum, l) => {

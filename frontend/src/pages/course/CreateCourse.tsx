@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { createCourse, searchCourses, getCourseById, updateCourse } from '../../services/course/course.service';
+import { createCourse, searchCourses, getCourseById, updateCourse, submitNewCourseToReview, submitCourseToReview } from '../../services/course/course.service';
 import { createLesson, getLessonsByCourse, updateLesson, deleteLesson as apiDeleteLesson } from '../../services/lesson/lesson.service';
 import toast from 'react-hot-toast';
 import type { CourseBuilderLesson, CourseBuilderLessonType as LessonType } from '../../types/course/create-course.types';
@@ -150,8 +150,11 @@ export function CreateCoursePage() {
             let courseId = editId;
             if (editId) {
                 await updateCourse(editId, formData);
+                await updateCourse(editId, { status: 'draft' });
             } else {
-                const newCourse = await createCourse(formData);
+                const newCourse = status === 'pending'
+                    ? await submitNewCourseToReview(formData)
+                    : await createCourse(formData);
                 courseId = newCourse.courseId;
             }
 
@@ -177,6 +180,10 @@ export function CreateCoursePage() {
                 } catch (err) {
                     console.error('Failed to sync lesson:', err);
                 }
+            }
+
+            if (editId && status === 'pending') {
+                await submitCourseToReview(editId);
             }
 
             if (!editId) {
