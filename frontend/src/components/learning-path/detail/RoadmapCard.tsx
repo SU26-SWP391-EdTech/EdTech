@@ -1,4 +1,3 @@
-import React from 'react';
 import { Clock, PlayCircle, Play, ArrowRight, Lock, Check, Radio } from 'lucide-react';
 import type { CourseNode } from '../../../hooks/learning-path/useLearningPathDetail';
 
@@ -49,10 +48,14 @@ export default function RoadmapCard({
         <div className="flex items-start gap-3">
           {/* Thumbnail */}
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+            className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0 overflow-hidden"
             style={{ backgroundColor: isLocked ? '#E5E7EB' : node.color, opacity: isLocked ? 0.5 : 1 }}
           >
-            <span style={{ color: 'white' }}>{node.icon}</span>
+            {node.thumbnailUrl ? (
+              <img src={node.thumbnailUrl} alt={node.title} className="w-full h-full object-cover" />
+            ) : (
+              <span style={{ color: 'white' }}>{node.icon}</span>
+            )}
           </div>
 
           {/* Info */}
@@ -106,7 +109,7 @@ export default function RoadmapCard({
                 className="mt-3 flex items-center gap-1.5 px-3 py-1.5 bg-[#E11D48] text-white rounded-lg text-xs hover:bg-[#BE123C] transition-colors" 
                 style={{ fontWeight: 500 }}
               >
-                <Play className="w-3 h-3 fill-white" /> Continue — Lesson {Math.max(1, Math.floor(node.lessons * (node.progress / 100)))} of {node.lessons}
+                <Play className="w-3 h-3 fill-white" /> Continue
               </button>
             )}
 

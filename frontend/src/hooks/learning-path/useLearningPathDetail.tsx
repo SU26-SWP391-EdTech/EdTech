@@ -23,13 +23,23 @@ export interface CourseNode {
   icon: React.ReactNode;
   color: string;
   topics: string[];
+  thumbnailUrl?: string | null;
   course: Course;
 }
 
 export interface Module {
   id: number;
   title: string;
-  lessons: { title: string; done: boolean; duration: string }[];
+  lessons: { id: number; title: string; done: boolean; duration: string }[];
+}
+
+function formatDuration(totalMinutes: number) {
+  const minutes = Math.max(0, Math.round(totalMinutes || 0));
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours === 0) return `${mins}m`;
+  if (mins === 0) return `${hours}h`;
+  return `${hours}h ${mins}m`;
 }
 
 export function useLearningPathDetail() {
@@ -38,10 +48,8 @@ export function useLearningPathDetail() {
   const user = useAuthStore((state) => state.user);
 
   const [path, setPath] = useState<LearningPath | null>(null);
-  const [courses, setCourses] = useState<Course[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [bookmarked, setBookmarked] = useState(false);
   const [liked, setLiked] = useState<Set<number>>(new Set());
   const [activeCourseId, setActiveCourseId] = useState<number | null>(null);
   const [activeCourseLessons, setActiveCourseLessons] = useState<any[]>([]);
@@ -51,7 +59,6 @@ export function useLearningPathDetail() {
       if (!id) return;
       try {
         setIsLoading(true);
-        setCourses([]);
 
         const targetPath = await getLearningPathById(parseInt(id));
         if (!targetPath) {
@@ -107,7 +114,7 @@ export function useLearningPathDetail() {
     loadActiveCourseLessons();
   }, [activeCourseId]);
 
-  const pathCourses = path?.learningPathCourses || [];
+  const pathCourses = [...(path?.learningPathCourses || [])].sort((a, b) => a.position - b.position);
 
   // Generate roadmap nodes dynamically based on active enrollments
   let foundFirstUnenrolled = false;
@@ -142,13 +149,14 @@ export function useLearningPathDetail() {
       id: pc.courseId,
       title: pc.course?.title || '',
       description: pc.course?.description || 'Learn key industry standard concepts.',
-      duration: `${pc.course?.duration || 10}h`,
+      duration: formatDuration(pc.course?.duration || 0),
       lessons: pc.course?.totalLessons || 12,
       progress: enrollment?.progress || 0,
       state,
       icon,
       color: ['#E11D48', '#D97706', '#059669', '#2563EB', '#7C3AED', '#0891B2'][idx % 6],
       topics: pc.course?.language ? [pc.course.language] : ['Development'],
+      thumbnailUrl: pc.course?.thumbnailUrl,
       course: pc.course,
     };
   });
@@ -156,23 +164,12 @@ export function useLearningPathDetail() {
   // Calculate statistics
   const totalCourses = pathCourses.length;
   const completedCourses = roadmapNodes.filter(n => n.state === 'completed').length;
+  const totalMinutes = roadmapNodes.reduce((sum, n) => sum + (n.course?.duration || 0), 0);
+  const totalDurationLabel = formatDuration(totalMinutes);
   
   // Calculate average progress
   const totalProgressSum = roadmapNodes.reduce((acc, n) => acc + n.progress, 0);
   const overallProgress = totalCourses > 0 ? Math.round(totalProgressSum / totalCourses) : 0;
-
-  // Remaining lessons & study time
-  const remainingLessons = roadmapNodes.reduce((acc, n) => {
-    if (n.state === 'completed') return acc;
-    const completedVal = Math.floor(n.lessons * (n.progress / 100));
-    return acc + (n.lessons - completedVal);
-  }, 0);
-
-  const remainingHours = roadmapNodes.reduce((acc, n) => {
-    if (n.state === 'completed') return acc;
-    const courseHours = parseInt(n.duration) || 10;
-    return acc + Math.round(courseHours * (1 - n.progress / 100));
-  }, 0);
 
   // Generate modules for the selected active course dynamically
   const selectedNode = roadmapNodes.find(n => n.id === activeCourseId) || roadmapNodes[0];
@@ -186,6 +183,7 @@ export function useLearningPathDetail() {
     const lessons = lessonsList.map((l, index) => {
       const done = index < lessonsPassed;
       return {
+        id: Number(l.lessonId),
         title: l.title,
         done,
         duration: l.duration || (l.videoDuration ? `${Math.round(l.videoDuration / 60)}m` : '15m'),
@@ -203,14 +201,6 @@ export function useLearningPathDetail() {
 
   const currentModules = activeCourse ? generateModulesForCourse(activeCourse, selectedNode.progress, activeCourseLessons) : [];
 
-  const getCourseDetailPath = (courseId: number) => {
-    const role = user?.roleName?.toLowerCase();
-    if (role === 'learner') return `/learner/courses/detail?id=${courseId}`;
-    if (role === 'course provider') return `/provider/courses/detail?id=${courseId}`;
-    if (role === 'academic manager') return `/academic/courses/detail?id=${courseId}`;
-    return `/courses/detail?id=${courseId}`;
-  };
-
   const handleContinueCourse = (courseId: number) => {
     const node = roadmapNodes.find(n => n.id === courseId);
     if (!node || node.state === 'locked') {
@@ -218,7 +208,7 @@ export function useLearningPathDetail() {
       return;
     }
 
-    navigate(getCourseDetailPath(courseId));
+    navigate(`/learner/lesson?courseId=${courseId}`);
   };
 
   // Actions
@@ -250,7 +240,7 @@ export function useLearningPathDetail() {
   };
 
 
-  const handleStartLesson = (lessonTitle: string) => {
+  const handleStartLesson = (lessonId: number) => {
     if (!user) {
       toast.error('Please sign in to study.');
       navigate('/login');
@@ -271,24 +261,21 @@ export function useLearningPathDetail() {
       return;
     }
 
-    navigate(`/learner/lesson?courseId=${activeCourseId}`);
+    navigate(`/learner/lesson?courseId=${activeCourseId}&lessonId=${lessonId}`);
   };
 
   return {
     path,
     isLoading,
-    bookmarked,
-    setBookmarked,
     liked,
     setLiked,
     activeCourseId,
     setActiveCourseId,
     roadmapNodes,
     totalCourses,
+    totalDurationLabel,
     completedCourses,
     overallProgress,
-    remainingLessons,
-    remainingHours,
     activeCourse,
     currentModules,
     handleEnrollSingleCourse,

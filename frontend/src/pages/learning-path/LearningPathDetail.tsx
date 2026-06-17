@@ -2,22 +2,18 @@ import { useLearningPathDetail } from '../../hooks/learning-path/useLearningPath
 import PathHeroBanner from '../../components/learning-path/detail/PathHeroBanner';
 import RoadmapCard from '../../components/learning-path/detail/RoadmapCard';
 import ModuleAccordion from '../../components/learning-path/detail/ModuleAccordion';
-import PathOverviewStats from '../../components/learning-path/detail/PathOverviewStats';
 
 export function LearningPathDetail() {
   const {
     path,
     isLoading,
-    bookmarked,
-    setBookmarked,
     activeCourseId,
     setActiveCourseId,
     roadmapNodes,
     totalCourses,
+    totalDurationLabel,
     completedCourses,
     overallProgress,
-    remainingLessons,
-    remainingHours,
     activeCourse,
     currentModules,
     handleEnrollSingleCourse,
@@ -42,12 +38,9 @@ export function LearningPathDetail() {
       <PathHeroBanner
         path={path}
         totalCourses={totalCourses}
+        totalDurationLabel={totalDurationLabel}
         overallProgress={overallProgress}
         completedCourses={completedCourses}
-        remainingHours={remainingHours}
-        remainingLessons={remainingLessons}
-        bookmarked={bookmarked}
-        onBookmarkToggle={() => setBookmarked(!bookmarked)}
       />
 
       {/* Main Roadmap & Modules Layout */}
@@ -87,7 +80,7 @@ export function LearningPathDetail() {
             </div>
           </div>
 
-          {/* Right Column: Selected Course Content Modules & Progress Overview Charts */}
+          {/* Right Column: Selected Course Content Modules */}
           <div className="col-span-5 flex flex-col gap-4">
             {activeCourse && (
               <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5">
@@ -110,13 +103,6 @@ export function LearningPathDetail() {
               </div>
             )}
 
-            <PathOverviewStats
-              overallProgress={overallProgress}
-              remainingHours={remainingHours}
-              remainingLessons={remainingLessons}
-              completedCourses={completedCourses}
-              totalCourses={totalCourses}
-            />
           </div>
         </div>
       </div>

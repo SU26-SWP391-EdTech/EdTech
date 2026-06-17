@@ -5,7 +5,7 @@ import type { Module } from '../../../hooks/learning-path/useLearningPathDetail'
 interface ModuleAccordionProps {
   module: Module;
   defaultOpen?: boolean;
-  onStartLesson: (lessonTitle: string) => void;
+  onStartLesson: (lessonId: number) => void;
 }
 
 export default function ModuleAccordion({
@@ -52,7 +52,7 @@ export default function ModuleAccordion({
               <span className="text-[10px] text-[#9CA3AF] shrink-0">{lesson.duration}</span>
               {!lesson.done && (
                 <button 
-                  onClick={() => onStartLesson(lesson.title)}
+                  onClick={() => onStartLesson(lesson.id)}
                   className="px-2 py-0.5 bg-white border border-[#E5E7EB] text-[#6B7280] rounded text-[10px] hover:border-[#E11D48] hover:text-[#E11D48] transition-colors" 
                   style={{ fontWeight: 500 }}
                 >

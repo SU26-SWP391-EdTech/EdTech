@@ -22,6 +22,8 @@ export interface LearningPath {
         userId: number;
         fullName: string;
         email: string;
+        avatar?: string | null;
+        avatarUrl?: string | null;
     };
     learningPathCourses?: LearningPathCourse[];
 }
