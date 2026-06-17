@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
 import { SearchCourseDto } from './dto/search-course.dto';
+import { CourseStatus } from 'src/common/enums/course.enum';
 
 @Injectable()
 export class CoursesRepository extends Repository<Course> {
@@ -13,7 +14,7 @@ export class CoursesRepository extends Repository<Course> {
 
     public async createCourse(data: Partial<Course>): Promise<Course> {
         const course = this.create(data);
-        return await this.save(course);
+        return await this.saveCourse(course);
     }
 
     public async findAllCourses(): Promise<Course[]> {
@@ -30,6 +31,13 @@ export class CoursesRepository extends Repository<Course> {
     }
 
     public async saveCourse(course: Course): Promise<Course> {
+        course.status = CourseStatus.DRAFT;
+        return await this.save(course);
+    }
+
+    public async pendingCourse(data: Partial<Course>) : Promise<Course>{
+        const course = this.create(data);
+        course.status = CourseStatus.PENDING;
         return await this.save(course);
     }
 

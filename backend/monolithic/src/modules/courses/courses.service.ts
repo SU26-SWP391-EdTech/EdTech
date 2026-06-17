@@ -67,6 +67,32 @@ export class CoursesService {
     return course;
   }
 
+  async submitToReview(
+    userId: number,
+    createCourseDto: CreateCourseDto,
+    file?: Express.Multer.File,
+  ): Promise<Course> {
+    const courseProvider = await this.userRepository.findOne({
+      where: {
+        userId: userId,
+      },
+    });
+
+    if (!courseProvider) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (file) {
+      const uploaded = await this.cloudinaryService.uploadImage(file);
+      createCourseDto.thumbnailUrl = uploaded.secure_url;
+    }
+
+    return await this.coursesRepository.pendingCourse({
+      ...createCourseDto,
+      user: courseProvider,
+    });
+  }
+
   //update course
 
   async update(
@@ -206,9 +232,9 @@ export class CoursesService {
   async search(dto: SearchCourseDto) {
     const { data, total } = await this.coursesRepository.searchCourses(dto);
 
-    if(total==0){
+    if (total == 0) {
       return {
-        statusCode: 200,
+        statusCode: 404,
         message: 'Course does not exist',
       };
     }

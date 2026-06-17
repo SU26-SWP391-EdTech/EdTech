@@ -11,7 +11,6 @@ import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import { Throttle } from '@nestjs/throttler';
-import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
 @ApiTags('Courses')
 @Controller('courses')
@@ -21,7 +20,6 @@ export class CoursesController {
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(RoleEnum.COURSE_PROVIDER)
     @Post()
-    @Roles(RoleEnum.COURSE_PROVIDER)
     @Throttle({ default: { limit: 3, ttl: 60000 } })
     @UseInterceptors(FileInterceptor('thumbnailUrl'))
     @ApiOperation({ summary: 'Create a course' })
@@ -53,6 +51,11 @@ export class CoursesController {
         return this.coursesService.search(query);
     }
 
+    @Post('submit-to-review')
+    async submitToReview(@Req() req, @Body() createCourseDto: CreateCourseDto, @UploadedFile() file?: Express.Multer.File) {
+        return this.coursesService.submitToReview(req.user.userId, createCourseDto, file);
+    }
+
     // Endpoint: GET /courses/:id
     @Public()
     @Get(':id')
@@ -72,7 +75,7 @@ export class CoursesController {
     @ApiBody({ type: UpdateCourseDto })
     @ApiResponse({ status: 200, description: 'Course updated successfully' })
     @ApiResponse({ status: 400, description: 'Invalid request data' })
-    @ApiResponse({ status: 403, description: 'You don't have permission to access' })
+    @ApiResponse({ status: 403, description: 'You dont have permission to access' })
     @ApiResponse({ status: 404, description: 'Course not found' })
     update(
         @Param('id', ParseIntPipe) id: number,
@@ -88,7 +91,7 @@ export class CoursesController {
     @Roles(RoleEnum.COURSE_PROVIDER, RoleEnum.ACADEMIC_MANAGER)
     @ApiOperation({ summary: 'Delete a course' })
     @ApiResponse({ status: 200, description: 'Course deleted successfully' })
-    @ApiResponse({ status: 403, description: 'You don't have permission to delete' })
+    @ApiResponse({ status: 403, description: 'You dont have permission to delete' })
     @ApiResponse({ status: 404, description: 'Course not found' })
     remove(@Param('id', ParseIntPipe) id: number, @Req() req) {
         return this.coursesService.remove(id, req.user.userId);
