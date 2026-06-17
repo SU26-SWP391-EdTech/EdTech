@@ -1,9 +1,9 @@
 import { useUserProfile } from '../../hooks/user/useUserProfile';
-import { EditProfileModal } from '../../components/user/profile/generic/EditProfileModal';
-import { ProfileHeader } from '../../components/user/profile/generic/ProfileHeader';
-import { ProfileStats } from '../../components/user/profile/generic/ProfileStats';
-import { PathsSection } from '../../components/user/profile/generic/PathsSection';
-import { HistoryTableSection } from '../../components/user/profile/generic/HistoryTableSection';
+import { EditProfileModal } from '../../components/User/Profile/generic/EditProfileModal';
+import { ProfileHeader } from '../../components/User/Profile/generic/ProfileHeader';
+import { ProfileStats } from '../../components/User/Profile/generic/ProfileStats';
+import { PathsSection } from '../../components/User/Profile/generic/PathsSection';
+import { HistoryTableSection } from '../../components/User/Profile/generic/HistoryTableSection';
 
 export function UserProfile() {
     const {

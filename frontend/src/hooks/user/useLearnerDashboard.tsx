@@ -3,7 +3,7 @@ import { Flame, Clock, Target, GraduationCap } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 import { getMyEnrollments, type Enrollment } from '../../services/enrollment/enrollment.service';
 import { getLearningPaths, type LearningPath } from '../../services/learning-path/learning-path.service';
-import type { NodeState } from '../../components/user/dashboard/learner/RoadmapNode';
+import type { NodeState } from '../../components/User/dashboard/learner/RoadmapNode';
 import { getLearnerProfile } from '../../services/learner/learner.services';
 
 export function useLearnerDashboard() {
