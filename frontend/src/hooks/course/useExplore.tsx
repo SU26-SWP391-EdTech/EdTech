@@ -25,7 +25,6 @@ export function useExplore() {
     const [enrolledPathIds, setEnrolledPathIds] = useState<number[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [enrollingId, setEnrollingId] = useState<number | null>(null);
-    const [profile, setProfile] = useState<any>(null);
 
     // Filter states
     const [searchTerm, setSearchTerm] = useState('');
@@ -60,18 +59,9 @@ export function useExplore() {
 
                 setEnrolledPathIds(enrolledPaths);
 
-                setProfile({
-                    fullName: user.fullName,
-                    email: user.email,
-                    streakCount: 0,
-                    completedCourses: enrollmentsData.filter(e => e.status === 'completed' || e.progress === 100).length,
-                    learningHours: enrollmentsData.reduce((acc, curr) => acc + Math.round((curr.course.duration || 10) * (curr.progress / 100)), 0),
-                    enrolledPaths: enrolledPaths.length,
-                });
             } else {
                 setEnrollments([]);
                 setEnrolledPathIds([]);
-                setProfile(null);
             }
         } catch (error) {
             console.error('Failed to load explore data:', error);
@@ -138,9 +128,22 @@ export function useExplore() {
     });
 
     const filteredPaths = learningPaths.filter((path) => {
-        const isLearner = user?.roleName?.toLowerCase() === 'learner';
-        const userEnrolledInPath = enrolledPathIds.includes(path.learningPathId);
-        return isLearner ? !userEnrolledInPath : true;
+        const q = searchTerm.trim().toLowerCase();
+        const pathCourses = path.learningPathCourses || [];
+
+        const matchesSearch = !q ||
+            path.title.toLowerCase().includes(q) ||
+            (path.description || '').toLowerCase().includes(q) ||
+            pathCourses.some(pc =>
+                pc.course?.title?.toLowerCase().includes(q) ||
+                (pc.course?.description || '').toLowerCase().includes(q) ||
+                (pc.course?.language || '').toLowerCase().includes(q)
+            );
+
+        const matchesLanguage = selectedLanguage === 'all' ||
+            pathCourses.some(pc => pc.course?.language?.toLowerCase() === selectedLanguage.toLowerCase());
+
+        return matchesSearch && matchesLanguage;
     });
 
     const getCourseGradient = (index: number) => {

@@ -1,9 +1,8 @@
-import { BookOpen, Users, Clock } from 'lucide-react';
+import { BookOpen, Clock } from 'lucide-react';
 
 interface ExploreCourseCardProps {
     title: string;
     provider: string;
-    students: string;
     duration: string;
     tags: string[];
     thumb: string;
@@ -18,7 +17,6 @@ interface ExploreCourseCardProps {
 export default function ExploreCourseCard({
     title,
     provider,
-    students,
     duration,
     tags,
     thumb,
@@ -56,8 +54,6 @@ export default function ExploreCourseCard({
                     <h3 className="text-[14px] text-[#111827] mb-1 line-clamp-1" style={{ fontWeight: 600 }}>{title}</h3>
                     <p className="text-xs text-[#6B7280] mb-2">{provider}</p>
                     <div className="flex items-center gap-2 text-[11px] text-[#6B7280] mb-3">
-                        <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" />{students}</span>
-                        <span className="w-1 h-1 rounded-full bg-[#D1D5DB]" />
                         <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{duration}</span>
                     </div>
                     <div className="flex items-center gap-1.5 mb-3 flex-wrap">

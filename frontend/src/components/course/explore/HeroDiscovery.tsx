@@ -1,4 +1,4 @@
-import { Sparkles, Search } from 'lucide-react';
+import { Search, Sparkles, X } from 'lucide-react';
 
 interface HeroDiscoveryProps {
     searchTerm: string;
@@ -21,18 +21,34 @@ export default function HeroDiscovery({
                     What do you want to learn today?
                 </h2>
 
-                <div className="relative mb-4">
+                <form
+                    className="relative mb-4"
+                    onSubmit={(event) => {
+                        event.preventDefault();
+                        onSearchChange(searchTerm.trim());
+                    }}
+                >
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#9CA3AF]" />
                     <input
-                        placeholder="Try “Spring Boot”, “Frontend Roadmap”, or “SQL”"
+                        placeholder="Try Spring Boot, Frontend Roadmap, or SQL"
                         value={searchTerm}
-                        onChange={(e) => onSearchChange(e.target.value)}
+                        onChange={(event) => onSearchChange(event.target.value)}
                         className="w-full pl-12 pr-32 py-4 bg-white border border-[#E5E7EB] rounded-xl text-[15px] text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#E11D48]/20 focus:border-[#E11D48] shadow-sm"
                     />
-                    <button className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2.5 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
+                    {searchTerm && (
+                        <button
+                            type="button"
+                            aria-label="Clear search"
+                            onClick={() => onSearchChange('')}
+                            className="absolute right-24 top-1/2 -translate-y-1/2 p-2 text-[#9CA3AF] hover:text-[#111827] transition-colors"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    )}
+                    <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2.5 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
                         Search
                     </button>
-                </div>
+                </form>
             </div>
         </section>
     );

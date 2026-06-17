@@ -8,6 +8,15 @@ import ExploreCourseCard from '../../components/course/explore/ExploreCourseCard
 
 type Tab = 'all' | 'courses' | 'paths' | 'recommended' | 'saved';
 
+function formatDuration(totalMinutes: number) {
+    const minutes = Math.max(0, Math.round(totalMinutes || 0));
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours === 0) return `${mins}m`;
+    if (mins === 0) return `${hours}h`;
+    return `${hours}h ${mins}m`;
+}
+
 export function ExplorePage() {
     const navigate = useNavigate();
     const {
@@ -90,12 +99,12 @@ export function ExplorePage() {
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-3 gap-4">
-                                    {(tab === 'all' ? filteredPaths.slice(0, 3) : filteredPaths).map((path, index) => {
+                                    {filteredPaths.map((path, index) => {
                                         const colors = ['#E11D48', '#6366F1', '#8B5CF6', '#10B981'];
                                         const pathCourses = path.learningPathCourses || [];
                                         
-                                        // Check if user is enrolled in the path
                                         const userEnrolledInPath = enrolledPathIds.includes(path.learningPathId);
+                                        const totalMinutes = pathCourses.reduce((sum, pc) => sum + (pc.course?.duration || 0), 0);
                                         
                                         // Calculate personal completion rate
                                         const completedInPath = pathCourses.filter(pc =>
@@ -112,11 +121,10 @@ export function ExplorePage() {
                                                 title={path.title}
                                                 description={path.description || 'Step-by-step master curriculum.'}
                                                 courses={pathCourses.length}
-                                                duration="35h"
+                                                duration={formatDuration(totalMinutes)}
                                                 difficulty={path.level}
-                                                enrolled="1,250"
-                                                completion={75}
                                                 accent={colors[index % colors.length]}
+                                                thumbnailUrl={path.bannerUrl}
                                                 isPathEnrolled={userEnrolledInPath}
                                                 personalProgress={personalProgress}
                                             />
@@ -157,19 +165,11 @@ export function ExplorePage() {
                                                              return '';
                                                          };
                                                          const prefix = getRolePrefix(roleName);
-                                                         const formatDuration = (minutes: number) => {
-                                                             const hours = Math.floor(minutes / 60);
-                                                             const mins = minutes % 60;
-                                                             if (hours === 0) return `${mins}m`;
-                                                             if (mins === 0) return `${hours}h`;
-                                                             return `${hours}h ${mins}m`;
-                                                         };
                                                          return (
                                                              <ExploreCourseCard
                                                                  key={course.courseId}
                                                                  title={course.title}
                                                                  provider={course.user?.fullName || "Senior Instructor"}
-                                                                 students={String(course.enrollmentCount || 0)}
                                                                  duration={formatDuration(course.duration || 0)}
                                                                  tags={[course.language || 'English']}
                                                                  thumb={getCourseGradient(index)}
