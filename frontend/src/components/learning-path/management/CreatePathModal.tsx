@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { X, Monitor, Image, BookOpen, ChevronDown, Target } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Monitor, Image, BookOpen, Target, Search, Plus } from 'lucide-react';
 import type { Course } from '../../../services/course/course.service';
 import type { LearningPath } from '../../../utils/learning-path/learningPathHelpers';
 
@@ -47,8 +47,28 @@ export function CreatePathModal({
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const courseSearchRef = useRef<HTMLDivElement>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(initialPath?.thumbnailUrl || null);
+  const [courseSearch, setCourseSearch] = useState('');
+  const [showCourseDropdown, setShowCourseDropdown] = useState(false);
+
+  // Close course dropdown when clicking outside
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (courseSearchRef.current && !courseSearchRef.current.contains(e.target as Node)) {
+        setShowCourseDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const filteredCourses = allCourses.filter(c =>
+    c.status === 'approved' &&
+    !addedCourses.some(ac => ac.courseId === c.courseId) &&
+    c.title.toLowerCase().includes(courseSearch.toLowerCase())
+  );
 
   const handleFileChange = (file: File) => {
     if (file.size > 2 * 1024 * 1024) {
@@ -179,33 +199,58 @@ export function CreatePathModal({
             </label>
 
             {!readOnly && (
-              /* Dropdown to select a course */
-              <div className="relative mb-2.5">
-                <select
-                  onChange={e => {
-                    const val = e.target.value;
-                    if (val) {
-                      const course = allCourses.find(c => String(c.courseId) === val);
-                      if (course && !addedCourses.some(ac => ac.courseId === course.courseId)) {
-                        setAddedCourses(prev => [...prev, course]);
-                      }
-                    }
-                    e.target.value = ''; // Reset select
-                  }}
-                  className="w-full appearance-none pl-3 pr-8 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 cursor-pointer"
-                >
-                  <option value="">-- Select a Course to Add --</option>
-                  {allCourses
-                    .filter(c => c.status === 'approved' && !addedCourses.some(ac => ac.courseId === c.courseId))
-                    .map(course => (
-                      <option key={course.courseId} value={course.courseId}>
-                        {course.title}
-                      </option>
-                    ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF] pointer-events-none" />
+              /* Search input for courses */
+              <div className="relative mb-2.5" ref={courseSearchRef}>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF] pointer-events-none" />
+                  <input
+                    type="text"
+                    value={courseSearch}
+                    onChange={e => { setCourseSearch(e.target.value); setShowCourseDropdown(true); }}
+                    onFocus={() => setShowCourseDropdown(true)}
+                    placeholder="Search courses to add..."
+                    className="w-full pl-9 pr-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 transition-colors"
+                  />
+                </div>
+
+                {showCourseDropdown && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#E5E7EB] rounded-xl shadow-xl z-20 max-h-52 overflow-y-auto">
+                    {filteredCourses.length === 0 ? (
+                      <div className="px-4 py-3 text-xs text-[#9CA3AF] text-center">
+                        {courseSearch ? 'No courses found matching your search.' : 'All available courses have been added.'}
+                      </div>
+                    ) : (
+                      filteredCourses.map(course => (
+                        <button
+                          key={course.courseId}
+                          type="button"
+                          onClick={() => {
+                            setAddedCourses(prev => [...prev, course]);
+                            setCourseSearch('');
+                            setShowCourseDropdown(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#FFF1F3] transition-colors text-left group"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-[#F3F4F6] flex items-center justify-center shrink-0 overflow-hidden">
+                            {course.thumbnailUrl ? (
+                              <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
+                            ) : (
+                              <BookOpen className="w-4 h-4 text-[#9CA3AF]" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-[#111827] truncate">{course.title}</p>
+                            <p className="text-[10px] text-[#9CA3AF] mt-0.5">{course.duration ? `${course.duration}h` : 'N/A'}</p>
+                          </div>
+                          <Plus className="w-4 h-4 text-[#E11D48] opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
             )}
+
 
             <div className="border border-[#E5E7EB] rounded-xl overflow-hidden bg-white">
               {readOnly ? (
@@ -235,7 +280,7 @@ export function CreatePathModal({
                     </span>
                   ))}
                   {addedCourses.length === 0 && (
-                    <span className="text-xs text-[#9CA3AF] p-1">No courses added yet. Please select courses from the dropdown above.</span>
+                    <span className="text-xs text-[#9CA3AF] p-1">No courses added yet. Search for courses above to add them.</span>
                   )}
                 </div>
               )}
