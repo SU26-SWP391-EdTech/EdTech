@@ -3,8 +3,8 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Check, CheckCircle2, Inbox, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { PrimaryButton } from '../../components/auth/PrimaryButton';
-import { SplitAuthLayout } from '../../layouts/Auth/SplitAuthLayout';
-import { useAuthStore } from '../../stores/auth.stores';
+import { SplitAuthLayout } from '../../layouts/auth/SplitAuthLayout';
+import { useAuthStore } from '../../stores/auth/auth.stores';
 
 // Helper function to decode JWT payload on the client side
 function decodeJwt(token: string) {

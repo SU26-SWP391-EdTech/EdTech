@@ -3,10 +3,10 @@ import { AlertCircle, Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
 import { CustomCheckbox } from '../../components/auth/CustomCheckbox';
 import { FormInput } from '../../components/auth/FormInput';
 import { PrimaryButton } from '../../components/auth/PrimaryButton';
-import { SplitAuthLayout } from '../../layouts/Auth/SplitAuthLayout';
-import { getPasswordStrength } from '../../utils/passwordStrength';
+import { SplitAuthLayout } from '../../layouts/auth/SplitAuthLayout';
+import { getPasswordStrength } from '../../utils/auth/passwordStrength';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../stores/auth.stores';
+import { useAuthStore } from '../../stores/auth/auth.stores';
 
 export function SignUp() {
   const navigate = useNavigate();

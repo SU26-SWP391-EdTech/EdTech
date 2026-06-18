@@ -57,6 +57,68 @@ export class CoursesController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.COURSE_PROVIDER)
+  @Post('submit-to-review')
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseInterceptors(FileInterceptor('thumbnailUrl'))
+  @ApiOperation({ summary: 'Create a course and submit it for review' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: CreateCourseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Course created and submitted for review successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({
+    status: 403,
+    description: 'Only Course Providers can submit courses for review',
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  submitNewCourseToReview(
+    @Req() req,
+    @Body() createCourseDto: CreateCourseDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.coursesService.createAndSubmitToReview(
+      createCourseDto,
+      req.user.userId,
+      file,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.COURSE_PROVIDER)
+  @Post(':courseId/submit-review')
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @ApiOperation({ summary: 'Submit an existing draft course for review' })
+  @ApiResponse({
+    status: 200,
+    description: 'Draft course submitted for review successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Only draft courses can be submitted' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Course not found' })
+  submitDraftToReview(
+    @Req() req,
+    @Param('courseId', ParseIntPipe) courseId: number,
+  ) {
+    return this.coursesService.submitDraftToReview(req.user.userId, courseId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.COURSE_PROVIDER)
+  @Post(':courseId/submit-to-review')
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @ApiOperation({ summary: 'Submit an existing draft course for review' })
+  submitDraftToReviewLegacy(
+    @Req() req,
+    @Param('courseId', ParseIntPipe) courseId: number,
+  ) {
+    return this.coursesService.submitDraftToReview(req.user.userId, courseId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER, RoleEnum.COURSE_PROVIDER, RoleEnum.ADMIN)
   @Get()
   @ApiOperation({ summary: 'Get all courses' })
@@ -68,8 +130,6 @@ export class CoursesController {
     return this.coursesService.findAll();
   }
 
-  // Endpoint: GET /courses (Ví dụ: GET /courses?search=javascript&page=1&limit=5)
-
   @Public()
   @Get('search')
   @ApiOperation({ summary: 'Search courses' })
@@ -78,49 +138,6 @@ export class CoursesController {
     return this.coursesService.search(query);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleEnum.COURSE_PROVIDER)
-  @Throttle({ default: { limit: 3, ttl: 60000 } })
-  @UseInterceptors(FileInterceptor('thumbnailUrl'))
-  @Post(':courseId/submit-to-review')
-  @ApiOperation({
-    summary: 'Create a course and submit it for review',
-  })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    type: CreateCourseDto,
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Course created and submitted for review successfully',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid request data',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized',
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'Only Course Providers can submit courses for review',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'User not found',
-  })
-  async submitToReview(
-    @Req() req,
-    @Param('courseId', ParseIntPipe) courseId: number,
-  ) {
-    return this.coursesService.submitToReview(
-      req.user.userId,
-      courseId
-    );
-  }
-
-  // Endpoint: GET /courses/:id
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get course detail' })
@@ -150,12 +167,7 @@ export class CoursesController {
     @Req() req,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.coursesService.update(
-      id,
-      updateCourseDto,
-      req.user.userId,
-      file,
-    );
+    return this.coursesService.update(id, updateCourseDto, req.user.userId, file);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -187,10 +199,7 @@ export class CoursesController {
     description: 'Forbidden - requires Academic Manager role',
   })
   @ApiResponse({ status: 404, description: 'Course or Reviewer not found' })
-  public async approveCourse(
-    @Param('id', ParseIntPipe) id: number,
-    @Req() req: any,
-  ) {
+  approveCourse(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
     return this.coursesService.approveCourse(id, req.user.userId);
   }
 
@@ -206,10 +215,7 @@ export class CoursesController {
     description: 'Forbidden - requires Academic Manager role',
   })
   @ApiResponse({ status: 404, description: 'Course or Reviewer not found' })
-  public async rejectCourse(
-    @Param('id', ParseIntPipe) id: number,
-    @Req() req: any,
-  ) {
+  rejectCourse(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
     return this.coursesService.rejectCourse(id, req.user.userId);
   }
 }

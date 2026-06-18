@@ -6,7 +6,8 @@ import { Logo } from '../shared/Logo';
 import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { PROVIDER_NAV } from '../config/nav-config';
-import { useAuthStore } from '../../../stores/auth.stores';
+import { useAuthStore } from '../../../stores/auth/auth.stores';
+import { getUserRoleLabel } from '../../../utils/user/roleUtils';
 
 export function ProviderHeader() {
     const navigate = useNavigate();
@@ -14,6 +15,7 @@ export function ProviderHeader() {
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
     const [open, setOpen] = useState(false);
+    const roleLabel = getUserRoleLabel(user, 'Course Provider');
 
     // Determine active item based on current URL path
     const getActiveTab = () => {
@@ -21,7 +23,6 @@ export function ProviderHeader() {
         if (path === '/provider') return 'dashboard';
         if (path === '/provider/explore') return 'explore';
         if (path === '/provider/courses') return 'courses';
-        if (path === '/provider/students') return 'students';
         return '';
     };
 
@@ -64,7 +65,7 @@ export function ProviderHeader() {
 
                 <div className="flex-1" />
 
-                <NotifBell count={5} accentColor={ACC} />
+                {/* <NotifBell count={5} accentColor={ACC} /> */}
 
                 <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
 
@@ -73,16 +74,20 @@ export function ProviderHeader() {
                         onClick={() => setOpen(!open)}
                         className="flex items-center gap-2 p-1 pr-2.5 rounded-xl hover:bg-[#F8FAFC] transition-colors"
                     >
-                        <div className="w-8 h-8 rounded-lg bg-[#0EA5E9] flex items-center justify-center text-white text-xs font-bold">
-                            {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'P'}
-                        </div>
+                        {user?.avatarUrl ? (
+                            <img src={user.avatarUrl} alt={user.fullName} className="w-8 h-8 rounded-lg object-cover" />
+                        ) : (
+                            <div className="w-8 h-8 rounded-lg bg-[#0EA5E9] flex items-center justify-center text-white text-xs font-bold">
+                                {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'P'}
+                            </div>
+                        )}
 
                         <div className="hidden xl:block text-left">
                             <p className="text-xs text-[#111827] leading-none font-medium">
                                 {user?.fullName || 'Your User Name'}
                             </p>
                             <p className="text-[10px] text-[#9CA3AF] mt-0.5 leading-none">
-                                Course Provider
+                                {roleLabel}
                             </p>
                         </div>
 
@@ -103,10 +108,9 @@ export function ProviderHeader() {
                                 </div>
 
                                 {[
-                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/provider/userprofile') },
+                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/provider/profile') },
                                     { icon: <UserCircle className="w-4 h-4" />, label: 'My Studio' },
                                     { icon: <BarChart2 className="w-4 h-4" />, label: 'Analytics' },
-                                    { icon: <Settings className="w-4 h-4" />, label: 'Settings' },
                                 ].map((item) => (
                                     <button
                                         key={item.label}

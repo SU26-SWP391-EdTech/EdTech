@@ -22,6 +22,8 @@ export interface LearningPath {
         userId: number;
         fullName: string;
         email: string;
+        avatar?: string | null;
+        avatarUrl?: string | null;
     };
     learningPathCourses?: LearningPathCourse[];
 }
@@ -86,5 +88,11 @@ export async function updateLearningPath(
     data: Partial<CreateLearningPathDto>
 ): Promise<LearningPath> {
     const response = await api.patch(`/learning-paths/${learningPathId}`, data);
+    return response.data;
+}
+
+// 8. Xóa lộ trình học tập bằng ID
+export async function deleteLearningPath(learningPathId: number): Promise<{ message: string }> {
+    const response = await api.delete(`/learning-paths/${learningPathId}`);
     return response.data;
 }

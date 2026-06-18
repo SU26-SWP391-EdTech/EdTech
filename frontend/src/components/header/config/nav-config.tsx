@@ -24,15 +24,12 @@ export const PROVIDER_NAV = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
     { id: 'explore', label: 'Explore', icon: <Compass className="w-3.5 h-3.5" /> },
     { id: 'courses', label: 'My Courses', icon: <BookOpen className="w-3.5 h-3.5" /> },
-    { id: 'students', label: 'Students', icon: <Users className="w-3.5 h-3.5" /> },
 ];
 
 export const ACADEMIC_MANAGER_NAV = [
-    { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
     { id: 'pending-courses', label: 'Pending Courses', icon: <CheckSquare className="w-3.5 h-3.5" /> },
     { id: 'courses', label: 'Courses', icon: <BookOpen className="w-3.5 h-3.5" /> },
     { id: 'learning-paths', label: 'Learning Paths', icon: <GraduationCap className="w-3.5 h-3.5" /> },
-    { id: 'providers', label: 'Course Providers', icon: <Users className="w-3.5 h-3.5" /> },
 ];
 
 export const GUEST_NAV = [

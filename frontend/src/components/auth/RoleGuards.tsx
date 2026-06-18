@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuthStore } from '../../stores/auth.stores';
-import { ScrollToTop } from '../ScrollToTop';
+import { useAuthStore } from '../../stores/auth/auth.stores';
+import { ScrollToTop } from '../shared/ScrollToTop';
 
 interface GuardProps {
   children?: ReactNode;

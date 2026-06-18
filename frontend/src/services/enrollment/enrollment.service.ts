@@ -29,7 +29,7 @@ export async function enrollCourse(courseId: number): Promise<Enrollment> {
 export async function getMyEnrollments(): Promise<Enrollment[]> {
     const response = await api.get('/enrollments/myenrollments');
     return response.data;
-}
+} 
 
 // 3. Lấy chi tiết tiến độ đăng ký của một khóa học cụ thể
 export async function getEnrollmentDetail(courseId: number): Promise<Enrollment> {
