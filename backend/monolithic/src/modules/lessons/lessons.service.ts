@@ -153,7 +153,7 @@ export class LessonsService {
     }
 
     if (file) {
-      const uploadedVideo = await this.cloudinaryService.uploadImage(file);
+      const uploadedVideo = await this.cloudinaryService.uploadVideo(file);
       dto.videoUrl = uploadedVideo.secure_url;
     }
 
