@@ -29,7 +29,7 @@ export class LessonsService {
     private readonly cloudinaryService: CloudinaryService,
     @InjectRepository(Enrollment)
     private readonly enrollmentsRepo: Repository<Enrollment>,
-  ) {}
+  ) { }
 
   async create(
     id: number,
@@ -76,13 +76,13 @@ export class LessonsService {
 
     return lesson;
   }
-  
+
 
   async findLesson(
     lessonId: number,
     userId: number,
   ): Promise<Lesson> {
-    
+
     const lesson = await this.lessonRepo.findOne({
       where: {
         lessonId,
@@ -95,13 +95,13 @@ export class LessonsService {
         },
       },
     });
-    
+
     if (!lesson) {
       throw new NotFoundException(
         `Lesson with ID ${lessonId} not found`,
       );
     }
-    
+
     // Instructor sở hữu course
     if (
       lesson.course.user.userId === userId &&
@@ -109,7 +109,7 @@ export class LessonsService {
     ) {
       return lesson;
     }
-    
+
     const enrollment = await this.enrollmentsRepo.findOne({
       where: {
         user: {
@@ -121,13 +121,13 @@ export class LessonsService {
         status: EnrollmentStatus.ACTIVE,
       },
     });
-    
+
     if (!enrollment) {
       throw new ForbiddenException(
         'You must enroll in this course before accessing lessons',
       );
     }
-    
+
     return lesson;
   }
 

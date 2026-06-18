@@ -1,10 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import { useLearnerDashboard } from '../../components/learner/LearnerDashboard/useLearnerDashboard';
-import DashboardStatCard from '../../components/learner/LearnerDashboard/DashboardStatCard';
-import DashboardHeader from '../../components/learner/LearnerDashboard/DashboardHeader';
-import ContinueLearningSection from '../../components/learner/LearnerDashboard/ContinueLearningSection';
-import LearningRoadmapSection from '../../components/learner/LearnerDashboard/LearningRoadmapSection';
-import { getContinueLessonUrl } from '../../components/LessonPage/lessonUtils';
+import { useLearnerDashboard } from '../../hooks/user/useLearnerDashboard';
+import DashboardStatCard from '../../components/User/dashboard/learner/DashboardStatCard';
+import DashboardHeader from '../../components/User/dashboard/learner/DashboardHeader';
+import ContinueLearningSection from '../../components/User/dashboard/learner/ContinueLearningSection';
+import LearningRoadmapSection from '../../components/User/dashboard/learner/LearningRoadmapSection';
 
 export function LearnerDashboard() {
     const navigate = useNavigate();
@@ -18,31 +17,15 @@ export function LearnerDashboard() {
         enrollments
     } = useLearnerDashboard();
 
-    const handleContinueCourse = (courseId: number) => {
-        const url = getContinueLessonUrl(courseId, enrollments);
-        navigate(url);
-    };
-
-    const handleHeaderContinue = () => {
-        if (continueCourses.length > 0) {
-            handleContinueCourse(continueCourses[0].courseId);
-        } else if (enrollments && enrollments.length > 0) {
-            handleContinueCourse(enrollments[0].course.courseId);
-        } else {
-            navigate('/learner/explore');
-        }
-    };
-
     return (
         <main className="max-w-[1440px] mx-auto px-8 py-8 space-y-8">
             {/* Header */}
             <DashboardHeader 
                 fullName={profile?.fullName}
-                onContinueClick={handleHeaderContinue}
             />
 
             {/* Stats */}
-            <div className="grid grid-cols-4 gap-5">
+            <div className="grid grid-cols-3 gap-5">
                 {activeStats.map(stat => (
                     <DashboardStatCard
                         key={stat.id}
@@ -62,7 +45,7 @@ export function LearnerDashboard() {
                 <ContinueLearningSection
                     continueCourses={continueCourses}
                     onViewAllClick={() => navigate('/learner/my-learning#enrolled-courses')}
-                    onContinueClick={handleContinueCourse}
+                    onCourseClick={(courseId) => navigate(`/learner/courses/detail?id=${courseId}`)}
                     onBrowseClick={() => navigate('/learner/explore')}
                 />
 

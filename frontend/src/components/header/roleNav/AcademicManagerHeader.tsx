@@ -6,7 +6,8 @@ import { Logo } from '../shared/Logo';
 import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { ACADEMIC_MANAGER_NAV } from '../config/nav-config';
-import { useAuthStore } from '../../../stores/auth.stores';
+import { useAuthStore } from '../../../stores/auth/auth.stores';
+import { getUserRoleLabel } from '../../../utils/user/roleUtils';
 
 export function AcademicManagerHeader() {
     const navigate = useNavigate();
@@ -14,6 +15,7 @@ export function AcademicManagerHeader() {
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
     const [open, setOpen] = useState(false);
+    const roleLabel = getUserRoleLabel(user, 'Academic Manager');
 
     // Determine active item based on current URL path
     const getActiveTab = () => {
@@ -22,7 +24,6 @@ export function AcademicManagerHeader() {
         if (path === '/academic/pending-courses') return 'pending-courses';
         if (path === '/academic/courses') return 'courses';
         if (path === '/academic/learning-paths') return 'learning-paths';
-        if (path === '/academic/providers') return 'providers';
         return '';
     };
 
@@ -67,7 +68,7 @@ export function AcademicManagerHeader() {
 
                 <div className="flex-1" />
 
-                <NotifBell count={8} accentColor={ACC} />
+                {/* <NotifBell count={8} accentColor={ACC} /> */}
 
                 <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
 
@@ -76,16 +77,20 @@ export function AcademicManagerHeader() {
                         onClick={() => setOpen(!open)}
                         className="flex items-center gap-2 p-1 pr-2.5 rounded-xl hover:bg-[#F8FAFC] transition-colors"
                     >
-                        <div className="w-8 h-8 rounded-lg bg-[#D97706] flex items-center justify-center text-white text-xs font-bold">
-                            {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'M'}
-                        </div>
+                        {user?.avatarUrl ? (
+                            <img src={user.avatarUrl} alt={user.fullName} className="w-8 h-8 rounded-lg object-cover" />
+                        ) : (
+                            <div className="w-8 h-8 rounded-lg bg-[#D97706] flex items-center justify-center text-white text-xs font-bold">
+                                {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'M'}
+                            </div>
+                        )}
 
                         <div className="hidden xl:block text-left">
                             <p className="text-xs text-[#111827] leading-none font-medium">
                                 {user?.fullName || 'Manager'}
                             </p>
                             <p className="text-[10px] text-[#9CA3AF] mt-0.5 leading-none">
-                                Academic Manager
+                                {roleLabel}
                             </p>
                         </div>
 

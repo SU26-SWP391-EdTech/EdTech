@@ -7,9 +7,9 @@ export class UpdateCourseDto extends PartialType(CreateCourseDto) {
   @ApiPropertyOptional({
     enum: CourseStatus,
     example: CourseStatus.PENDING,
-    description: 'Trạng thái khóa học',
+    description: 'Course status',
   })
   @IsOptional()
-  @IsEnum(CourseStatus, { message: 'Trạng thái khóa học không hợp lệ' })
+  @IsEnum(CourseStatus, { message: 'Course status is invalid' })
   status?: CourseStatus;
 }

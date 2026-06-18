@@ -200,4 +200,13 @@ export class LearningPathsService {
       message: 'Course position updated successfully'
     })
   }
+
+  public async delete(id: number): Promise<{ message: string }> {
+    const learningPath = await this.learningPathsRepository.getLearningPathById(id);
+    if (!learningPath) {
+      throw new NotFoundException('Learning path not found');
+    }
+    await this.learningPathsRepository.delete(id);
+    return { message: 'Learning path deleted successfully' };
+  }
 }

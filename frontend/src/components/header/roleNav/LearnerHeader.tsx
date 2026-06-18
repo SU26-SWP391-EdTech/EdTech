@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Play, ChevronDown, LogOut, UserCircle, BookOpen, Settings } from 'lucide-react';
+import { ChevronDown, LogOut, UserCircle, BookOpen, Settings } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
 import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { LEARNER_NAV } from '../config/nav-config';
-import { useAuthStore } from '../../../stores/auth.stores';
-import { getContinueLessonUrl } from '../../LessonPage/lessonUtils';
+import { useAuthStore } from '../../../stores/auth/auth.stores';
+import { getUserRoleLabel } from '../../../utils/user/roleUtils';
 
 export function LearnerHeader() {
     const navigate = useNavigate();
@@ -15,6 +15,7 @@ export function LearnerHeader() {
     const user = useAuthStore((s) => s.user);
     const logout = useAuthStore((s) => s.logout);
     const [open, setOpen] = useState(false);
+    const roleLabel = getUserRoleLabel(user, 'Learner');
 
     // Determine active item based on current URL path
     const getActiveTab = () => {
@@ -29,23 +30,6 @@ export function LearnerHeader() {
     const ACC = '#E11D48';
     const ACTIVE_BG = '#FFF1F3';
 
-    const handleContinueLearning = () => {
-        const storedEnrollments = sessionStorage.getItem('explore_cache_enrollments');
-        const enrollments = storedEnrollments ? JSON.parse(storedEnrollments) : [];
-        const activeEnrollments = enrollments.filter((e: any) => e.status === 'active' && e.progress < 100);
-
-        if (activeEnrollments.length > 0) {
-            const courseId = activeEnrollments[0].course.courseId;
-            const url = getContinueLessonUrl(courseId, enrollments);
-            navigate(url);
-        } else if (enrollments.length > 0) {
-            const courseId = enrollments[0].course.courseId;
-            const url = getContinueLessonUrl(courseId, enrollments);
-            navigate(url);
-        } else {
-            navigate('/learner/explore');
-        }
-    };
 
     return (
         <div className="bg-white border-b border-[#E5E7EB] shadow-sm">
@@ -64,7 +48,6 @@ export function LearnerHeader() {
                             active={active === item.id}
                             accentColor={ACC}
                             activeBg={ACTIVE_BG}
-                            badge={item.badge}
                             onClick={() => {
                                 if (item.id === 'my-learning') {
                                     navigate('/learner/my-learning');
@@ -86,38 +69,29 @@ export function LearnerHeader() {
                 </div>
                 */}
 
-                <NotifBell count={3} accentColor={ACC} />
+                {/* <NotifBell count={3} accentColor={ACC} /> */}
 
                 <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
-
-                <button
-                    onClick={handleContinueLearning}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm flex-shrink-0 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                    style={{
-                        backgroundColor: ACC,
-                        fontWeight: 500,
-                        boxShadow: `0 2px 8px ${ACC}35`,
-                    }}
-                >
-                    <Play className="w-3.5 h-3.5" />
-                    Continue Learning
-                </button>
 
                 <div className="relative flex-shrink-0">
                     <button
                         onClick={() => setOpen(!open)}
                         className="flex items-center gap-2 p-1 pr-2.5 rounded-xl hover:bg-[#F8FAFC] transition-colors"
                     >
-                        <div className="w-8 h-8 rounded-lg bg-[#E11D48] flex items-center justify-center text-white text-xs font-bold">
-                            {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'L'}
-                        </div>
+                        {user?.avatarUrl ? (
+                            <img src={user.avatarUrl} alt={user.fullName} className="w-8 h-8 rounded-lg object-cover" />
+                        ) : (
+                            <div className="w-8 h-8 rounded-lg bg-[#E11D48] flex items-center justify-center text-white text-xs font-bold">
+                                {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'L'}
+                            </div>
+                        )}
 
                         <div className="hidden xl:block text-left">
                             <p className="text-xs text-[#111827] leading-none font-medium">
                                 {user?.fullName || 'Your User Name'}
                             </p>
                             <p className="text-[10px] text-[#9CA3AF] mt-0.5 leading-none">
-                                Level 4 · 40%
+                                {roleLabel}
                             </p>
                         </div>
 
@@ -140,7 +114,6 @@ export function LearnerHeader() {
                                 {[
                                     { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/learner/learnerprofile') },
                                     { icon: <BookOpen className="w-4 h-4" />, label: 'My Learning', onClick: () => navigate('/learner/my-learning') },
-                                    { icon: <Settings className="w-4 h-4" />, label: 'Settings' },
                                 ].map((item) => (
                                     <button
                                         key={item.label}

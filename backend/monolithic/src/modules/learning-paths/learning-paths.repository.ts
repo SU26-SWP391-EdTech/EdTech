@@ -183,4 +183,20 @@ export class LearningPathsRepository {
       await queryRunner.release();
     }
   }
+
+  public async delete(id: number): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      await queryRunner.manager.delete(LearningPathCourse, { learningPathId: id });
+      await queryRunner.manager.delete(LearningPath, { learningPathId: id });
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
 }

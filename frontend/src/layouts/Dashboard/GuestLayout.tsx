@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import { GuestHeader } from '../../components';
-import { ScrollToTop } from '../../components/ScrollToTop';
+import { ScrollToTop } from '../../components/shared/ScrollToTop';
 
 export function GuestLayout() {
     return (

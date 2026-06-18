@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { router } from './routes/index';
-import { useAuthStore } from './stores/auth.stores';
+import { useAuthStore } from './stores/auth/auth.stores';
 
 const App = () => {
   const checkAuth = useAuthStore((state) => state.checkAuth);

@@ -24,7 +24,7 @@ export class CoursesService {
     private readonly coursesRepository: CoursesRepository,
     private cloudinaryService: CloudinaryService,
     @InjectRepository(User) private userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   //create course
   async create(
@@ -53,6 +53,33 @@ export class CoursesService {
     });
   }
 
+  async createAndSubmitToReview(
+    createCourseDto: CreateCourseDto,
+    userId: number,
+    file?: Express.Multer.File,
+  ): Promise<Course> {
+    const courseProvider = await this.userRepository.findOne({
+      where: {
+        userId,
+      },
+    });
+
+    if (!courseProvider) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (file) {
+      const uploaded = await this.cloudinaryService.uploadImage(file);
+      createCourseDto.thumbnailUrl = uploaded.secure_url;
+    }
+
+    return this.coursesRepository.createCourse({
+      ...createCourseDto,
+      status: CourseStatus.PENDING,
+      user: courseProvider,
+    });
+  }
+
   async findAll(): Promise<Course[]> {
     return this.coursesRepository.findAllCourses();
   }
@@ -65,6 +92,29 @@ export class CoursesService {
     }
 
     return course;
+  }
+
+  async submitDraftToReview(userId: number, courseId: number): Promise<Course> {
+    const course = await this.coursesRepository.findOne({
+      where: {
+        courseId,
+        user: {
+          userId,
+        },
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    if (course.status !== CourseStatus.DRAFT) {
+      throw new BadRequestException(
+        'Only draft courses can be submitted for review',
+      );
+    }
+
+    return await this.coursesRepository.pendingCourse(course);
   }
 
   //update course
@@ -206,9 +256,9 @@ export class CoursesService {
   async search(dto: SearchCourseDto) {
     const { data, total } = await this.coursesRepository.searchCourses(dto);
 
-    if(total==0){
+    if (total == 0) {
       return {
-        statusCode: 200,
+        statusCode: 404,
         message: 'Course does not exist',
       };
     }

@@ -6,7 +6,8 @@ import { Logo } from '../shared/Logo';
 import { NotifBell } from '../shared/NotifBell';
 import { NavItem } from '../shared/NavItem';
 import { ADMIN_NAV } from '../config/nav-config';
-import { useAuthStore } from '../../../stores/auth.stores';
+import { useAuthStore } from '../../../stores/auth/auth.stores';
+import { getUserRoleLabel } from '../../../utils/user/roleUtils';
 
 export function AdminHeader() {
     const navigate = useNavigate();
@@ -15,6 +16,7 @@ export function AdminHeader() {
     const logout = useAuthStore((s) => s.logout);
 
     const [open, setOpen] = useState(false);
+    const roleLabel = getUserRoleLabel(user, 'Admin');
 
     const ACC = '#7C3AED'; // Admin Accent: Purple
     const ACTIVE_BG = '#EDE9FE';
@@ -65,25 +67,25 @@ export function AdminHeader() {
 
                 <div className="flex-1" />
 
-                <NotifBell count={8} accentColor={ACC} />
-
-                <div className="w-px h-5 bg-[#E5E7EB] flex-shrink-0" />
-
                 <div className="relative flex-shrink-0">
                     <button
                         onClick={() => setOpen(!open)}
                         className="flex items-center gap-2 p-1 pr-2.5 rounded-xl hover:bg-[#F8FAFC] transition-colors"
                     >
-                        <div className="w-8 h-8 rounded-lg bg-[#7C3AED] flex items-center justify-center text-white text-xs font-bold">
-                            {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'A'}
-                        </div>
+                        {user?.avatarUrl ? (
+                            <img src={user.avatarUrl} alt={user.fullName} className="w-8 h-8 rounded-lg object-cover" />
+                        ) : (
+                            <div className="w-8 h-8 rounded-lg bg-[#7C3AED] flex items-center justify-center text-white text-xs font-bold">
+                                {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'A'}
+                            </div>
+                        )}
 
                         <div className="hidden xl:block text-left">
                             <p className="text-xs text-[#111827] leading-none font-medium">
                                 {user?.fullName || 'Admin User'}
                             </p>
                             <p className="text-[10px] text-[#9CA3AF] mt-0.5 leading-none">
-                                Platform SuperAdmin
+                                {roleLabel}
                             </p>
                         </div>
 
