@@ -12,6 +12,7 @@ interface ExploreCourseCardProps {
     onEnroll: () => void;
     enrolling: boolean;
     onClick?: () => void;
+    role?: string;
 }
 
 export default function ExploreCourseCard({
@@ -25,7 +26,8 @@ export default function ExploreCourseCard({
     isEnrolled,
     onEnroll,
     enrolling,
-    onClick
+    onClick,
+    role
 }: ExploreCourseCardProps) {
     const badgeMap: Record<string, { color: string; tint: string }> = {
         Popular: { color: '#E11D48', tint: '#FEF2F2' },
@@ -63,21 +65,23 @@ export default function ExploreCourseCard({
                     </div>
                 </div>
             </div>
-            <div className="p-4 pt-0">
-                {isEnrolled ? (
-                    <div className="w-full text-center py-2.5 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold border border-emerald-100">
-                        Already Enrolled
-                    </div>
-                ) : (
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onEnroll(); }}
-                        disabled={enrolling}
-                        className="w-full py-2 bg-[#E11D48] text-white rounded-lg text-xs hover:bg-[#BE123C] disabled:bg-slate-200 disabled:text-slate-400 transition-colors font-semibold"
-                    >
-                        {enrolling ? 'Enrolling...' : 'Enroll'}
-                    </button>
-                )}
-            </div>
+            {role === 'learner' && (
+                <div className="p-4 pt-0">
+                    {isEnrolled  ?  (
+                        <div className="w-full text-center py-2.5 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold border border-emerald-100">
+                            Already Enrolled
+                        </div>
+                    ) : (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onEnroll(); }}
+                            disabled={enrolling}
+                            className="w-full py-2 bg-[#E11D48] text-white rounded-lg text-xs hover:bg-[#BE123C] disabled:bg-slate-200 disabled:text-slate-400 transition-colors font-semibold"
+                        >
+                            {enrolling ? 'Enrolling...' : 'Enroll'}
+                        </button>
+                    )}
+                </div>
+            )}
         </div>
     );
 }
