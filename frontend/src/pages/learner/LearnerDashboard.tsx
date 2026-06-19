@@ -13,7 +13,7 @@ export function LearnerDashboard() {
         continueCourses,
         activePath,
         roadmapNodes,
-        completedCount,
+        enrolledCount,
         enrollments
     } = useLearnerDashboard();
 
@@ -52,7 +52,7 @@ export function LearnerDashboard() {
                 <LearningRoadmapSection
                     activePath={activePath}
                     roadmapNodes={roadmapNodes}
-                    completedCount={completedCount}
+                    enrolledCount={enrolledCount}
                     onViewFullMap={() => navigate(`/learner/learning-path/${activePath?.learningPathId}`)}
                     onExplorePathsClick={() => navigate('/learner/explore')}
                 />
