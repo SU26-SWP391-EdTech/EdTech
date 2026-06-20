@@ -7,8 +7,6 @@ import { LessonsService } from './lessons.service';
 import { LessonsRepository } from './lessons.repository';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { Enrollment } from '../enrollments/entities/enrollment.entity';
-import { Tag } from './entities/tag.entity';
-import { LessonTag } from './entities/lesson-tag.entity';
 import { LessonPrerequisite } from './entities/lesson-prerequisite.entity';
 
 @Module({
@@ -17,8 +15,6 @@ import { LessonPrerequisite } from './entities/lesson-prerequisite.entity';
       Lesson,
       Course,
       Enrollment,
-      Tag,
-      LessonTag,
       LessonPrerequisite
     ]),
   ],

@@ -6,10 +6,12 @@ import { CoursesService } from './courses.service';
 import { CoursesRepository } from './courses.repository';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { User } from '../users/entities/user.entity';
+import { Tag } from './entities/tag.entity';
+import { CourseTag } from './entities/course-tag.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Course, User]), // Đăng ký Entity với TypeORM
+    TypeOrmModule.forFeature([Course, User, Tag, CourseTag]), // Đăng ký Entity với TypeORM
   ],
   controllers: [
     CoursesController, // Khai báo Controller

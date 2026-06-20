@@ -16,6 +16,7 @@ import {
   JoinColumn,
   OneToOne,
 } from 'typeorm';
+import { CourseTag } from './course-tag.entity';
 
 @Entity('courses')
 export class Course {
@@ -123,4 +124,11 @@ export class Course {
     (assessment) => assessment.course,
   )
   assessments!: Assessment[];
+
+  @OneToMany(
+    () => CourseTag,
+    (courseTag) => courseTag.course,
+    { nullable: false }
+  )
+  courseTag!: CourseTag[];
 }

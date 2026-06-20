@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { AssessmentSession } from './assessment-session.entity';
 import { PvpMatch } from 'src/modules/pvp/entities/pvp-match.entity';
+import { ChallengeRequest } from 'src/modules/pvp/entities/challenge-request.entity';
 
 
 @Entity('assessments')
@@ -98,4 +99,10 @@ export class Assessment {
     (match) => match.assessment,
   )
   pvpMatches!: PvpMatch[];
+
+  @OneToMany(
+    () => ChallengeRequest,
+    challenge => challenge.assessment,
+  )
+  challengeRequests!: ChallengeRequest[];
 }

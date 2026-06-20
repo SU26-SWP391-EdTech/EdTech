@@ -1,4 +1,5 @@
 import { PvpStatus } from "src/common/enums/pvp-status.enum";
+import { ChallengeRequest } from "src/modules/pvp/entities/challenge-request.entity";
 import { PvpMatch } from "src/modules/pvp/entities/pvp-match.entity";
 import { User } from "src/modules/users/entities/user.entity";
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
@@ -85,4 +86,16 @@ export class Learner {
     nullable: true,
   })
   lastOnlineAt?: Date;
+
+  @OneToMany(
+    () => ChallengeRequest,
+    challenge => challenge.challenger,
+  )
+  sentChallenges!: ChallengeRequest[];
+
+  @OneToMany(
+    () => ChallengeRequest,
+    challenge => challenge.receiver,
+  )
+  receivedChallenges!: ChallengeRequest[];
 }

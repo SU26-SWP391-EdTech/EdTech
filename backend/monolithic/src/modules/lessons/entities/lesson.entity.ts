@@ -9,7 +9,6 @@ import {
   JoinColumn,
   OneToMany
 } from 'typeorm';
-import { LessonTag } from './lesson-tag.entity';
 import { LessonPrerequisite } from './lesson-prerequisite.entity';
 import { Assessment } from 'src/modules/assessment/entities/assessment.entity';
 import { LearnerLessonProgress } from 'src/modules/progress/entities/learner-lesson-progress.entity';
@@ -47,14 +46,6 @@ export class Lesson {
 
   @Column({ name: 'position', nullable: false })
   position!: number;
-
-  // lessons 1 - n lesson_tags
-  @OneToMany(
-    () => LessonTag,
-    (lessonTag) => lessonTag.lesson,
-    { nullable: false }
-  )
-  lessonTags!: LessonTag[];
 
   @OneToMany(
     () => LessonPrerequisite,

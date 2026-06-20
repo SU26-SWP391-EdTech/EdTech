@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { LessonTag } from "./lesson-tag.entity";
+import { CourseTag } from "./course-tag.entity";
 
 @Entity('tags')
 export class Tag {
@@ -29,11 +29,11 @@ export class Tag {
   })
   createdAt!: Date;
 
-  // tags n - 1 lesson_tags
+  // tags n - 1 course_tags
   @OneToMany(
-    () => LessonTag,
-    (lessonTag) => lessonTag.tag,
+    () => CourseTag,
+    (courseTag) => courseTag.tag,
     { nullable: false }
   )
-  lessonTags!: LessonTag[];
+  courseTags!: CourseTag[];
 }

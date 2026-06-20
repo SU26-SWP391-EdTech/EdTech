@@ -22,7 +22,6 @@ import { AssessmentModule } from './modules/assessment/assessment.module';
 import { ProgressModule } from './modules/progress/progress.module';
 import { QuestionModule } from './modules/question/question.module';
 import { PvpModule } from './modules/pvp/pvp.module';
-import { ChallengeModule } from './modules/challenge/challenge.module';
 
 @Module({
   imports: [
@@ -67,7 +66,6 @@ import { ChallengeModule } from './modules/challenge/challenge.module';
     ProgressModule,
     QuestionModule,
     PvpModule,
-    ChallengeModule
   ],
   providers: [
     {
