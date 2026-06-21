@@ -121,7 +121,7 @@ export function CreatePathModal({
 
           {/* Description */}
           <div>
-            <label className="block text-xs text-[#374151] mb-1.5 font-medium">Description <span className="text-[#E11D48]">*</span></label>
+            <label className="block text-xs text-[#374151] mb-1.5 font-medium">Description</label>
             <textarea
               rows={3}
               value={description}
@@ -313,11 +313,11 @@ export function CreatePathModal({
                 <button onClick={onClose} className="px-4 py-2 bg-white border border-[#E5E7EB] text-[#374151] rounded-lg text-sm hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-colors font-medium">Cancel</button>
                 <button
                   onClick={() => {
-                    if (!title.trim() || !description.trim()) {
-                      alert('Please fill out Path Title and Description.');
+                    if (!title.trim()) {
+                      alert('Please fill out Path Title.');
                       return;
                     }
-                    onSave({ title, description, courses: addedCourses, thumbnailUrl: thumbnailPreview || undefined });
+                    onSave({ title, description: description.trim(), courses: addedCourses, thumbnailUrl: thumbnailPreview || undefined });
                   }}
                   className="flex items-center gap-1.5 px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors font-medium"
                 >
