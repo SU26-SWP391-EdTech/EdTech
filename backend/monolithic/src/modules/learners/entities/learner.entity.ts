@@ -1,4 +1,5 @@
 import { PvpStatus } from "src/common/enums/pvp-status.enum";
+import { LearnerLessonProgress } from "src/modules/progress/entities/learner-lesson-progress.entity";
 import { ChallengeRequest } from "src/modules/pvp/entities/challenge-request.entity";
 import { PvpMatch } from "src/modules/pvp/entities/pvp-match.entity";
 import { User } from "src/modules/users/entities/user.entity";
@@ -6,7 +7,10 @@ import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from "
 
 @Entity('learner_profiles')
 export class Learner {
-  @PrimaryColumn({ name: 'user_id' })
+  @PrimaryColumn({
+    name: 'user_id',
+    type: 'int'
+  })
   userId!: number;
 
   // user 1-1 learner
@@ -98,4 +102,10 @@ export class Learner {
     challenge => challenge.receiver,
   )
   receivedChallenges!: ChallengeRequest[];
+
+  @OneToMany(
+    () => LearnerLessonProgress,
+    (progress) => progress.learner,
+  )
+  lessonProgresses: LearnerLessonProgress[];
 }

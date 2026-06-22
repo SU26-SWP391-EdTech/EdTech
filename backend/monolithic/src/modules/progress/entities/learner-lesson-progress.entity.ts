@@ -1,6 +1,6 @@
 import { LessonProgressStatus } from 'src/common/enums/lesson-progress-status.enum';
+import { Learner } from 'src/modules/learners/entities/learner.entity';
 import { Lesson } from 'src/modules/lessons/entities/lesson.entity';
-import { User } from 'src/modules/users/entities/user.entity';
 import {
   Entity,
   PrimaryColumn,
@@ -42,20 +42,6 @@ export class LearnerLessonProgress {
   })
   completedAt?: Date;
 
-
-  @ManyToOne(
-    () => User,
-    (user) => user.lessonProgresses,
-    {
-      nullable: false,
-    },
-  )
-  @JoinColumn({
-    name: 'user_id',
-  })
-  user!: User;
-
-
   @ManyToOne(
     () => Lesson,
     (lesson) => lesson.learnerLessonProgresses,
@@ -67,4 +53,16 @@ export class LearnerLessonProgress {
     name: 'lesson_id',
   })
   lesson!: Lesson;
+
+  @ManyToOne(
+    () => Learner,
+    (profile) => profile.lessonProgresses,
+    {
+      nullable: false
+    },
+  )
+  @JoinColumn({
+    name: 'user_id',
+  })
+  learner!: Learner;
 }

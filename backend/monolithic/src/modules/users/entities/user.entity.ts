@@ -18,7 +18,6 @@ import {
 import { UserProfile } from './user-profile.entity';
 import { LearningPath } from 'src/modules/learning-paths/entities/learning-path.entity';
 import { LearningPathFollow } from 'src/modules/learning-paths/entities/learning-path-follow.entity';
-import { LearnerLessonProgress } from 'src/modules/progress/entities/learner-lesson-progress.entity';
 import { AssessmentSession } from 'src/modules/assessment/entities/assessment-session.entity';
 @Entity('users')
 export class User {
@@ -114,12 +113,6 @@ export class User {
   // users 1 - n learnign_path_follows
   @OneToMany(() => LearningPathFollow, (follow) => follow.user)
   learningPathFollows!: LearningPathFollow[];
-
-  @OneToMany(
-    () => LearnerLessonProgress,
-    (progress) => progress.user,
-  )
-  lessonProgresses!: LearnerLessonProgress[];
 
   @OneToMany(
     () => AssessmentSession,
