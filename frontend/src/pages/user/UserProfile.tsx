@@ -1,9 +1,5 @@
 import { useUserProfile } from '../../hooks/user/useUserProfile';
-<<<<<<< HEAD
-import { EditProfileModal } from '../../components/user/profile/admin/EditProfileModal';
-=======
 import { EditProfileModal } from '../../components/user/profile/generic/EditProfileModal';
->>>>>>> 3a58e99ecd5ff1c5b1bb363325e3f4ae90802246
 import { ProfileHeader } from '../../components/user/profile/generic/ProfileHeader';
 import { ProfileStats } from '../../components/user/profile/generic/ProfileStats';
 import { PathsSection } from '../../components/user/profile/generic/PathsSection';
