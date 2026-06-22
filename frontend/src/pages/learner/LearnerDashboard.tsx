@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { useLearnerDashboard } from '../../hooks/user/useLearnerDashboard';
-import DashboardStatCard from '../../components/User/dashboard/learner/DashboardStatCard';
-import DashboardHeader from '../../components/User/dashboard/learner/DashboardHeader';
-import ContinueLearningSection from '../../components/User/dashboard/learner/ContinueLearningSection';
-import LearningRoadmapSection from '../../components/User/dashboard/learner/LearningRoadmapSection';
+import DashboardStatCard from '../../components/user/dashboard/learner/DashboardStatCard';
+import DashboardHeader from '../../components/user/dashboard/learner/DashboardHeader';
+import ContinueLearningSection from '../../components/user/dashboard/learner/ContinueLearningSection';
+import LearningRoadmapSection from '../../components/user/dashboard/learner/LearningRoadmapSection';
 
 export function LearnerDashboard() {
     const navigate = useNavigate();

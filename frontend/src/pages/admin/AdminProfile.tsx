@@ -1,5 +1,5 @@
-import { EditProfileModal } from '../../components/User/Profile/admin/EditProfileModal';
-import { ProfileCard } from '../../components/User/Profile/admin/ProfileCard';
+import { EditProfileModal } from '../../components/user/profile/admin/EditProfileModal';
+import { ProfileCard } from '../../components/user/profile/admin/ProfileCard';
 import { useAdminProfile } from '../../hooks/user/useAdminProfile';
 
 export function AdminProfile() {
