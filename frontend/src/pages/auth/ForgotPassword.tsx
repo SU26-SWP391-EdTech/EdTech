@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, CheckCircle2, Lock, Mail } from 'lucide-react';
 import { FormInput } from '../../components/auth/FormInput';
 import { PrimaryButton } from '../../components/auth/PrimaryButton';
-import { SplitAuthLayout } from '../../layouts/auth/SplitAuthLayout';
+import { SplitAuthLayout } from '../../layouts/Auth/SplitAuthLayout';
 
 function goTo(path: string) {
   window.location.href = path;
