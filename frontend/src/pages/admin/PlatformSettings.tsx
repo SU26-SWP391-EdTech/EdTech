@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Shield, Mail, Globe, BookOpen, AlertCircle, Save, Info } from 'lucide-react';
+import { Settings, Shield, Mail, BookOpen, AlertCircle, Save, Info } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getPlatformSettings, updatePlatformSettings } from '../../services/platform-setting/platform-setting.service';
 import type { PlatformSetting } from '../../services/platform-setting/platform-setting.service';
@@ -12,8 +12,6 @@ export function PlatformSettings() {
     // Form states
     const [platformName, setPlatformName] = useState('');
     const [platformEmail, setPlatformEmail] = useState('');
-    const [logoUrl, setLogoUrl] = useState('');
-    const [bannerUrl, setBannerUrl] = useState('');
     const [description, setDescription] = useState('');
 
     const fetchSettings = async () => {
@@ -23,8 +21,6 @@ export function PlatformSettings() {
             setSettings(data);
             setPlatformName(data.platformName || '');
             setPlatformEmail(data.platformEmail || '');
-            setLogoUrl(data.logoUrl || '');
-            setBannerUrl(data.bannerUrl || '');
             setDescription(data.description || '');
         } catch (err: any) {
             console.error('Failed to load platform settings:', err);
@@ -55,8 +51,6 @@ export function PlatformSettings() {
             const updated = await updatePlatformSettings({
                 platformName,
                 platformEmail,
-                logoUrl: logoUrl || undefined,
-                bannerUrl: bannerUrl || undefined,
                 description: description || undefined,
             });
             setSettings(updated);
@@ -127,35 +121,7 @@ export function PlatformSettings() {
                             </div>
                         </div>
 
-                        {/* Platform Logo Url */}
-                        <div>
-                            <label className="block text-xs font-medium text-[#374151] mb-1.5">Logo URL</label>
-                            <div className="relative">
-                                <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
-                                <input
-                                    type="text"
-                                    value={logoUrl}
-                                    onChange={(e) => setLogoUrl(e.target.value)}
-                                    placeholder="e.g. https://domain.com/logo.png"
-                                    className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/15 transition-all"
-                                />
-                            </div>
-                        </div>
 
-                        {/* Platform Banner Url */}
-                        <div>
-                            <label className="block text-xs font-medium text-[#374151] mb-1.5">Banner URL</label>
-                            <div className="relative">
-                                <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
-                                <input
-                                    type="text"
-                                    value={bannerUrl}
-                                    onChange={(e) => setBannerUrl(e.target.value)}
-                                    placeholder="e.g. https://domain.com/hero-banner.jpg"
-                                    className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#7C3AED]/15 transition-all"
-                                />
-                            </div>
-                        </div>
 
                         {/* Platform Description */}
                         <div>
@@ -214,7 +180,6 @@ export function PlatformSettings() {
                             <ul className="text-xs text-[#6B7280] space-y-2 list-disc pl-4 leading-relaxed">
                                 <li>The brand name is displayed in emails, headers, and footer copyrights.</li>
                                 <li>Support email is used for platform automated transactional emails.</li>
-                                <li>Ensure external URLs for Logo/Banner are hosted on secure HTTPS networks.</li>
                             </ul>
                         </div>
                     </div>

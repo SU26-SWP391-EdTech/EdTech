@@ -20,16 +20,18 @@ export async function getPlatformSettings(): Promise<PlatformSetting> {
   return res.data;
 }
 
-export async function createPlatformSettings(formData: FormData): Promise<PlatformSetting> {
+export async function createPlatformSettings(formData: FormData | any): Promise<PlatformSetting> {
+  const isFormData = formData instanceof FormData;
   const res = await api.post('/platform-settings', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined,
   });
   return res.data;
 }
 
-export async function updatePlatformSettings(formData: FormData): Promise<PlatformSetting> {
+export async function updatePlatformSettings(formData: FormData | any): Promise<PlatformSetting> {
+  const isFormData = formData instanceof FormData;
   const res = await api.put('/platform-settings', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined,
   });
   return res.data;
 }
