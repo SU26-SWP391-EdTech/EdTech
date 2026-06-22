@@ -17,6 +17,11 @@ import { MailModule } from './modules/mail/mail.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { LeaderboardModule } from './modules/leaderboard/leaderboard.module';
+import { AssessmentModule } from './modules/assessment/assessment.module';
+import { ProgressModule } from './modules/progress/progress.module';
+import { QuestionModule } from './modules/question/question.module';
+import { PvpModule } from './modules/pvp/pvp.module';
 
 @Module({
   imports: [
@@ -29,7 +34,7 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
       {
         ttl: 60000,
         limit: 500,
-      }, 
+      },
     ]),
 
     TypeOrmModule.forRoot({
@@ -55,7 +60,12 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
     LearningPathsModule,
     AuthModule,
     MailModule,
-    CloudinaryModule
+    CloudinaryModule,
+    LeaderboardModule,
+    AssessmentModule,
+    ProgressModule,
+    QuestionModule,
+    PvpModule,
   ],
   providers: [
     {

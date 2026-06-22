@@ -747,8 +747,8 @@ export function PlatformSetup() {
                 {[
                   { icon: Save, label: 'Save Changes', onClick: handleSave, primary: true },
                   { icon: RotateCcw, label: 'Reset Form', onClick: () => { setForm(savedForm); setFormFiles(savedFormFiles); setFormLogoPreview(''); setFormBannerPreview(''); setTouched({}); }, primary: false },
-                  { icon: Globe, label: 'Preview Public Page', onClick: () => {}, primary: false },
-                  { icon: FileText, label: 'View Audit Log', onClick: () => {}, primary: false },
+                  { icon: Globe, label: 'Preview Public Page', onClick: () => { }, primary: false },
+                  { icon: FileText, label: 'View Audit Log', onClick: () => { }, primary: false },
                 ].map(a => (
                   <button key={a.label} onClick={a.onClick} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', border: `1px solid ${a.primary ? '#E11D48' : '#E5E7EB'}`, borderRadius: 9, background: a.primary ? '#E11D48' : '#FAFAFA', cursor: 'pointer', fontSize: 13, fontWeight: 500, color: a.primary ? '#fff' : '#374151' }}>
                     <a.icon size={14} style={{ color: a.primary ? '#fff' : '#6B7280' }} /> {a.label}

@@ -20,11 +20,14 @@ export class CloudinaryService {
       api_key: apiKey,
       api_secret: apiSecret,
     });
+
+    cloudinary.api.ping()
+      .then((r) => console.log('Cloudinary OK:', r))
+      .catch((e) => console.error('Cloudinary ERROR:', e));
   }
 
-  async uploadImage(
-    file: Express.Multer.File,
-  ): Promise<UploadApiResponse> {
+  public async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
+    console.log(file);
     return new Promise((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
@@ -34,7 +37,7 @@ export class CloudinaryService {
           },
           (error, result) => {
             if (error) return reject(error);
-  
+
             resolve(result as UploadApiResponse);
           },
         )
@@ -54,7 +57,7 @@ export class CloudinaryService {
           },
           (error, result) => {
             if (error) return reject(error);
-  
+
             resolve(result as UploadApiResponse);
           },
         )
