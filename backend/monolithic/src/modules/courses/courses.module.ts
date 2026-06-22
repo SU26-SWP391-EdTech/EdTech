@@ -6,22 +6,24 @@ import { CoursesService } from './courses.service';
 import { CoursesRepository } from './courses.repository';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { User } from '../users/entities/user.entity';
+import { Tag } from './entities/tag.entity';
+import { CourseTag } from './entities/course-tag.entity';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([Course, User]), // Đăng ký Entity với TypeORM
-    ],
-    controllers: [
-        CoursesController, // Khai báo Controller
-    ],
-    providers: [
-        CoursesService,    // Khai báo Service
-        CoursesRepository,
-        CloudinaryService, // Đăng ký Custom Repository như một Provider
-    ],
-    exports: [
-        CoursesService,    // Export nếu các module khác cần sử dụng
-        CoursesRepository
-    ],
+  imports: [
+    TypeOrmModule.forFeature([Course, User, Tag, CourseTag]), // Đăng ký Entity với TypeORM
+  ],
+  controllers: [
+    CoursesController, // Khai báo Controller
+  ],
+  providers: [
+    CoursesService,    // Khai báo Service
+    CoursesRepository,
+    CloudinaryService, // Đăng ký Custom Repository như một Provider
+  ],
+  exports: [
+    CoursesService,    // Export nếu các module khác cần sử dụng
+    CoursesRepository
+  ],
 })
 export class CoursesModule { }

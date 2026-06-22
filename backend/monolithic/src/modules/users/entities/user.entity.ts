@@ -17,12 +17,14 @@ import {
 } from 'typeorm';
 import { UserProfile } from './user-profile.entity';
 import { LearningPath } from 'src/modules/learning-paths/entities/learning-path.entity';
+import { LearningPathFollow } from 'src/modules/learning-paths/entities/learning-path-follow.entity';
+import { AssessmentSession } from 'src/modules/assessment/entities/assessment-session.entity';
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn({ name: 'user_id' })
   userId!: number;
 
-  @OneToMany(() => LearningPathCourse, (lpc) => lpc.edittedBy, {nullable: false})
+  @OneToMany(() => LearningPathCourse, (lpc) => lpc.edittedBy, { nullable: false })
   learningPathCourses!: LearningPathCourse[];
 
   // ==== course ====
@@ -32,7 +34,7 @@ export class User {
   // khoa hoc da review
   @OneToMany(() => Course, (course) => course.reviewedBy, { nullable: false })
   reviewedCourses!: Course[];
-  
+
 
   // user 1-1 learner
   @OneToOne(() => Learner, (learner) => learner.user, { nullable: false })
@@ -50,9 +52,10 @@ export class User {
   })
   email!: string;
 
-  @Column({ name: 'password',
+  @Column({
+    name: 'password',
     select: false,
-   })
+  })
   password!: string;
 
   @Column({
@@ -90,11 +93,11 @@ export class User {
 
   @Column({
     name: 'email_verification_expires_at',
-    nullable: true ,
+    nullable: true,
   })
   emailVerificationExpiresAt!: Date;
-  
-  @UpdateDateColumn({ name: 'updated_at' , nullable: true })
+
+  @UpdateDateColumn({ name: 'updated_at', nullable: true })
   updatedAt!: Date;
 
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
@@ -104,6 +107,16 @@ export class User {
   @OneToOne(() => UserProfile, (userProfile) => userProfile.user, { nullable: false })
   userProfile!: UserProfile;
 
-  @OneToMany(() => LearningPath, (learningPath) => learningPath.edittedBy, {nullable: false})
+  @OneToMany(() => LearningPath, (learningPath) => learningPath.edittedBy, { nullable: false })
   learningPaths!: LearningPath[];
+
+  // users 1 - n learnign_path_follows
+  @OneToMany(() => LearningPathFollow, (follow) => follow.user)
+  learningPathFollows!: LearningPathFollow[];
+
+  @OneToMany(
+    () => AssessmentSession,
+    (session) => session.user,
+  )
+  assessmentSessions!: AssessmentSession[];
 }

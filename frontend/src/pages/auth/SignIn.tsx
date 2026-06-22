@@ -3,7 +3,7 @@ import { AlertCircle, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { CustomCheckbox } from '../../components/auth/CustomCheckbox';
 import { FormInput } from '../../components/auth/FormInput';
 import { PrimaryButton } from '../../components/auth/PrimaryButton';
-import { SplitAuthLayout } from '../../layouts/auth/SplitAuthLayout';
+import { SplitAuthLayout } from '../../layouts/Auth/SplitAuthLayout';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 

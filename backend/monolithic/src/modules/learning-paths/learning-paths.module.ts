@@ -7,14 +7,15 @@ import { LearningPathsService } from './learning-paths.service';
 import { LearningPathsRepository } from './learning-paths.repository';
 import { CoursesModule } from '../courses/courses.module';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { LearningPathFollow } from './entities/learning-path-follow.entity';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([LearningPath, LearningPathCourse]),
-        CoursesModule
-    ],
-    controllers: [LearningPathsController],
-    providers: [LearningPathsService, LearningPathsRepository, CloudinaryService],
-    exports: [LearningPathsService, LearningPathsRepository]
+  imports: [
+    TypeOrmModule.forFeature([LearningPath, LearningPathCourse, LearningPathFollow]),
+    CoursesModule
+  ],
+  controllers: [LearningPathsController],
+  providers: [LearningPathsService, LearningPathsRepository, CloudinaryService],
+  exports: [LearningPathsService, LearningPathsRepository]
 })
-export class LearningPathsModule {}
+export class LearningPathsModule { }
