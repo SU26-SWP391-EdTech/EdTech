@@ -1,9 +1,9 @@
-import Enrollments from '../../components/User/Profile/learner/Enrollments';
-import AboutLearner from '../../components/User/Profile/learner/AboutLearner';
-import StatsLearner from '../../components/User/Profile/learner/StatsLearner';
-import ProfileMini from '../../components/User/Profile/shared/ProfileMini';
-import LearningPaths from '../../components/User/Profile/learner/LearningPaths';
-import Toast from '../../components/User/Profile/shared/Toast';
+import Enrollments from '../../components/user/profile/learner/Enrollments';
+import AboutLearner from '../../components/user/profile/learner/AboutLearner';
+import StatsLearner from '../../components/user/profile/learner/StatsLearner';
+import ProfileMini from '../../components/user/profile/shared/ProfileMini';
+import LearningPaths from '../../components/user/profile/learner/LearningPaths';
+import Toast from '../../components/user/profile/shared/Toast';
 import { useLearnerProfile } from '../../hooks/user/useLearnerProfile';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 

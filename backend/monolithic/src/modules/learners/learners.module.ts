@@ -18,4 +18,4 @@ import { UserProfile } from '../users/entities/user-profile.entity';
   controllers: [LearnersController],
   providers: [LearnersService, CloudinaryService],
 })
-export class LearnersModule {}
+export class LearnersModule { }

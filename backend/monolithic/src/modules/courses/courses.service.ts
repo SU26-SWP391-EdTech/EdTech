@@ -42,10 +42,12 @@ export class CoursesService {
       throw new NotFoundException('User not found');
     }
 
+
     if (file) {
       const uploaded = await this.cloudinaryService.uploadImage(file);
       createCourseDto.thumbnailUrl = uploaded.secure_url;
     }
+
 
     return this.coursesRepository.createCourse({
       ...createCourseDto,
