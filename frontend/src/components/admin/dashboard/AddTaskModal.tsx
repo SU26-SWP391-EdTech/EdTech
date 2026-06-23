@@ -48,7 +48,7 @@ export function AddTaskModal({ onClose, onAdd }: AddTaskModalProps) {
                     </div>
 
                     {/* Priority */}
-                    <div className="flex flex-col gap-1.5">
+                    {/* <div className="flex flex-col gap-1.5">
                         <label className="text-xs font-semibold text-[#374151]">Độ ưu tiên</label>
                         <div className="grid grid-cols-3 gap-2">
                             {(['High', 'Medium', 'Low'] as const).map((p) => {
@@ -79,7 +79,7 @@ export function AddTaskModal({ onClose, onAdd }: AddTaskModalProps) {
                                 );
                             })}
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Due Date */}
                     <div className="flex flex-col gap-1.5">
