@@ -130,41 +130,19 @@ export function useLearnerDashboard() {
 
     const pathCourses = activePath ? [...(activePath.learningPathCourses || [])].sort((a, b) => a.position - b.position) : [];
 
-    let foundCurrentOrUpcoming = false;
     const roadmapNodes = pathCourses.map((lpc, idx) => {
         const enrollment = enrollments.find(e => e.course.courseId === lpc.courseId);
-
-        let state: NodeState = 'locked';
-        let progress: number | undefined = undefined;
-
-        if (enrollment) {
-            if (enrollment.status === 'completed' || enrollment.progress === 100) {
-                state = 'completed';
-                progress = 100;
-            } else {
-                state = 'current';
-                progress = enrollment.progress;
-                foundCurrentOrUpcoming = true;
-            }
-        } else {
-            if (!foundCurrentOrUpcoming) {
-                state = 'upcoming';
-                foundCurrentOrUpcoming = true;
-            } else {
-                state = 'locked';
-            }
-        }
+        const state: NodeState = enrollment ? 'enrolled' : 'not-enrolled';
 
         return {
             id: lpc.courseId,
             label: lpc.course?.title || `Course ${idx + 1}`,
             state,
             course: lpc.course?.description || 'Curated course in this path',
-            progress,
         };
     });
 
-    const completedCount = roadmapNodes.filter(n => n.state === 'completed').length;
+    const enrolledCount = roadmapNodes.filter(n => n.state === 'enrolled').length;
 
     return {
         profile,
@@ -172,7 +150,7 @@ export function useLearnerDashboard() {
         continueCourses,
         activePath,
         roadmapNodes,
-        completedCount,
+        enrolledCount,
         enrollments,
         isLoading
     };

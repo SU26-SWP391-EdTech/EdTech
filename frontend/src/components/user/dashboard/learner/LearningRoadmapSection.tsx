@@ -8,13 +8,12 @@ interface RoadmapNodeData {
     label: string;
     state: NodeState;
     course: string;
-    progress?: number;
 }
 
 interface LearningRoadmapSectionProps {
     activePath: LearningPath | null;
     roadmapNodes: RoadmapNodeData[];
-    completedCount: number;
+    enrolledCount: number;
     onViewFullMap: () => void;
     onExplorePathsClick: () => void;
 }
@@ -22,7 +21,7 @@ interface LearningRoadmapSectionProps {
 export default function LearningRoadmapSection({
     activePath,
     roadmapNodes,
-    completedCount,
+    enrolledCount,
     onViewFullMap,
     onExplorePathsClick
 }: LearningRoadmapSectionProps) {
@@ -41,7 +40,7 @@ export default function LearningRoadmapSection({
                     <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-2">
                             <div className="px-2.5 py-1 bg-[#FFF1F4] rounded-full">
-                                <span className="text-xs text-[#E11D48]" style={{ fontWeight: 600 }}>{completedCount} / {roadmapNodes.length} complete</span>
+                                <span className="text-xs text-[#059669]" style={{ fontWeight: 600 }}>{enrolledCount} / {roadmapNodes.length} enrolled</span>
                             </div>
                         </div>
                         <button 
@@ -64,7 +63,6 @@ export default function LearningRoadmapSection({
                                     label={node.label}
                                     state={node.state}
                                     course={node.course}
-                                    progress={node.progress}
                                     isLast={isLast}
                                 />
                             );
@@ -75,9 +73,8 @@ export default function LearningRoadmapSection({
                     <div className="pt-4 border-t border-[#F3F4F6] flex items-center justify-between text-xs text-[#9CA3AF]">
                         <span>Est. completion: Aug 2026</span>
                         <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#10B981]" /><span>Done</span></div>
-                            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#E11D48]" /><span>Active</span></div>
-                            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#D1D5DB]" /><span>Locked</span></div>
+                            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#10B981]" /><span>Enrolled</span></div>
+                            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#D1D5DB]" /><span>Not enrolled</span></div>
                         </div>
                     </div>
                 </div>
