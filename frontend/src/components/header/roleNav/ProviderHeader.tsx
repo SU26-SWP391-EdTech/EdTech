@@ -20,7 +20,6 @@ export function ProviderHeader() {
     // Determine active item based on current URL path
     const getActiveTab = () => {
         const path = location.pathname;
-        if (path === '/provider') return 'dashboard';
         if (path === '/provider/explore') return 'explore';
         if (path === '/provider/courses') return 'courses';
         return '';
@@ -53,8 +52,6 @@ export function ProviderHeader() {
                             onClick={() => {
                                 if (item.id === 'courses') {
                                     navigate('/provider/courses');
-                                } else if (item.id === 'dashboard') {
-                                    navigate('/provider');
                                 } else if (item.id === 'explore') {
                                     navigate('/provider/explore');
                                 }
@@ -109,8 +106,7 @@ export function ProviderHeader() {
 
                                 {[
                                     { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/provider/profile') },
-                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Studio' },
-                                    { icon: <BarChart2 className="w-4 h-4" />, label: 'Analytics' },
+                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Courses', onClick: () => navigate('/provider/courses') },
                                 ].map((item) => (
                                     <button
                                         key={item.label}
@@ -126,7 +122,7 @@ export function ProviderHeader() {
                                 ))}
 
                                 <div className="border-t border-[#F3F4F6] mt-1">
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             logout();
                                             navigate('/login');

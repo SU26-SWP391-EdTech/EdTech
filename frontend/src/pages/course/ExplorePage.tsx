@@ -177,6 +177,7 @@ export function ExplorePage() {
                                                                  isEnrolled={isEnrolled(course.courseId)}
                                                                  onEnroll={() => handleEnroll(course.courseId)}
                                                                  enrolling={enrollingId === course.courseId}
+                                                                 role={roleName}
                                                                  onClick={() => {
                                                                      navigate(`${prefix}/courses/detail?id=${course.courseId}`);
                                                                  }}

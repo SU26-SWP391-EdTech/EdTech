@@ -6,16 +6,16 @@ import ContinueLearningSection from '../../components/user/dashboard/learner/Con
 import LearningRoadmapSection from '../../components/user/dashboard/learner/LearningRoadmapSection';
 
 export function LearnerDashboard() {
-  const navigate = useNavigate();
-  const {
-    profile,
-    activeStats,
-    continueCourses,
-    activePath,
-    roadmapNodes,
-    completedCount,
-    enrollments
-  } = useLearnerDashboard();
+    const navigate = useNavigate();
+    const {
+        profile,
+        activeStats,
+        continueCourses,
+        activePath,
+        roadmapNodes,
+        enrolledCount,
+        enrollments
+    } = useLearnerDashboard();
 
   return (
     <main className="max-w-[1440px] mx-auto px-8 py-8 space-y-8">
@@ -49,15 +49,15 @@ export function LearnerDashboard() {
           onBrowseClick={() => navigate('/learner/explore')}
         />
 
-        <LearningRoadmapSection
-          activePath={activePath}
-          roadmapNodes={roadmapNodes}
-          completedCount={completedCount}
-          onViewFullMap={() => navigate(`/learner/learning-path/${activePath?.learningPathId}`)}
-          onExplorePathsClick={() => navigate('/learner/explore')}
-        />
-      </div>
-    </main>
-  );
+                <LearningRoadmapSection
+                    activePath={activePath}
+                    roadmapNodes={roadmapNodes}
+                    enrolledCount={enrolledCount}
+                    onViewFullMap={() => navigate(`/learner/learning-path/${activePath?.learningPathId}`)}
+                    onExplorePathsClick={() => navigate('/learner/explore')}
+                />
+            </div>
+        </main>
+    );
 }
 

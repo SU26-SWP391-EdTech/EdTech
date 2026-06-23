@@ -3,7 +3,6 @@ import { GuestLayout } from '../layouts/Dashboard/GuestLayout';
 import { CourseDetail } from '../pages/course/CourseDetail';
 import { ExplorePage } from '../pages/course/ExplorePage';
 import { LearningPathDetail } from '../pages/learning-path/LearningPathDetail';
-import { ProviderProfile } from '../pages/user/ProviderProfile';
 import { HomeRedirect } from './HomeRedirect';
 
 export const publicRoutes: RouteObject = {
@@ -14,6 +13,5 @@ export const publicRoutes: RouteObject = {
         { path: 'explore', element: <ExplorePage /> },
         { path: 'courses/detail', element: <CourseDetail /> },
         { path: 'learning-path/:id', element: <LearningPathDetail /> },
-        { path: 'providers/:id', element: <ProviderProfile /> },
     ],
 };
