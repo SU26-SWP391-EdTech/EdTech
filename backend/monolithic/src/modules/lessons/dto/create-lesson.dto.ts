@@ -44,4 +44,13 @@ export class CreateLessonDto {
     @IsOptional()
     @IsString()
     content?: string;
+
+    @ApiProperty({
+        example: '1',
+        description: 'Vị trí của bài học'
+    })
+    @IsNotEmpty()
+    @Type(() => Number)
+    @IsNumber()
+    position!: number;
 }
