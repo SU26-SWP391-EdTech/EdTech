@@ -11,6 +11,7 @@ interface LessonHeaderProps {
   completedLessons: number;
   overallProgress: number;
   isCompleted: boolean;
+  role?: string;
   onBackToCourse: () => void;
   onMarkComplete: () => void;
 }
@@ -24,6 +25,7 @@ export function LessonHeader({
   completedLessons,
   overallProgress,
   isCompleted,
+  role,
   onBackToCourse,
   onMarkComplete
 }: LessonHeaderProps) {
@@ -89,6 +91,7 @@ export function LessonHeader({
                 <span>{Math.max(totalLessons - completedLessons, 0)} left</span>
               </div>
             </div>
+            {role == 'learner' && (
             <div className="flex flex-col gap-2">
               <button
                 onClick={onMarkComplete}
@@ -104,6 +107,7 @@ export function LessonHeader({
                 {isCompleted ? 'Completed!' : 'Mark as Completed'}
               </button>
             </div>
+            )}
           </div>
         </div>
       </div>

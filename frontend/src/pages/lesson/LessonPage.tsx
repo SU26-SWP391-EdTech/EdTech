@@ -32,6 +32,7 @@ export function LessonPage() {
         completedLessons={lesson.completedLessons}
         overallProgress={lesson.overallProgress}
         isCompleted={lesson.isCompleted}
+        role = {lesson.role}
         onBackToCourse={lesson.handleBackToCourse}
         onMarkComplete={lesson.handleMarkComplete}
       />
