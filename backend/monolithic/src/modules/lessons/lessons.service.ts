@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -16,6 +17,7 @@ import { Enrollment } from '../enrollments/entities/enrollment.entity';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { CoursesService } from '../courses/courses.service';
 
+
 @Injectable()
 export class LessonsService {
   constructor(
@@ -24,7 +26,7 @@ export class LessonsService {
     private readonly courseService: CoursesService,
     @InjectRepository(Enrollment)
     private readonly enrollmentsRepo: Repository<Enrollment>,
-  ) { }
+  ) {}
 
   async create(
     id: number,
@@ -46,6 +48,16 @@ export class LessonsService {
     if (file) {
       const uploadedVideo = await this.cloudinaryService.uploadVideo(file);
       lessonData.videoUrl = uploadedVideo.secure_url;
+    }
+
+    const position = lessonData.position;
+
+    const allLessonOfCourse = await this.findAllByCourse(id);
+
+    for (const lesson of allLessonOfCourse) {
+      if (lesson.position === position) {
+        throw new ConflictException('Position already exists in this course');
+      }
     }
 
     return await this.lessonsRepo.createLesson({
@@ -95,9 +107,7 @@ export class LessonsService {
     const lesson = await this.lessonsRepo.findById(lessonId);
 
     if (!lesson) {
-      throw new NotFoundException(
-        `Lesson with ID ${lessonId} not found`,
-      );
+      throw new NotFoundException(`Lesson with ID ${lessonId} not found`);
     }
 
     // Instructor sở hữu course
