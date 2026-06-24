@@ -12,6 +12,9 @@ export function LearnerDashboard() {
         activeStats,
         continueCourses,
         activePath,
+        followedPaths,
+        selectedPathId,
+        setSelectedPathId,
         roadmapNodes,
         enrolledCount,
         enrollments
@@ -51,6 +54,9 @@ export function LearnerDashboard() {
 
                 <LearningRoadmapSection
                     activePath={activePath}
+                    followedPaths={followedPaths}
+                    selectedPathId={selectedPathId}
+                    onSelectedPathChange={setSelectedPathId}
                     roadmapNodes={roadmapNodes}
                     enrolledCount={enrolledCount}
                     onViewFullMap={() => navigate(`/learner/learning-path/${activePath?.learningPathId}`)}
