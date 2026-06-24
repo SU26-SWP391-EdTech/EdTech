@@ -9,6 +9,7 @@ interface CourseData {
     progress: number;
     gradient: string;
     initials: string;
+    thumbnailUrl?: string;
 }
 
 interface ContinueLearningSectionProps {
@@ -48,6 +49,7 @@ export default function ContinueLearningSection({
                             gradient={course.gradient}
                             initials={course.initials}
                             idx={idx}
+                            thumbnailUrl={course.thumbnailUrl}
                             onClick={() => onCourseClick(course.courseId)}
                         />
                     ))

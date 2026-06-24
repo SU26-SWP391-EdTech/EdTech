@@ -12,93 +12,93 @@ import { UpdateLearnerInfoDto } from './dto/update-learner-info.dto';
 export class LearnersService {
   constructor(
     @InjectRepository(User)
-    private userRepository:Repository<User>,
+    private userRepository: Repository<User>,
     @InjectRepository(Learner)
-    private learnerRepository:Repository<Learner>,
-    private cloudinaryService:CloudinaryService,
-  ){}
+    private learnerRepository: Repository<Learner>,
+    private cloudinaryService: CloudinaryService,
+  ) { }
 
-  async updateProfile(id: number, userId: number , dto: UpdateLearnerInfoDto) {
+  async updateProfile(id: number, userId: number, dto: UpdateLearnerInfoDto) {
 
-    if(userId !== id ){
+    if (userId !== id) {
       throw new BadRequestException("You can't update another learner profile")
     }
 
     let learner = await this.learnerRepository.findOne({ where: { userId: id } });
 
     if (!learner) {
-        learner = this.learnerRepository.create({
-            userId: id,
-            learningGoal: dto.learningGoal,
-            level: dto.level,
-            bio: dto.bio,
-        });
+      learner = this.learnerRepository.create({
+        userId: id,
+        learningGoal: dto.learningGoal,
+        level: dto.level,
+        bio: dto.bio,
+      });
     } else {
-        Object.assign(learner, {
-            learningGoal: dto.learningGoal,
-            level: dto.level,
-            bio: dto.bio,
-        });
+      Object.assign(learner, {
+        learningGoal: dto.learningGoal,
+        level: dto.level,
+        bio: dto.bio,
+      });
     }
 
     return this.learnerRepository.save(learner);
-}
+  }
 
-  async editLearnerProfile(id: number, dto: EditLearnerProfileDto, userId: number, file?: Express.Multer.File){
-      if(userId !== id ){
-        throw new BadRequestException("You can't update another learner profile");
+  async editLearnerProfile(id: number, dto: EditLearnerProfileDto, userId: number, file?: Express.Multer.File) {
+    if (userId !== id) {
+      throw new BadRequestException("You can't update another learner profile");
+    }
+
+    const user = await this.userRepository.findOne({
+      where: {
+        userId: id,
       }
+    });
 
-      const user = await this.userRepository.findOne({
-        where: {
-          userId: id,
-        }
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (file) {
+      const uploaded = await this.cloudinaryService.uploadImage(file);
+      user.avatar = uploaded.secure_url;
+    } else if (dto.avatarUrl) {
+      user.avatar = dto.avatarUrl;
+    }
+
+    if (dto.fullName) {
+      user.fullName = dto.fullName;
+    }
+
+    await this.userRepository.save(user);
+
+    // Save learner profile details
+    let learner = await this.learnerRepository.findOne({ where: { userId: id } });
+    if (!learner) {
+      learner = this.learnerRepository.create({
+        userId: id,
       });
+    }
 
-      if(!user){
-        throw new NotFoundException('User not found');
-      }
-      
-      if (file) {
-        const uploaded = await this.cloudinaryService.uploadImage(file);
-        user.avatar = uploaded.secure_url;
-      } else if (dto.avatarUrl) {
-        user.avatar = dto.avatarUrl;
-      }
+    if (dto.learningGoal !== undefined) {
+      learner.learningGoal = dto.learningGoal;
+    }
+    if (dto.level !== undefined) {
+      learner.level = dto.level;
+    }
+    if (dto.bio !== undefined) {
+      learner.bio = dto.bio;
+    }
 
-      if (dto.fullName) {
-        user.fullName = dto.fullName;
-      }
+    const savedLearner = await this.learnerRepository.save(learner);
 
-      await this.userRepository.save(user);
-
-      // Save learner profile details
-      let learner = await this.learnerRepository.findOne({ where: { userId: id } });
-      if (!learner) {
-        learner = this.learnerRepository.create({
-          userId: id,
-        });
-      }
-
-      if (dto.learningGoal !== undefined) {
-        learner.learningGoal = dto.learningGoal;
-      }
-      if (dto.level !== undefined) {
-        learner.level = dto.level;
-      }
-      if (dto.bio !== undefined) {
-        learner.bio = dto.bio;
-      }
-
-      const savedLearner = await this.learnerRepository.save(learner);
-
-      return {
-        fullName: user.fullName,
-        avatarUrl: user.avatar,
-        learningGoal: savedLearner.learningGoal,
-        level: savedLearner.level,
-        bio: savedLearner.bio,
-      };
+    return {
+      fullName: user.fullName,
+      avatarUrl: user.avatar,
+      learningGoal: savedLearner.learningGoal,
+      level: savedLearner.level,
+      bio: savedLearner.bio,
+    };
   }
 
   async viewLearnerProfile(id: number): Promise<GetLearnerProfileDto> {
@@ -106,7 +106,7 @@ export class LearnersService {
       where: { userId: id },
       relations: ['user'],
     });
-  
+
     if (learner && learner.user) {
       return {
         fullName: learner.user.fullName,
