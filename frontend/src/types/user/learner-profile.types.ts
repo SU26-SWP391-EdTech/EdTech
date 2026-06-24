@@ -46,6 +46,8 @@ export interface LearnerStats {
     enrolledCount: number;
     completedCount: number;
     avgProgress: number;
+    currentStreak?: number;
+    longestStreak?: number;
 }
 
 //Toast

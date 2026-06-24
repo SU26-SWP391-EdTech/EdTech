@@ -1,7 +1,7 @@
-import { BookOpen, CheckCircle2, TrendingUp } from 'lucide-react';
+import { BookOpen, CheckCircle2, TrendingUp, Flame } from 'lucide-react';
 import type { LearnerStats } from '../../../types/user/learner-profile.types';
 
-const StatsLearner = ({ enrolledCount, completedCount, avgProgress }: LearnerStats) => {
+const StatsLearner = ({ enrolledCount, completedCount, avgProgress, currentStreak = 0, longestStreak = 0 }: LearnerStats) => {
     // Nếu avgProgress là NaN (khi chưa đăng ký khóa học nào), đặt là 0
     const safeAvgProgress = isNaN(avgProgress) ? 0 : avgProgress;
     
@@ -16,6 +16,8 @@ const StatsLearner = ({ enrolledCount, completedCount, avgProgress }: LearnerSta
                     { icon: BookOpen, label: 'Enrolled Courses', value: enrolledCount, color: '#7C3AED' },
                     { icon: CheckCircle2, label: 'Completed', value: completedCount, color: '#16A34A' },
                     { icon: TrendingUp, label: 'Avg. Progress', value: `${Math.round(displayProgress)}%`, color: '#E11D48' },
+                    { icon: Flame, label: 'Current Streak', value: `${currentStreak} days`, color: '#F59E0B' },
+                    { icon: Flame, label: 'Longest Streak', value: `${longestStreak} days`, color: '#EF4444' },
                 ].map(s => (
                     <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <s.icon size={15} style={{ color: s.color, flexShrink: 0 }} />
