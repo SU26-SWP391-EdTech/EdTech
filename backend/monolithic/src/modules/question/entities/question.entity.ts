@@ -79,6 +79,9 @@ export class Question {
   @OneToMany(
     () => QuestionOption,
     (option) => option.question,
+    {
+      cascade: true,
+    }
   )
   options!: QuestionOption[];
 }

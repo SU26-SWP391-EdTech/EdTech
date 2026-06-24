@@ -4,10 +4,25 @@ import { Question } from './entities/question.entity';
 import { QuestionOption } from './entities/question-option.entity';
 import { QuestionController } from './question.controller';
 import { QuestionService } from './question.service';
+import { LessonsService } from '../lessons/lessons.service';
+import { AssessmentService } from '../assessment/assessment.service';
+import { QuestionRepository } from './question.repository';
+import { LessonsRepository } from '../lessons/lessons.repository';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { CoursesService } from '../courses/courses.service';
+import { EnrollmentsRepository } from '../enrollments/enrollments.repository';
+import { Enrollment } from '../enrollments/entities/enrollment.entity';
+import { Assessment } from '../assessment/entities/assessment.entity';
+import { AssessmentRepository } from '../assessment/assessment.repository';
+import { Lesson } from '../lessons/entities/lesson.entity';
+import { Course } from '../courses/entities/course.entity';
+import { CoursesRepository } from '../courses/courses.repository';
+import { User } from '../users/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Question, QuestionOption])],
+  imports: [TypeOrmModule.forFeature([Question, QuestionOption, Enrollment, Assessment, Lesson, Course, User])],
   controllers: [QuestionController],
-  providers: [QuestionService]
+  providers: [QuestionService, LessonsService, AssessmentService, QuestionRepository, LessonsRepository, CloudinaryService, CoursesService, EnrollmentsRepository, AssessmentRepository, CoursesRepository],
+  exports: [QuestionService, LessonsService, AssessmentService, QuestionRepository]
 })
 export class QuestionModule { }
