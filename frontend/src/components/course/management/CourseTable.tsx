@@ -134,12 +134,7 @@ export function CourseTable({
                         <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: isPendingPage ? '28%' : '20%' }}>
                             Course
                         </th>
-                        {!isPendingPage && (
-                            <>
-                                <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '12%' }}>Slug</th>
-                                <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '10%' }}>Level</th>
-                            </>
-                        )}
+
                         <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '13%' }}>Provider</th>
                         <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '12%' }}>Status</th>
                         <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '10%' }}>Duration</th>
@@ -184,26 +179,7 @@ export function CourseTable({
                                 </div>
                             </td>
 
-                            {!isPendingPage && (
-                                <>
-                                    {/* Slug */}
-                                    <td className="px-4 py-3">
-                                        <span className="text-xs text-[#475569] font-mono bg-[#F1F5F9] px-2 py-0.5 rounded truncate max-w-[120px] inline-block" title={course.slug}>
-                                            {course.slug}
-                                        </span>
-                                    </td>
-                                    {/* Level */}
-                                    <td className="px-4 py-3">
-                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold inline-block capitalize ${
-                                            course.level === 'beginner' ? 'bg-[#EFF6FF] text-[#1D4ED8]' :
-                                            course.level === 'intermediate' ? 'bg-[#FFF7ED] text-[#C2410C]' :
-                                            'bg-[#FAF5FF] text-[#6B21A8]'
-                                        }`}>
-                                            {course.level}
-                                        </span>
-                                    </td>
-                                </>
-                            )}
+
 
                             {/* Provider */}
                             <td className="px-4 py-3">

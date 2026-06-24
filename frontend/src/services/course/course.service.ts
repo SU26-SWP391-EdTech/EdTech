@@ -21,8 +21,6 @@ export interface BackendCourse {
   status: 'draft' | 'pending' | 'approved' | 'rejected';
   user: CourseUser;
   enrollmentCount?: number;
-  slug?: string | null;
-  level?: string | null;
 }
 
 export type Course = BackendCourse;

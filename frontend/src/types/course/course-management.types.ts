@@ -24,6 +24,4 @@ export interface Course {
   language: string;
   thumbnailUrl?: string | null;
   projectUrl?: string | null;
-  slug?: string;
-  level?: string;
 }

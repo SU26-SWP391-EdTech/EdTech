@@ -18,7 +18,7 @@ export class LessonsRepository {
     public async findById(lessonId: number): Promise<Lesson | null> {
         return await this.repo.findOne({
             where: { lessonId: lessonId as any },
-            relations: ['course'],
+            relations: ['course', 'prerequisites'],
         });
     }
 
@@ -27,8 +27,9 @@ export class LessonsRepository {
             where: {
                 course: { courseId },
             },
+            relations: ['prerequisites'],
             order: {
-                createdAt: 'ASC',
+                position: 'ASC',
             },
         });
     }

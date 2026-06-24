@@ -26,6 +26,8 @@ export interface LearningPath {
   rating: number;
   nodes: RoadmapNode[];
   thumbnailUrl?: string;
+  slug?: string;
+  level?: string;
 }
 
 // Converts minutes to display string e.g. 90 → "1h 30m", 60 → "1h", 45 → "45m"
@@ -35,6 +37,24 @@ export const formatDuration = (minutes: number): string => {
   if (h > 0 && m > 0) return `${h}h ${m}m`;
   if (h > 0) return `${h}h`;
   return `${m}m`;
+};
+
+// Parses display string back to minutes e.g. "1h 30m" → 90, "1h" → 60, "45m" → 45
+export const parseDurationToMins = (durationStr: string): number => {
+  if (!durationStr || durationStr === 'N/A') return 0;
+  let totalMins = 0;
+  
+  const hMatch = durationStr.match(/(\d+)h/);
+  if (hMatch) {
+    totalMins += parseInt(hMatch[1], 10) * 60;
+  }
+  
+  const mMatch = durationStr.match(/(\d+)m/);
+  if (mMatch) {
+    totalMins += parseInt(mMatch[1], 10);
+  }
+  
+  return totalMins;
 };
 
 export const mapBackendToFrontend = (bp: any): LearningPath => {
@@ -96,6 +116,8 @@ export const mapBackendToFrontend = (bp: any): LearningPath => {
     accentColor,
     rating: 0,
     thumbnailUrl: bp.bannerUrl || undefined,
+    slug: bp.slug || '',
+    level: bp.level || 'beginner',
     nodes
   };
 };

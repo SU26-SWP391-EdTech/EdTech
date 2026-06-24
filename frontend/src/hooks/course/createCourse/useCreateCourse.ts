@@ -64,11 +64,6 @@ export function useCreateCourse() {
   }, [editId]);
 
   function handleSubmitForReviewClick() {
-    setShowSubmit(true);
-  }
-
-  function handleConfirmSubmit() {
-    setShowSubmit(false);
     persistence.handleSubmit('pending');
   }
 
@@ -96,6 +91,5 @@ export function useCreateCourse() {
     onEditLesson: persistence.openLessonEditor,
     onSaveDraft: () => persistence.handleSubmit('draft'),
     onSubmitForReview: handleSubmitForReviewClick,
-    onConfirmSubmit: handleConfirmSubmit,
   };
 }

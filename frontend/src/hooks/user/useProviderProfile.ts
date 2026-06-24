@@ -16,7 +16,6 @@ export function useProviderProfile(providerId?: number) {
     const [fullName, setFullName] = useState('');
     const [expertise, setExpertise] = useState('');
     const [experienceYears, setExperienceYears] = useState('');
-    const [toastActive, setToastActive] = useState(false);
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
     const loggedInUser = useAuthStore((state) => state.user);
@@ -53,60 +52,46 @@ export function useProviderProfile(providerId?: number) {
         if (!providerId) return;
         setIsSaving(true);
         try {
-            let updatedData;
             if (avatarFile) {
                 const formData = new FormData();
                 formData.append('fullName', fullName);
                 formData.append('expertise', expertise);
                 formData.append('experienceYears', String(parseInt(experienceYears, 10) || 0));
-                formData.append('avatarUrl', avatarFile);
-
-                updatedData = await editAcademicProfile(providerId, formData);
+                formData.append('avatar', avatarFile);
+                await editAcademicProfile(providerId, formData);
             } else {
                 const payload = {
                     fullName,
                     expertise: expertise || '',
                     experienceYears: parseInt(experienceYears, 10) || 0,
                 };
-                updatedData = await editAcademicProfile(providerId, payload);
+                await editAcademicProfile(providerId, payload);
             }
 
-            // Cập nhật local state
-            setProfile({
-                ...profile,
-                fullName: updatedData.fullName,
-                expertise: updatedData.userProfile?.expertise,
-                experienceYears: updatedData.userProfile?.experienceYears,
-                avatarUrl: updatedData.avatar,
-            });
+            // Refresh from server to get canonical data (avatar URL, etc.)
+            await fetchProfile();
 
-            if (user) {
-                setUser({
-                    ...user,
-                    fullName: updatedData.fullName,
-                    avatarUrl: updatedData.avatar,
-                });
-            }
-
-            // Đồng bộ với Auth Store nếu là chính mình
+            // Sync auth store if editing own profile
             if (canEdit && loggedInUser) {
+                const [profRes, userRes] = await Promise.all([
+                    getAcademicProfile(providerId),
+                    getUserById(providerId),
+                ]);
                 useAuthStore.setState({
                     user: {
                         ...loggedInUser,
-                        fullName: updatedData.fullName,
-                        avatarUrl: updatedData.avatar,
+                        fullName: userRes.fullName,
+                        avatarUrl: profRes.avatarUrl || userRes.avatarUrl || userRes.avatar || loggedInUser.avatarUrl,
                     }
                 });
             }
 
             setAvatarFile(null);
             setEditing(false);
-            setToastActive(true);
-            setTimeout(() => setToastActive(false), 3000);
-            toast.success("Profile saved successfully!");
+            toast.success('Profile saved successfully!');
         } catch (err: any) {
-            console.error("Failed to save profile:", err);
-            toast.error(err.response?.data?.message || "Failed to save profile");
+            console.error('Failed to save profile:', err);
+            toast.error(err.response?.data?.message || 'Failed to save profile');
         } finally {
             setIsSaving(false);
         }
@@ -134,8 +119,6 @@ export function useProviderProfile(providerId?: number) {
         setExpertise,
         experienceYears,
         setExperienceYears,
-        toast: toastActive,
-        setToast: setToastActive,
         save,
         isSaving,
         cancel,

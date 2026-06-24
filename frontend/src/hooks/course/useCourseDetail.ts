@@ -195,6 +195,27 @@ export function useCourseDetail() {
   // Estimate completed lessons from progress percentage
   const completedLessons = enrolled ? Math.round((progressVal / 100) * totalLessons) : 0;
 
+  const completedLessonIds = new Set<string>();
+  lessonsList.forEach((l, idx) => {
+    if (idx < completedLessons) {
+      completedLessonIds.add(String(l.lessonId));
+    }
+  });
+
+  const isLockedByPrerequisites = (l: any) => {
+    if (!l.prerequisites || l.prerequisites.length === 0) return false;
+    return l.prerequisites.some((prereq: any) => {
+      const reqId = String(prereq.prerequisiteLessonId);
+      return !completedLessonIds.has(reqId);
+    });
+  };
+
+  const currentLessonId = enrolled ? lessonsList.find((l, idx) => {
+    const isCompleted = idx < completedLessons;
+    const isLocked = isLockedByPrerequisites(l);
+    return !isCompleted && !isLocked;
+  })?.lessonId : null;
+
   // Build the dynamic curriculum with a single main module
   const dynamicCurriculum: Module[] = [
     {
@@ -204,7 +225,6 @@ export function useCourseDetail() {
       progress: progressVal,
       lessons: lessonsList.map((l, index) => {
         let status: LessonStatus = 'not-started';
-        const lessonIndex = index + 1;
 
         if (isSpecialRole) {
           status = 'not-started';
@@ -212,9 +232,13 @@ export function useCourseDetail() {
           if (!enrolled) {
             status = 'locked';
           } else {
-            if (lessonIndex <= completedLessons) {
+            const isCompleted = index < completedLessons;
+            const isLocked = isLockedByPrerequisites(l);
+            if (isCompleted) {
               status = 'completed';
-            } else if (lessonIndex === completedLessons + 1) {
+            } else if (isLocked) {
+              status = 'locked';
+            } else if (l.lessonId === currentLessonId) {
               status = 'current';
             } else {
               status = 'not-started';
@@ -233,6 +257,7 @@ export function useCourseDetail() {
           content: l.content || '',
           hasVideo: Boolean(l.videoUrl),
           hasReading: Boolean(l.content),
+          prerequisites: l.prerequisites || [],
         };
       }),
     }

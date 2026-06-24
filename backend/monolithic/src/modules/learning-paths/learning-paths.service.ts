@@ -33,7 +33,7 @@ export class LearningPathsService {
       createLearningPathDto.bannerUrl = upload.secure_url;
     }
 
-    const slug = this.generateSlug(createLearningPathDto.title);
+    const slug = createLearningPathDto.slug || this.generateSlug(createLearningPathDto.title);
 
     return await this.learningPathsRepository.createLearningPath(
       createLearningPathDto,
@@ -165,7 +165,12 @@ export class LearningPathsService {
       dto.bannerUrl = upload.secure_url;
     }
 
-    const updateLearningPath = await this.learningPathsRepository.updateLearningPath(learningPathId, dto, user);
+    const updateDto = { ...dto };
+    if (updateDto.title && !updateDto.slug) {
+      updateDto.slug = this.generateSlug(updateDto.title);
+    }
+
+    const updateLearningPath = await this.learningPathsRepository.updateLearningPath(learningPathId, updateDto, user);
     return updateLearningPath;
   }
 

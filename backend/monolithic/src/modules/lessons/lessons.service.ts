@@ -17,6 +17,8 @@ import { Enrollment } from '../enrollments/entities/enrollment.entity';
 import { EnrollmentsRepository } from '../enrollments/enrollments.repository';
 import { RoleEnum } from 'src/common/enums/role.enum';
 
+import { LessonPrerequisite } from './entities/lesson-prerequisite.entity';
+
 @Injectable()
 export class LessonsService {
   constructor(
@@ -29,6 +31,8 @@ export class LessonsService {
     private readonly cloudinaryService: CloudinaryService,
     @InjectRepository(Enrollment)
     private readonly enrollmentsRepo: Repository<Enrollment>,
+    @InjectRepository(LessonPrerequisite)
+    private readonly lessonPrerequisiteRepo: Repository<LessonPrerequisite>,
   ) { }
 
   async create(
@@ -36,7 +40,7 @@ export class LessonsService {
     dto: CreateLessonDto,
     file?: Express.Multer.File,
   ): Promise<Lesson> {
-    const { ...lessonData } = dto;
+    const { prerequisiteLessonIds, clearPrerequisites, ...lessonData } = dto;
 
     // check course exist
     const course = await this.courseRepo.findOne({
@@ -52,10 +56,49 @@ export class LessonsService {
       lessonData.videoUrl = uploadedVideo.secure_url;
     }
 
-    return await this.lessonsRepo.createLesson({
+    // Tự động tính toán vị trí (position) của bài học mới
+    const count = await this.lessonRepo.count({
+      where: { course: { courseId: id } }
+    });
+    const match = dto.title.match(/^\[Order:(\d+)\]/);
+    const position = match ? parseInt(match[1], 10) : count + 1;
+
+    const lesson = await this.lessonsRepo.createLesson({
       ...lessonData,
       course,
+      position,
     });
+
+    // Lưu các bài học tiên quyết
+    let prIds: number[] = [];
+    if (prerequisiteLessonIds) {
+      if (typeof prerequisiteLessonIds === 'string') {
+        try {
+          const parsed = JSON.parse(prerequisiteLessonIds);
+          if (Array.isArray(parsed)) {
+            prIds = parsed.map(Number);
+          } else {
+            prIds = String(prerequisiteLessonIds).split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
+          }
+        } catch {
+          prIds = String(prerequisiteLessonIds).split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
+        }
+      } else if (Array.isArray(prerequisiteLessonIds)) {
+        prIds = prerequisiteLessonIds.map(Number);
+      }
+    }
+
+    if (prIds.length > 0) {
+      const prerequisiteEntities = prIds.map(prId => {
+        const item = new LessonPrerequisite();
+        item.targetLessonId = lesson.lessonId;
+        item.prerequisiteLessonId = prId;
+        return item;
+      });
+      await this.lessonPrerequisiteRepo.save(prerequisiteEntities);
+    }
+
+    return await this.findOne(lesson.lessonId);
   }
 
   async findAllByCourse(courseId: number): Promise<Lesson[]> {
@@ -157,9 +200,60 @@ export class LessonsService {
       dto.videoUrl = uploadedVideo.secure_url;
     }
 
-    Object.assign(lesson, dto);
+    const { prerequisiteLessonIds, clearPrerequisites, ...updateData } = dto;
 
-    return await this.lessonsRepo.save(lesson);
+    Object.assign(lesson, updateData);
+
+    // If title has order prefix, update position accordingly
+    if (dto.title) {
+      const match = dto.title.match(/^\[Order:(\d+)\]/);
+      if (match) {
+        lesson.position = parseInt(match[1], 10);
+      }
+    }
+
+    // Sửa đổi các bài học tiên quyết nếu được cung cấp
+    let prIds: number[] = [];
+    let shouldUpdatePrerequisites = false;
+
+    if (prerequisiteLessonIds !== undefined) {
+      shouldUpdatePrerequisites = true;
+      if (typeof prerequisiteLessonIds === 'string') {
+        try {
+          const parsed = JSON.parse(prerequisiteLessonIds);
+          if (Array.isArray(parsed)) {
+            prIds = parsed.map(Number);
+          } else {
+            prIds = String(prerequisiteLessonIds).split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
+          }
+        } catch {
+          prIds = String(prerequisiteLessonIds).split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
+        }
+      } else if (Array.isArray(prerequisiteLessonIds)) {
+        prIds = prerequisiteLessonIds.map(Number);
+      }
+    } else if (clearPrerequisites) {
+      shouldUpdatePrerequisites = true;
+    }
+
+    if (shouldUpdatePrerequisites) {
+      // Xóa tất cả các bài học tiên quyết cũ
+      await this.lessonPrerequisiteRepo.delete({ targetLessonId: lessonId });
+
+      // Thêm mới các bài học tiên quyết nếu danh sách không rỗng
+      if (prIds.length > 0) {
+        const prerequisiteEntities = prIds.map(prId => {
+          const item = new LessonPrerequisite();
+          item.targetLessonId = lessonId;
+          item.prerequisiteLessonId = prId;
+          return item;
+        });
+        await this.lessonPrerequisiteRepo.save(prerequisiteEntities);
+      }
+    }
+
+    await this.lessonsRepo.save(lesson);
+    return await this.findOne(lessonId);
   }
 
   async remove(id: number): Promise<{ success: boolean; message: string }> {

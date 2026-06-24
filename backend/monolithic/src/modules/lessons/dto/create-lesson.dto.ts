@@ -44,4 +44,19 @@ export class CreateLessonDto {
     @IsOptional()
     @IsString()
     content?: string;
+
+    @ApiPropertyOptional({
+        type: [Number],
+        description: 'Danh sách ID bài học tiên quyết',
+    })
+    @IsOptional()
+    prerequisiteLessonIds?: any;
+
+    @ApiPropertyOptional({
+        type: Boolean,
+        description: 'Xóa toàn bộ bài học tiên quyết',
+    })
+    @IsOptional()
+    clearPrerequisites?: any;
 }
+

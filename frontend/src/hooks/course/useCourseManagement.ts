@@ -77,8 +77,6 @@ export function useCourseManagement() {
                     language: item.language || 'English',
                     thumbnailUrl: item.thumbnailUrl,
                     projectUrl: item.projectUrl,
-                    slug: item.slug || item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-                    level: item.level || 'beginner',
                 };
             });
 

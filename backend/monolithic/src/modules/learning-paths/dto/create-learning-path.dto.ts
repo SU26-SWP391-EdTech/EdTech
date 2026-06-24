@@ -37,4 +37,12 @@ export class CreateLearningPathDto {
   @IsEnum(LearningPathLevel)
   @IsOptional()
   level?: LearningPathLevel;
+
+  @ApiPropertyOptional({
+    example: 'frontend-developer-roadmap',
+    description: 'Learning path slug',
+  })
+  @IsString()
+  @IsOptional()
+  slug?: string;
 }
