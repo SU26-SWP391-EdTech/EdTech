@@ -59,4 +59,3 @@ export class CreateLessonDto {
     @IsOptional()
     clearPrerequisites?: any;
 }
-

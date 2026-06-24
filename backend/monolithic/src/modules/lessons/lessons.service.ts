@@ -7,15 +7,14 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LessonsRepository } from './lessons.repository';
-import { Course } from '../courses/entities/course.entity';
 import { CreateLessonDto } from './dto/create-lesson.dto';
 import { UpdateLessonDto } from './dto/update-lesson.dto';
 import { Lesson } from './entities/lesson.entity';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
 import { Enrollment } from '../enrollments/entities/enrollment.entity';
-import { EnrollmentsRepository } from '../enrollments/enrollments.repository';
 import { RoleEnum } from 'src/common/enums/role.enum';
+import { CoursesService } from '../courses/courses.service';
 
 import { LessonPrerequisite } from './entities/lesson-prerequisite.entity';
 
@@ -23,12 +22,8 @@ import { LessonPrerequisite } from './entities/lesson-prerequisite.entity';
 export class LessonsService {
   constructor(
     private readonly lessonsRepo: LessonsRepository,
-
-    @InjectRepository(Lesson)
-    private readonly lessonRepo: Repository<Lesson>,
-    @InjectRepository(Course)
-    private readonly courseRepo: Repository<Course>,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly courseService: CoursesService,
     @InjectRepository(Enrollment)
     private readonly enrollmentsRepo: Repository<Enrollment>,
     @InjectRepository(LessonPrerequisite)
@@ -43,9 +38,7 @@ export class LessonsService {
     const { prerequisiteLessonIds, clearPrerequisites, ...lessonData } = dto;
 
     // check course exist
-    const course = await this.courseRepo.findOne({
-      where: { courseId: id },
-    });
+    const course = await this.courseService.findCourseByIdService(id);
 
     if (!course) {
       throw new NotFoundException(`Not found course with ID ${id}`);
@@ -57,9 +50,8 @@ export class LessonsService {
     }
 
     // Tự động tính toán vị trí (position) của bài học mới
-    const count = await this.lessonRepo.count({
-      where: { course: { courseId: id } }
-    });
+    const allLessons = await this.lessonsRepo.findByCourseId(id);
+    const count = allLessons.length;
     const match = dto.title.match(/^\[Order:(\d+)\]/);
     const position = match ? parseInt(match[1], 10) : count + 1;
 
@@ -102,7 +94,7 @@ export class LessonsService {
   }
 
   async findAllByCourse(courseId: number): Promise<Lesson[]> {
-    const course = await this.courseRepo.findOne({ where: { courseId } });
+    const course = await this.courseService.findCourseByIdService(courseId);
     if (!course) {
       throw new NotFoundException(`Not found course with ID ${courseId}`);
     }
@@ -126,23 +118,10 @@ export class LessonsService {
     userId: number,
   ): Promise<Lesson> {
 
-    const lesson = await this.lessonRepo.findOne({
-      where: {
-        lessonId,
-      },
-      relations: {
-        course: {
-          user: {
-            role: true,
-          },
-        },
-      },
-    });
+    const lesson = await this.lessonsRepo.findById(lessonId);
 
     if (!lesson) {
-      throw new NotFoundException(
-        `Lesson with ID ${lessonId} not found`,
-      );
+      throw new NotFoundException(`Lesson with ID ${lessonId} not found`);
     }
 
     // Instructor sở hữu course
@@ -184,9 +163,8 @@ export class LessonsService {
 
     if (!lesson) throw new NotFoundException('Lesson not exist');
 
-    const course = await this.courseRepo.findOne({
-      where: { courseId: courseId },
-    });
+    const course = await this.courseService.findCourseByIdService(courseId);
+
     if (!course) {
       throw new NotFoundException(`Not found course with ID ${courseId}`);
     }
@@ -263,5 +241,13 @@ export class LessonsService {
       success: true,
       message: `Lesson with ID ${id} has been deleted successfully`,
     };
+  }
+
+  public async findLessonByIdService(lessonId: number): Promise<Lesson> {
+    const lesson = await this.lessonsRepo.findById(lessonId);
+    if (!lesson) {
+      throw new NotFoundException(`Lesson with ID ${lessonId} not found`);
+    }
+    return lesson;
   }
 }

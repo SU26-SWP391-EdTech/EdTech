@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Flame, Clock, GraduationCap } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 import { getMyEnrollments, type Enrollment } from '../../services/enrollment/enrollment.service';
-import { getLearningPaths, type LearningPath } from '../../services/learning-path/learning-path.service';
+import { getLearningPaths, type LearningPath, getFollowedLearningPathIds } from '../../services/learning-path/learning-path.service';
 import type { NodeState } from '../../components/User/dashboard/learner/RoadmapNode';
 import { getLearnerProfile } from '../../services/learner/learner.services';
 
@@ -11,6 +11,7 @@ export function useLearnerDashboard() {
     const [profile, setProfile] = useState<any>(null);
     const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
     const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
+    const [followedPathIds, setFollowedPathIds] = useState<number[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
@@ -18,10 +19,11 @@ export function useLearnerDashboard() {
             if (!user) return;
             try {
                 setIsLoading(true);
-                const [profileData, enrollmentsData, pathsData] = await Promise.all([
+                const [profileData, enrollmentsData, pathsData, followedIds] = await Promise.all([
                     getLearnerProfile(user.userId),
                     getMyEnrollments(),
-                    getLearningPaths()
+                    getLearningPaths(),
+                    getFollowedLearningPathIds()
                 ]);
 
                 const completedCount = enrollmentsData.filter(
@@ -42,11 +44,13 @@ export function useLearnerDashboard() {
 
                 setEnrollments(enrollmentsData);
                 setLearningPaths(pathsData);
+                setFollowedPathIds(followedIds);
             } catch (error) {
                 console.error("Failed to load dashboard data from API:", error);
                 setProfile(null);
                 setEnrollments([]);
                 setLearningPaths([]);
+                setFollowedPathIds([]);
             } finally {
                 setIsLoading(false);
             }
@@ -112,20 +116,29 @@ export function useLearnerDashboard() {
                 progress: enrollment.progress,
                 gradient: gradients[idx % gradients.length],
                 initials: enrollment.course.title.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+                thumbnailUrl: enrollment.course.thumbnailUrl || undefined,
             };
         });
 
-    // Roadmap active path & nodes mapping
-    const enrolledPathIds = learningPaths.filter(path => {
-        const pathCourses = path.learningPathCourses || [];
-        if (pathCourses.length === 0) return false;
-        return pathCourses.some(pc =>
-            enrollments.some(e => e.course?.courseId === pc.courseId)
-        );
-    }).map(p => p.learningPathId);
+    const [selectedPathId, setSelectedPathId] = useState<number | null>(null);
 
+    const followedPaths = learningPaths.filter(path =>
+        followedPathIds.includes(path.learningPathId)
+    );
+
+    useEffect(() => {
+        if (followedPathIds.length > 0) {
+            if (selectedPathId === null || !followedPathIds.includes(selectedPathId)) {
+                setSelectedPathId(followedPathIds[0]);
+            }
+        } else {
+            setSelectedPathId(null);
+        }
+    }, [followedPathIds, selectedPathId]);
+
+    // Roadmap active path & nodes mapping (only display paths that are followed)
     const activePath = learningPaths.find(path =>
-        enrolledPathIds.includes(path.learningPathId)
+        path.learningPathId === selectedPathId
     ) || null;
 
     const pathCourses = activePath ? [...(activePath.learningPathCourses || [])].sort((a, b) => a.position - b.position) : [];
@@ -149,6 +162,9 @@ export function useLearnerDashboard() {
         activeStats,
         continueCourses,
         activePath,
+        followedPaths,
+        selectedPathId,
+        setSelectedPathId,
         roadmapNodes,
         enrolledCount,
         enrollments,

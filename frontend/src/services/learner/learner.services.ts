@@ -8,6 +8,8 @@ export interface LearnerProfile {
     level?: string;
     bio?: string;
     createdAt: string;
+    currentStreak?: number;
+    longestStreak?: number;
 }
 
 //get

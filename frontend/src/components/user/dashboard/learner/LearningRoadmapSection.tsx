@@ -12,6 +12,9 @@ interface RoadmapNodeData {
 
 interface LearningRoadmapSectionProps {
     activePath: LearningPath | null;
+    followedPaths: LearningPath[];
+    selectedPathId: number | null;
+    onSelectedPathChange: (id: number) => void;
     roadmapNodes: RoadmapNodeData[];
     enrolledCount: number;
     onViewFullMap: () => void;
@@ -20,6 +23,9 @@ interface LearningRoadmapSectionProps {
 
 export default function LearningRoadmapSection({
     activePath,
+    followedPaths,
+    selectedPathId,
+    onSelectedPathChange,
     roadmapNodes,
     enrolledCount,
     onViewFullMap,
@@ -29,8 +35,18 @@ export default function LearningRoadmapSection({
         <div className="col-span-6">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base text-[#111827]" style={{ fontWeight: 700 }}>Learning Roadmap</h2>
-                {activePath && (
-                    <span className="text-xs text-[#9CA3AF]" style={{ fontWeight: 500 }}>{activePath.title}</span>
+                {followedPaths.length > 0 && (
+                    <select
+                        value={selectedPathId || ''}
+                        onChange={(e) => onSelectedPathChange(Number(e.target.value))}
+                        className="text-xs text-[#374151] bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-2 py-1 outline-none font-semibold cursor-pointer max-w-[200px]"
+                    >
+                        {followedPaths.map(path => (
+                            <option key={path.learningPathId} value={path.learningPathId}>
+                                {path.title}
+                            </option>
+                        ))}
+                    </select>
                 )}
             </div>
 
@@ -71,7 +87,6 @@ export default function LearningRoadmapSection({
 
                     {/* Footer */}
                     <div className="pt-4 border-t border-[#F3F4F6] flex items-center justify-between text-xs text-[#9CA3AF]">
-                        <span>Est. completion: Aug 2026</span>
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#10B981]" /><span>Enrolled</span></div>
                             <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#D1D5DB]" /><span>Not enrolled</span></div>
