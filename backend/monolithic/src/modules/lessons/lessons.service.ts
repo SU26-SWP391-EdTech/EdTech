@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -29,7 +30,7 @@ export class LessonsService {
     private readonly cloudinaryService: CloudinaryService,
     @InjectRepository(Enrollment)
     private readonly enrollmentsRepo: Repository<Enrollment>,
-  ) { }
+  ) {}
 
   async create(
     id: number,
@@ -50,6 +51,16 @@ export class LessonsService {
     if (file) {
       const uploadedVideo = await this.cloudinaryService.uploadVideo(file);
       lessonData.videoUrl = uploadedVideo.secure_url;
+    }
+
+    const position = lessonData.position;
+
+    const allLessonOfCourse = await this.findAllByCourse(id);
+
+    for (const lesson of allLessonOfCourse) {
+      if (lesson.position === position) {
+        throw new ConflictException('Position already exists in this course');
+      }
     }
 
     return await this.lessonsRepo.createLesson({
@@ -77,12 +88,7 @@ export class LessonsService {
     return lesson;
   }
 
-
-  async findLesson(
-    lessonId: number,
-    userId: number,
-  ): Promise<Lesson> {
-
+  async findLesson(lessonId: number, userId: number): Promise<Lesson> {
     const lesson = await this.lessonRepo.findOne({
       where: {
         lessonId,
@@ -97,9 +103,7 @@ export class LessonsService {
     });
 
     if (!lesson) {
-      throw new NotFoundException(
-        `Lesson with ID ${lessonId} not found`,
-      );
+      throw new NotFoundException(`Lesson with ID ${lessonId} not found`);
     }
 
     // Instructor sở hữu course
