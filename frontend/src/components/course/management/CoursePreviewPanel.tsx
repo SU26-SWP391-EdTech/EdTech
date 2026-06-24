@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Clock, PlayCircle, Users, Globe } from 'lucide-react';
+import { Clock, PlayCircle, Users, Globe, Hash, Layers } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 import { StarRating } from './StarRating';
 import type { Course } from '../../../types/course/course-management.types';
@@ -23,7 +23,7 @@ export function CoursePreviewPanel({ course, onViewDetails }: CoursePreviewPanel
         : location.pathname.endsWith('/pending-courses')
           ? `${location.pathname.replace('/pending-courses', '/courses')}/detail`
           : `${location.pathname}/courses/detail`;
-      navigate(`${basePath}?id=${course.id || course.courseId}`);
+      navigate(`${basePath}?id=${course.id}`);
     }
   };
 
@@ -83,10 +83,12 @@ export function CoursePreviewPanel({ course, onViewDetails }: CoursePreviewPanel
             { icon: <PlayCircle className="w-3.5 h-3.5 text-[#9CA3AF]" />, label: 'Lessons', val: `${course.lessons} lessons` },
             { icon: <Users className="w-3.5 h-3.5 text-[#9CA3AF]" />, label: 'Students', val: course.students > 0 ? course.students.toLocaleString() : '—' },
             { icon: <Globe className="w-3.5 h-3.5 text-[#9CA3AF]" />, label: 'Language', val: course.language },
+            { icon: <Hash className="w-3.5 h-3.5 text-[#9CA3AF]" />, label: 'Slug', val: course.slug || '—' },
+            { icon: <Layers className="w-3.5 h-3.5 text-[#9CA3AF]" />, label: 'Level', val: course.level || 'beginner' },
           ].map(s => (
             <div key={s.label} className="bg-[#F8FAFC] border border-[#F3F4F6] rounded-xl p-2.5">
               <div className="flex items-center gap-1.5 mb-1">{s.icon}<span className="text-[10px] text-[#9CA3AF]">{s.label}</span></div>
-              <p className="text-xs text-[#111827]" style={{ fontWeight: 600 }}>{s.val}</p>
+              <p className="text-xs text-[#111827] truncate capitalize" style={{ fontWeight: 600 }} title={String(s.val)}>{s.val}</p>
             </div>
           ))}
         </div>

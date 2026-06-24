@@ -67,6 +67,12 @@ export class Course {
   @Column({ name: 'duration', nullable: true })
   duration!: number;
 
+  @Column({ name: 'slug', nullable: true })
+  slug!: string;
+
+  @Column({ name: 'level', nullable: true, default: 'beginner' })
+  level!: string;
+
   @Column({ name: 'total_lessons', default: 0 })
   totalLessons!: number;
 

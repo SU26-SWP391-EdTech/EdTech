@@ -52,4 +52,20 @@ export class CreateCourseDto {
   @Type(() => Number)
   @IsNumber()
   duration?: number;
+
+  @ApiPropertyOptional({
+    example: 'reactjs-basics',
+    description: 'Slug của khóa học',
+  })
+  @IsOptional()
+  @IsString()
+  slug?: string;
+
+  @ApiPropertyOptional({
+    example: 'beginner',
+    description: 'Level của khóa học (beginner, intermediate, advanced)',
+  })
+  @IsOptional()
+  @IsString()
+  level?: string;
 }

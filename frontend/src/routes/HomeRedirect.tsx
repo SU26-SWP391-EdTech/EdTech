@@ -17,7 +17,7 @@ export function HomeRedirect() {
         case 'course provider':
             return <Navigate to="/provider" replace />;
         case 'academic manager':
-            return <Navigate to="/academic" replace />;
+            return <Navigate to="/academic/courses" replace />;
         default:
             return <LandingPage />;
     }

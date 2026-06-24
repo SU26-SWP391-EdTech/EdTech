@@ -21,6 +21,8 @@ export interface BackendCourse {
   status: 'draft' | 'pending' | 'approved' | 'rejected';
   user: CourseUser;
   enrollmentCount?: number;
+  slug?: string | null;
+  level?: string | null;
 }
 
 export type Course = BackendCourse;
@@ -106,7 +108,7 @@ export async function approveCourse(id: number): Promise<BackendCourse> {
 }
 
 // Từ chối khóa học
-export async function rejectCourse(id: number): Promise<BackendCourse> {
-  const response = await api.patch(`/courses/${id}/reject`);
+export async function rejectCourse(id: number, reason?: string): Promise<BackendCourse> {
+  const response = await api.patch(`/courses/${id}/reject`, { reason });
   return response.data;
 }

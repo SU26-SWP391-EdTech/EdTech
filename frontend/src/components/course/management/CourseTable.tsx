@@ -4,7 +4,7 @@ import { CourseThumbnail } from './CourseThumbnail';
 import { StatusBadge } from './StatusBadge';
 import type { Course } from '../../../types/course/course-management.types';
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 5;
 
 interface CourseTableProps {
     filtered: Course[];
@@ -131,9 +131,15 @@ export function CourseTable({
             <table className="w-full min-w-[700px]">
                 <thead>
                     <tr className="bg-[#F9FAFB] border-b border-[#F3F4F6]">
-                        <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '28%' }}>
+                        <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: isPendingPage ? '28%' : '20%' }}>
                             Course
                         </th>
+                        {!isPendingPage && (
+                            <>
+                                <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '12%' }}>Slug</th>
+                                <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '10%' }}>Level</th>
+                            </>
+                        )}
                         <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '13%' }}>Provider</th>
                         <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '12%' }}>Status</th>
                         <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '10%' }}>Duration</th>
@@ -155,7 +161,9 @@ export function CourseTable({
                                 </button>
                             )}
                         </th>
-                        <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '10%' }}>Actions</th>
+                        {isPendingPage && (
+                            <th className="text-left px-4 py-3.5 text-xs text-[#6B7280]" style={{ fontWeight: 500, width: '10%' }}>Actions</th>
+                        )}
                     </tr>
                 </thead>
                 <tbody>
@@ -175,6 +183,27 @@ export function CourseTable({
                                     </div>
                                 </div>
                             </td>
+
+                            {!isPendingPage && (
+                                <>
+                                    {/* Slug */}
+                                    <td className="px-4 py-3">
+                                        <span className="text-xs text-[#475569] font-mono bg-[#F1F5F9] px-2 py-0.5 rounded truncate max-w-[120px] inline-block" title={course.slug}>
+                                            {course.slug}
+                                        </span>
+                                    </td>
+                                    {/* Level */}
+                                    <td className="px-4 py-3">
+                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold inline-block capitalize ${
+                                            course.level === 'beginner' ? 'bg-[#EFF6FF] text-[#1D4ED8]' :
+                                            course.level === 'intermediate' ? 'bg-[#FFF7ED] text-[#C2410C]' :
+                                            'bg-[#FAF5FF] text-[#6B21A8]'
+                                        }`}>
+                                            {course.level}
+                                        </span>
+                                    </td>
+                                </>
+                            )}
 
                             {/* Provider */}
                             <td className="px-4 py-3">
@@ -214,8 +243,8 @@ export function CourseTable({
                             </td>
 
                             {/* Actions */}
-                            <td className="px-4 py-3">
-                                {isPendingPage ? (
+                            {isPendingPage && (
+                                <td className="px-4 py-3">
                                     <div className="flex items-center gap-1.5">
                                         <button
                                             onClick={e => {
@@ -239,22 +268,8 @@ export function CourseTable({
                                             <X className="w-4 h-4 text-[#EF4444] transition-transform group-hover/btn:scale-110" />
                                         </button>
                                     </div>
-                                ) : (
-                                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button
-                                            onClick={e => {
-                                                e.stopPropagation();
-                                                setSelectedCourseForDelete(course);
-                                                setShowDeleteModal(true);
-                                            }}
-                                            className="p-1.5 hover:bg-[#FEF2F2] rounded-lg transition-colors"
-                                            title="Delete"
-                                        >
-                                            <Trash2 className="w-3.5 h-3.5 text-[#FCA5A5]" />
-                                        </button>
-                                    </div>
-                                )}
-                            </td>
+                                </td>
+                            )}
                         </tr>
                     ))}
                 </tbody>

@@ -77,6 +77,8 @@ export function useCourseManagement() {
                     language: item.language || 'English',
                     thumbnailUrl: item.thumbnailUrl,
                     projectUrl: item.projectUrl,
+                    slug: item.slug || item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+                    level: item.level || 'beginner',
                 };
             });
 
@@ -186,7 +188,7 @@ export function useCourseManagement() {
 
     const handleRejectCourse = async (courseId: number, reason: string) => {
         try {
-            await rejectCourse(courseId);
+            await rejectCourse(courseId, reason);
             setCourses(prev => prev.map(c => c.id === courseId ? { ...c, status: 'Rejected' } : c));
             toast.success('Course rejected successfully!');
         } catch (e: any) {

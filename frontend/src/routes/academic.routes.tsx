@@ -1,13 +1,11 @@
-import type { RouteObject } from 'react-router-dom';
+import { Navigate, type RouteObject } from 'react-router-dom';
 import { AcademicGuard } from '../components/auth/RoleGuards';
 import { DashboardLayout } from '../layouts/Dashboard/Dashboard';
 import { CourseDetail } from '../pages/course/CourseDetail';
 import { CourseManagement } from '../pages/course/CourseManagement';
 import { PendingCourses } from '../pages/course/PendingCourses';
-import { LearningPathDetail } from '../pages/learning-path/LearningPathDetail';
 import { LearningPathManagement } from '../pages/learning-path/LearningPathManagement';
 import { LessonPage } from '../pages/lesson/LessonPage';
-import { ProviderProfile } from '../pages/user/ProviderProfile';
 import { UserProfile } from '../pages/user/UserProfile';
 
 export const academicRoutes: RouteObject = {
@@ -18,15 +16,13 @@ export const academicRoutes: RouteObject = {
         </AcademicGuard>
     ),
     children: [
-        { index: true, element: <h1>Home Academic</h1> },
+        { index: true, element: <Navigate to="courses" replace /> },
         { path: 'userprofile', element: <UserProfile /> },
         { path: 'courses', element: <CourseManagement /> },
         { path: 'pending-courses', element: <PendingCourses /> },
         { path: 'courses/detail', element: <CourseDetail /> },
         { path: 'courses/lessons', element: <CourseManagement /> },
         { path: 'lesson', element: <LessonPage /> },
-        { path: 'learning-path/:id', element: <LearningPathDetail /> },
         { path: 'learning-paths', element: <LearningPathManagement /> },
-        { path: 'providers/:id', element: <ProviderProfile /> },
     ],
 };
