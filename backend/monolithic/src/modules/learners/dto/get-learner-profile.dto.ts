@@ -42,4 +42,4 @@ export class GetLearnerProfileDto {
         description: 'Thời điểm tạo profile',
     })
     createdAt?: Date;
-  }
+}
