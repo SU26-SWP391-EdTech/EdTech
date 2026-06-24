@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from './entities/role.entity';
 
 @Injectable()
@@ -10,7 +10,7 @@ export class RolesRepository {
   constructor(
     @InjectRepository(Role)
     private readonly repository: Repository<Role>,
-  ) {}
+  ) { }
 
   public async seedRoles(roles: string[]): Promise<void> {
     this.logger.log('Seeding roles into database...');
