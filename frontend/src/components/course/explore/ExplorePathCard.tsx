@@ -10,8 +10,10 @@ interface ExplorePathCardProps {
     difficulty: string;
     accent: string;
     thumbnailUrl?: string | null;
-    isPathEnrolled: boolean;
+    isFollowed: boolean;
     personalProgress: number;
+    onFollow?: () => void;
+    onUnfollow?: () => void;
 }
 
 export default function ExplorePathCard({
@@ -23,8 +25,10 @@ export default function ExplorePathCard({
     difficulty,
     accent,
     thumbnailUrl,
-    isPathEnrolled,
-    personalProgress
+    isFollowed,
+    personalProgress,
+    onFollow,
+    onUnfollow
 }: ExplorePathCardProps) {
     const navigate = useNavigate();
 
@@ -63,7 +67,7 @@ export default function ExplorePathCard({
                         <span className="flex items-center gap-1"><BookOpen className="w-3 h-3" />{courses} courses</span>
                         <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{duration}</span>
                     </div>
-                    {isPathEnrolled && (
+                    {isFollowed && (
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex-1">
                             <div className="flex items-center justify-between mb-1">
@@ -85,7 +89,24 @@ export default function ExplorePathCard({
                 >
                     View Detail
                 </button>
-                {isPathEnrolled && personalProgress === 100 && (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (isFollowed) {
+                            onUnfollow?.();
+                        } else {
+                            onFollow?.();
+                        }
+                    }}
+                    className={`px-3 py-2 text-xs font-semibold rounded-lg transition-colors text-center ${
+                        isFollowed 
+                            ? 'bg-[#F3F4F6] text-[#4B5563] hover:bg-[#E5E7EB]' 
+                            : 'bg-[#E11D48] text-white hover:bg-[#BE123C]'
+                    }`}
+                >
+                    {isFollowed ? 'Following' : 'Follow'}
+                </button>
+                {isFollowed && personalProgress === 100 && (
                     <div className="py-2 px-3 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-100 text-center flex items-center justify-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         Completed ✓
                     </div>

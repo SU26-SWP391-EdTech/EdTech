@@ -31,8 +31,11 @@ export function ExplorePage() {
         filteredPaths,
         enrollments,
         enrolledPathIds,
+        followedPathIds,
         isEnrolled,
         handleEnroll,
+        handleFollow,
+        handleUnfollow,
         getCourseGradient,
         user,
     } = useExplore();
@@ -125,8 +128,10 @@ export function ExplorePage() {
                                                 difficulty={path.level}
                                                 accent={colors[index % colors.length]}
                                                 thumbnailUrl={path.bannerUrl}
-                                                isPathEnrolled={userEnrolledInPath}
+                                                isFollowed={followedPathIds.includes(path.learningPathId)}
                                                 personalProgress={personalProgress}
+                                                onFollow={() => handleFollow(path.learningPathId)}
+                                                onUnfollow={() => handleUnfollow(path.learningPathId)}
                                             />
                                         );
                                     })}
