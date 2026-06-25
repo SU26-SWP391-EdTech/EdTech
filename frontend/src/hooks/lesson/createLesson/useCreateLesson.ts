@@ -117,6 +117,9 @@ export function useCreateLesson() {
     quizQuestions: form.quizQuestions,
     setQuizQuestions: form.setQuizQuestions,
 
+    assessments: form.assessments,
+    setAssessments: form.setAssessments,
+
     titleError: form.titleError,
     setTitleError: form.setTitleError,
 

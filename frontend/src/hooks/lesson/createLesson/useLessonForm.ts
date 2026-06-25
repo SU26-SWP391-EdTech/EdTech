@@ -33,6 +33,7 @@ export function useLessonForm() {
   const [objectives, setObjectives] = useState<Objective[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
 
   const [titleError, setTitleError] = useState(false);
   const [prerequisiteLessonIds, setPrerequisiteLessonIds] = useState<number[]>([]);
@@ -70,6 +71,7 @@ export function useLessonForm() {
     setObjectives([]);
     setResources([]);
     setQuizQuestions([]);
+    setAssessments([]);
 
     setTitleError(false);
     setPrerequisiteLessonIds([]);
@@ -112,6 +114,17 @@ export function useLessonForm() {
     setQuizQuestions(
       lessonContent ? parseQuizQuestionsFromContent(lessonContent) : []
     );
+
+    const savedAss = localStorage.getItem(`assessments_lesson_${lesson.lessonId}`);
+    if (savedAss) {
+      try {
+        setAssessments(JSON.parse(savedAss));
+      } catch (e) {
+        setAssessments([]);
+      }
+    } else {
+      setAssessments([]);
+    }
 
     if (lesson.prerequisites) {
       setPrerequisiteLessonIds(lesson.prerequisites.map(p => Number(p.prerequisiteLessonId)));
@@ -185,6 +198,9 @@ export function useLessonForm() {
 
     quizQuestions,
     setQuizQuestions,
+
+    assessments,
+    setAssessments,
 
     titleError,
     setTitleError,

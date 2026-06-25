@@ -4,6 +4,7 @@ import { LessonInfoSection } from '../../components/lesson/create/LessonInfoSect
 import { LessonTypeSection } from '../../components/lesson/create/LessonTypeSection';
 import { LessonContentSection } from '../../components/lesson/create/LessonContentSection';
 import { AddResourceModal } from '../../components/lesson/create/AddResourceModal';
+import { LessonAssessmentSection } from '../../components/lesson/create/LessonAssessmentSection';
 
 export function CreateLessonPage() {
   const hook = useCreateLesson();
@@ -90,6 +91,11 @@ export function CreateLessonPage() {
             setContent={hook.setContent}
             handleVideoFileChange={hook.handleVideoFileChange}
             clearVideo={hook.clearVideo}
+          />
+
+          <LessonAssessmentSection
+            assessments={hook.assessments}
+            setAssessments={hook.setAssessments}
           />
 
         </div>

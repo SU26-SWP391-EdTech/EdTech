@@ -22,6 +22,7 @@ export function ProviderHeader() {
         const path = location.pathname;
         if (path === '/provider/explore') return 'explore';
         if (path === '/provider/courses') return 'courses';
+        if (path === '/provider/leaderboard') return 'leaderboard';
         return '';
     };
 
@@ -54,6 +55,8 @@ export function ProviderHeader() {
                                     navigate('/provider/courses');
                                 } else if (item.id === 'explore') {
                                     navigate('/provider/explore');
+                                } else if (item.id === 'leaderboard') {
+                                    navigate('/provider/leaderboard');
                                 }
                             }}
                         />
