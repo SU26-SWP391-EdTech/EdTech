@@ -106,7 +106,7 @@ export async function approveCourse(id: number): Promise<BackendCourse> {
 }
 
 // Từ chối khóa học
-export async function rejectCourse(id: number): Promise<BackendCourse> {
-  const response = await api.patch(`/courses/${id}/reject`);
+export async function rejectCourse(id: number, reason?: string): Promise<BackendCourse> {
+  const response = await api.patch(`/courses/${id}/reject`, { reason });
   return response.data;
 }

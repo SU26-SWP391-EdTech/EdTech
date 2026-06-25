@@ -33,6 +33,7 @@ export interface CreateLearningPathDto {
     description?: string;
     bannerUrl?: string;
     level?: LearningPathLevel;
+    slug?: string;
 }
 
 export interface AddCourseToLearningPathDto {

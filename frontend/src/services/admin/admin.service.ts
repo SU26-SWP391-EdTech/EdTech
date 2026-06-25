@@ -2,14 +2,14 @@ import api from '../../lib/axios';
 
 export interface DashboardStats {
   totalUsers: number;
-  totalUsersChange: string;
-  totalUsersUp: boolean;
+  totalUsersChange?: string;
+  totalUsersUp?: boolean;
   activePaths: number;
-  activePathsChange: string;
-  activePathsUp: boolean;
+  activePathsChange?: string;
+  activePathsUp?: boolean;
   completedCourses: number;
-  completedCoursesChange: string;
-  completedCoursesUp: boolean;
+  completedCoursesChange?: string;
+  completedCoursesUp?: boolean;
   sparkUsers: { v: number }[];
   sparkPaths: { v: number }[];
   sparkCourses: { v: number }[];

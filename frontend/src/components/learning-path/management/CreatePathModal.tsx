@@ -6,7 +6,14 @@ import type { LearningPath } from '../../../utils/learning-path/learningPathHelp
 interface CreatePathModalProps {
   onClose: () => void;
   initialPath?: LearningPath;
-  onSave: (data: { title: string; description: string; courses: Course[]; thumbnailUrl?: string }) => void;
+  onSave: (data: {
+    title: string;
+    description: string;
+    courses: Course[];
+    thumbnailUrl?: string;
+    slug?: string;
+    level?: string;
+  }) => void;
   readOnly?: boolean;
   allCourses?: Course[];
 }
@@ -21,6 +28,8 @@ export function CreatePathModal({
   const [dragOver, setDragOver] = useState(false);
   const [title, setTitle] = useState(initialPath ? initialPath.title : '');
   const [description, setDescription] = useState(initialPath ? initialPath.description : '');
+  const [slug, setSlug] = useState(initialPath ? (initialPath.slug || '') : '');
+  const [level, setLevel] = useState(initialPath ? (initialPath.level || 'beginner') : 'beginner');
   const [addedCourses, setAddedCourses] = useState<Course[]>(() => {
     if (initialPath) {
       return initialPath.nodes.map(n => {
@@ -69,7 +78,6 @@ export function CreatePathModal({
     !addedCourses.some(ac => ac.courseId === c.courseId) &&
     c.title.toLowerCase().includes(courseSearch.toLowerCase())
   );
-
   const handleFileChange = (file: File) => {
     if (file.size > 2 * 1024 * 1024) {
       alert('File is too large. Max size is 2MB.');
@@ -81,6 +89,25 @@ export function CreatePathModal({
       setThumbnailPreview(reader.result as string);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleSave = () => {
+    if (!title.trim()) {
+      alert('Please fill out Path Title.');
+      return;
+    }
+    if (addedCourses.length === 0) {
+      alert('A learning path must contain at least one course.');
+      return;
+    }
+    onSave({
+      title,
+      description: description.trim(),
+      courses: addedCourses,
+      thumbnailUrl: thumbnailPreview || undefined,
+      slug: slug.trim() || undefined,
+      level: level as any
+    });
   };
 
   return (
@@ -130,6 +157,34 @@ export function CreatePathModal({
               placeholder="What will learners achieve by completing this path?"
               className="w-full px-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 disabled:bg-[#F8FAFC] disabled:text-[#6B7280] disabled:cursor-not-allowed resize-none transition-colors"
             />
+          </div>
+
+          {/* Level and Slug */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs text-[#374151] mb-1.5 font-medium">Level <span className="text-[#E11D48]">*</span></label>
+              <select
+                value={level}
+                onChange={e => setLevel(e.target.value)}
+                disabled={readOnly}
+                className="w-full px-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 disabled:bg-[#F8FAFC] disabled:text-[#6B7280] disabled:cursor-not-allowed transition-colors"
+              >
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-[#374151] mb-1.5 font-medium">Custom Slug</label>
+              <input
+                type="text"
+                value={slug}
+                onChange={e => setSlug(e.target.value)}
+                disabled={readOnly}
+                placeholder="e.g. fullstack-web-dev (optional)"
+                className="w-full px-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 disabled:bg-[#F8FAFC] disabled:text-[#6B7280] disabled:cursor-not-allowed transition-colors"
+              />
+            </div>
           </div>
 
           {/* Thumbnail Upload */}
@@ -312,13 +367,7 @@ export function CreatePathModal({
               <div className="flex items-center gap-2.5">
                 <button onClick={onClose} className="px-4 py-2 bg-white border border-[#E5E7EB] text-[#374151] rounded-lg text-sm hover:bg-[#F9FAFB] hover:border-[#D1D5DB] transition-colors font-medium">Cancel</button>
                 <button
-                  onClick={() => {
-                    if (!title.trim()) {
-                      alert('Please fill out Path Title.');
-                      return;
-                    }
-                    onSave({ title, description: description.trim(), courses: addedCourses, thumbnailUrl: thumbnailPreview || undefined });
-                  }}
+                  onClick={handleSave}
                   className="flex items-center gap-1.5 px-4 py-2 bg-[#E11D48] text-white rounded-lg text-sm hover:bg-[#BE123C] transition-colors font-medium"
                 >
                   <Target className="w-4 h-4" /> {initialPath ? 'Save Changes' : 'Create Path'}

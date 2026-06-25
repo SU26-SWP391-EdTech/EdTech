@@ -65,6 +65,10 @@ export function CreateLessonPage() {
             setSavedLessonId={hook.setSavedLessonId}
             searchParams={hook.searchParams}
             navigate={hook.navigate}
+            lessons={hook.lessons}
+            editingLessonId={hook.editingLessonId}
+            prerequisiteLessonIds={hook.prerequisiteLessonIds}
+            setPrerequisiteLessonIds={hook.setPrerequisiteLessonIds}
           />
 
           <LessonTypeSection

@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -17,6 +16,7 @@ import { Enrollment } from '../enrollments/entities/enrollment.entity';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { CoursesService } from '../courses/courses.service';
 
+import { LessonPrerequisite } from './entities/lesson-prerequisite.entity';
 
 @Injectable()
 export class LessonsService {
@@ -26,20 +26,19 @@ export class LessonsService {
     private readonly courseService: CoursesService,
     @InjectRepository(Enrollment)
     private readonly enrollmentsRepo: Repository<Enrollment>,
-  ) {}
+    @InjectRepository(LessonPrerequisite)
+    private readonly lessonPrerequisiteRepo: Repository<LessonPrerequisite>,
+  ) { }
 
   async create(
     id: number,
     dto: CreateLessonDto,
     file?: Express.Multer.File,
   ): Promise<Lesson> {
-    const { ...lessonData } = dto;
+    const { prerequisiteLessonIds, clearPrerequisites, ...lessonData } = dto;
 
     // check course exist
-    const course = await this.courseService.findCourseByIdService(id)
-    // const course = await this.courseRepo.findOne({
-    //  where: { courseId: id },
-    // });
+    const course = await this.courseService.findCourseByIdService(id);
 
     if (!course) {
       throw new NotFoundException(`Not found course with ID ${id}`);
@@ -50,25 +49,52 @@ export class LessonsService {
       lessonData.videoUrl = uploadedVideo.secure_url;
     }
 
-    const position = lessonData.position;
+    // Tự động tính toán vị trí (position) của bài học mới
+    const allLessons = await this.lessonsRepo.findByCourseId(id);
+    const count = allLessons.length;
+    const match = dto.title.match(/^\[Order:(\d+)\]/);
+    const position = match ? parseInt(match[1], 10) : count + 1;
 
-    const allLessonOfCourse = await this.findAllByCourse(id);
+    const lesson = await this.lessonsRepo.createLesson({
+      ...lessonData,
+      course,
+      position,
+    });
 
-    for (const lesson of allLessonOfCourse) {
-      if (lesson.position === position) {
-        throw new ConflictException('Position already exists in this course');
+    // Lưu các bài học tiên quyết
+    let prIds: number[] = [];
+    if (prerequisiteLessonIds) {
+      if (typeof prerequisiteLessonIds === 'string') {
+        try {
+          const parsed = JSON.parse(prerequisiteLessonIds);
+          if (Array.isArray(parsed)) {
+            prIds = parsed.map(Number);
+          } else {
+            prIds = String(prerequisiteLessonIds).split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
+          }
+        } catch {
+          prIds = String(prerequisiteLessonIds).split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
+        }
+      } else if (Array.isArray(prerequisiteLessonIds)) {
+        prIds = prerequisiteLessonIds.map(Number);
       }
     }
 
-    return await this.lessonsRepo.createLesson({
-      ...lessonData,
-      course,
-    });
+    if (prIds.length > 0) {
+      const prerequisiteEntities = prIds.map(prId => {
+        const item = new LessonPrerequisite();
+        item.targetLessonId = lesson.lessonId;
+        item.prerequisiteLessonId = prId;
+        return item;
+      });
+      await this.lessonPrerequisiteRepo.save(prerequisiteEntities);
+    }
+
+    return await this.findOne(lesson.lessonId);
   }
 
   async findAllByCourse(courseId: number): Promise<Lesson[]> {
     const course = await this.courseService.findCourseByIdService(courseId);
-    // const course = await this.courseRepo.findOne({ where: { courseId } });
     if (!course) {
       throw new NotFoundException(`Not found course with ID ${courseId}`);
     }
@@ -92,18 +118,6 @@ export class LessonsService {
     userId: number,
   ): Promise<Lesson> {
 
-    // const lesson = await this.lessonRepo.findOne({
-    //  where: {
-    //    lessonId,
-    //  },
-    //  relations: {
-    //    course: {
-    //      user: {
-    //        role: true,
-    //      },
-    //    },
-    //  },
-    // });
     const lesson = await this.lessonsRepo.findById(lessonId);
 
     if (!lesson) {
@@ -151,9 +165,6 @@ export class LessonsService {
 
     const course = await this.courseService.findCourseByIdService(courseId);
 
-    // const course = await this.courseRepo.findOne({
-    //  where: { courseId: courseId },
-    // });
     if (!course) {
       throw new NotFoundException(`Not found course with ID ${courseId}`);
     }
@@ -167,9 +178,60 @@ export class LessonsService {
       dto.videoUrl = uploadedVideo.secure_url;
     }
 
-    Object.assign(lesson, dto);
+    const { prerequisiteLessonIds, clearPrerequisites, ...updateData } = dto;
 
-    return await this.lessonsRepo.save(lesson);
+    Object.assign(lesson, updateData);
+
+    // If title has order prefix, update position accordingly
+    if (dto.title) {
+      const match = dto.title.match(/^\[Order:(\d+)\]/);
+      if (match) {
+        lesson.position = parseInt(match[1], 10);
+      }
+    }
+
+    // Sửa đổi các bài học tiên quyết nếu được cung cấp
+    let prIds: number[] = [];
+    let shouldUpdatePrerequisites = false;
+
+    if (prerequisiteLessonIds !== undefined) {
+      shouldUpdatePrerequisites = true;
+      if (typeof prerequisiteLessonIds === 'string') {
+        try {
+          const parsed = JSON.parse(prerequisiteLessonIds);
+          if (Array.isArray(parsed)) {
+            prIds = parsed.map(Number);
+          } else {
+            prIds = String(prerequisiteLessonIds).split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
+          }
+        } catch {
+          prIds = String(prerequisiteLessonIds).split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
+        }
+      } else if (Array.isArray(prerequisiteLessonIds)) {
+        prIds = prerequisiteLessonIds.map(Number);
+      }
+    } else if (clearPrerequisites) {
+      shouldUpdatePrerequisites = true;
+    }
+
+    if (shouldUpdatePrerequisites) {
+      // Xóa tất cả các bài học tiên quyết cũ
+      await this.lessonPrerequisiteRepo.delete({ targetLessonId: lessonId });
+
+      // Thêm mới các bài học tiên quyết nếu danh sách không rỗng
+      if (prIds.length > 0) {
+        const prerequisiteEntities = prIds.map(prId => {
+          const item = new LessonPrerequisite();
+          item.targetLessonId = lessonId;
+          item.prerequisiteLessonId = prId;
+          return item;
+        });
+        await this.lessonPrerequisiteRepo.save(prerequisiteEntities);
+      }
+    }
+
+    await this.lessonsRepo.save(lesson);
+    return await this.findOne(lessonId);
   }
 
   async remove(id: number): Promise<{ success: boolean; message: string }> {

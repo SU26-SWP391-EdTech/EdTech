@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronDown, LogOut, UserCircle, Settings, BarChart2 } from 'lucide-react';
+import { ChevronDown, LogOut, UserCircle } from 'lucide-react';
 
 import { Logo } from '../shared/Logo';
 import { NotifBell } from '../shared/NotifBell';
@@ -112,9 +112,6 @@ export function AcademicManagerHeader() {
 
                                 {[
                                     { icon: <UserCircle className="w-4 h-4" />, label: 'My Profile', onClick: () => navigate('/academic/userprofile') },
-                                    { icon: <UserCircle className="w-4 h-4" />, label: 'My Dashboard' },
-                                    { icon: <BarChart2 className="w-4 h-4" />, label: 'Analytics' },
-                                    { icon: <Settings className="w-4 h-4" />, label: 'Review Rules' },
                                 ].map((item) => (
                                     <button
                                         key={item.label}

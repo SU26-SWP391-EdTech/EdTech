@@ -215,7 +215,11 @@ export class CoursesController {
     description: 'Forbidden - requires Academic Manager role',
   })
   @ApiResponse({ status: 404, description: 'Course or Reviewer not found' })
-  rejectCourse(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
-    return this.coursesService.rejectCourse(id, req.user.userId);
+  rejectCourse(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: any,
+    @Body('reason') reason?: string,
+  ) {
+    return this.coursesService.rejectCourse(id, req.user.userId, reason);
   }
 }

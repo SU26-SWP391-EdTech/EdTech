@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Req,
+  ForbiddenException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -90,14 +91,18 @@ export class UsersController {
   async updateProfile(
     @Param('id') id: number,
     @Body() dto: UpdateAcademicUserInfoDto,
+    @Req() req,
   ) {
-    return this.usersService.updateProfile(id, dto);
+    if (req.user.userId !== Number(id)) {
+      throw new ForbiddenException('You can only update your own profile');
+    }
+    return this.usersService.updateProfile(Number(id), dto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.COURSE_PROVIDER,RoleEnum.ACADEMIC_MANAGER)
   @Patch('edit-academic-user-profile/:id')
-  @UseInterceptors(FileInterceptor('avatarUrl'))
+  @UseInterceptors(FileInterceptor('avatar'))
   @ApiOperation({ summary: 'Edit academic user profile with avatar upload' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: EditAcademicUserProfileDto })
@@ -109,9 +114,13 @@ export class UsersController {
   async editAcademicUserProfile(
     @Param('id') id: number,
     @Body() dto: EditAcademicUserProfileDto,
+    @Req() req,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.usersService.editAcademicUserProfile(id, dto, file);
+    if (req.user.userId !== Number(id)) {
+      throw new ForbiddenException('You can only update your own profile');
+    }
+    return this.usersService.editAcademicUserProfile(Number(id), dto, file);
   }
   @Public()
   @Get('academic-user/:id')

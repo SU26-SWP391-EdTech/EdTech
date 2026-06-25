@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 import type { ProfileData } from '../../types/user/user-profile.types';
 import { getAcademicProfile, editAcademicProfile } from '../../services/user/user.service';
@@ -21,7 +21,7 @@ export function useUserProfile() {
 
   const loggedInUser = useAuthStore((state) => state.user);
 
-  // Profile state
+  // Profile state — roleName bắt buộc theo ProfileData interface
   const [profile, setProfile] = useState<ProfileData>(() => ({
     name: loggedInUser?.fullName || '',
     email: loggedInUser?.email || '',
@@ -33,9 +33,10 @@ export function useUserProfile() {
     experienceYear: '',
     createdAt: '',
     role: loggedInUser?.roleName ? mapRoleNameToLabel(loggedInUser.roleName) : 'User',
+    roleName: loggedInUser?.roleName || '',
   }));
 
-  const fetchProfileData = async () => {
+  const fetchProfileData = useCallback(async () => {
     if (!loggedInUser) return;
     try {
       setLoading(true);
@@ -50,15 +51,20 @@ export function useUserProfile() {
         organization: 'EdTech Platform',
         avatar: res?.avatarUrl || loggedInUser.avatarUrl || '',
         expertise: res?.expertise || 'Not set',
-        experienceYear: res?.experienceYears !== undefined && res?.experienceYears !== null ? `${res.experienceYears} years` : '0 years',
-        createdAt: res?.createdAt ? new Date(res.createdAt).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        }) : '—',
+        experienceYear: res?.experienceYears !== undefined && res?.experienceYears !== null
+          ? `${res.experienceYears} years`
+          : '0 years',
+        createdAt: res?.createdAt
+          ? new Date(res.createdAt).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })
+          : '—',
         role: loggedInUser.roleName ? mapRoleNameToLabel(loggedInUser.roleName) : 'User',
+        roleName: loggedInUser.roleName || '',
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to load profile', err);
       setProfile({
         name: loggedInUser.fullName || 'No Name',
@@ -71,15 +77,16 @@ export function useUserProfile() {
         experienceYear: '0 years',
         createdAt: '—',
         role: mapRoleNameToLabel(loggedInUser.roleName),
+        roleName: loggedInUser.roleName || '',
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [loggedInUser]);
 
   useEffect(() => {
     fetchProfileData();
-  }, [loggedInUser]);
+  }, [fetchProfileData]);
 
   const handleSaveProfile = async (updated: {
     name: string;
@@ -100,26 +107,30 @@ export function useUserProfile() {
       formData.append('expertise', updated.expertise);
       formData.append('experienceYears', String(years));
       if (updated.avatarFile) {
-        formData.append('avatarUrl', updated.avatarFile);
+        formData.append('avatar', updated.avatarFile);
       } else if (updated.avatar) {
         formData.append('avatarUrl', updated.avatar);
       }
 
+      // Backend returns raw User entity: { fullName, avatar (not avatarUrl), userProfile: {...} }
       const res = await editAcademicProfile(loggedInUser.userId, formData);
+      const newAvatarUrl = res.avatar || res.avatarUrl || updated.avatar;
 
       useAuthStore.setState({
         user: {
           ...loggedInUser,
           fullName: res.fullName || updated.name,
-          avatarUrl: res.avatar || updated.avatar,
+          avatarUrl: newAvatarUrl,
         }
       });
 
       toast.success('Profile updated successfully!');
+      // Re-fetch from server to get canonical flat profile shape
       await fetchProfileData();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to save profile', err);
-      toast.error(err.response?.data?.message || 'Failed to save profile. Please try again.');
+      const error = err as { response?: { data?: { message?: string } } };
+      toast.error(error.response?.data?.message || 'Failed to save profile. Please try again.');
     } finally {
       setLoading(false);
     }

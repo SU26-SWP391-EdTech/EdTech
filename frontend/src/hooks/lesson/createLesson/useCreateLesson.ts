@@ -120,6 +120,9 @@ export function useCreateLesson() {
     titleError: form.titleError,
     setTitleError: form.setTitleError,
 
+    prerequisiteLessonIds: form.prerequisiteLessonIds,
+    setPrerequisiteLessonIds: form.setPrerequisiteLessonIds,
+
     // UI
     modal,
     setModal,

@@ -5,8 +5,8 @@ interface StatCardProps {
     icon: React.ReactNode;
     label: string;
     value: string;
-    change: string;
-    up: boolean;
+    change?: string;
+    up?: boolean;
     sub: string;
     sparkData: { v: number }[];
 }
@@ -18,10 +18,12 @@ export function StatCard({ icon, label, value, change, up, sub, sparkData }: Sta
                 <div className="p-2 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl">
                     {icon}
                 </div>
-                <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs ${up ? 'bg-[#F0FDF4] text-[#16A34A]' : 'bg-[#FEF2F2] text-[#DC2626]'}`} style={{ fontWeight: 500 }}>
-                    {up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                    {change}
-                </div>
+                {change && up !== undefined && (
+                    <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs ${up ? 'bg-[#F0FDF4] text-[#16A34A]' : 'bg-[#FEF2F2] text-[#DC2626]'}`} style={{ fontWeight: 500 }}>
+                        {up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                        {change}
+                    </div>
+                )}
             </div>
             <div>
                 <p className="text-[#111827]" style={{ fontSize: '26px', fontWeight: 700, lineHeight: 1.1 }}>{value}</p>

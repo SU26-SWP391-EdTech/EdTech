@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Lesson } from './entities/lesson.entity';
 
 @Injectable()
@@ -17,15 +17,14 @@ export class LessonsRepository {
 
   public async findById(lessonId: number): Promise<Lesson | null> {
     return await this.repo.findOne({
-      where: {
-        lessonId,
-      },
+      where: { lessonId: lessonId as any },
       relations: {
         course: {
           user: {
             role: true,
           },
         },
+        prerequisites: true,
       },
     });
   }
@@ -35,8 +34,9 @@ export class LessonsRepository {
       where: {
         course: { courseId },
       },
+      relations: ['prerequisites'],
       order: {
-        createdAt: 'ASC',
+        position: 'ASC',
       },
     });
   }

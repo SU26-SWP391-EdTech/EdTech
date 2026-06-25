@@ -23,7 +23,7 @@ export function CoursePreviewPanel({ course, onViewDetails }: CoursePreviewPanel
         : location.pathname.endsWith('/pending-courses')
           ? `${location.pathname.replace('/pending-courses', '/courses')}/detail`
           : `${location.pathname}/courses/detail`;
-      navigate(`${basePath}?id=${course.id || course.courseId}`);
+      navigate(`${basePath}?id=${course.id}`);
     }
   };
 
@@ -86,7 +86,7 @@ export function CoursePreviewPanel({ course, onViewDetails }: CoursePreviewPanel
           ].map(s => (
             <div key={s.label} className="bg-[#F8FAFC] border border-[#F3F4F6] rounded-xl p-2.5">
               <div className="flex items-center gap-1.5 mb-1">{s.icon}<span className="text-[10px] text-[#9CA3AF]">{s.label}</span></div>
-              <p className="text-xs text-[#111827]" style={{ fontWeight: 600 }}>{s.val}</p>
+              <p className="text-xs text-[#111827] truncate capitalize" style={{ fontWeight: 600 }} title={String(s.val)}>{s.val}</p>
             </div>
           ))}
         </div>
