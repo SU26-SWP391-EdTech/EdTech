@@ -8,6 +8,7 @@ import { UsersModule } from '../users/users.module';
 import { Role } from '../roles/entities/role.entity';
 import { Learner } from './entities/learner.entity';
 import { UserProfile } from '../users/entities/user-profile.entity';
+import { LearnerRepository } from './learners.repository';
 
 @Module({
   imports: [
@@ -16,6 +17,13 @@ import { UserProfile } from '../users/entities/user-profile.entity';
   ],
 
   controllers: [LearnersController],
-  providers: [LearnersService, CloudinaryService],
+  providers: [
+    LearnersService, 
+    CloudinaryService,
+    LearnerRepository
+  ],
+  exports: [
+    LearnersService
+  ]
 })
 export class LearnersModule { }

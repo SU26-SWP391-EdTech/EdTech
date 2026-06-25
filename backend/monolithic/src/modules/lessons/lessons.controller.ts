@@ -94,5 +94,4 @@ export class LessonsController {
   async remove(@Param('id', ParseIntPipe) id: number) {
     return await this.lessonsService.remove(id);
   }
-
 }
