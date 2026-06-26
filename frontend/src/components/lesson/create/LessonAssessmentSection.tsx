@@ -151,9 +151,9 @@ export function LessonAssessmentSection({ assessments, setAssessments }: Props) 
               onChange={e => setNewType(e.target.value as AssessmentType)}
               style={{ width: '100%', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#374151', outline: 'none', background: '#fff' }}
             >
-              <option value="LESSON_QUIZ">Lesson Quiz (LESSON_QUIZ)</option>
-              <option value="PRACTICE">Practice (PRACTICE)</option>
-              <option value="PVP">PvP Arena Quiz (PVP)</option>
+              <option value="LESSON_QUIZ">Lesson Quiz</option>
+              <option value="PRACTICE">Practice</option>
+              <option value="PVP">PvP Arena Quiz</option>
             </select>
           </div>
           <button
@@ -309,9 +309,9 @@ export function LessonAssessmentSection({ assessments, setAssessments }: Props) 
                     onChange={e => handleQuestionTypeChange(e.target.value as QuestionType)}
                     style={{ width: '100%', border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#374151', outline: 'none', background: '#FAFAFA', fontFamily: 'inherit' }}
                   >
-                    <option value="MULTIPLE_CHOICE_SINGLE">Single Choice (MULTIPLE_CHOICE_SINGLE)</option>
-                    <option value="MULTIPLE_CHOICE_MULTI">Multiple Choice (MULTIPLE_CHOICE_MULTI)</option>
-                    <option value="TRUE_FALSE">True / False (TRUE_FALSE)</option>
+                    <option value="MULTIPLE_CHOICE_SINGLE">Single Choice</option>
+                    <option value="MULTIPLE_CHOICE_MULTI">Multiple Choice</option>
+                    <option value="TRUE_FALSE">True / False</option>
                   </select>
                 </div>
                 <div style={{ width: 100 }}>

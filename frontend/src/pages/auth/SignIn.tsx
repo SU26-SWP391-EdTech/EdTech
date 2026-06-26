@@ -14,7 +14,6 @@ export function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
-  const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async () => {
@@ -96,22 +95,10 @@ export function SignIn() {
           />
         </div>
 
-        <div className="flex items-center justify-between mb-6">
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <CustomCheckbox checked={remember} onChange={() => setRemember((value) => !value)} />
-            <span className="text-sm text-[#6B7280]">Remember me</span>
-          </label>
-          <button onClick={() => navigate('/forgot-password')} className="text-sm text-[#E11D48] hover:text-[#BE123C] transition-colors" style={{ fontWeight: 500 }}>
-            Forgot password?
-          </button>
-        </div>
-
         <div className="space-y-4">
           <PrimaryButton onClick={handleSubmit} loading={isLoading} disabled={isLoading}>
             Sign In
           </PrimaryButton>
-          {/* <Divider label="or continue with" />
-          <SocialButtons /> */}
         </div>
 
         <p className="text-center text-sm text-[#6B7280] mt-6">
