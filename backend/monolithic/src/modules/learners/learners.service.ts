@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Learner } from './entities/learner.entity';
 import { GetLearnerProfileDto } from './dto/get-learner-profile.dto';
 import { UpdateLearnerInfoDto } from './dto/update-learner-info.dto';
+import { LearnerRepository } from './learners.repository';
 
 @Injectable()
 export class LearnersService {
@@ -16,6 +17,8 @@ export class LearnersService {
     @InjectRepository(Learner)
     private learnerRepository: Repository<Learner>,
     private cloudinaryService: CloudinaryService,
+    
+    private learnerRepo: LearnerRepository
   ) { }
 
   async updateProfile(id: number, userId: number, dto: UpdateLearnerInfoDto) {
@@ -134,5 +137,13 @@ export class LearnersService {
       bio: '',
       createdAt: user.createdAt,
     };
+  }
+
+  public async getLearnerProfileById(userId: number): Promise<Learner> {
+    const learner = await this.learnerRepo.findLeanerById(userId);
+    if(!learner) {
+      throw new NotFoundException("Can not find leaner profile by " + userId);
+    }
+    return learner;
   }
 }
