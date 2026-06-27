@@ -1,6 +1,6 @@
-import { QuestionType } from "src/common/enums/question-type.enum";
+import { QuestionType } from 'src/common/enums/question-type.enum';
 import { ApiProperty } from '@nestjs/swagger';
-import { Question } from "../entities/question.entity";
+import { Question } from '../entities/question.entity';
 
 export class QuestionResponseDto {
   @ApiProperty({ example: 1, description: 'Question ID' })
@@ -21,6 +21,9 @@ export class QuestionResponseDto {
   @ApiProperty({ example: 1, description: 'Question order position' })
   position: number;
 
+  @ApiProperty({ example: '2026-01-01T00:00:00.000Z', description: 'Question creation timestamp' })
+  createdAt: Date;
+
   constructor(question: Question) {
     this.questionId = question.questionId;
     this.assessmentId = question.assessmentId;
@@ -28,5 +31,6 @@ export class QuestionResponseDto {
     this.type = question.type;
     this.points = Number(question.points);
     this.position = question.position;
+    this.createdAt = question.createdAt;
   }
 }
