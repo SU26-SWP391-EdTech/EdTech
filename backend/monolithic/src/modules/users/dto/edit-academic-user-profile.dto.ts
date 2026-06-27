@@ -16,7 +16,7 @@ export class EditAcademicUserProfileDto {
     description: 'URL ảnh đại diện',
   })
   @IsOptional()
-  @IsUrl()
+  @IsString()
   avatarUrl?: string;
 
   @ApiPropertyOptional({

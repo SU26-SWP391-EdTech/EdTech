@@ -42,7 +42,7 @@ export class UsersService implements OnApplicationBootstrap {
     @InjectRepository(LearningPath)
     private learningPathRepo: Repository<LearningPath>,
     private cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   private readonly logger = new Logger(UsersService.name);
 
@@ -53,15 +53,16 @@ export class UsersService implements OnApplicationBootstrap {
       where: { status: EnrollmentStatus.COMPLETED }
     });
 
+
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const activityData: any[] = [];
     const now = new Date();
-    
+
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const year = d.getFullYear();
       const month = d.getMonth();
-      
+
       const startOfMonth = new Date(year, month, 1);
       const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
 
@@ -91,15 +92,15 @@ export class UsersService implements OnApplicationBootstrap {
     const currentDay = now.getDay();
     const distanceToMonday = currentDay === 0 ? 6 : currentDay - 1;
     const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - distanceToMonday);
-    
+
     for (let i = 0; i < 7; i++) {
       const dayStart = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
       const dayEnd = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i, 23, 59, 59);
-      
+
       const count = await this.enrollmentRepo.createQueryBuilder('enrollment')
         .where('enrollment.enrolledAt >= :start AND enrollment.enrolledAt <= :end', { start: dayStart, end: dayEnd })
         .getCount();
-        
+
       weeklyEnrollments.push({
         day: daysOfWeek[i],
         value: count,
@@ -133,13 +134,13 @@ export class UsersService implements OnApplicationBootstrap {
       order: { enrolledAt: 'DESC' },
       take: 5,
     });
-    
+
     const colorsBg = ['bg-[#7C3AED]', 'bg-[#16A34A]', 'bg-[#2563EB]', 'bg-[#D97706]', 'bg-[#E11D48]'];
     const recentActivity = latestEnrollments.map((en, i) => {
       const timeDiff = Math.abs(now.getTime() - en.enrolledAt.getTime());
       const minutes = Math.floor(timeDiff / (1000 * 60));
       const hours = Math.floor(minutes / 60);
-      const timeStr = minutes < 60 ? `${minutes}m ago` : hours < 24 ? `${hours}h ago` : `${Math.floor(hours/24)}d ago`;
+      const timeStr = minutes < 60 ? `${minutes}m ago` : hours < 24 ? `${hours}h ago` : `${Math.floor(hours / 24)}d ago`;
 
       return {
         type: 'enrollment',
@@ -157,7 +158,7 @@ export class UsersService implements OnApplicationBootstrap {
       order: { createdAt: 'DESC' },
       take: 5,
     });
-    
+
     const tableUsers = dbUsers.map((u, i) => {
       const initials = u.fullName ? u.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U';
       const formattedCreated = new Date(u.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -175,7 +176,7 @@ export class UsersService implements OnApplicationBootstrap {
     const sparkUsers: any[] = [];
     const sparkPaths: any[] = [];
     const sparkCourses: any[] = [];
-    
+
     for (let i = 6; i >= 0; i--) {
       const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
       const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i, 23, 59, 59);
@@ -201,14 +202,8 @@ export class UsersService implements OnApplicationBootstrap {
     return {
       stats: {
         totalUsers,
-        totalUsersChange: '+12.4%',
-        totalUsersUp: true,
         activePaths,
-        activePathsChange: '+5.2%',
-        activePathsUp: true,
         completedCourses,
-        completedCoursesChange: '+18.1%',
-        completedCoursesUp: true,
         sparkUsers,
         sparkPaths,
         sparkCourses,
@@ -491,7 +486,7 @@ export class UsersService implements OnApplicationBootstrap {
     const usersCreatedThisMonth = await this.userRepo.createQueryBuilder('user')
       .where('user.createdAt >= :start AND user.createdAt <= :end', { start: startOfCurrentMonth, end: endOfCurrentMonth })
       .getCount();
-    
+
     // 2. Enrollments change this month
     const enrollmentsThisMonth = await this.enrollmentRepo.createQueryBuilder('enrollment')
       .where('enrollment.enrolledAt >= :start AND enrollment.enrolledAt <= :end', { start: startOfCurrentMonth, end: endOfCurrentMonth })
@@ -511,12 +506,12 @@ export class UsersService implements OnApplicationBootstrap {
 
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const activityData: any[] = [];
-    
+
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const year = d.getFullYear();
       const month = d.getMonth();
-      
+
       const startOfMonth = new Date(year, month, 1);
       const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
 

@@ -64,15 +64,6 @@ export function CreateCoursePage() {
         </div>
       </div>
 
-      {course.showSubmit && (
-        <SubmitModal
-          onClose={() => course.setShowSubmit(false)}
-          onConfirm={course.onConfirmSubmit}
-          isSubmitting={course.isSubmitting}
-          hasLessons={course.lessons.length > 0}
-        />
-      )}
-
       {course.showUnsaved && <UnsavedModal onClose={() => course.setShowUnsaved(false)} />}
     </div>
   );

@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 import { searchCourses } from '../../services/course/course.service';
 import { getMyEnrollments, enrollCourse } from '../../services/enrollment/enrollment.service';
-import { getLearningPaths } from '../../services/learning-path/learning-path.service';
+import { getLearningPaths, followLearningPath, unfollowLearningPath, getFollowedLearningPathIds } from '../../services/learning-path/learning-path.service';
 import type { Course } from '../../services/course/course.service';
 import type { Enrollment } from '../../services/enrollment/enrollment.service';
 import type { LearningPath } from '../../services/learning-path/learning-path.service';
@@ -23,6 +23,7 @@ export function useExplore() {
     const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
     const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
     const [enrolledPathIds, setEnrolledPathIds] = useState<number[]>([]);
+    const [followedPathIds, setFollowedPathIds] = useState<number[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [enrollingId, setEnrollingId] = useState<number | null>(null);
 
@@ -33,7 +34,7 @@ export function useExplore() {
     async function loadData() {
         try {
             setIsLoading(true);
-
+ 
             const [coursesRes, pathsRes] = await Promise.all([
                 searchCourses({ status: 'approved' }),
                 getLearningPaths(),
@@ -45,8 +46,12 @@ export function useExplore() {
 
             const isLearner = user?.roleName?.toLowerCase() === 'learner';
             if (user && isLearner) {
-                const enrollmentsData = await getMyEnrollments();
+                const [enrollmentsData, followedIds] = await Promise.all([
+                    getMyEnrollments(),
+                    getFollowedLearningPathIds(),
+                ]);
                 setEnrollments(enrollmentsData);
+                setFollowedPathIds(followedIds);
 
                 // Determine enrolled path IDs dynamically: user is enrolled in path if they are enrolled in at least one course of the path
                 const enrolledPaths = pathsRes.filter(path => {
@@ -62,6 +67,7 @@ export function useExplore() {
             } else {
                 setEnrollments([]);
                 setEnrolledPathIds([]);
+                setFollowedPathIds([]);
             }
         } catch (error) {
             console.error('Failed to load explore data:', error);
@@ -109,6 +115,41 @@ export function useExplore() {
 
     const isEnrolled = (courseId: number) => {
         return enrollments.some(e => e.course?.courseId === courseId);
+    };
+
+    const handleFollow = async (learningPathId: number) => {
+        if (!user) {
+            toast.error('Please sign in to follow learning paths.');
+            navigate('/login');
+            return;
+        }
+
+        const role = user.roleName?.toLowerCase();
+        if (role !== 'learner') {
+            toast.error(`As a ${user.roleName}, you cannot follow learning paths.`);
+            return;
+        }
+
+        try {
+            await followLearningPath(learningPathId);
+            toast.success('Followed learning path successfully!');
+            await loadData();
+        } catch (error: any) {
+            console.error('Follow error:', error);
+            toast.error(error.response?.data?.message || 'Failed to follow.');
+        }
+    };
+
+    const handleUnfollow = async (learningPathId: number) => {
+        if (!user) return;
+        try {
+            await unfollowLearningPath(learningPathId);
+            toast.success('Unfollowed learning path successfully!');
+            await loadData();
+        } catch (error: any) {
+            console.error('Unfollow error:', error);
+            toast.error(error.response?.data?.message || 'Failed to unfollow.');
+        }
     };
 
 
@@ -169,8 +210,11 @@ export function useExplore() {
         filteredPaths,
         enrollments,
         enrolledPathIds,
+        followedPathIds,
         isEnrolled,
         handleEnroll,
+        handleFollow,
+        handleUnfollow,
         getCourseGradient,
         user,
     };

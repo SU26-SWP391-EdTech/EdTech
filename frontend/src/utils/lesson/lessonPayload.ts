@@ -40,6 +40,7 @@ export function buildLessonApiPayload(options: {
     objectives: Objective[];
     resources: Resource[];
     quizQuestions: QuizQuestion[];
+    prerequisiteLessonIds?: number[];
 }) {
     let videoSec = 0;
     if (options.hasVideo) {
@@ -53,6 +54,7 @@ export function buildLessonApiPayload(options: {
         videoDuration: options.hasVideo ? videoSec : undefined,
         content: buildLessonContent(options) || undefined,
         videoUrl: options.hasVideo ? options.videoUrl.trim() : '',
+        prerequisiteLessonIds: options.prerequisiteLessonIds,
     };
 }
 

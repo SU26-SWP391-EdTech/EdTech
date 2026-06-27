@@ -4,11 +4,9 @@ import {
   Settings,
   Shield,
   Mail,
-  Upload,
   XCircle,
   RefreshCw,
   AlertTriangle,
-  Trash2,
   Info,
   CheckCircle2
 } from 'lucide-react';
@@ -111,7 +109,7 @@ export function PlatformSetup() {
     <div className="fixed inset-0 z-[100] bg-[#F8FAFC] overflow-y-auto py-12 px-6 flex items-center justify-center">
       {/* Centered setup container */}
       <div className="max-w-[960px] w-full my-auto flex flex-col">
-        
+
         {/* Header (matches style of PlatformSettings.tsx) */}
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -126,7 +124,7 @@ export function PlatformSetup() {
 
         {/* 2-Column Grid (matches PlatformSettings.tsx structure) */}
         <div className="grid grid-cols-12 gap-6">
-          
+
           {/* Left Form: 8 columns */}
           <form onSubmit={handleSubmit} className="col-span-12 md:col-span-8 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm p-6 flex flex-col gap-5">
             <h2 className="text-lg font-bold text-[#111827] flex items-center gap-2 border-b border-[#F3F4F6] pb-3 mb-2">
@@ -162,15 +160,13 @@ export function PlatformSetup() {
                 onBlur={() => setTouched(p => ({ ...p, name: true }))}
                 placeholder="e.g. EdTech Academy"
                 disabled={isAlreadyConfigured}
-                className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/15 transition-all ${
-                  isAlreadyConfigured ? 'opacity-65 cursor-not-allowed bg-[#F3F4F6]' : ''
-                } ${
-                  touched.name && errors.name
+                className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/15 transition-all ${isAlreadyConfigured ? 'opacity-65 cursor-not-allowed bg-[#F3F4F6]' : ''
+                  } ${touched.name && errors.name
                     ? 'border-[#EF4444] focus:border-[#EF4444]'
                     : touched.name && !errors.name
                       ? 'border-[#10B981] focus:border-[#10B981]'
                       : 'border-[#E5E7EB] focus:border-[#7C3AED]'
-                }`}
+                  }`}
               />
               {touched.name && errors.name && (
                 <p className="text-xs text-[#EF4444] mt-1.5 flex items-center gap-1">
@@ -191,15 +187,13 @@ export function PlatformSetup() {
                   onBlur={() => setTouched(p => ({ ...p, email: true }))}
                   placeholder="e.g. support@edtech.com"
                   disabled={isAlreadyConfigured}
-                  className={`w-full pl-10 pr-3.5 py-2.5 bg-white border rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/15 transition-all ${
-                    isAlreadyConfigured ? 'opacity-65 cursor-not-allowed bg-[#F3F4F6]' : ''
-                  } ${
-                    touched.email && errors.email
+                  className={`w-full pl-10 pr-3.5 py-2.5 bg-white border rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/15 transition-all ${isAlreadyConfigured ? 'opacity-65 cursor-not-allowed bg-[#F3F4F6]' : ''
+                    } ${touched.email && errors.email
                       ? 'border-[#EF4444] focus:border-[#EF4444]'
                       : touched.email && !errors.email
                         ? 'border-[#10B981] focus:border-[#10B981]'
                         : 'border-[#E5E7EB] focus:border-[#7C3AED]'
-                  }`}
+                    }`}
                 />
               </div>
               {touched.email && errors.email && (
@@ -226,15 +220,13 @@ export function PlatformSetup() {
                 placeholder="Write a short pitch or description of the platform's vision..."
                 rows={4}
                 disabled={isAlreadyConfigured}
-                className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/15 resize-none transition-all ${
-                  isAlreadyConfigured ? 'opacity-65 cursor-not-allowed bg-[#F3F4F6]' : ''
-                } ${
-                  touched.description && errors.description
+                className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#7C3AED]/15 resize-none transition-all ${isAlreadyConfigured ? 'opacity-65 cursor-not-allowed bg-[#F3F4F6]' : ''
+                  } ${touched.description && errors.description
                     ? 'border-[#EF4444] focus:border-[#EF4444]'
                     : touched.description && !errors.description
                       ? 'border-[#10B981] focus:border-[#10B981]'
                       : 'border-[#E5E7EB] focus:border-[#7C3AED]'
-                }`}
+                  }`}
               />
               {touched.description && errors.description && (
                 <p className="text-xs text-[#EF4444] mt-1.5 flex items-center gap-1">

@@ -63,6 +63,8 @@ export function LearnerProfile() {
             enrolledCount={enrollments.length}
             completedCount={completedCount}
             avgProgress={avgProgress}
+            currentStreak={profile?.currentStreak}
+            longestStreak={profile?.longestStreak}
           />
         </div>
 

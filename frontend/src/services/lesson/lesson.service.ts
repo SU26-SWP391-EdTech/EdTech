@@ -10,6 +10,7 @@ export interface Lesson {
     createdAt: string;
     updatedAt: string | null;
     courseId?: number;
+    prerequisites?: { prerequisiteLessonId: number; targetLessonId: number }[];
 }
 
 export interface CreateLessonDto {
@@ -18,6 +19,7 @@ export interface CreateLessonDto {
     videoDuration?: number;
     content?: string;
     videoUrl?: string;
+    prerequisiteLessonIds?: number[];
 }
 
 export interface UpdateLessonDto {
@@ -26,6 +28,8 @@ export interface UpdateLessonDto {
     videoDuration?: number;
     content?: string;
     videoUrl?: string;
+    prerequisiteLessonIds?: number[];
+    clearPrerequisites?: boolean;
 }
 
 // 1. Tạo bài học mới trong một khóa học (Có hỗ trợ upload file video)
@@ -36,6 +40,9 @@ export async function createLesson(courseId: number, data: CreateLessonDto, file
     if (data.videoDuration !== undefined) formData.append('videoDuration', String(data.videoDuration));
     if (data.content) formData.append('content', data.content);
     if (data.videoUrl !== undefined) formData.append('videoUrl', data.videoUrl);
+    if (data.prerequisiteLessonIds) {
+        formData.append('prerequisiteLessonIds', JSON.stringify(data.prerequisiteLessonIds));
+    }
     if (file) {
         formData.append('videoUrl', file);
     }
@@ -121,6 +128,12 @@ export async function updateLesson(
     if (data.videoDuration !== undefined) formData.append('videoDuration', String(data.videoDuration));
     if (data.content !== undefined) formData.append('content', data.content);
     if (data.videoUrl !== undefined) formData.append('videoUrl', data.videoUrl);
+    if (data.prerequisiteLessonIds) {
+        formData.append('prerequisiteLessonIds', JSON.stringify(data.prerequisiteLessonIds));
+    }
+    if (data.clearPrerequisites !== undefined) {
+        formData.append('clearPrerequisites', String(data.clearPrerequisites));
+    }
     if (file) {
         formData.append('videoUrl', file);
     }

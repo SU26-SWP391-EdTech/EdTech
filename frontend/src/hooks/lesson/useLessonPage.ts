@@ -99,6 +99,7 @@ export function useLessonPage() {
         content: l.content || '',
         hasVideo: Boolean(l.videoUrl),
         hasReading: Boolean(l.content),
+        prerequisites: l.prerequisites || [],
       })),
     }
   ];
@@ -144,6 +145,26 @@ export function useLessonPage() {
   const completedFromProgressCount = !hasTrackedLessonProgress && rawModules.length > 0
     ? Math.round((progressVal / 100) * rawModules.reduce((acc: number, mod: any) => acc + (mod.lessons || []).length, 0))
     : 0;
+
+  // Helper to check if lesson has unmet prerequisites
+  const isLockedByPrerequisites = (l: any) => {
+    if (!l.prerequisites || l.prerequisites.length === 0) return false;
+    return l.prerequisites.some((prereq: any) => {
+      const reqId = String(prereq.prerequisiteLessonId);
+      return !completedLessonIds.has(reqId);
+    });
+  };
+
+  // Find the first uncompleted and unlocked lesson
+  const currentLessonId = rawModules
+    .flatMap(m => m.lessons)
+    .find(l => {
+      const lessonKey = String(l.id);
+      const isCompleted = completedLessonIds.has(lessonKey);
+      const isLocked = isLockedByPrerequisites(l);
+      return !isCompleted && !isLocked;
+    })?.id;
+
   let lessonCounter = 0;
   const modules: Module[] = rawModules.map((m: any) => {
     let completedInModule = 0;
@@ -159,10 +180,15 @@ export function useLessonPage() {
         }
       } else {
         const lessonKey = String(l.id);
-        if (lessonCounter <= completedFromProgressCount || completedLessonIds.has(lessonKey)) {
+        const isCompleted = completedLessonIds.has(lessonKey);
+        const isLocked = isLockedByPrerequisites(l);
+
+        if (isCompleted) {
           status = 'completed';
           completedInModule++;
-        } else if (lessonCounter === completedFromProgressCount + 1) {
+        } else if (isLocked) {
+          status = 'locked';
+        } else if (l.id === currentLessonId) {
           status = 'current';
         } else {
           status = 'upcoming';
@@ -305,7 +331,11 @@ export function useLessonPage() {
 
   const handleLessonClick = (lesson: Lesson) => {
     if (lesson.status === 'locked') {
-      toast.error('This lesson is locked. Please enroll in the course to unlock.');
+      if (role === 'guest') {
+        toast.error('This lesson is locked. Please enroll in the course to unlock.');
+      } else {
+        toast.error('You must complete the prerequisite lessons before accessing this lesson.');
+      }
       return;
     }
     setSearchParams({ courseId: String(courseId), lessonId: String(lesson.id) });
@@ -315,7 +345,11 @@ export function useLessonPage() {
     if (activeLessonIndex > 0) {
       const prev = flatLessons[activeLessonIndex - 1];
       if (prev.status === 'locked') {
-        toast.error('The previous lesson is locked.');
+        if (role === 'guest') {
+          toast.error('The previous lesson is locked. Please enroll in the course.');
+        } else {
+          toast.error('The previous lesson is locked. Please complete the prerequisites.');
+        }
         return;
       }
       setSearchParams({ courseId: String(courseId), lessonId: String(prev.id) });
@@ -326,7 +360,11 @@ export function useLessonPage() {
     if (activeLessonIndex < flatLessons.length - 1) {
       const next = flatLessons[activeLessonIndex + 1];
       if (next.status === 'locked') {
-        toast.error('The next lesson is locked. Please enroll in the course.');
+        if (role === 'guest') {
+          toast.error('The next lesson is locked. Please enroll in the course.');
+        } else {
+          toast.error('The next lesson is locked. Please complete the prerequisites.');
+        }
         return;
       }
       setSearchParams({ courseId: String(courseId), lessonId: String(next.id) });

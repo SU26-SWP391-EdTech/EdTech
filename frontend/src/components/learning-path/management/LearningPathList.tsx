@@ -95,6 +95,20 @@ export function LearningPathList({
                                     <Clock className="w-3.5 h-3.5 text-orange-500" />
                                     {path.duration}
                                 </span>
+                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 border rounded-lg text-xs font-medium ${
+                                    path.level === 'advanced'
+                                        ? 'bg-purple-50 text-purple-700 border-purple-100'
+                                        : path.level === 'intermediate'
+                                            ? 'bg-indigo-50 text-indigo-700 border-indigo-100'
+                                            : 'bg-green-50 text-green-700 border-green-100'
+                                }`}>
+                                    {path.level ? path.level.charAt(0).toUpperCase() + path.level.slice(1) : 'Beginner'}
+                                </span>
+                                {path.slug && (
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 text-gray-600 border border-gray-100 rounded-lg text-[11px] font-mono">
+                                        /{path.slug}
+                                    </span>
+                                )}
                             </div>
                         </div>
 

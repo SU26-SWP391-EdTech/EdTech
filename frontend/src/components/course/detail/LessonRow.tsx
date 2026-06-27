@@ -4,6 +4,7 @@ import { Clock, Video, BookOpen, ClipboardList, FileText } from 'lucide-react';
 import type { Lesson } from '../../../types/course/course-detail.types';
 import { StatusIcon } from './StatusIcon';
 import { useAuthStore } from '../../../stores/auth/auth.stores';
+import toast from 'react-hot-toast';
 
 interface LessonRowProps {
   lesson: Lesson;
@@ -31,6 +32,11 @@ export function LessonRow({ lesson, courseId }: LessonRowProps) {
     <div
       onClick={() => {
         if (isLocked) {
+          if (role === 'guest') {
+            toast.error('This lesson is locked. Please enroll in the course to unlock.');
+          } else {
+            toast.error('Please enroll in the course or complete the prerequisite lessons to unlock this lesson.');
+          }
           return;
         }
         navigate(lessonPath);

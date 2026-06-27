@@ -159,27 +159,21 @@ export function Dashboard() {
                         icon={<Users className="w-4 h-4 text-[#6B7280]" />}
                         label="Total Users"
                         value={stats.totalUsers.toLocaleString()}
-                        change={stats.totalUsersChange}
-                        up={stats.totalUsersUp}
-                        sub="vs. last month"
+                        sub="Total registered users"
                         sparkData={stats.sparkUsers}
                     />
                     <StatCard
                         icon={<BookOpen className="w-4 h-4 text-[#6B7280]" />}
                         label="Active Learning Paths"
                         value={stats.activePaths.toString()}
-                        change={stats.activePathsChange}
-                        up={stats.activePathsUp}
-                        sub="vs. last month"
+                        sub="Total active learning paths"
                         sparkData={stats.sparkPaths}
                     />
                     <StatCard
                         icon={<GraduationCap className="w-4 h-4 text-[#6B7280]" />}
                         label="Completed Courses"
                         value={stats.completedCourses.toLocaleString()}
-                        change={stats.completedCoursesChange}
-                        up={stats.completedCoursesUp}
-                        sub="this month"
+                        sub="Total completed courses"
                         sparkData={stats.sparkCourses}
                     />
                 </div>

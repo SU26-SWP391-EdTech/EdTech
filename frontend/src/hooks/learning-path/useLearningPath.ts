@@ -6,11 +6,11 @@ import {
   addCourseToLearningPath,
   removeCourseFromLearningPath,
   getCoursesInLearningPath,
-  deleteLearningPath
+  deleteLearningPath,
+  type LearningPathLevel
 } from '../../services/learning-path/learning-path.service';
-import { searchCourses } from '../../services/course/course.service';
-import type { Course } from '../../services/course/course.service';
-import { mapBackendToFrontend } from '../../utils/learning-path/learningPathHelpers';
+import { searchCourses, type Course } from '../../services/course/course.service';
+import { mapBackendToFrontend, formatDuration, parseDurationToMins } from '../../utils/learning-path/learningPathHelpers';
 import type { LearningPath } from '../../utils/learning-path/learningPathHelpers';
 
 export function useLearningPath() {
@@ -79,24 +79,34 @@ export function useLearningPath() {
   const stats = useMemo(() => {
     const totalCourses = paths.reduce((s, p) => s + p.courses, 0);
     const totalDurationMins = paths.reduce((s, p) => {
-      // p.duration is already formatted string (e.g. "2h 30m") — we can't parse back.
-      // Instead, sum from raw paths data is not available here.
-      // We'll skip avgDuration recalculation and just count paths.
-      return s;
+      return s + parseDurationToMins(p.duration);
     }, 0);
     const avgCourses = paths.length > 0
       ? Math.round((totalCourses / paths.length) * 10) / 10
       : 0;
+    const avgDurationMins = paths.length > 0 ? Math.round(totalDurationMins / paths.length) : 0;
+    const avgDuration = avgDurationMins > 0 ? formatDuration(avgDurationMins) : 'N/A';
 
     return {
       total: paths.length,
       totalCourses,
-      avgDuration: '—',
+      avgDuration,
       avgCourses,
     };
   }, [paths]);
 
-  const handleSavePath = async (savedData: { title: string; description: string; courses: Course[]; thumbnailUrl?: string }) => {
+  const handleSavePath = async (savedData: {
+    title: string;
+    description: string;
+    courses: Course[];
+    thumbnailUrl?: string;
+    slug?: string;
+    level?: LearningPathLevel;
+  }) => {
+    if (!savedData.courses || savedData.courses.length === 0) {
+      alert("A learning path must contain at least one course.");
+      return;
+    }
     setLoading(true);
     try {
       const bannerUrl = savedData.thumbnailUrl;
@@ -107,6 +117,8 @@ export function useLearningPath() {
           title: savedData.title,
           description: savedData.description,
           bannerUrl: bannerUrl || undefined,
+          slug: savedData.slug || undefined,
+          level: savedData.level || undefined,
         });
 
         // 2. Fetch current courses in path
@@ -131,7 +143,8 @@ export function useLearningPath() {
           title: savedData.title,
           description: savedData.description,
           bannerUrl: bannerUrl || undefined,
-          level: 'beginner'
+          level: savedData.level || 'beginner',
+          slug: savedData.slug || undefined,
         });
 
         // 2. Add courses sequentially to preserve ordering

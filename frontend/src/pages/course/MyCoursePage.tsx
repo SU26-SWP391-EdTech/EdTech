@@ -47,7 +47,6 @@ export function MyCoursesPage() {
     const handleSubmitCourse = async (id: number) => {
         try {
             await handleSubmitForReview(id);
-            toast.success('Course submitted for review successfully!');
         } catch (error) {
             toast.error('Failed to submit course for review. Please try again.');
         }

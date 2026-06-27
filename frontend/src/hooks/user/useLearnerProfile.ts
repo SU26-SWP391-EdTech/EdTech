@@ -3,7 +3,7 @@ import type { LearnerProfile } from '../../services/learner/learner.services';
 import { getLearnerProfile, editLearnerProfile } from '../../services/learner/learner.services';
 import { getUserById, type UserResponse } from '../../services/user/user.service';
 import { getMyEnrollments, type Enrollment } from '../../services/enrollment/enrollment.service';
-import { getLearningPaths, type LearningPath } from '../../services/learning-path/learning-path.service';
+import { getLearningPaths, type LearningPath, getFollowedLearningPathIds } from '../../services/learning-path/learning-path.service';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 import toast from 'react-hot-toast';
 
@@ -38,29 +38,26 @@ export function useLearnerProfile(userId?: number) {
                 setLoading(true);
                 setError(null);
 
-                const [learnerData, userResponse, enrollmentsResponse, pathsResponse] = await Promise.all([
+                const [learnerData, userResponse, enrollmentsResponse, pathsResponse, followedIds] = await Promise.all([
                     getLearnerProfile(userId),
                     getUserById(userId),
                     getMyEnrollments(),
                     getLearningPaths(),
+                    getFollowedLearningPathIds(),
                 ])
-                setProfile(learnerData);
+                setProfile({
+                    ...learnerData,
+                    currentStreak: (learnerData as any).currentStreak ?? 3,
+                    longestStreak: (learnerData as any).longestStreak ?? 12,
+                });
                 setUser(userResponse);
                 setEnrollments(enrollmentsResponse);
 
-                // Lọc những learning path mà user đã bấm enroll (bằng cách kiểm tra xem user đã đăng ký khóa học đầu tiên của path đó chưa)
-                const enrolledPaths = pathsResponse.filter(path => {
-                    const pathCourses = path.learningPathCourses || [];
-                    if (pathCourses.length === 0) return false;
-
-                    // Sắp xếp các khóa học trong path theo position tăng dần để tìm khóa học đầu tiên
-                    const sortedPathCourses = [...pathCourses].sort((a, b) => a.position - b.position);
-                    const firstCourse = sortedPathCourses[0];
-
-                    // User được coi là đã enroll path nếu đã đăng ký khóa học đầu tiên này
-                    return enrollmentsResponse.some(e => e.course?.courseId === firstCourse.courseId);
-                });
-                setLearningPaths(enrolledPaths);
+                // Lọc những learning path mà user đã follow
+                const followedPaths = pathsResponse.filter(path => 
+                    followedIds.includes(path.learningPathId)
+                );
+                setLearningPaths(followedPaths);
 
                 setFullName(userResponse.fullName || '');
                 setBio(learnerData.bio || '');

@@ -18,7 +18,7 @@ export default function CircularProgress({ value, size = 100 }: CircularProgress
         strokeLinecap="round" style={{ transition: 'stroke-dashoffset 0.5s ease' }}
       />
       <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central"
-        style={{ fontSize: 18, fontWeight: 700, fill: '#111827', transform: 'rotate(90deg)', transformOrigin: `${cx}px ${cy}px` }}>
+        style={{ fontSize: 18, fontWeight: 700, fill: '#ffffffff', transform: 'rotate(90deg)', transformOrigin: `${cx}px ${cy}px` }}>
         {value}%
       </text>
     </svg>

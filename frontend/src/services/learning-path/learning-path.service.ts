@@ -33,6 +33,7 @@ export interface CreateLearningPathDto {
     description?: string;
     bannerUrl?: string;
     level?: LearningPathLevel;
+    slug?: string;
 }
 
 export interface AddCourseToLearningPathDto {
@@ -95,4 +96,40 @@ export async function updateLearningPath(
 export async function deleteLearningPath(learningPathId: number): Promise<{ message: string }> {
     const response = await api.delete(`/learning-paths/${learningPathId}`);
     return response.data;
+}
+
+// 9. Follow một lộ trình học tập
+export async function followLearningPath(learningPathId: number): Promise<{ message: string }> {
+    // const response = await api.post(`/learning-paths/${learningPathId}/follow`);
+    // return response.data;
+    
+    // MOCK: Sử dụng localStorage do backend chưa hỗ trợ API follow
+    const followed = JSON.parse(localStorage.getItem('followed_paths') || '[]');
+    if (!followed.includes(learningPathId)) {
+        followed.push(learningPathId);
+        localStorage.setItem('followed_paths', JSON.stringify(followed));
+    }
+    return { message: 'Followed learning path successfully (mocked)' };
+}
+
+// 10. Unfollow một lộ trình học tập
+export async function unfollowLearningPath(learningPathId: number): Promise<{ message: string }> {
+    // const response = await api.delete(`/learning-paths/${learningPathId}/follow`);
+    // return response.data;
+
+    // MOCK: Sử dụng localStorage do backend chưa hỗ trợ API follow
+    let followed = JSON.parse(localStorage.getItem('followed_paths') || '[]');
+    followed = followed.filter((id: number) => id !== learningPathId);
+    localStorage.setItem('followed_paths', JSON.stringify(followed));
+    return { message: 'Unfollowed learning path successfully (mocked)' };
+}
+
+// 11. Lấy danh sách ID các lộ trình học tập đã follow
+export async function getFollowedLearningPathIds(): Promise<number[]> {
+    // const response = await api.get('/learning-paths/followed/ids');
+    // return response.data;
+
+    // MOCK: Sử dụng localStorage do backend chưa hỗ trợ API follow
+    const followed = JSON.parse(localStorage.getItem('followed_paths') || '[]');
+    return followed;
 }

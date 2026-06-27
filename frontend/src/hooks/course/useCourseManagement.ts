@@ -186,7 +186,7 @@ export function useCourseManagement() {
 
     const handleRejectCourse = async (courseId: number, reason: string) => {
         try {
-            await rejectCourse(courseId);
+            await rejectCourse(courseId, reason);
             setCourses(prev => prev.map(c => c.id === courseId ? { ...c, status: 'Rejected' } : c));
             toast.success('Course rejected successfully!');
         } catch (e: any) {

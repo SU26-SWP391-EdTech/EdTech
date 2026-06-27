@@ -57,6 +57,10 @@ interface Props {
   setSavedLessonId: (id: number | null) => void;
   searchParams: URLSearchParams;
   navigate: (path: string) => void;
+  lessons?: any[];
+  editingLessonId?: number | null;
+  prerequisiteLessonIds?: number[];
+  setPrerequisiteLessonIds?: (ids: number[]) => void;
 }
 
 export function LessonInfoSection({
@@ -64,7 +68,7 @@ export function LessonInfoSection({
   videoDurationInput = '', setVideoDurationInput, hasVideo = true, hasReading = false,
   lessonOrder, courses, setSelectedCourseId, selectedCourse,
   draftCourseTitle, titleError, setTitleError, setEditingLessonId, setSavedLessonId,
-  searchParams, navigate,
+  searchParams, navigate, lessons, editingLessonId, prerequisiteLessonIds, setPrerequisiteLessonIds,
 }: Props) {
   return (
     <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14, padding: '22px 26px', marginBottom: 16 }}>
@@ -145,6 +149,109 @@ export function LessonInfoSection({
             </>
           )}
         </div>
+
+        {/* Prerequisites selection */}
+        {lessons && lessons.length > 0 && (() => {
+          const availableForPrereq = lessons.filter(
+            l => Number(l.lessonId) !== Number(editingLessonId)
+          );
+          const selectedIds = prerequisiteLessonIds || [];
+          const unselectedLessons = availableForPrereq.filter(
+            l => !selectedIds.includes(Number(l.lessonId))
+          );
+
+          return (
+            <div style={{ gridColumn: '1 / -1', marginTop: 10 }}>
+              <Label>Prerequisite Lessons</Label>
+              <p style={{ fontSize: 11.5, color: '#6B7280', marginBottom: 8 }}>
+                Learners must complete these lessons before accessing this one.
+              </p>
+
+              {/* Selected prerequisite badges */}
+              {selectedIds.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+                  {selectedIds.map(lid => {
+                    const lesson = lessons.find(l => Number(l.lessonId) === lid);
+                    return (
+                      <span
+                        key={lid}
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 5,
+                          background: '#FFF1F2', border: '1px solid #FECDD3',
+                          borderRadius: 20, padding: '4px 10px 4px 12px',
+                          fontSize: 12, fontWeight: 500, color: '#E11D48',
+                        }}
+                      >
+                        {lesson?.title || `Lesson ${lid}`}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (setPrerequisiteLessonIds) {
+                              setPrerequisiteLessonIds(selectedIds.filter(id => id !== lid));
+                            }
+                          }}
+                          style={{
+                            background: 'none', border: 'none', cursor: 'pointer',
+                            color: '#F43F5E', fontWeight: 700, fontSize: 14,
+                            lineHeight: 1, padding: '0 2px', display: 'flex', alignItems: 'center',
+                          }}
+                          title="Remove prerequisite"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Dropdown to add new prerequisites */}
+              {unselectedLessons.length > 0 ? (
+                <div style={{ position: 'relative' }}>
+                  <select
+                    value=""
+                    onChange={e => {
+                      const lid = Number(e.target.value);
+                      if (lid && setPrerequisiteLessonIds) {
+                        setPrerequisiteLessonIds([...selectedIds, lid]);
+                      }
+                    }}
+                    style={{
+                      width: '100%', border: '1px solid #E5E7EB', borderRadius: 8,
+                      padding: '8px 32px 8px 12px', fontSize: 13, color: '#374151',
+                      outline: 'none', background: '#FAFAFA', appearance: 'none',
+                      cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >
+                    <option value="">+ Add prerequisite lesson…</option>
+                    {unselectedLessons.map(l => (
+                      <option key={Number(l.lessonId)} value={Number(l.lessonId)}>
+                        {l.title}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    size={13}
+                    style={{
+                      position: 'absolute', right: 10, top: '50%',
+                      transform: 'translateY(-50%)', color: '#9CA3AF', pointerEvents: 'none',
+                    }}
+                  />
+                </div>
+              ) : (
+                <p style={{
+                  fontSize: 12, color: '#9CA3AF', fontStyle: 'italic',
+                  padding: '8px 12px', border: '1px solid #E5E7EB',
+                  borderRadius: 8, background: '#FAFAFA',
+                }}>
+                  {availableForPrereq.length === 0
+                    ? 'No other lessons in this course yet.'
+                    : 'All available lessons have been added as prerequisites.'}
+                </p>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Back to course link */}

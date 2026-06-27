@@ -35,6 +35,7 @@ export function useLessonForm() {
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
 
   const [titleError, setTitleError] = useState(false);
+  const [prerequisiteLessonIds, setPrerequisiteLessonIds] = useState<number[]>([]);
 
   // Auto-calculate lesson duration based on video duration and reading defaults
   useEffect(() => {
@@ -71,6 +72,7 @@ export function useLessonForm() {
     setQuizQuestions([]);
 
     setTitleError(false);
+    setPrerequisiteLessonIds([]);
   }, []);
 
   const hydrateFromApiLesson = useCallback((lesson: Lesson) => {
@@ -110,6 +112,12 @@ export function useLessonForm() {
     setQuizQuestions(
       lessonContent ? parseQuizQuestionsFromContent(lessonContent) : []
     );
+
+    if (lesson.prerequisites) {
+      setPrerequisiteLessonIds(lesson.prerequisites.map(p => Number(p.prerequisiteLessonId)));
+    } else {
+      setPrerequisiteLessonIds([]);
+    }
   }, []);
 
   const handleVideoFileChange = useCallback((file?: File) => {
@@ -180,6 +188,9 @@ export function useLessonForm() {
 
     titleError,
     setTitleError,
+
+    prerequisiteLessonIds,
+    setPrerequisiteLessonIds,
 
     resetFormFields,
     hydrateFromApiLesson,

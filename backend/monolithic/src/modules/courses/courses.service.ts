@@ -229,7 +229,7 @@ export class CoursesService {
     return this.coursesRepository.saveCourse(course);
   }
 
-  public async rejectCourse(id: number, reviewerId: number): Promise<Course> {
+  public async rejectCourse(id: number, reviewerId: number, reason?: string): Promise<Course> {
     const course = await this.coursesRepository.findCourseById(id);
 
     if (!course) {
@@ -250,6 +250,9 @@ export class CoursesService {
 
     course.status = CourseStatus.REJECTED;
     course.reviewedBy = reviewer;
+    if (reason) {
+      course.reviewReason = reason;
+    }
 
     return this.coursesRepository.saveCourse(course);
   }

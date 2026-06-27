@@ -81,6 +81,7 @@ export function useLessonPersistence({
                 objectives: form.objectives,
                 resources: form.resources,
                 quizQuestions: form.quizQuestions,
+                prerequisiteLessonIds: form.prerequisiteLessonIds,
             });
 
             const existingId = data.editingLessonId ?? data.savedLessonId;
