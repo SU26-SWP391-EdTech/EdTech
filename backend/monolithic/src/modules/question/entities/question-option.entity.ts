@@ -49,7 +49,7 @@ export class QuestionOption {
     () => Question,
     (question) => question.options,
     {
-      nullable: false
+      nullable: false,
     },
   )
   @JoinColumn({
