@@ -28,7 +28,7 @@ export class AuthController {
   }
 
   @Public()
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login' })
