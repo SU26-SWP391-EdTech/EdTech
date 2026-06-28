@@ -18,6 +18,7 @@ import {
 export function useLessonForm() {
   const [hasVideo, setHasVideo] = useState(true);
   const [hasReading, setHasReading] = useState(false);
+  const [hasAssessment, setHasAssessment] = useState(false);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -38,10 +39,12 @@ export function useLessonForm() {
   const [titleError, setTitleError] = useState(false);
   const [prerequisiteLessonIds, setPrerequisiteLessonIds] = useState<number[]>([]);
 
-  // Auto-calculate lesson duration based on video duration and reading defaults
+  // Auto-calculate lesson duration based on video duration, reading defaults, or assessment
   useEffect(() => {
     let calculated = 0;
-    if (hasVideo && hasReading) {
+    if (hasAssessment) {
+      calculated = 15;
+    } else if (hasVideo && hasReading) {
       calculated = Number(videoDurationInput || 0) + 10;
     } else if (hasVideo) {
       calculated = Number(videoDurationInput || 0);
@@ -51,11 +54,12 @@ export function useLessonForm() {
       calculated = 10; // default fallback
     }
     setDuration(calculated > 0 ? String(calculated) : '');
-  }, [hasVideo, hasReading, videoDurationInput]);
+  }, [hasVideo, hasReading, hasAssessment, videoDurationInput]);
 
   const resetFormFields = useCallback(() => {
     setHasVideo(true);
     setHasReading(false);
+    setHasAssessment(false);
 
     setTitle('');
     setDescription('');
@@ -93,8 +97,23 @@ export function useLessonForm() {
     }
     const hasRead = Boolean(cleanReadingContent.trim());
 
-    setHasVideo(hasVid || (!hasVid && !hasRead));
-    setHasReading(hasRead);
+    // Hydrate assessments first to determine hasAssessment
+    const savedAss = localStorage.getItem(`assessments_lesson_${lesson.lessonId}`);
+    let hasAss = false;
+    let loadedAssessments: Assessment[] = [];
+    if (savedAss) {
+      try {
+        loadedAssessments = JSON.parse(savedAss);
+        hasAss = loadedAssessments && loadedAssessments.length > 0;
+      } catch (e) {
+        loadedAssessments = [];
+      }
+    }
+    setAssessments(loadedAssessments);
+
+    setHasAssessment(hasAss);
+    setHasVideo(!hasAss && (hasVid || (!hasVid && !hasRead)));
+    setHasReading(!hasAss && hasRead);
 
     const vidMin = lesson.videoDuration ? Math.round(lesson.videoDuration / 60) : 0;
     setVideoDurationInput(vidMin ? String(vidMin) : '');
@@ -114,17 +133,6 @@ export function useLessonForm() {
     setQuizQuestions(
       lessonContent ? parseQuizQuestionsFromContent(lessonContent) : []
     );
-
-    const savedAss = localStorage.getItem(`assessments_lesson_${lesson.lessonId}`);
-    if (savedAss) {
-      try {
-        setAssessments(JSON.parse(savedAss));
-      } catch (e) {
-        setAssessments([]);
-      }
-    } else {
-      setAssessments([]);
-    }
 
     if (lesson.prerequisites) {
       setPrerequisiteLessonIds(lesson.prerequisites.map(p => Number(p.prerequisiteLessonId)));
@@ -162,6 +170,9 @@ export function useLessonForm() {
 
     hasReading,
     setHasReading,
+
+    hasAssessment,
+    setHasAssessment,
 
     title,
     setTitle,

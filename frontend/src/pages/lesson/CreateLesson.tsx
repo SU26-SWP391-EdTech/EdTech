@@ -77,26 +77,32 @@ export function CreateLessonPage() {
             setHasVideo={hook.setHasVideo}
             hasReading={hook.hasReading}
             setHasReading={hook.setHasReading}
+            hasAssessment={hook.hasAssessment}
+            setHasAssessment={hook.setHasAssessment}
           />
 
-          <LessonContentSection
-            hasVideo={hook.hasVideo}
-            videoUrl={hook.videoUrl}
-            setVideoUrl={hook.setVideoUrl}
-            videoFile={hook.videoFile}
-            videoUploaded={hook.videoUploaded}
-            videoInputRef={hook.videoInputRef}
-            hasReading={hook.hasReading}
-            content={hook.content}
-            setContent={hook.setContent}
-            handleVideoFileChange={hook.handleVideoFileChange}
-            clearVideo={hook.clearVideo}
-          />
+          {(hook.hasVideo || hook.hasReading) && (
+            <LessonContentSection
+              hasVideo={hook.hasVideo}
+              videoUrl={hook.videoUrl}
+              setVideoUrl={hook.setVideoUrl}
+              videoFile={hook.videoFile}
+              videoUploaded={hook.videoUploaded}
+              videoInputRef={hook.videoInputRef}
+              hasReading={hook.hasReading}
+              content={hook.content}
+              setContent={hook.setContent}
+              handleVideoFileChange={hook.handleVideoFileChange}
+              clearVideo={hook.clearVideo}
+            />
+          )}
 
-          <LessonAssessmentSection
-            assessments={hook.assessments}
-            setAssessments={hook.setAssessments}
-          />
+          {hook.hasAssessment && (
+            <LessonAssessmentSection
+              assessments={hook.assessments}
+              setAssessments={hook.setAssessments}
+            />
+          )}
 
         </div>
       </div>

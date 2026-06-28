@@ -8,6 +8,7 @@ export interface Lesson {
   content?: string;
   hasVideo?: boolean;
   hasReading?: boolean;
+  hasAssessment?: boolean;
   status: 'completed' | 'current' | 'upcoming' | 'locked';
 }
 
