@@ -9,6 +9,7 @@ import { LearningPathDetail } from '../pages/learning-path/LearningPathDetail';
 import { CreateLessonPage } from '../pages/lesson/CreateLesson';
 import { LessonPage } from '../pages/lesson/LessonPage';
 import { ProviderProfile } from '../pages/user/ProviderProfile';
+import { LeaderboardPage } from '../pages/leaderboard/LeaderboardPage';
 
 export const providerRoutes: RouteObject = {
     path: '/provider',
@@ -27,5 +28,6 @@ export const providerRoutes: RouteObject = {
         { path: 'lesson', element: <LessonPage /> },
         { path: 'explore', element: <ExplorePage /> }, 
         { path: 'learning-path/:id', element: <LearningPathDetail /> },
+        { path: 'leaderboard', element: <LeaderboardPage /> },
     ],
 };
