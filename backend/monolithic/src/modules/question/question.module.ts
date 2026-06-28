@@ -19,9 +19,10 @@ import { Course } from '../courses/entities/course.entity';
 import { CoursesRepository } from '../courses/courses.repository';
 import { User } from '../users/entities/user.entity';
 import { QuestionOptionRepository } from './question-option.repository';
+import { LessonPrerequisite } from '../lessons/entities/lesson-prerequisite.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Question, QuestionOption, Enrollment, Assessment, Lesson, Course, User])],
+  imports: [TypeOrmModule.forFeature([Question, QuestionOption, Enrollment, Assessment, Lesson, Course, User, LessonPrerequisite])],
   controllers: [QuestionController],
   providers: [QuestionService, LessonsService, AssessmentService, QuestionRepository, LessonsRepository, CloudinaryService, CoursesService, EnrollmentsRepository, AssessmentRepository, CoursesRepository, QuestionOptionRepository],
   exports: [QuestionService, LessonsService, AssessmentService, QuestionRepository, QuestionOptionRepository]
