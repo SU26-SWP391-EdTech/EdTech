@@ -13,6 +13,7 @@ export function GuestHeader() {
         const path = location.pathname;
         if (path === '/explore') return 'explore';
         if (path === '/about') return 'about';
+        if (path === '/leaderboard') return 'leaderboard';
         return '';
     };
 
@@ -41,6 +42,8 @@ export function GuestHeader() {
                             onClick={() => {
                                 if (item.id === 'explore') {
                                     navigate('/explore');
+                                } else if (item.id === 'leaderboard') {
+                                    navigate('/leaderboard');
                                 }
                             }}
                         />

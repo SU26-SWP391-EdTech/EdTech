@@ -4,6 +4,7 @@ import { LessonInfoSection } from '../../components/lesson/create/LessonInfoSect
 import { LessonTypeSection } from '../../components/lesson/create/LessonTypeSection';
 import { LessonContentSection } from '../../components/lesson/create/LessonContentSection';
 import { AddResourceModal } from '../../components/lesson/create/AddResourceModal';
+import { LessonAssessmentSection } from '../../components/lesson/create/LessonAssessmentSection';
 
 export function CreateLessonPage() {
   const hook = useCreateLesson();
@@ -76,21 +77,32 @@ export function CreateLessonPage() {
             setHasVideo={hook.setHasVideo}
             hasReading={hook.hasReading}
             setHasReading={hook.setHasReading}
+            hasAssessment={hook.hasAssessment}
+            setHasAssessment={hook.setHasAssessment}
           />
 
-          <LessonContentSection
-            hasVideo={hook.hasVideo}
-            videoUrl={hook.videoUrl}
-            setVideoUrl={hook.setVideoUrl}
-            videoFile={hook.videoFile}
-            videoUploaded={hook.videoUploaded}
-            videoInputRef={hook.videoInputRef}
-            hasReading={hook.hasReading}
-            content={hook.content}
-            setContent={hook.setContent}
-            handleVideoFileChange={hook.handleVideoFileChange}
-            clearVideo={hook.clearVideo}
-          />
+          {(hook.hasVideo || hook.hasReading) && (
+            <LessonContentSection
+              hasVideo={hook.hasVideo}
+              videoUrl={hook.videoUrl}
+              setVideoUrl={hook.setVideoUrl}
+              videoFile={hook.videoFile}
+              videoUploaded={hook.videoUploaded}
+              videoInputRef={hook.videoInputRef}
+              hasReading={hook.hasReading}
+              content={hook.content}
+              setContent={hook.setContent}
+              handleVideoFileChange={hook.handleVideoFileChange}
+              clearVideo={hook.clearVideo}
+            />
+          )}
+
+          {hook.hasAssessment && (
+            <LessonAssessmentSection
+              assessments={hook.assessments}
+              setAssessments={hook.setAssessments}
+            />
+          )}
 
         </div>
       </div>

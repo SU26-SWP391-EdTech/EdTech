@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { NavigateFunction } from 'react-router-dom';
 
+import api from '../../../lib/axios';
 import {
     createLesson,
     updateLesson,
@@ -100,6 +101,21 @@ export function useLessonPersistence({
                 );
 
             const nextLessonId = Number(saved.lessonId);
+
+            // Persist assessments to localStorage and attempt to save to backend API
+            localStorage.setItem(`assessments_lesson_${nextLessonId}`, JSON.stringify(form.assessments));
+            for (const ass of form.assessments) {
+                try {
+                    await api.post('/assessment', {
+                        courseId: data.selectedCourseId,
+                        lessonId: nextLessonId,
+                        title: ass.title,
+                        type: ass.type,
+                    });
+                } catch (apiErr) {
+                    console.warn('Failed to save assessment to backend API:', apiErr);
+                }
+            }
 
             if (existingId) {
                 await updateCourse(data.selectedCourseId, { status: 'draft' });

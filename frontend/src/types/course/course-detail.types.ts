@@ -1,5 +1,5 @@
 export type LessonStatus = 'completed' | 'current' | 'locked' | 'not-started';
-export type LessonType = 'Video' | 'Reading' | 'Quiz' | 'Assignment' | 'Video & Reading';
+export type LessonType = 'Video' | 'Reading' | 'Quiz' | 'Assignment' | 'Video & Reading' | 'Assessment';
 
 export interface Lesson {
   id: string;
@@ -12,6 +12,7 @@ export interface Lesson {
   content?: string;
   hasVideo?: boolean;
   hasReading?: boolean;
+  hasAssessment?: boolean;
 }
 
 export interface Module {

@@ -92,21 +92,20 @@ export function LessonHeader({
               </div>
             </div>
             {role == 'learner' && (
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={onMarkComplete}
-                disabled={isCompleted}
-                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm transition-colors whitespace-nowrap ${
-                  isCompleted
-                    ? 'bg-[#10B981] text-white'
-                    : 'bg-[#E11D48] text-white hover:bg-[#BE123C]'
-                }`}
-                style={{ fontWeight: 500 }}
-              >
-                <CheckCircle2 className="w-4 h-4" />
-                {isCompleted ? 'Completed!' : 'Mark as Completed'}
-              </button>
-            </div>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={onMarkComplete}
+                  disabled={isCompleted}
+                  className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm transition-colors whitespace-nowrap ${isCompleted
+                      ? 'bg-[#10B981] text-white'
+                      : 'bg-[#E11D48] text-white hover:bg-[#BE123C]'
+                    }`}
+                  style={{ fontWeight: 500 }}
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  {isCompleted ? 'Completed!' : 'Mark as Completed'}
+                </button>
+              </div>
             )}
           </div>
         </div>

@@ -8,6 +8,7 @@ export function buildLocalLessonDraft(options: {
     duration: string;
     hasVideo: boolean;
     hasReading: boolean;
+    hasAssessment?: boolean;
     content: string;
     videoUrl: string;
     objectives: Objective[];
@@ -16,10 +17,21 @@ export function buildLocalLessonDraft(options: {
 }): CourseBuilderLesson {
     const hasVideoAndReading = options.hasVideo && options.hasReading;
 
+    let type: CourseBuilderLessonType = 'Reading';
+    if (options.hasAssessment) {
+        type = 'Assessment';
+    } else if (hasVideoAndReading) {
+        type = 'Video & Reading';
+    } else if (options.hasVideo) {
+        type = 'Video';
+    } else if (options.hasReading) {
+        type = 'Reading';
+    }
+
     return {
         id: options.localLessonId || `l-${Date.now()}`,
         title: options.title.trim(),
-        type: hasVideoAndReading ? 'Video & Reading' : options.hasVideo ? 'Video' : 'Reading',
+        type,
         duration: options.duration ? `${options.duration} min` : '10 min',
         locked: false,
         content: buildLessonContent(options),
@@ -27,6 +39,7 @@ export function buildLocalLessonDraft(options: {
         description: '',
         hasVideo: options.hasVideo,
         hasReading: options.hasReading,
+        hasAssessment: options.hasAssessment,
     };
 }
 

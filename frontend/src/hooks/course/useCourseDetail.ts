@@ -7,6 +7,7 @@ import { getCourseById, approveCourse, rejectCourse, searchCourses } from '../..
 import { getLessonsByCourse } from '../../services/lesson/lesson.service';
 import { getMyEnrollments, enrollCourse } from '../../services/enrollment/enrollment.service';
 import { getAcademicProfile } from '../../services/user/user.service';
+import api from '../../lib/axios';
 
 function getLessonType(lesson: any) {
   const hasVideo = Boolean(lesson.videoUrl);
@@ -59,6 +60,7 @@ export function useCourseDetail() {
   const [providerProfile, setProviderProfile] = useState<any>(null);
   const [providerCoursesCount, setProviderCoursesCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [completedLessonIds, setCompletedLessonIds] = useState<Set<string>>(new Set());
 
   async function loadData() {
     try {
@@ -97,6 +99,30 @@ export function useCourseDetail() {
       if (role === 'learner') {
         const enrollData = await getMyEnrollments();
         setEnrollments(enrollData);
+
+        const isEnrolled = enrollData.some((e: any) => e.course?.courseId === courseId);
+        if (isEnrolled) {
+          const progressPromises = lessonsData.map(async (l: any) => {
+            try {
+              const res = await api.get(`/progress/lessonId/${l.lessonId}/complete`);
+              return { lessonId: String(l.lessonId), status: res.data?.status };
+            } catch {
+              return { lessonId: String(l.lessonId), status: null };
+            }
+          });
+          const progressResults = await Promise.all(progressPromises);
+          const completedIds = new Set<string>();
+          progressResults.forEach((r) => {
+            if (r.status === 'COMPLETED') {
+              completedIds.add(r.lessonId);
+            }
+          });
+          setCompletedLessonIds(completedIds);
+        } else {
+          setCompletedLessonIds(new Set());
+        }
+      } else {
+        setCompletedLessonIds(new Set());
       }
     } catch (error) {
       console.warn('Failed to load real course details, using mock fallback:', error);
@@ -192,15 +218,7 @@ export function useCourseDetail() {
   const totalLessons = lessonsList.length;
   const totalLessonMinutes = lessonsList.reduce((sum, lesson) => sum + getLessonDurationMinutes(lesson), 0);
   const courseDurationLabel = formatCourseHours(totalLessonMinutes);
-  // Estimate completed lessons from progress percentage
-  const completedLessons = enrolled ? Math.round((progressVal / 100) * totalLessons) : 0;
-
-  const completedLessonIds = new Set<string>();
-  lessonsList.forEach((l, idx) => {
-    if (idx < completedLessons) {
-      completedLessonIds.add(String(l.lessonId));
-    }
-  });
+  const completedLessons = enrolled ? completedLessonIds.size : 0;
 
   const isLockedByPrerequisites = (l: any) => {
     if (!l.prerequisites || l.prerequisites.length === 0) return false;
@@ -210,8 +228,8 @@ export function useCourseDetail() {
     });
   };
 
-  const currentLessonId = enrolled ? lessonsList.find((l, idx) => {
-    const isCompleted = idx < completedLessons;
+  const currentLessonId = enrolled ? lessonsList.find((l) => {
+    const isCompleted = completedLessonIds.has(String(l.lessonId));
     const isLocked = isLockedByPrerequisites(l);
     return !isCompleted && !isLocked;
   })?.lessonId : null;
@@ -223,7 +241,7 @@ export function useCourseDetail() {
       title: 'Lesson Curriculum',
       description: 'Lessons list',
       progress: progressVal,
-      lessons: lessonsList.map((l, index) => {
+      lessons: lessonsList.map((l) => {
         let status: LessonStatus = 'not-started';
 
         if (isSpecialRole) {
@@ -232,7 +250,7 @@ export function useCourseDetail() {
           if (!enrolled) {
             status = 'locked';
           } else {
-            const isCompleted = index < completedLessons;
+            const isCompleted = completedLessonIds.has(String(l.lessonId));
             const isLocked = isLockedByPrerequisites(l);
             if (isCompleted) {
               status = 'completed';

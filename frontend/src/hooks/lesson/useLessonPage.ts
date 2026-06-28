@@ -11,6 +11,7 @@ import { useAuthStore } from '../../stores/auth/auth.stores';
 import { getCourseById } from '../../services/course/course.service';
 import { getLessonsByCourse } from '../../services/lesson/lesson.service';
 import { getMyEnrollments, updateEnrollmentProgress } from '../../services/enrollment/enrollment.service';
+import api from '../../lib/axios';
 
 function getLessonType(lesson: any) {
   if (lesson.type === 'Assessment') return 'Assessment';
@@ -35,6 +36,7 @@ export function useLessonPage() {
   const [lessonsList, setLessonsList] = useState<any[]>([]);
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [completedLessonIds, setCompletedLessonIds] = useState<Set<string>>(new Set());
 
   const user = useAuthStore((state) => state.user);
   const role = user?.roleName?.toLowerCase() || 'guest';
@@ -53,8 +55,27 @@ export function useLessonPage() {
         if (role === 'learner') {
           const enrolls = await getMyEnrollments();
           setEnrollments(enrolls);
+
+          // Fetch progress status for each lesson concurrently
+          const progressPromises = lessonsData.map(async (l: any) => {
+            try {
+              const res = await api.get(`/progress/lessonId/${l.lessonId}/complete`);
+              return { lessonId: String(l.lessonId), status: res.data?.status || null };
+            } catch {
+              return { lessonId: String(l.lessonId), status: null };
+            }
+          });
+          const progressResults = await Promise.all(progressPromises);
+          const completedIds = new Set<string>();
+          progressResults.forEach((r) => {
+            if (r.status === 'COMPLETED') {
+              completedIds.add(r.lessonId);
+            }
+          });
+          setCompletedLessonIds(completedIds);
         } else {
           setEnrollments([]);
+          setCompletedLessonIds(new Set());
         }
       } catch (error) {
         console.error('Failed to load lesson page data:', error);
@@ -113,33 +134,42 @@ export function useLessonPage() {
   // States
   const [videoProgress] = useState(34);
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
-  const [completedLessonIds, setCompletedLessonIds] = useState<Set<string>>(new Set());
   const [noteText, setNoteText] = useState('');
   const [notes, setNotes] = useState<Note[]>(SAVED_NOTES);
   const [copiedCode, setCopiedCode] = useState(false);
   const [questionText, setQuestionText] = useState('');
   const [activeTab, setActiveTab] = useState<'content' | 'notes' | 'discussion'>('content');
 
-
-
-
-
-  // Sync completedLessonIds from progressVal
+  // Auto-start active lesson if it is not completed or started yet
   useEffect(() => {
-    if (currentEnrollment) {
-      const lessonsCount = lessonsList.length;
-      const completedCount = Math.round((progressVal / 100) * lessonsCount);
-      const nextCompleted = new Set<string>();
-      lessonsList.forEach((l, idx) => {
-        if (idx < completedCount) {
-          nextCompleted.add(String(l.lessonId));
+    if (role !== 'learner' || !activeLessonId || isLoading) return;
+    
+    const lessonStrId = String(activeLessonId);
+    if (completedLessonIds.has(lessonStrId)) return;
+
+    async function checkAndStartProgress() {
+      try {
+        // Try getting progress status
+        const res = await api.get(`/progress/lessonId/${activeLessonId}/complete`);
+        if (!res.data || !res.data.status) {
+          try {
+            await api.post(`/progress/lesson/${activeLessonId}/start`);
+          } catch (startErr) {
+            console.warn('Failed to start lesson progress:', startErr);
+          }
         }
-      });
-      setCompletedLessonIds(nextCompleted);
-    } else {
-      setCompletedLessonIds(new Set());
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          try {
+            await api.post(`/progress/lesson/${activeLessonId}/start`);
+          } catch (startErr) {
+            console.warn('Failed to start lesson progress:', startErr);
+          }
+        }
+      }
     }
-  }, [currentEnrollment, lessonsList, progressVal]);
+    checkAndStartProgress();
+  }, [activeLessonId, role, isLoading]);
 
   // Map modules and status
   const hasTrackedLessonProgress = completedLessonIds.size > 0;
@@ -306,14 +336,14 @@ export function useLessonPage() {
       return;
     }
 
-    const nextCompletedIds = new Set(completedLessonIds);
-    nextCompletedIds.add(lessonId);
-    setCompletedLessonIds(nextCompletedIds);
-
-    const progress = totalLessons > 0 ? Math.round((nextCompletedIds.size / totalLessons) * 100) : 0;
-    
     try {
-      await updateEnrollmentProgress(courseId, progress);
+      // 1. Call progress complete API
+      await api.patch(`/progress/lesson/${lessonId}/complete`);
+
+      const nextCompletedIds = new Set(completedLessonIds);
+      nextCompletedIds.add(lessonId);
+      setCompletedLessonIds(nextCompletedIds);
+
       if (showToast) toast.success('Marked lesson as completed!');
       
       const enrolls = await getMyEnrollments();
