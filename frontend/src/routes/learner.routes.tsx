@@ -23,6 +23,6 @@ export const learnerRoutes: RouteObject = {
         { path: 'explore', element: <ExplorePage /> },
         { path: 'courses/detail', element: <CourseDetail /> },
         { path: 'learning-path/:id', element: <LearningPathDetail /> },
-        { path: 'lesson', element: <LessonPage /> },
+        { path: 'lesson', element: <LessonPage /> }
     ],
 };

@@ -13,6 +13,7 @@ import { getLessonsByCourse } from '../../services/lesson/lesson.service';
 import { getMyEnrollments, updateEnrollmentProgress } from '../../services/enrollment/enrollment.service';
 
 function getLessonType(lesson: any) {
+  if (lesson.type === 'Assessment') return 'Assessment';
   const hasVideo = Boolean(lesson.videoUrl);
   const hasReading = Boolean(lesson.content);
 
