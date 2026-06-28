@@ -18,11 +18,10 @@ export function SignUp() {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'learner' | 'provider'>('learner');
   const [showPwd, setShowPwd] = useState(false);
-  const [terms, setTerms] = useState(false);
   const [error, setError] = useState('');
 
   const strength = password ? getPasswordStrength(password) : null;
-  const canSubmit = !!name && !!email && password.length >= 8 && terms;
+  const canSubmit = !!name && !!email && password.length >= 8;
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -124,19 +123,10 @@ export function SignUp() {
           </div>
         </div>
 
-        <label className="flex items-start gap-3 mb-6 cursor-pointer select-none">
-          <CustomCheckbox checked={terms} onChange={() => setTerms((value) => !value)} />
-          <span className="text-sm text-[#6B7280]" style={{ lineHeight: 1.55 }}>
-            I agree to the <span className="text-[#E11D48]" style={{ fontWeight: 500 }}>Terms of Service</span> and <span className="text-[#E11D48]" style={{ fontWeight: 500 }}>Privacy Policy</span>
-          </span>
-        </label>
-
         <div className="space-y-4">
           <PrimaryButton onClick={handleSubmit} loading={isLoading} disabled={!canSubmit}>
             Create Account
           </PrimaryButton>
-          {/* <Divider label="or sign up with" />
-          <SocialButtons /> */}
         </div>
 
         <p className="text-center text-sm text-[#6B7280] mt-6">

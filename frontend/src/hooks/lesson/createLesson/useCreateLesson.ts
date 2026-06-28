@@ -84,6 +84,9 @@ export function useCreateLesson() {
     hasReading: form.hasReading,
     setHasReading: form.setHasReading,
 
+    hasAssessment: form.hasAssessment,
+    setHasAssessment: form.setHasAssessment,
+
     title: form.title,
     setTitle: form.setTitle,
 
@@ -116,6 +119,9 @@ export function useCreateLesson() {
 
     quizQuestions: form.quizQuestions,
     setQuizQuestions: form.setQuizQuestions,
+
+    assessments: form.assessments,
+    setAssessments: form.setAssessments,
 
     titleError: form.titleError,
     setTitleError: form.setTitleError,

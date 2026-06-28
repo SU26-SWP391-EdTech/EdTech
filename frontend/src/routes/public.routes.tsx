@@ -4,6 +4,7 @@ import { CourseDetail } from '../pages/course/CourseDetail';
 import { ExplorePage } from '../pages/course/ExplorePage';
 import { LearningPathDetail } from '../pages/learning-path/LearningPathDetail';
 import { HomeRedirect } from './HomeRedirect';
+import { LeaderboardPage } from '../pages/leaderboard/LeaderboardPage';
 
 export const publicRoutes: RouteObject = {
     path: '/',
@@ -13,5 +14,6 @@ export const publicRoutes: RouteObject = {
         { path: 'explore', element: <ExplorePage /> },
         { path: 'courses/detail', element: <CourseDetail /> },
         { path: 'learning-path/:id', element: <LearningPathDetail /> },
+        { path: 'leaderboard', element: <LeaderboardPage /> },
     ],
 };
