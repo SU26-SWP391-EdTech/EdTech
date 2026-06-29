@@ -58,4 +58,14 @@ export class AssessmentService {
     }
     return assessment;
   }
+
+  async findAssessment(assessmentId: number, lessonId: number, courseId: number){
+    const assessment = await this.assessmentRepository.findAssessmentWithRelation(assessmentId, lessonId, courseId);
+    if (!assessment) {
+      throw new NotFoundException(
+        `Assessment ${assessmentId} not found`,
+      );
+    }
+    return assessment;
+  }
 }

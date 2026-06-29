@@ -28,12 +28,13 @@ export function LessonTypeBadge({ type }: LessonTypeBadgeProps) {
     Reading: { Icon: BookOpen, tint: '#EEF2FF', color: '#6366F1' },
     Quiz: { Icon: ClipboardList, tint: '#FFFBEB', color: '#B45309' },
     Assignment: { Icon: FileText, tint: '#ECFDF5', color: '#047857' },
+    Assessment: { Icon: ClipboardList, tint: '#FEF2F2', color: '#E11D48' },
   };
   const meta = map[type as Exclude<CourseBuilderLessonType, 'Video & Reading'>];
 
   return (
-    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]" style={{ background: meta.tint, color: meta.color, fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}>
-      <meta.Icon className="w-3 h-3" />
+    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]" style={{ background: meta?.tint || '#F3F4F6', color: meta?.color || '#374151', fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}>
+      {meta && <meta.Icon className="w-3 h-3" />}
       {type}
     </span>
   );

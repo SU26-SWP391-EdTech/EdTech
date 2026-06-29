@@ -1,4 +1,4 @@
-import { BookOpen, Video } from 'lucide-react';
+import { BookOpen, Video, ClipboardList } from 'lucide-react';
 import { LessonStatusIcon } from './LessonStatusIcon';
 import type { Lesson, Module } from '../../../types/lesson/lesson.types';
 
@@ -50,6 +50,9 @@ export function CurriculumSidebar({
                   )}
                   {(lesson.hasReading || lesson.type === 'Reading' || lesson.type === 'Video & Reading') && (
                     <BookOpen className="h-3.5 w-3.5 text-[#6366F1]" />
+                  )}
+                  {(lesson.hasAssessment || lesson.type === 'Assessment') && (
+                    <ClipboardList className="h-3.5 w-3.5 text-[#E11D48]" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">

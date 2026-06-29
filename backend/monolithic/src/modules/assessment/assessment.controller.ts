@@ -42,4 +42,9 @@ export class AssessmentController {
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return await this.assessmentService.findOneService(id);
   }
+
+  @Get('courses/:courseId/lesson/:lessonId/assessment/:assessmentId')
+  async findAssessment(@Param('assessmentId', ParseIntPipe) assessmentId: number, @Param('lessonId', ParseIntPipe) lessonId: number, @Param('courseId', ParseIntPipe) courseId: number){
+    return await this.assessmentService.findAssessment(assessmentId, lessonId, courseId);
+  }
 }

@@ -1,4 +1,4 @@
-export type CourseBuilderLessonType = 'Video' | 'Reading' | 'Quiz' | 'Assignment' | 'Video & Reading';
+export type CourseBuilderLessonType = 'Video' | 'Reading' | 'Quiz' | 'Assignment' | 'Video & Reading' | 'Assessment';
 
 export interface CourseBuilderLesson {
     id: string;
@@ -11,6 +11,7 @@ export interface CourseBuilderLesson {
     description?: string;
     hasVideo?: boolean;
     hasReading?: boolean;
+    hasAssessment?: boolean;
 }
 
 export interface CourseDraft {

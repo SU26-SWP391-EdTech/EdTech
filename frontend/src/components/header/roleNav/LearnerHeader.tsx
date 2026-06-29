@@ -22,6 +22,7 @@ export function LearnerHeader() {
         const path = location.pathname;
         if (path === '/learner/my-learning') return 'my-learning';
         if (path === '/learner/explore') return 'explore';
+        if (path === '/learner/leaderboard') return 'leaderboard';
         return '';
     };
 
@@ -53,6 +54,8 @@ export function LearnerHeader() {
                                     navigate('/learner/my-learning');
                                 } else if (item.id === 'explore') {
                                     navigate('/learner/explore');
+                                } else if (item.id === 'leaderboard') {
+                                    navigate('/learner/leaderboard');
                                 }
                             }}
                         />

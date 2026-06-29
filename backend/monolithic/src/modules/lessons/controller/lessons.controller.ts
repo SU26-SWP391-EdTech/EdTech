@@ -46,6 +46,7 @@ export class LessonsController {
 
   @Post(':id')
   @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.COURSE_PROVIDER)
   @UseInterceptors(FileInterceptor('videoUrl'))
   @ApiOperation({ summary: 'Create a lesson in a course' })
@@ -83,6 +84,7 @@ export class LessonsController {
 
   @Patch(':courseId')
   @Roles(RoleEnum.COURSE_PROVIDER)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @UseInterceptors(FileInterceptor('videoUrl'))
   @ApiOperation({ summary: 'Update a lesson in a course' })
   @ApiConsumes('multipart/form-data')
@@ -108,6 +110,7 @@ export class LessonsController {
 
   @Delete(':id')
   @Roles(RoleEnum.COURSE_PROVIDER)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Delete a lesson' })
   @ApiResponse({ status: 200, description: 'Lesson deleted successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })

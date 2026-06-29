@@ -14,8 +14,19 @@ export function mapBackendLessonToCourseBuilderLesson(lesson: BackendLesson): Co
     }
     const hasReading = Boolean(cleanReadingContent.trim());
     
+    const savedAss = localStorage.getItem(`assessments_lesson_${lesson.lessonId}`);
+    let hasAssessment = false;
+    if (savedAss) {
+      try {
+        const parsed = JSON.parse(savedAss);
+        hasAssessment = parsed && parsed.length > 0;
+      } catch (e) {}
+    }
+
     let type: CourseBuilderLessonType = 'Reading';
-    if (hasVideo && hasReading) {
+    if (hasAssessment) {
+        type = 'Assessment';
+    } else if (hasVideo && hasReading) {
         type = 'Video & Reading';
     } else if (hasVideo) {
         type = 'Video';
@@ -25,7 +36,9 @@ export function mapBackendLessonToCourseBuilderLesson(lesson: BackendLesson): Co
 
     const videoMin = lesson.videoDuration ? Math.round(lesson.videoDuration / 60) : 0;
     let mins = 10;
-    if (hasVideo && hasReading) {
+    if (hasAssessment) {
+        mins = 15;
+    } else if (hasVideo && hasReading) {
         mins = videoMin + 10;
     } else if (hasVideo) {
         mins = videoMin;
@@ -44,6 +57,7 @@ export function mapBackendLessonToCourseBuilderLesson(lesson: BackendLesson): Co
         content: lesson.content || '',
         videoUrl: lesson.videoUrl || '',
         description: lesson.description || '',
+        hasAssessment,
     };
 }
 

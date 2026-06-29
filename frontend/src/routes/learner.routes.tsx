@@ -8,6 +8,7 @@ import { MyLearning } from '../pages/learner/MyLearning';
 import { LearningPathDetail } from '../pages/learning-path/LearningPathDetail';
 import { LessonPage } from '../pages/lesson/LessonPage';
 import { LearnerProfile } from '../pages/user/LearnerProfile';
+import { LeaderboardPage } from '../pages/leaderboard/LeaderboardPage';
 
 export const learnerRoutes: RouteObject = {
     path: '/learner',
@@ -24,5 +25,6 @@ export const learnerRoutes: RouteObject = {
         { path: 'courses/detail', element: <CourseDetail /> },
         { path: 'learning-path/:id', element: <LearningPathDetail /> },
         { path: 'lesson', element: <LessonPage /> },
+        { path: 'leaderboard', element: <LeaderboardPage /> },
     ],
 };

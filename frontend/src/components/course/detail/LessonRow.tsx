@@ -18,6 +18,7 @@ export function LessonRow({ lesson, courseId }: LessonRowProps) {
   const isReading = lesson.hasReading || lesson.type === 'Reading' || lesson.type === 'Video & Reading';
   const isQuiz = lesson.type === 'Quiz';
   const isAssignment = lesson.type === 'Assignment';
+  const isAssessment = lesson.hasAssessment || lesson.type === 'Assessment';
 
   const isCurrent = lesson.status === 'current';
   const isLocked = lesson.status === 'locked';
@@ -65,6 +66,11 @@ export function LessonRow({ lesson, courseId }: LessonRowProps) {
         {isAssignment && (
           <span className="flex items-center" title="Assignment" style={{ color: '#10B981' }}>
             <FileText className="w-3.5 h-3.5" />
+          </span>
+        )}
+        {isAssessment && (
+          <span className="flex items-center" title="Assessment" style={{ color: '#E11D48' }}>
+            <ClipboardList className="w-3.5 h-3.5" />
           </span>
         )}
       </span>
