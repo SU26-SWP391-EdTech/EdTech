@@ -7,7 +7,7 @@ import { AssessmentRepository } from './assessment.repository';
 import { Assessment } from './entities/assessment.entity';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
 import { CoursesService } from '../courses/courses.service';
-import { LessonsService } from '../lessons/lessons.service';
+import { LessonsService } from '../lessons/service/lessons.service';
 import { Lesson } from '../lessons/entities/lesson.entity';
 
 @Injectable()

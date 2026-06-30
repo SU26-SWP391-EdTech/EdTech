@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { Question } from './entities/question.entity';
-import { LessonsService } from '../lessons/lessons.service';
+import { LessonsService } from '../lessons/service/lessons.service';
 import { AssessmentService } from '../assessment/assessment.service';
 import { QuestionRepository } from './question.repository';
 import { QuestionResponseDto } from './dto/question-response.dto';
