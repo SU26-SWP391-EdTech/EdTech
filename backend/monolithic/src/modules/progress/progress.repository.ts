@@ -44,4 +44,5 @@ export class ProgressRepository {
 
     return await this.repo.findOneBy({ userId, lessonId });
   }
+
 }
