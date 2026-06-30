@@ -5,92 +5,66 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { Roles } from 'src/common/decorators/roles/roles.decorator';
 import { RoleEnum } from 'src/common/enums/role.enum';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { AddCourseToLearningPathDto } from './dto/add-course-to-learning-path.dto';
 import { UpdateLearningPathDto } from './dto/update-learning-path.dto';
 import { UpdateCoursePositionDto } from './dto/update-course-position.dto';
 import { Public } from 'src/common/decorators/public.decorator';
+import { LearningPathFollowingResponseDto } from './dto/learning-path-following-response.dto';
 
 @ApiTags('Learning paths')
 @Controller('learning-paths')
 export class LearningPathsController {
-  constructor(private readonly learningPathsService: LearningPathsService) { }
+  constructor(private readonly learningPathsService: LearningPathsService) {}
 
-  // Create a learning path
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post()
-  @ApiOperation({
-    summary: 'Create a learning path',
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Learning path created successfully',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid request data',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized',
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'Forbidden',
-  })
-  async create(
-    @Body() createLearningPathDto: CreateLearningPathDto,
-    @Req() req: any,
-  ) {
-    // req.user is attached by JwtAuthGuard
+  @ApiOperation({ summary: 'Create a learning path' })
+  @ApiBody({ type: CreateLearningPathDto })
+  @ApiResponse({ status: 201, description: 'Learning path created successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async create(@Body() createLearningPathDto: CreateLearningPathDto, @Req() req: any) {
     return this.learningPathsService.create(createLearningPathDto, req.user);
   }
 
-  // Add a course to a learning path
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post(':id/courses')
-  @ApiOperation({
-    summary: 'Add a course to a learning path',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Course added to learning path successfully',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Learning path or course not found',
-  })
+  @ApiOperation({ summary: 'Add a course to a learning path' })
+  @ApiBody({ type: AddCourseToLearningPathDto })
+  @ApiResponse({ status: 200, description: 'Course added to learning path successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Learning path or course not found' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   public async addCourse(
-    @Param('id', ParseIntPipe)
-    learningPathId: number,
-
-    @Body()
-    dto: AddCourseToLearningPathDto,
-
-    @Req()
-    req: any
-
+    @Param('id', ParseIntPipe) learningPathId: number,
+    @Body() dto: AddCourseToLearningPathDto,
+    @Req() req: any,
   ) {
-    return this.learningPathsService.addCourse(learningPathId, dto, req.user)
+    return this.learningPathsService.addCourse(learningPathId, dto, req.user);
   }
 
-  // Remove a course from a learning path
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER)
   @Delete(':id/courses/:courseId')
-  @ApiOperation({
-    summary: 'Remove a course from a learning path',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Course removed from learning path successfully',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Learning path or course not found',
-  })
+  @ApiOperation({ summary: 'Remove a course from a learning path' })
+  @ApiResponse({ status: 200, description: 'Course removed from learning path successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Learning path or course not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   public async removeCourse(
     @Param('id', ParseIntPipe) learningPathId: number,
     @Param('courseId', ParseIntPipe) courseId: number,
@@ -100,70 +74,48 @@ export class LearningPathsController {
 
   @Public()
   @Get()
-  @ApiOperation({
-    summary: 'Get all learning paths',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'List of all learning paths',
-  })
+  @ApiOperation({ summary: 'Get all learning paths' })
+  @ApiResponse({ status: 200, description: 'List of all learning paths' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'No learning paths found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   async getAll() {
     return this.learningPathsService.getAll();
   }
 
-  // Get learning path detail by ID
   @Public()
   @Get(':id')
-  @ApiOperation({
-    summary: 'Get learning path detail by ID',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Learning path details',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Learning path not found',
-  })
+  @ApiOperation({ summary: 'Get learning path detail by ID' })
+  @ApiResponse({ status: 200, description: 'Learning path details' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Learning path not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   async getById(@Param('id', ParseIntPipe) id: number) {
     return this.learningPathsService.getLearningPathById(id);
   }
 
-  // Get courses in a learning path
   @Public()
   @Get(':id/courses')
-  @ApiOperation({
-    summary: 'Get courses in a learning path',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'List of courses in the learning path',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Learning path not found',
-  })
-  public async getCourses(
-    @Param('id', ParseIntPipe) learningPathId: number,
-  ) {
+  @ApiOperation({ summary: 'Get courses in a learning path' })
+  @ApiResponse({ status: 200, description: 'List of courses in the learning path' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 404, description: 'Learning path not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  public async getCourses(@Param('id', ParseIntPipe) learningPathId: number) {
     return this.learningPathsService.getCoursesInLearningPath(learningPathId);
   }
 
-  // update learning path
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER)
   @Patch(':id')
-  @ApiOperation({
-    summary: 'Update a learning path',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Learning path updated successfully',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Learning path or course not found',
-  })
+  @ApiOperation({ summary: 'Update a learning path' })
+  @ApiBody({ type: UpdateLearningPathDto })
+  @ApiResponse({ status: 200, description: 'Learning path updated successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Learning path or course not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   public async updateLearningPath(
     @Param('id', ParseIntPipe) learningPathId: number,
     @Body() dto: UpdateLearningPathDto,
@@ -172,21 +124,17 @@ export class LearningPathsController {
     return this.learningPathsService.updateLearningPath(req.user, learningPathId, dto);
   }
 
-  // update course position in a learning path
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER)
   @Patch(':id/courses/:courseId/position')
-  @ApiOperation({
-    summary: 'Update a course position in a learning path',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Course position updated successfully',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Learning path or course not found',
-  })
+  @ApiOperation({ summary: 'Update a course position in a learning path' })
+  @ApiBody({ type: UpdateCoursePositionDto })
+  @ApiResponse({ status: 200, description: 'Course position updated successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Learning path or course not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   public async updateCoursePos(
     @Param('id', ParseIntPipe) learningPathId: number,
     @Param('courseId', ParseIntPipe) courseId: number,
@@ -196,22 +144,70 @@ export class LearningPathsController {
     return this.learningPathsService.updateCoursePosition(req.user, learningPathId, courseId, dto);
   }
 
-  // Delete a learning path
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.ACADEMIC_MANAGER)
   @Delete(':id')
-  @ApiOperation({
-    summary: 'Delete a learning path',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Learning path deleted successfully',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Learning path not found',
-  })
+  @ApiOperation({ summary: 'Delete a learning path' })
+  @ApiResponse({ status: 200, description: 'Learning path deleted successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Learning path not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   public async deleteLearningPath(@Param('id', ParseIntPipe) id: number) {
     return this.learningPathsService.delete(id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.LEARNER, RoleEnum.COURSE_PROVIDER, RoleEnum.ACADEMIC_MANAGER)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post(':learningPathId')
+  @ApiOperation({ summary: 'Follow a learning path' })
+  @ApiResponse({ status: 200, description: 'Learning path followed successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Learning path not found' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  public async followLearningPath(@Param('learningPathId', ParseIntPipe) learningPathId: number, @Req() req) {
+    return this.learningPathsService.followLearningPathService(learningPathId, req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN, RoleEnum.COURSE_PROVIDER, RoleEnum.ACADEMIC_MANAGER)
+  @Get(':learningPathId/follower')
+  @ApiOperation({ summary: 'View followers of a learning path' })
+  @ApiResponse({ status: 200, description: 'Followers returned successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Learning path not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  public async viewLearningPathFollower(@Param('learningPathId', ParseIntPipe) learningPathId: number) {
+    return this.learningPathsService.viewLearningPathFollower(learningPathId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.LEARNER)
+  @Get('me/following-learning-paths')
+  @ApiOperation({ summary: 'Get learning paths I am following' })
+  @ApiResponse({ status: 200, description: 'Following learning paths returned successfully', type: LearningPathFollowingResponseDto, isArray: true })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async getMyFollowingLearningPaths(@Req() req): Promise<LearningPathFollowingResponseDto[]> {
+    return await this.learningPathsService.getMyFollowingLearningPaths(req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.LEARNER)
+  @Delete('learning-paths/:learningPathId/unfollow')
+  @ApiOperation({ summary: 'Unfollow a learning path' })
+  @ApiResponse({ status: 200, description: 'Learning path unfollowed successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Follow relationship not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  async unfollowLearningPath(@Param('learningPathId', ParseIntPipe) learningPathId: number, @Req() req): Promise<void> {
+    await this.learningPathsService.unfollowLearningPath(learningPathId, req.user.userId);
   }
 }

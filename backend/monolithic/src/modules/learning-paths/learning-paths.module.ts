@@ -8,6 +8,7 @@ import { LearningPathsRepository } from './learning-paths.repository';
 import { CoursesModule } from '../courses/courses.module';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { LearningPathFollow } from './entities/learning-path-follow.entity';
+import { LearningPathFollowRepository } from './learning-path-follow.repository';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { LearningPathFollow } from './entities/learning-path-follow.entity';
     CoursesModule
   ],
   controllers: [LearningPathsController],
-  providers: [LearningPathsService, LearningPathsRepository, CloudinaryService],
+  providers: [LearningPathsService, LearningPathsRepository, CloudinaryService, LearningPathFollowRepository],
   exports: [LearningPathsService, LearningPathsRepository]
 })
 export class LearningPathsModule { }
