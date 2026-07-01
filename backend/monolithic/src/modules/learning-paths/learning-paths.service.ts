@@ -6,16 +6,16 @@ import {
 } from '@nestjs/common';
 import { CreateLearningPathDto } from './dto/create-learning-path.dto';
 import { User } from 'src/modules/users/entities/user.entity';
-import { LearningPathsRepository } from './learning-paths.repository';
+import { LearningPathsRepository } from './repositories/learning-paths.repository';
 import { LearningPath } from './entities/learning-path.entity';
 import { AddCourseToLearningPathDto } from './dto/add-course-to-learning-path.dto';
 import { LearningPathCourse } from './entities/learning-path-course.entity';
-import { CoursesRepository } from '../courses/courses.repository';
+import { CoursesRepository } from '../courses/repositories/courses.repository';
 import { UpdateLearningPathDto } from './dto/update-learning-path.dto';
 import { UpdateCoursePositionDto } from './dto/update-course-position.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CourseStatus } from 'src/common/enums/course.enum';
-import { LearningPathFollowRepository } from './learning-path-follow.repository';
+import { LearningPathFollowRepository } from './repositories/learning-path-follow.repository';
 import { LearningPathFollowingResponseDto } from './dto/learning-path-following-response.dto';
 
 @Injectable()

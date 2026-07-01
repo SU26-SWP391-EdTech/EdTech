@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { Course } from './entities/course.entity';
-import { SearchCourseDto } from './dto/search-course.dto';
+import { Course } from '../entities/course.entity';
+import { SearchCourseDto } from '../dto/search-course.dto';
 import { CourseStatus } from 'src/common/enums/course.enum';
 
 @Injectable()
@@ -115,7 +115,10 @@ export class CoursesRepository extends Repository<Course> {
             .leftJoin('course.user', 'user')
             .addSelect(['user.userId', 'user.fullName', 'user.email', 'user.avatar'])
             .leftJoinAndSelect('course.lessons', 'lessons')
+            .leftJoinAndSelect('course.courseTag', 'courseTag')
+            .leftJoinAndSelect('courseTag.tag', 'tag')
             .where('course.courseId = :id', { id })
+            .orderBy('LOWER(tag.name)', 'ASC')
             .getOne();
     }
 }

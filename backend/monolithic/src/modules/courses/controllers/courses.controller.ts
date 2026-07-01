@@ -13,10 +13,10 @@ import {
   UseInterceptors,
   UseGuards,
 } from '@nestjs/common';
-import { CoursesService } from './courses.service';
-import { CreateCourseDto } from './dto/create-course.dto';
-import { UpdateCourseDto } from './dto/update-course.dto';
-import { SearchCourseDto } from './dto/search-course.dto';
+import { CoursesService } from '../services/courses.service';
+import { CreateCourseDto } from '../dto/create-course.dto';
+import { UpdateCourseDto } from '../dto/update-course.dto';
+import { SearchCourseDto } from '../dto/search-course.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { Roles } from 'src/common/decorators/roles/roles.decorator';
@@ -31,6 +31,7 @@ import {
 } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import { Throttle } from '@nestjs/throttler';
+import { ApproveCourseDto, CourseTagsDto } from '../dto/course-tags.dto';
 
 @ApiTags('Courses')
 @Controller('courses')
@@ -167,7 +168,39 @@ export class CoursesController {
     @Req() req,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.coursesService.update(id, updateCourseDto, req.user.userId, file);
+    return this.coursesService.update(
+      id,
+      updateCourseDto,
+      req.user.userId,
+      file,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ACADEMIC_MANAGER)
+  @Patch(':id/tags')
+  @ApiOperation({ summary: 'Set official course tags' })
+  @ApiResponse({ status: 200, description: 'Course tags updated successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid tags' })
+  @ApiResponse({ status: 404, description: 'Course not found' })
+  updateCourseTags(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() courseTagsDto: CourseTagsDto,
+  ) {
+    return this.coursesService.updateCourseTags(id, courseTagsDto.tags);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ACADEMIC_MANAGER)
+  @Delete(':id/tags/:tagId')
+  @ApiOperation({ summary: 'Remove a tag from a course' })
+  @ApiResponse({ status: 200, description: 'Tag removed from course successfully' })
+  @ApiResponse({ status: 404, description: 'Course or tag not found' })
+  removeCourseTag(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('tagId', ParseIntPipe) tagId: number,
+  ) {
+    return this.coursesService.removeCourseTag(id, tagId);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -199,8 +232,16 @@ export class CoursesController {
     description: 'Forbidden - requires Academic Manager role',
   })
   @ApiResponse({ status: 404, description: 'Course or Reviewer not found' })
-  approveCourse(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
-    return this.coursesService.approveCourse(id, req.user.userId);
+  approveCourse(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: any,
+    @Body() approveCourseDto: ApproveCourseDto,
+  ) {
+    return this.coursesService.approveCourse(
+      id,
+      req.user.userId,
+      approveCourseDto.tags,
+    );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
