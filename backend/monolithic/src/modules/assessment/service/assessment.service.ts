@@ -3,12 +3,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { AssessmentRepository } from './assessment.repository';
-import { Assessment } from './entities/assessment.entity';
-import { CreateAssessmentDto } from './dto/create-assessment.dto';
-import { CoursesService } from '../courses/courses.service';
-import { LessonsService } from '../lessons/service/lessons.service';
-import { Lesson } from '../lessons/entities/lesson.entity';
+import { AssessmentRepository } from '../repository/assessment.repository';
+import { Assessment } from '../entities/assessment.entity';
+import { CreateAssessmentDto } from '../dto/create-assessment.dto';
+import { CoursesService } from '../../courses/courses.service';
+import { LessonsService } from '../../lessons/service/lessons.service';
+import { Lesson } from '../../lessons/entities/lesson.entity';
 
 @Injectable()
 export class AssessmentService {
@@ -19,12 +19,12 @@ export class AssessmentService {
   ) { }
 
   // Create a new assessment
-  async createService(createAssessmentDto: CreateAssessmentDto): Promise<Assessment> {
+  async createService(userId: number, createAssessmentDto: CreateAssessmentDto): Promise<Assessment> {
     const { courseId, lessonId, title, type } = createAssessmentDto;
 
     // 1. Verify course exists
-    const course = await this.courseService.findCourseByIdService(courseId);
-
+    const course = await this.courseService.validateCourseOwner(userId, courseId);
+    
     let lesson: Lesson | null = null;
     // 2. Verify lesson exists and belongs to the course if provided
     if (lessonId) {
