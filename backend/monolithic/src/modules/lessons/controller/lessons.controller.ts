@@ -44,7 +44,7 @@ export class LessonsController {
     private readonly lessonPrerequisiteService: LessonPrerequisiteService,
   ) {}
 
-  @Post(':id')
+  @Post(':courseId')
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.COURSE_PROVIDER)
@@ -57,7 +57,7 @@ export class LessonsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   async create(
-    @Param('id', ParseIntPipe) courseId: number,
+    @Param('courseId', ParseIntPipe) courseId: number,
     @Body() createLessonDto: CreateLessonDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {

@@ -44,12 +44,10 @@ export class CoursesService {
       throw new NotFoundException('User not found');
     }
 
-
     if (file) {
       const uploaded = await this.cloudinaryService.uploadImage(file);
       createCourseDto.thumbnailUrl = uploaded.secure_url;
     }
-
 
     return this.coursesRepository.createCourse({
       ...createCourseDto,
@@ -296,7 +294,11 @@ export class CoursesService {
     return this.tagsService.removeTagFromCourse(courseId, tagId);
   }
 
-  public async rejectCourse(id: number, reviewerId: number, reason?: string): Promise<Course> {
+  public async rejectCourse(
+    id: number,
+    reviewerId: number,
+    reason?: string,
+  ): Promise<Course> {
     const course = await this.coursesRepository.findCourseById(id);
 
     if (!course) {
@@ -353,6 +355,22 @@ export class CoursesService {
     if (!course) {
       throw new NotFoundException(`Not found course with ID ${courseId}`);
     }
+    return course;
+  }
+
+  async validateCourseOwner(userId: number, courseId: number): Promise<Course> {
+    const course = await this.coursesRepository.findCourseById(courseId);
+
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+
+    if (course.user.userId !== userId) {
+      throw new ForbiddenException(
+        'You do not have permission to access this course',
+      );
+    }
+
     return course;
   }
 }
