@@ -14,7 +14,7 @@ import { CloudinaryService } from 'src/modules/cloudinary/cloudinary.service';
 import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
 import { Enrollment } from 'src/modules/enrollments/entities/enrollment.entity';
 import { RoleEnum } from 'src/common/enums/role.enum';
-import { CoursesService } from 'src/modules/courses/courses.service';
+import { CoursesService } from 'src/modules/courses/services/courses.service';
 import { LessonPrerequisiteService } from './lesson-prerequisite.service';
 
 @Injectable()

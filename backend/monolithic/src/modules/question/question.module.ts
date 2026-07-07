@@ -9,18 +9,17 @@ import { AssessmentService } from '../assessment/service/assessment.service';
 import { QuestionRepository } from './question.repository';
 import { LessonsRepository } from '../lessons/repository/lessons.repository';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
-import { CoursesService } from '../courses/courses.service';
 import { EnrollmentsRepository } from '../enrollments/enrollments.repository';
 import { Enrollment } from '../enrollments/entities/enrollment.entity';
 import { Assessment } from '../assessment/entities/assessment.entity';
 import { AssessmentRepository } from '../assessment/repository/assessment.repository';
 import { Lesson } from '../lessons/entities/lesson.entity';
 import { Course } from '../courses/entities/course.entity';
-import { CoursesRepository } from '../courses/courses.repository';
 import { User } from '../users/entities/user.entity';
 import { QuestionOptionRepository } from './question-option.repository';
 import { LessonPrerequisite } from '../lessons/entities/lesson-prerequisite.entity';
 import { LessonsModule } from '../lessons/lessons.module';
+import { CoursesModule } from '../courses/courses.module';
 
 @Module({
   imports: [
@@ -34,7 +33,8 @@ import { LessonsModule } from '../lessons/lessons.module';
       User,
       LessonPrerequisite,
     ]),
-    LessonsModule
+    LessonsModule,
+    CoursesModule,
   ],
   controllers: [QuestionController],
   providers: [
@@ -44,10 +44,8 @@ import { LessonsModule } from '../lessons/lessons.module';
     QuestionRepository,
     LessonsRepository,
     CloudinaryService,
-    CoursesService,
     EnrollmentsRepository,
     AssessmentRepository,
-    CoursesRepository,
     QuestionOptionRepository,
   ],
   exports: [
