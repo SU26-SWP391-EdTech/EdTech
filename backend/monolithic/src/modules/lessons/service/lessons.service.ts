@@ -6,17 +6,16 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LessonsRepository } from './lessons.repository';
-import { CreateLessonDto } from './dto/create-lesson.dto';
-import { UpdateLessonDto } from './dto/update-lesson.dto';
-import { Lesson } from './entities/lesson.entity';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { LessonsRepository } from '../repository/lessons.repository';
+import { CreateLessonDto } from '../dto/create-lesson.dto';
+import { UpdateLessonDto } from '../dto/update-lesson.dto';
+import { Lesson } from '../entities/lesson.entity';
+import { CloudinaryService } from 'src/modules/cloudinary/cloudinary.service';
 import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
-import { Enrollment } from '../enrollments/entities/enrollment.entity';
+import { Enrollment } from 'src/modules/enrollments/entities/enrollment.entity';
 import { RoleEnum } from 'src/common/enums/role.enum';
-import { CoursesService } from '../courses/courses.service';
-
-import { LessonPrerequisite } from './entities/lesson-prerequisite.entity';
+import { CoursesService } from 'src/modules/courses/services/courses.service';
+import { LessonPrerequisiteService } from './lesson-prerequisite.service';
 
 @Injectable()
 export class LessonsService {
@@ -26,11 +25,10 @@ export class LessonsService {
     private readonly courseService: CoursesService,
     @InjectRepository(Enrollment)
     private readonly enrollmentsRepo: Repository<Enrollment>,
-    @InjectRepository(LessonPrerequisite)
-    private readonly lessonPrerequisiteRepo: Repository<LessonPrerequisite>,
+    private readonly lessonPrerequisiteService: LessonPrerequisiteService,
   ) { }
 
-  async create(
+  public async create(
     id: number,
     dto: CreateLessonDto,
     file?: Express.Multer.File,
@@ -81,13 +79,7 @@ export class LessonsService {
     }
 
     if (prIds.length > 0) {
-      const prerequisiteEntities = prIds.map(prId => {
-        const item = new LessonPrerequisite();
-        item.targetLessonId = lesson.lessonId;
-        item.prerequisiteLessonId = prId;
-        return item;
-      });
-      await this.lessonPrerequisiteRepo.save(prerequisiteEntities);
+      await this.lessonPrerequisiteService.createPrerequisitesService(lesson.lessonId, prIds);
     }
 
     return await this.findOne(lesson.lessonId);
@@ -215,19 +207,7 @@ export class LessonsService {
     }
 
     if (shouldUpdatePrerequisites) {
-      // Xóa tất cả các bài học tiên quyết cũ
-      await this.lessonPrerequisiteRepo.delete({ targetLessonId: lessonId });
-
-      // Thêm mới các bài học tiên quyết nếu danh sách không rỗng
-      if (prIds.length > 0) {
-        const prerequisiteEntities = prIds.map(prId => {
-          const item = new LessonPrerequisite();
-          item.targetLessonId = lessonId;
-          item.prerequisiteLessonId = prId;
-          return item;
-        });
-        await this.lessonPrerequisiteRepo.save(prerequisiteEntities);
-      }
+      await this.lessonPrerequisiteService.updatePrerequisitesForLesson(lessonId, prIds);
     }
 
     await this.lessonsRepo.save(lesson);

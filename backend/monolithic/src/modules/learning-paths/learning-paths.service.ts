@@ -6,15 +6,17 @@ import {
 } from '@nestjs/common';
 import { CreateLearningPathDto } from './dto/create-learning-path.dto';
 import { User } from 'src/modules/users/entities/user.entity';
-import { LearningPathsRepository } from './learning-paths.repository';
+import { LearningPathsRepository } from './repositories/learning-paths.repository';
 import { LearningPath } from './entities/learning-path.entity';
 import { AddCourseToLearningPathDto } from './dto/add-course-to-learning-path.dto';
 import { LearningPathCourse } from './entities/learning-path-course.entity';
-import { CoursesRepository } from '../courses/courses.repository';
+import { CoursesRepository } from '../courses/repositories/courses.repository';
 import { UpdateLearningPathDto } from './dto/update-learning-path.dto';
 import { UpdateCoursePositionDto } from './dto/update-course-position.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CourseStatus } from 'src/common/enums/course.enum';
+import { LearningPathFollowRepository } from './repositories/learning-path-follow.repository';
+import { LearningPathFollowingResponseDto } from './dto/learning-path-following-response.dto';
 
 @Injectable()
 export class LearningPathsService {
@@ -22,6 +24,7 @@ export class LearningPathsService {
     private readonly learningPathsRepository: LearningPathsRepository,
     private readonly courseRepository: CoursesRepository,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly learningPathFollowRepo: LearningPathFollowRepository,
   ) { }
 
   async create(
@@ -213,5 +216,50 @@ export class LearningPathsService {
     }
     await this.learningPathsRepository.delete(id);
     return { message: 'Learning path deleted successfully' };
+  }
+
+  public async followLearningPathService(learningPathId: number, userId: number){
+    return await this.learningPathFollowRepo.followLearningPath(learningPathId, userId);
+  }
+
+  public async viewLearningPathFollower(learningPathId: number){
+    return await this.learningPathFollowRepo.viewLearningPathFollower(learningPathId);
+  }
+
+  async getMyFollowingLearningPaths(
+    userId: number,
+  ): Promise<LearningPathFollowingResponseDto[]> {
+  
+    const learningPaths =
+      await this.learningPathFollowRepo.findFollowingLearningPaths(
+        userId,
+      );
+  
+    return learningPaths.map(
+      lp => new LearningPathFollowingResponseDto(lp),
+    );
+  }
+
+  async unfollowLearningPath(
+    learningPathId: number,
+    userId: number,
+  ): Promise<void> {
+  
+    const follow =
+      await this.learningPathFollowRepo.findFollow(
+        learningPathId,
+        userId,
+      );
+  
+    if (!follow) {
+      throw new NotFoundException(
+        'You are not following this learning path',
+      );
+    }
+  
+    await this.learningPathFollowRepo.deleteFollow(
+      learningPathId,
+      userId,
+    );
   }
 }

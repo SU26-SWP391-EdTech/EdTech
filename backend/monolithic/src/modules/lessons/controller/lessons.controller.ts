@@ -13,25 +13,38 @@ import {
   Req,
   Query,
 } from '@nestjs/common';
-import { LessonsService } from './lessons.service';
-import { CreateLessonDto } from './dto/create-lesson.dto';
-import { UpdateLessonDto } from './dto/update-lesson.dto';
+import { LessonsService } from '../service/lessons.service';
+import { LessonPrerequisiteService } from '../service/lesson-prerequisite.service';
+import { CreateLessonDto } from '../dto/create-lesson.dto';
+import { UpdateLessonDto } from '../dto/update-lesson.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { Roles } from 'src/common/decorators/roles/roles.decorator';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { Public } from 'src/common/decorators/public.decorator';
+import { UpdateLessonPrerequisitesDto } from '../dto/update-lesson-prerequisites.dto';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import type { JwtPayloadUser } from 'src/common/decorators/current-user.decorator';
 
 @ApiTags('Lessons')
 @Controller('lessons')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class LessonsController {
-  constructor(private readonly lessonsService: LessonsService) { }
+  constructor(
+    private readonly lessonsService: LessonsService,
+    private readonly lessonPrerequisiteService: LessonPrerequisiteService,
+  ) {}
 
-  @Post(':id')
+  @Post(':courseId')
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.COURSE_PROVIDER)
@@ -43,7 +56,11 @@ export class LessonsController {
   @ApiResponse({ status: 400, description: 'Invalid request data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  async create(@Param('id', ParseIntPipe) courseId: number, @Body() createLessonDto: CreateLessonDto, @UploadedFile() file?: Express.Multer.File) {
+  async create(
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Body() createLessonDto: CreateLessonDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
     return await this.lessonsService.create(courseId, createLessonDto, file);
   }
 
@@ -83,7 +100,12 @@ export class LessonsController {
     @Body() updateLessonDto: UpdateLessonDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    return await this.lessonsService.update(courseId, lessonId, updateLessonDto, file);
+    return await this.lessonsService.update(
+      courseId,
+      lessonId,
+      updateLessonDto,
+      file,
+    );
   }
 
   @Delete(':id')
@@ -96,5 +118,35 @@ export class LessonsController {
   @ApiResponse({ status: 404, description: 'Lesson not found' })
   async remove(@Param('id', ParseIntPipe) id: number) {
     return await this.lessonsService.remove(id);
+  }
+
+  // course provider will create lesson prerequisites
+  @Post(':lessonId/prerequisites')
+  @Roles(RoleEnum.COURSE_PROVIDER)
+  @ApiOperation({ summary: 'Update prerequisite lessons for a lesson' })
+  @ApiBody({ type: UpdateLessonPrerequisitesDto })
+  public async updatePrerequisites(
+    @Param('lessonId', ParseIntPipe)
+    lessonId: number,
+
+    @Body()
+    updateLessonPrerequisitesDto: UpdateLessonPrerequisitesDto,
+
+    @CurrentUser()
+    user: JwtPayloadUser,
+  ) {
+    return await this.lessonPrerequisiteService.updatePrerequisitesService(
+      lessonId,
+      updateLessonPrerequisitesDto,
+      user.userId,
+    );
+  }
+
+  @Get(':lessonId/milestones')
+  @ApiOperation({ summary: 'Get prerequisite by lesson Id' })
+  public async getMilestonesByLessonId(
+    @Param('lessonId', ParseIntPipe) lessonId: number,
+  ) {
+    return this.lessonPrerequisiteService.getPrerequisitesByLessonIdService(lessonId);
   }
 }

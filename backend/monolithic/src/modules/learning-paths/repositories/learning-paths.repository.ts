@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
-import { LearningPath } from './entities/learning-path.entity';
-import { CreateLearningPathDto } from './dto/create-learning-path.dto';
+import { LearningPath } from '../entities/learning-path.entity';
+import { CreateLearningPathDto } from '../dto/create-learning-path.dto';
 import { User } from 'src/modules/users/entities/user.entity';
-import { LearningPathCourse } from './entities/learning-path-course.entity';
-import { UpdateLearningPathDto } from './dto/update-learning-path.dto';
+import { LearningPathCourse } from '../entities/learning-path-course.entity';
+import { UpdateLearningPathDto } from '../dto/update-learning-path.dto';
 import { CourseStatus } from 'src/common/enums/course.enum';
 
 @Injectable()

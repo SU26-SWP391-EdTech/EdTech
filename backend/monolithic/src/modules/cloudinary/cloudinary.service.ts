@@ -9,6 +9,7 @@ export class CloudinaryService {
     const apiKey = this.configService.get<string>('CLOUDINARY_API_KEY');
     const apiSecret = this.configService.get<string>('CLOUDINARY_API_SECRET');
 
+
     if (!cloudName || !apiKey || !apiSecret) {
       throw new Error(
         'Missing Cloudinary env vars: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET',
@@ -27,7 +28,6 @@ export class CloudinaryService {
   }
 
   public async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
-    console.log(file);
     return new Promise((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
