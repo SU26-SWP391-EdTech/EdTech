@@ -6,9 +6,9 @@ import {
 import { AssessmentRepository } from '../repository/assessment.repository';
 import { Assessment } from '../entities/assessment.entity';
 import { CreateAssessmentDto } from '../dto/create-assessment.dto';
-import { CoursesService } from '../../courses/courses.service';
-import { LessonsService } from '../../lessons/service/lessons.service';
-import { Lesson } from '../../lessons/entities/lesson.entity';
+import { CoursesService } from 'src/modules/courses/services/courses.service';
+import { LessonsService } from 'src/modules/lessons/service/lessons.service';
+import { Lesson } from 'src/modules/lessons/entities/lesson.entity';
 
 @Injectable()
 export class AssessmentService {

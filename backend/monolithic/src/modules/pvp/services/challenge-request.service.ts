@@ -4,14 +4,14 @@ import { PvpMatchStatus } from 'src/common/enums/pvp-match-status.enum';
 import { DataSource, EntityManager } from 'typeorm';
 import { ChallengeRequest } from '../entities/challenge-request.entity';
 import { PvpMatch } from '../entities/pvp-match.entity';
-import { ChallengeRequestRepository } from '../repository/challenge-request.repository';
+import { ChallengeRequestRepository } from '../repositories/challenge-request.repository';
 
 @Injectable()
 export class ChallengeRequestService {
   constructor(
     private readonly challengeRequestRepository: ChallengeRequestRepository,
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   /**
    * Find a match for the learner.

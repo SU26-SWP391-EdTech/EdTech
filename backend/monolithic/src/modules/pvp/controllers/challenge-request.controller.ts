@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Param, Body, Req, UseGuards, ParseIntPipe, HttpCode, HttpStatus } from '@nestjs/common';
-import { ChallengeRequestService } from '../service/challenge-request.service';
+import { ChallengeRequestService } from '../services/challenge-request.service';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { Roles } from 'src/common/decorators/roles/roles.decorator';
