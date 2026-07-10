@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChallengeStatus } from 'src/common/enums/challenge-status.enum';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { ChallengeRequest } from '../entities/challenge-request.entity';
 
 @Injectable()
@@ -11,6 +11,10 @@ export class ChallengeRequestRepository {
       @InjectRepository(ChallengeRequest)
       private readonly challengeRepo: Repository<ChallengeRequest>,
     ) {}
+
+    get manager(): EntityManager {
+      return this.challengeRepo.manager;
+    }
 
     public async findPendingChallenge(
         player1Id: number,
