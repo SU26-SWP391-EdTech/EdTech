@@ -15,7 +15,7 @@ import type { JwtPayloadUser } from 'src/common/decorators/current-user.decorato
 export class ChallengeRequestController {
   constructor(private readonly challengeRequestService: ChallengeRequestService) { }
 
-  @Post()
+  @Post(':userId')
   @Roles(RoleEnum.LEARNER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Find or create a matchmaking challenge request' })
@@ -26,8 +26,10 @@ export class ChallengeRequestController {
 
     @Body('assessmentId', ParseIntPipe)
     assessmentId: number,
+
+    @Param('userId', ParseIntPipe) userId: number,
   ) {
-    return this.challengeRequestService.findOrCreateChallenge(user.userId, assessmentId);
+    return this.challengeRequestService.challengeRequests(assessmentId, userId, user.userId);
   }
 
   @Get(':challengeId')

@@ -77,9 +77,12 @@ export class PvpGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() challengeRequestDto: ChallengeRequestDto,
   ) {
+
+    const { assessmentId, receiverId } = challengeRequestDto;
     await this.handleSocketAction(client, async () => {
       await this.challengeRequestService.challengeRequests(
-        challengeRequestDto,
+        assessmentId,
+        receiverId,
         client.data.user.userId,
       );
     });
