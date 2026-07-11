@@ -26,6 +26,6 @@ import { PlatformSettingsModule } from '../platform-settings/platform-settings.m
   ],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthService],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}
