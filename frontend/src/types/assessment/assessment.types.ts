@@ -8,13 +8,13 @@ export interface AssessmentQuestion {
     type: 'single-choice' | 'multiple-choice';
     content: string;
     options: AssessmentOption[];
+    points?: number;
 }
 
 export interface AssessmentAttempt {
     id?: number;
     date: string;
     score: number;
-    passed: boolean;
     duration: string;
 }
 
@@ -23,14 +23,11 @@ export interface AssessmentMetadata {
     title: string;
     description: string;
     timeLimit: number; // in minutes (0 for unlimited)
-    passScore: number; // out of 100
     questionCount: number;
-    difficulty: string;
     course: string;
     attempts: number;
     bestScore: number;
-    topics: string[];
-    xpReward: number;
+    pointsReward: number;
 }
 
 export interface AnswerReviewItem {
@@ -46,13 +43,11 @@ export interface AnswerReviewItem {
 
 export interface AssessmentResultSummary {
     score: number;
-    passScore: number;
-    isPassed: boolean;
     totalQuestions: number;
     correctCount: number;
     incorrectCount: number;
     duration: string;
     assessment: string;
     submittedAt: string;
-    xpEarned: number;
+    pointsEarned: number;
 }

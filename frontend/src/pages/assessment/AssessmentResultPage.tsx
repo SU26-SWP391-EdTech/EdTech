@@ -44,36 +44,14 @@ export function AssessmentResultPage({ lessonId, onRetry, onExit }: AssessmentRe
             {/* Result Banner Summary */}
             <div style={{ background: '#FFFFFF', borderBottom: '1px solid #E5E7EB', padding: '28px 32px' }}>
                 <div style={{ maxWidth: 1000, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 32 }}>
-                    <ScoreRing score={r.score} passScore={r.passScore} passed={r.isPassed} size={150} />
+                    <ScoreRing score={r.score} size={150} />
 
                     <div style={{ flex: 1 }}>
-                        {/* Pass/Fail Status Badge */}
-                        <div 
-                            style={{ 
-                                display: 'inline-flex', 
-                                alignItems: 'center', 
-                                gap: 7, 
-                                padding: '5px 14px', 
-                                borderRadius: 20, 
-                                marginBottom: 12, 
-                                background: r.isPassed ? '#F0FDF4' : '#FFF1F3', 
-                                border: `1px solid ${r.isPassed ? '#BBF7D0' : '#FECDD3'}` 
-                            }}
-                        >
-                            {r.isPassed
-                                ? <CheckCircle2 size={14} style={{ color: '#16A34A' }} />
-                                : <XCircle size={14} style={{ color: '#E11D48' }} />
-                            }
-                            <span style={{ fontSize: 13, fontWeight: 700, color: r.isPassed ? '#16A34A' : '#E11D48' }}>
-                                {r.isPassed ? 'ĐẠT YÊU CẦU' : 'CHƯA ĐẠT'}
-                            </span>
-                        </div>
-
                         <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111827', marginBottom: 4, lineHeight: 1.3 }}>
-                            {r.isPassed ? 'Chúc mừng! Bạn đã vượt qua bài kiểm tra 🎉' : 'Bạn chưa đạt điểm tối thiểu. Hãy ôn tập lại nhé!'}
+                            Bạn đã hoàn thành bài kiểm tra! 
                         </h1>
                         <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 16 }}>
-                            {r.assessment} · Nộp lúc {r.submittedAt}
+                            Nộp lúc {r.submittedAt}
                         </p>
 
                         {/* Stats Row */}
@@ -82,7 +60,6 @@ export function AssessmentResultPage({ lessonId, onRetry, onExit }: AssessmentRe
                                 { label: 'Câu đúng', value: `${r.correctCount}/${r.totalQuestions}`, color: '#16A34A' },
                                 { label: 'Câu sai', value: `${r.incorrectCount}`, color: '#E11D48' },
                                 { label: 'Thời gian', value: r.duration, color: '#6B7280' },
-                                { label: 'Điểm cần đạt', value: `${r.passScore}/100`, color: '#D97706' },
                             ].map((st, i) => (
                                 <div key={i}>
                                     <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 2, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -93,12 +70,12 @@ export function AssessmentResultPage({ lessonId, onRetry, onExit }: AssessmentRe
                             ))}
                         </div>
 
-                        {/* XP Rewards banner */}
-                        {r.isPassed && (
+                        {/* Points Rewards banner */}
+                        {r.pointsEarned > 0 && (
                             <div style={{ marginTop: 16, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '9px 16px', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 9 }}>
                                 <Zap size={16} style={{ color: '#D97706' }} />
-                                <span style={{ fontSize: 15, fontWeight: 700, color: '#D97706' }}>+{r.xpEarned} XP</span>
-                                <span style={{ fontSize: 12.5, color: '#374151' }}>đã được cộng vào tài khoản của bạn</span>
+                                <span style={{ fontSize: 15, fontWeight: 700, color: '#D97706' }}>+{r.pointsEarned} Points</span>
+                                <span style={{ fontSize: 12.5, color: '#374151' }}>đã được tích lũy vào tài khoản của bạn</span>
                             </div>
                         )}
                     </div>
@@ -119,12 +96,12 @@ export function AssessmentResultPage({ lessonId, onRetry, onExit }: AssessmentRe
                                 style={{
                                     padding: '6px 14px', 
                                     borderRadius: 7,
-                                    border: `1px solid ${filter === f ? (f === 'correct' ? '#16A34A' : f === 'incorrect' ? '#E11D48' : '#E11D48') : '#E5E7EB'}`,
-                                    background: filter === f ? (f === 'correct' ? '#F0FDF4' : f === 'incorrect' ? '#FFF1F3' : '#FFF1F3') : '#FFFFFF',
+                                    border: `1px solid ${filter === f ? (f === 'correct' ? '#16A34A' : f === 'incorrect' ? '#E11D48' : '#4F46E5') : '#E5E7EB'}`,
+                                    background: filter === f ? (f === 'correct' ? '#F0FDF4' : f === 'incorrect' ? '#FFF1F3' : '#EEF2FF') : '#FFFFFF',
                                     cursor: 'pointer', 
                                     fontSize: 12.5, 
                                     fontWeight: 600,
-                                    color: filter === f ? (f === 'correct' ? '#16A34A' : '#E11D48') : '#6B7280',
+                                    color: filter === f ? (f === 'correct' ? '#16A34A' : f === 'incorrect' ? '#E11D48' : '#4F46E5') : '#6B7280',
                                 }}
                             >
                                 {f === 'all' 
@@ -148,12 +125,6 @@ export function AssessmentResultPage({ lessonId, onRetry, onExit }: AssessmentRe
                     style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 20px', background: '#F8FAFC', border: '1px solid #E5E7EB', borderRadius: 9, cursor: 'pointer', fontSize: 13.5, color: '#6B7280', fontWeight: 600 }}
                 >
                     <RotateCcw size={14} /> Làm lại bài thi
-                </button>
-                <button 
-                    onClick={onExit} 
-                    style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 20px', background: '#E11D48', border: 'none', borderRadius: 9, cursor: 'pointer', fontSize: 13.5, fontWeight: 700, color: '#fff' }}
-                >
-                    <LayoutDashboard size={14} /> Về Dashboard
                 </button>
             </div>
         </div>

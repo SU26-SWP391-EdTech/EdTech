@@ -2,12 +2,11 @@ import { Clock, Target, FileQuestion, Zap } from 'lucide-react';
 
 interface AssessmentStatsGridProps {
     timeLimit: number;
-    passScore: number;
     questionCount: number;
-    xpReward: number;
+    pointsReward: number;
 }
 
-export function AssessmentStatsGrid({ timeLimit, passScore, questionCount, xpReward }: AssessmentStatsGridProps) {
+export function AssessmentStatsGrid({ timeLimit, questionCount, pointsReward }: AssessmentStatsGridProps) {
     const stats = [
         { 
             icon: <Clock size={20} />, 
@@ -15,13 +14,6 @@ export function AssessmentStatsGrid({ timeLimit, passScore, questionCount, xpRew
             value: timeLimit === 0 ? 'Không giới hạn' : `${timeLimit} phút`, 
             color: '#D97706', 
             bg: '#FFFBEB' 
-        },
-        { 
-            icon: <Target size={20} />, 
-            label: 'Điểm đạt', 
-            value: `${passScore}/100`, 
-            color: '#059669', 
-            bg: '#ECFDF5' 
         },
         { 
             icon: <FileQuestion size={20} />, 
@@ -32,15 +24,15 @@ export function AssessmentStatsGrid({ timeLimit, passScore, questionCount, xpRew
         },
         { 
             icon: <Zap size={20} />, 
-            label: 'XP thưởng', 
-            value: `+${xpReward} XP`, 
+            label: 'Tổng điểm', 
+            value: `${pointsReward} Points`, 
             color: '#4F46E5', 
             bg: '#EEF2FF' 
         },
     ];
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
             {stats.map((stat, i) => (
                 <div 
                     key={i} 
