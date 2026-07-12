@@ -4,11 +4,11 @@ import { LearningPath } from './entities/learning-path.entity';
 import { LearningPathCourse } from './entities/learning-path-course.entity';
 import { LearningPathsController } from './learning-paths.controller';
 import { LearningPathsService } from './learning-paths.service';
-import { LearningPathsRepository } from './learning-paths.repository';
+import { LearningPathsRepository } from './repositories/learning-paths.repository';
 import { CoursesModule } from '../courses/courses.module';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { LearningPathFollow } from './entities/learning-path-follow.entity';
-import { LearningPathFollowRepository } from './learning-path-follow.repository';
+import { LearningPathFollowRepository } from './repositories/learning-path-follow.repository';
 
 @Module({
   imports: [

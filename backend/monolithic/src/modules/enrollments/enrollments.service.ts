@@ -114,4 +114,15 @@ export class EnrollmentsService {
     return enrollment;
   }
 
+  async checkEnrollment(userId: number, courseId: number) : Promise<Boolean>{
+    const enrollment = await this.enrollmentsRepo.findByUserAndCourse(userId, courseId);
+
+    if(!enrollment){
+      throw new NotFoundException(`You have not enrolled in this course!`);
+      return false;
+    }
+
+    return true;
+  }
+
 }
