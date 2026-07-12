@@ -103,19 +103,29 @@ export function useLessonPersistence({
             const nextLessonId = Number(saved.lessonId);
 
             // Persist assessments to localStorage and attempt to save to backend API
-            localStorage.setItem(`assessments_lesson_${nextLessonId}`, JSON.stringify(form.assessments));
+            const savedAssessments = [];
             for (const ass of form.assessments) {
                 try {
-                    await api.post('/assessment', {
+                    const response = await api.post('/assessment', {
                         courseId: data.selectedCourseId,
                         lessonId: nextLessonId,
                         title: ass.title,
                         type: ass.type,
                     });
+                    if (response.data && response.data.assessmentId) {
+                        savedAssessments.push({
+                            ...ass,
+                            assessmentId: response.data.assessmentId
+                        });
+                    } else {
+                        savedAssessments.push(ass);
+                    }
                 } catch (apiErr) {
                     console.warn('Failed to save assessment to backend API:', apiErr);
+                    savedAssessments.push(ass);
                 }
             }
+            localStorage.setItem(`assessments_lesson_${nextLessonId}`, JSON.stringify(savedAssessments));
 
             if (existingId) {
                 await updateCourse(data.selectedCourseId, { status: 'draft' });

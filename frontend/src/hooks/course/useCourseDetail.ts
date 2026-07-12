@@ -10,6 +10,23 @@ import { getAcademicProfile } from '../../services/user/user.service';
 import api from '../../lib/axios';
 
 function getLessonType(lesson: any) {
+  if (lesson.type === 'Assessment') return 'Assessment';
+  if (lesson.hasAssessment) return 'Assessment';
+  if (lesson.assessments && lesson.assessments.length > 0) return 'Assessment';
+
+  const lessonId = lesson.lessonId || lesson.id;
+  if (lessonId) {
+    const savedAss = localStorage.getItem(`assessments_lesson_${lessonId}`);
+    if (savedAss) {
+      try {
+        const parsed = JSON.parse(savedAss);
+        if (parsed && parsed.length > 0) {
+          return 'Assessment';
+        }
+      } catch (e) {}
+    }
+  }
+
   const hasVideo = Boolean(lesson.videoUrl);
   const hasReading = Boolean(lesson.content);
 
@@ -20,6 +37,7 @@ function getLessonType(lesson: any) {
 }
 
 function getLessonDurationMinutes(lesson: any) {
+  if (getLessonType(lesson) === 'Assessment') return 15;
   const hasVideo = Boolean(lesson.videoUrl);
   const hasReading = Boolean(lesson.content);
   const videoMin = lesson.videoDuration ? Math.round(Number(lesson.videoDuration) / 60) : 0;
@@ -275,6 +293,7 @@ export function useCourseDetail() {
           content: l.content || '',
           hasVideo: Boolean(l.videoUrl),
           hasReading: Boolean(l.content),
+          hasAssessment: getLessonType(l) === 'Assessment',
           prerequisites: l.prerequisites || [],
         };
       }),
