@@ -237,6 +237,27 @@ export class AssessmentService {
             }
         }
 
+        if (lesson) {
+            try {
+                const targetCourseId = lesson.courseId || 8;
+                const response = await api.get(`/question/courses/${targetCourseId}/lesson/${lessonId}/questions`);
+                if (response.data && response.data.length > 0) {
+                    return response.data.map((q: any, idx: number) => ({
+                        id: q.questionId || idx + 1,
+                        type: q.type === 'MULTIPLE_CHOICE_MULTI' ? 'multiple-choice' : 'single-choice',
+                        content: q.content,
+                        points: q.points ? Number(q.points) : 10,
+                        options: (q.options || []).map((opt: any) => ({
+                            id: opt.optionId || opt.id || String(Math.random()),
+                            text: opt.content,
+                        }))
+                    }));
+                }
+            } catch (err) {
+                console.warn('Failed to fetch questions directly via QuestionController:', err);
+            }
+        }
+
         try {
             const response = await api.get(`/assessment/lesson/${lessonId}/questions`);
             return response.data;
