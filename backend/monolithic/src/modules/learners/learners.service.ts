@@ -17,7 +17,7 @@ export class LearnersService {
     @InjectRepository(Learner)
     private learnerRepository: Repository<Learner>,
     private cloudinaryService: CloudinaryService,
-    
+
     private learnerRepo: LearnerRepository
   ) { }
 
@@ -141,7 +141,7 @@ export class LearnersService {
 
   public async getLearnerProfileById(userId: number): Promise<Learner> {
     const learner = await this.learnerRepo.findLeanerById(userId);
-    if(!learner) {
+    if (!learner) {
       throw new NotFoundException("Can not find leaner profile by " + userId);
     }
     return learner;

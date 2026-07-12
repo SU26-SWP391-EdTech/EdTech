@@ -26,6 +26,7 @@ export class LessonsRepository {
           },
         },
         prerequisites: true,
+        assessments: true,
       },
     });
   }
@@ -68,7 +69,7 @@ export class LessonsRepository {
       where: {
         course: { courseId },
       },
-      relations: ['prerequisites'],
+      relations: ['prerequisites', 'course', 'assessments'],
       order: {
         position: 'ASC',
       },
