@@ -46,20 +46,6 @@ export function AssessmentDetailPage({ lessonId, onStartQuiz }: AssessmentDetail
                         pointsReward={a.pointsReward} 
                     />
 
-                    {/* Rules */}
-                    <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 16, padding: '20px 24px', display: 'flex', gap: 14 }}>
-                        <AlertCircle size={20} style={{ color: '#D97706', flexShrink: 0, marginTop: 1 }} />
-                        <div style={{ fontSize: 14, color: '#92400E', lineHeight: 1.6 }}>
-                            <strong style={{ color: '#92400E', fontWeight: 700 }}>Lưu ý trước khi làm bài:</strong>
-                            <ul style={{ margin: '8px 0 0', paddingLeft: 20 }}>
-                                <li>Đồng hồ đếm ngược sẽ bắt đầu ngay khi bạn nhấn "Bắt đầu làm bài".</li>
-                                <li>Không thể tạm dừng bài thi sau khi đã bắt đầu.</li>
-                                <li>Câu hỏi chưa trả lời được tính là sai khi hết giờ.</li>
-                                <li>Bạn có thể quay lại các câu đã làm trong phiên thi.</li>
-                            </ul>
-                        </div>
-                    </div>
-
                     {/* Previous attempts */}
                     {attempts.length > 0 && (
                         <div style={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 16, padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
