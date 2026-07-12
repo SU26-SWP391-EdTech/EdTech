@@ -5,6 +5,7 @@ import { CoursesService } from "../courses/services/courses.service";
 import { AssessmentSessionService } from "../assessment/service/assessment-session.service";
 import { LeaderboardRule } from "./entities/leaderboard-rule.entity";
 import { UpdateLeaderboardRuleDto } from "./dto/update-leaderboard-rule.dto";
+import { EnrollmentsService } from "../enrollments/enrollments.service";
 
 @Injectable()
 export class LeaderboardService{
@@ -12,6 +13,7 @@ export class LeaderboardService{
         private readonly leaderboardRepo: LeaderboardRepository,
         private readonly coursesService: CoursesService,
         private readonly assessmentSessionService: AssessmentSessionService,
+        private readonly enrollmentsService: EnrollmentsService,
     ){}
 
     async createLeaderboardRule(
@@ -102,4 +104,19 @@ export class LeaderboardService{
       
         return await this.leaderboardRepo.updateRule(rule);
       }
+
+      public async calculateOverall(userId: number): Promise<number> {
+        const enrollments = await this.enrollmentsService.findEnrollmentByUserId(userId);
+    
+        let totalPoint = 0;
+    
+        for (const enrollment of enrollments) {
+            totalPoint += await this.calculate(
+                enrollment.course.courseId,
+                userId,
+            );
+        }
+    
+        return totalPoint;
+    }
 }

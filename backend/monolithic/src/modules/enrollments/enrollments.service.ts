@@ -125,4 +125,7 @@ export class EnrollmentsService {
     return true;
   }
 
+  async findEnrollmentByUserId(userId: number){
+    return await this.enrollmentsRepo.findByUserId(userId);
+  }
 }
