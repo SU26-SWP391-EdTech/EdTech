@@ -34,55 +34,17 @@ export function AssessmentDetailPage({ lessonId, onStartQuiz }: AssessmentDetail
         );
     }
 
-    const passing = a.passScore;
-
     return (
         <div style={{ minHeight: '100vh', background: '#F8FAFC', color: '#111827', fontFamily: "'Inter','SF Pro Display',sans-serif", paddingBottom: 60 }}>
-            {/* Header band */}
-            <div style={{ background: '#FFFFFF', borderBottom: '1px solid #E5E7EB', padding: '24px 0' }}>
-                <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px' }}>
-                    {/* Course breadcrumb */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#64748B', marginBottom: 16 }}>
-                        <BookOpen size={14} style={{ color: '#64748B' }} />
-                        <span>{a.course}</span>
-                        <ChevronRight size={12} />
-                        <span style={{ color: '#E11D48', fontWeight: 500 }}>Bài kiểm tra</span>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-                        <div style={{ width: 56, height: 56, borderRadius: 14, background: '#FEF2F2', border: '1.5px solid #E11D48', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <FileQuestion size={26} style={{ color: '#E11D48' }} />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#111827', letterSpacing: '-0.3px', marginBottom: 6 }}>
-                                {a.title}
-                            </h1>
-                            <p style={{ margin: 0, color: '#64748B', fontSize: 14, lineHeight: 1.6, maxWidth: 700 }}>{a.description}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div style={{ maxWidth: 1000, margin: '0 auto', padding: '32px 24px 0', display: 'grid', gridTemplateColumns: '1fr 320px', gap: 28, alignItems: 'start' }}>
                 {/* Left column */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                     {/* Stats row */}
                     <AssessmentStatsGrid 
                         timeLimit={a.timeLimit} 
-                        passScore={a.passScore} 
                         questionCount={a.questionCount} 
-                        xpReward={a.xpReward} 
+                        pointsReward={a.pointsReward} 
                     />
-
-                    {/* Topics covered */}
-                    <div style={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 16, padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
-                        <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: '#111827' }}>Nội dung kiểm tra</h3>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                            {a.topics.map((t, i) => (
-                                <span key={i} style={{ background: '#EEF2FF', border: '1.5px solid #F1F5F9', borderRadius: 20, padding: '6px 14px', fontSize: 13, color: '#4F46E5', fontWeight: 500 }}>{t}</span>
-                            ))}
-                        </div>
-                    </div>
 
                     {/* Rules */}
                     <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 16, padding: '20px 24px', display: 'flex', gap: 14 }}>
@@ -111,8 +73,7 @@ export function AssessmentDetailPage({ lessonId, onStartQuiz }: AssessmentDetail
                                             <span style={{ fontSize: 13, color: '#64748B' }}>{s.duration}</span>
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                                            <span style={{ fontSize: 18, fontWeight: 700, color: s.score >= passing ? '#059669' : '#DC2626' }}>{s.score} điểm</span>
-                                            <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, background: s.score >= passing ? '#ECFDF5' : '#FEF2F2', color: s.score >= passing ? '#059669' : '#DC2626' }}>{s.score >= passing ? 'ĐẠT' : 'CHƯA ĐẠT'}</span>
+                                            <span style={{ fontSize: 16, fontWeight: 700, color: '#4F46E5' }}>{s.score}%</span>
                                         </div>
                                     </div>
                                 ))}
@@ -126,14 +87,11 @@ export function AssessmentDetailPage({ lessonId, onStartQuiz }: AssessmentDetail
                     <div style={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 16, padding: '24px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)' }}>
                         {/* Best score ring */}
                         <div style={{ textAlign: 'center', marginBottom: 24, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <ScoreRing score={a.bestScore} passScore={a.passScore} passed={a.bestScore >= a.passScore} size={110} />
+                            <ScoreRing score={a.bestScore} size={110} />
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 14 }}>
                                 <BarChart3 size={14} style={{ color: '#64748B' }} />
                                 <span style={{ fontSize: 13, color: '#64748B' }}>
-                                    {a.bestScore >= passing 
-                                        ? 'Chúc mừng! Bạn đã vượt qua bài kiểm tra' 
-                                        : <>Cần <strong style={{ color: '#D97706' }}>{passing - a.bestScore}</strong> điểm nữa để đạt</>
-                                    }
+                                    Điểm số tốt nhất: <strong style={{ color: '#4F46E5' }}>{a.bestScore}%</strong>
                                 </span>
                             </div>
                         </div>
@@ -162,7 +120,7 @@ export function AssessmentDetailPage({ lessonId, onStartQuiz }: AssessmentDetail
 
                         <div style={{ marginTop: 16, padding: '12px 14px', background: '#F8FAFC', border: '1px solid #E5E7EB', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
                             <Trophy size={18} style={{ color: '#D97706', flexShrink: 0 }} />
-                            <span style={{ fontSize: 13, color: '#64748B', lineHeight: 1.4 }}>Đạt bài thi nhận ngay <strong style={{ color: '#D97706' }}>{a.xpReward} XP</strong> và huy hiệu khóa học</span>
+                            <span style={{ fontSize: 13, color: '#64748B', lineHeight: 1.4 }}>Hoàn thành bài thi nhận ngay <strong style={{ color: '#D97706' }}>{a.pointsReward} Points</strong> và huy hiệu khóa học</span>
                         </div>
                     </div>
 
@@ -171,7 +129,7 @@ export function AssessmentDetailPage({ lessonId, onStartQuiz }: AssessmentDetail
                             <Zap size={16} style={{ color: '#059669' }} />
                         </div>
                         <div>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>Độ khó: {a.difficulty}</div>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>Lượt thi tiếp theo</div>
                             <div style={{ fontSize: 12, color: '#64748B' }}>Lần thử {a.attempts + 1} của bạn</div>
                         </div>
                     </div>

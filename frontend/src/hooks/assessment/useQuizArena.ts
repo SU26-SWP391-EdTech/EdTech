@@ -22,11 +22,12 @@ export function useQuizArena(
     // Auto-submit flag ref to avoid double submits
     const didAutoSubmit = useRef(false);
 
-    // Fetch questions
+    // Fetch questions & start session
     useEffect(() => {
-        const fetchQuestions = async () => {
+        const initArena = async () => {
             setIsLoading(true);
             try {
+                await AssessmentService.startSession(lessonId);
                 const data = await AssessmentService.getQuestions(lessonId);
                 setQuestions(data);
                 setError(null);
@@ -38,7 +39,7 @@ export function useQuizArena(
         };
 
         if (lessonId) {
-            fetchQuestions();
+            initArena();
         }
     }, [lessonId]);
 
