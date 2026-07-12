@@ -137,6 +137,17 @@ export class AssessmentService {
         let description = MOCK_METADATA.description;
         let courseTitle = MOCK_METADATA.course;
         let questionCount = MOCK_METADATA.questionCount;
+        let pointsReward = MOCK_METADATA.pointsReward;
+
+        try {
+            const actualQuestions = await this.getQuestions(lessonId);
+            if (actualQuestions && actualQuestions.length > 0) {
+                questionCount = actualQuestions.length;
+                pointsReward = actualQuestions.reduce((sum, q) => sum + (q.points || 10), 0);
+            }
+        } catch (err) {
+            console.warn('Failed to fetch actual questions for metadata:', err);
+        }
 
         if (assessmentId) {
             try {
@@ -144,9 +155,6 @@ export class AssessmentService {
                 const response = await api.get(`/assessment/courses/${targetCourseId}/lesson/${lessonId}/assessment/${assessmentId}`);
                 if (response.data) {
                     title = response.data.title || title;
-                    if (response.data.questions) {
-                        questionCount = response.data.questions.length;
-                    }
                 }
             } catch (err) {
                 console.warn('Failed to fetch assessment details from backend hierarchical route:', err);
@@ -167,6 +175,7 @@ export class AssessmentService {
             attempts: attempts.length,
             bestScore,
             questionCount,
+            pointsReward,
         };
         return { metadata, attempts };
     }
