@@ -89,7 +89,6 @@ export function QuestionCard({ question, index, total, selectedAnswers, toggleOp
                                 </div>
                             )}
                             <span style={{ fontSize: 14, lineHeight: 1.6, fontWeight: selected ? 600 : 400 }}>
-                                <span style={{ color: '#E11D48', fontWeight: 700, marginRight: 5 }}>{opt.id.toUpperCase()}.</span>
                                 {opt.text}
                             </span>
                         </button>
