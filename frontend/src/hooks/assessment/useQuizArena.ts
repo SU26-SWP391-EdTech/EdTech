@@ -27,7 +27,15 @@ export function useQuizArena(
         const initArena = async () => {
             setIsLoading(true);
             try {
-                await AssessmentService.startSession(lessonId);
+                const session = await AssessmentService.startSession(lessonId);
+                if (session && session.sessionId) {
+                    try {
+                        const sessionDetail = await AssessmentService.getSession(session.sessionId);
+                        console.log('Active Assessment Session:', sessionDetail);
+                    } catch (sessionErr) {
+                        console.warn('Failed to retrieve session detail from backend:', sessionErr);
+                    }
+                }
                 const data = await AssessmentService.getQuestions(lessonId);
                 setQuestions(data);
                 setError(null);

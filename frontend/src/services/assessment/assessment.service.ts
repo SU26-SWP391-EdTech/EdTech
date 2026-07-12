@@ -120,16 +120,14 @@ export class AssessmentService {
         }
 
         let lesson: any = null;
-        if (!assessmentId) {
-            try {
-                lesson = await getLessonById(lessonId);
-                if (lesson && lesson.assessments && lesson.assessments.length > 0) {
-                    assessmentId = lesson.assessments[0].assessmentId || null;
-                    cachedTitle = lesson.assessments[0].title || '';
-                }
-            } catch (e) {
-                console.warn('Failed to load lesson details in assessment fallback:', e);
+        try {
+            lesson = await getLessonById(lessonId);
+            if (lesson && lesson.assessments && lesson.assessments.length > 0) {
+                assessmentId = lesson.assessments[0].assessmentId || null;
+                cachedTitle = lesson.assessments[0].title || '';
             }
+        } catch (e) {
+            console.warn('Failed to load lesson details in assessment fallback:', e);
         }
 
         const attempts = this.getLocalAttempts(lessonId);
@@ -142,7 +140,8 @@ export class AssessmentService {
 
         if (assessmentId) {
             try {
-                const response = await api.get(`/assessment/${assessmentId}`);
+                const targetCourseId = lesson?.courseId || 8;
+                const response = await api.get(`/assessment/courses/${targetCourseId}/lesson/${lessonId}/assessment/${assessmentId}`);
                 if (response.data) {
                     title = response.data.title || title;
                     if (response.data.questions) {
@@ -150,7 +149,7 @@ export class AssessmentService {
                     }
                 }
             } catch (err) {
-                console.warn('Failed to fetch assessment details from backend:', err);
+                console.warn('Failed to fetch assessment details from backend hierarchical route:', err);
             }
         } else if (lesson) {
             title = lesson.title || title;
@@ -198,20 +197,20 @@ export class AssessmentService {
             }
         }
 
-        if (!assessmentId) {
-            try {
-                const lesson = await getLessonById(lessonId);
-                if (lesson && lesson.assessments && lesson.assessments.length > 0) {
-                    assessmentId = lesson.assessments[0].assessmentId;
-                }
-            } catch (e) {
-                console.warn('Failed to fetch lesson details for questions:', e);
+        let lesson: any = null;
+        try {
+            lesson = await getLessonById(lessonId);
+            if (lesson && lesson.assessments && lesson.assessments.length > 0) {
+                assessmentId = lesson.assessments[0].assessmentId;
             }
+        } catch (e) {
+            console.warn('Failed to fetch lesson details for questions:', e);
         }
 
         if (assessmentId) {
             try {
-                const response = await api.get(`/assessment/${assessmentId}`);
+                const targetCourseId = lesson?.courseId || 8;
+                const response = await api.get(`/assessment/courses/${targetCourseId}/lesson/${lessonId}/assessment/${assessmentId}`);
                 if (response.data && response.data.questions && response.data.questions.length > 0) {
                     return response.data.questions.map((q: any, idx: number) => ({
                         id: q.questionId || idx + 1,
@@ -225,7 +224,7 @@ export class AssessmentService {
                     }));
                 }
             } catch (err) {
-                console.warn('Failed to fetch assessment questions from backend:', err);
+                console.warn('Failed to fetch assessment questions from backend hierarchical route:', err);
             }
         }
 
@@ -334,5 +333,10 @@ export class AssessmentService {
                 reviews: MOCK_ANSWERS_REVIEW
             };
         }
+    }
+
+    public static async getSession(sessionId: number): Promise<any> {
+        const response = await api.get(`/assessment-session/${sessionId}`);
+        return response.data;
     }
 }
