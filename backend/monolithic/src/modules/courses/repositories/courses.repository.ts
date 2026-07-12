@@ -26,7 +26,13 @@ export class CoursesRepository extends Repository<Course> {
   public async findCourseById(id: number): Promise<Course | null> {
     return await this.findOne({
       where: { courseId: id },
-      relations: ['user', 'lessons'],
+      relations: {
+        user: true,
+        lessons: true,
+        assessments: {
+          sessions: true,
+        },
+      },
     });
   }
 

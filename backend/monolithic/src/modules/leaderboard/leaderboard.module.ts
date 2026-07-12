@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { LeaderboardRule } from './entities/learderboard-rule.entity';
+import { LeaderboardRule } from './entities/leaderboard-rule.entity';
 
 @Module({
   imports: [
