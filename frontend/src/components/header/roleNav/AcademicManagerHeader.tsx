@@ -24,7 +24,6 @@ export function AcademicManagerHeader() {
         if (path === '/academic/pending-courses') return 'pending-courses';
         if (path === '/academic/courses') return 'courses';
         if (path === '/academic/learning-paths') return 'learning-paths';
-        if (path === '/academic/leaderboard') return 'leaderboard';
         return '';
     };
 
@@ -61,8 +60,6 @@ export function AcademicManagerHeader() {
                                     navigate('/academic/learning-paths');
                                 } else if (item.id === 'dashboard') {
                                     navigate('/academic');
-                                } else if (item.id === 'leaderboard') {
-                                    navigate('/academic/leaderboard');
                                 }
                             }}
                         />

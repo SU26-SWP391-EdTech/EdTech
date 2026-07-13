@@ -9,6 +9,8 @@ import { LearningPathDetail } from '../pages/learning-path/LearningPathDetail';
 import { LessonPage } from '../pages/lesson/LessonPage';
 import { LearnerProfile } from '../pages/user/LearnerProfile';
 import { LeaderboardPage } from '../pages/leaderboard/LeaderboardPage';
+import { PvpBattlePage } from '../pages/pvp/PvpBattlePage';
+import { PvpArenaPage } from '../pages/pvp/PvpArenaPage';
 
 export const learnerRoutes: RouteObject = {
     path: '/learner',
@@ -26,5 +28,7 @@ export const learnerRoutes: RouteObject = {
         { path: 'learning-path/:id', element: <LearningPathDetail /> },
         { path: 'lesson', element: <LessonPage /> },
         { path: 'leaderboard', element: <LeaderboardPage /> },
+        { path: 'pvp', element: <PvpArenaPage /> },
+        { path: 'pvp/battle', element: <PvpBattlePage /> },
     ],
 };

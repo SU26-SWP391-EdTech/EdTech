@@ -54,6 +54,10 @@ export class BattleService {
       });
     }
 
+    // Shuffle and select up to 5 questions for competitive PvP match
+    const shuffledQuestions = [...questions].sort(() => 0.5 - Math.random());
+    const selectedQuestions = shuffledQuestions.slice(0, 5);
+
     const match = await this.matchRepository.createMatch({
       assessmentId,
       player1Id: challengerId,
@@ -72,7 +76,7 @@ export class BattleService {
     await this.socketService.joinUserToRoom(challengerId, room.roomId);
     await this.socketService.joinUserToRoom(receiverId, room.roomId);
 
-    const battleQuestions: BattleQuestion[] = questions.map((question) => ({
+    const battleQuestions: BattleQuestion[] = selectedQuestions.map((question) => ({
       questionId: question.questionId,
       content: question.content,
       type: question.type,

@@ -6,18 +6,16 @@ interface LeaderboardTableProps {
     tab: LeaderboardTab;
     searchedList: LeaderboardEntry[];
     totalCourses: number;
-    setChallengeModalEntry: (entry: LeaderboardEntry) => void;
 }
 
 export function LeaderboardTable({
     tab,
     searchedList,
     totalCourses,
-    setChallengeModalEntry,
 }: LeaderboardTableProps) {
     const tableCols = tab === 'course'
-        ? ['#', 'Learner', 'Score', 'Time', 'Attempt', 'PvP', 'Total', 'Action']
-        : ['#', 'Learner', 'Score', 'Time', 'Attempt', 'PvP', 'Courses', 'Total', 'Action'];
+        ? ['#', 'Learner', 'Score', 'Time', 'Attempt', 'PvP', 'Total']
+        : ['#', 'Learner', 'Score', 'Time', 'Attempt', 'PvP', 'Courses', 'Total'];
 
     return (
         <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14, overflow: 'hidden' }}>
@@ -102,21 +100,6 @@ export function LeaderboardTable({
                                         <span style={{ fontSize: 15, fontWeight: 700, color: entry.rank === 1 ? '#F59E0B' : entry.rank === 2 ? '#6B7280' : entry.rank === 3 ? '#D97706' : '#111827' }}>
                                             {entry.total}
                                         </span>
-                                    </td>
-
-                                    <td style={{ padding: '13px 16px' }}>
-                                        {isMe ? (
-                                            <span style={{ fontSize: 13, color: '#D1D5DB' }}>—</span>
-                                        ) : (
-                                            <button
-                                                onClick={() => setChallengeModalEntry(entry)}
-                                                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', background: '#FFF1F3', border: '1px solid #FECDD3', borderRadius: 7, cursor: 'pointer', fontSize: 12.5, fontWeight: 600, color: '#E11D48' }}
-                                                onMouseEnter={e => { e.currentTarget.style.background = '#E11D48'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#E11D48'; }}
-                                                onMouseLeave={e => { e.currentTarget.style.background = '#FFF1F3'; e.currentTarget.style.color = '#E11D48'; e.currentTarget.style.borderColor = '#FECDD3'; }}
-                                            >
-                                                <Swords size={12} /> Challenge
-                                            </button>
-                                        )}
                                     </td>
                                 </tr>
                             );

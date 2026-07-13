@@ -61,6 +61,10 @@ export async function getLeaderboardCourses(currentUserId: number): Promise<Cour
         const allCoursesRes = await searchCourses({ status: 'approved' });
         const backendCourses = allCoursesRes.data?.items || [];
 
+        if (!backendCourses || backendCourses.length === 0) {
+            throw new Error('No approved courses found in backend');
+        }
+
         // 2. Fetch current user's enrollments to determine isEnrolled
         let enrolledIds = new Set<number>();
         try {
@@ -76,14 +80,18 @@ export async function getLeaderboardCourses(currentUserId: number): Promise<Cour
 
         // 3. Map to CourseRankInfo format
         return backendCourses.map((c, index) => {
-            const isEnrolled = enrolledIds.has(c.courseId);
+            // A course provider owns their courses, which counts as "enrolled" for filtering purposes
+            const isEnrolled = enrolledIds.has(c.courseId) || c.user?.userId === currentUserId;
             // Simulated Rank calculation or lookup
             // If the course doesn't have custom mock rank, assign a deterministic rank
-            let yourRank = isEnrolled ? (index % 5) + 3 : 0;
-            if (c.courseId === 1) yourRank = 3;
-            else if (c.courseId === 2) yourRank = 7;
-            else if (c.courseId === 3) yourRank = 12;
-            else if (c.courseId === 4) yourRank = 5;
+            let yourRank = 0;
+            if (isEnrolled) {
+                yourRank = (index % 5) + 3;
+                if (c.courseId === 1) yourRank = 3;
+                else if (c.courseId === 2) yourRank = 7;
+                else if (c.courseId === 3) yourRank = 12;
+                else if (c.courseId === 4) yourRank = 5;
+            }
 
             return {
                 courseId: c.courseId,
@@ -109,6 +117,12 @@ export function getCourseLeaderboardData(courseId: number): LeaderboardEntry[] {
     return MOCK_COURSE_LEADERBOARD_DATA[courseId] || MOCK_COURSE_LEADERBOARD_DATA[1];
 }
 
-export function getOverallLeaderboardData(): (LeaderboardEntry & { coursesCompleted: number })[] {
-    return MOCK_OVERALL_LEADERBOARD_DATA;
+export async function getOverallLeaderboardData(): Promise<(LeaderboardEntry & { coursesCompleted: number })[]> {
+    try {
+        const res = await api.get('/leaderboard/overall');
+        return res.data;
+    } catch (err) {
+        console.warn('Failed to fetch overall leaderboard from API, falling back to mock:', err);
+        return MOCK_OVERALL_LEADERBOARD_DATA;
+    }
 }

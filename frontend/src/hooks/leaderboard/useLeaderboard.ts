@@ -7,10 +7,13 @@ import {
     getOverallLeaderboardData
 } from '../../services/leaderboard/leaderboard.service';
 import type { LeaderboardEntry, CourseRankInfo, LeaderboardTab, EnrollFilter } from '../../types/leaderboard/leaderboard.types';
+import { usePvp } from '../../context/PvpContext';
+import api from '../../lib/axios';
 
 export function useLeaderboard() {
     const user = useAuthStore(state => state.user);
     const currentUserId = user?.userId || 1;
+    const { sendChallenge } = usePvp();
 
     // UI and Filtering states
     const [tab, setTab] = useState<LeaderboardTab>('course');
@@ -52,7 +55,7 @@ export function useLeaderboard() {
                 });
                 setCourseLeaderboards(courseDataMap);
 
-                const overallData = JSON.parse(JSON.stringify(getOverallLeaderboardData()));
+                const overallData = JSON.parse(JSON.stringify(await getOverallLeaderboardData()));
                 setOverallLeaderboard(overallData);
             } catch (err) {
                 console.error('Failed to load leaderboard data:', err);
@@ -109,6 +112,26 @@ export function useLeaderboard() {
         }
     }, [currentUserId, isLoading]);
 
+    // Sync selectedCourseId when enrollFilter changes to ensure a course matching the filter is selected
+    useEffect(() => {
+        if (courses.length === 0) return;
+
+        const currentCourse = courses.find(c => c.courseId === selectedCourseId);
+        if (!currentCourse) return;
+
+        if (enrollFilter === 'enrolled' && !currentCourse.isEnrolled) {
+            const firstEnrolled = courses.find(c => c.isEnrolled);
+            if (firstEnrolled) {
+                setSelectedCourseId(firstEnrolled.courseId);
+            }
+        } else if (enrollFilter === 'not_enrolled' && currentCourse.isEnrolled) {
+            const firstUnenrolled = courses.find(c => !c.isEnrolled);
+            if (firstUnenrolled) {
+                setSelectedCourseId(firstUnenrolled.courseId);
+            }
+        }
+    }, [enrollFilter, courses, selectedCourseId]);
+
     // Filtering logic for the courses dropdown
     const filteredCoursesDropdown = useMemo(() => {
         return courses.filter(c => {
@@ -156,70 +179,28 @@ export function useLeaderboard() {
         if (!challengeModalEntry) return;
 
         const targetName = challengeModalEntry.fullName;
+        const receiverId = challengeModalEntry.userId;
         setChallengeModalEntry(null);
 
         toast.promise(
-            new Promise((resolve) => setTimeout(resolve, 1500)),
+            (async () => {
+                let pvpAssessmentId = 1; // Fallback to 1 (seeded)
+                try {
+                    const res = await api.get(`/assessment/courses/${selectedCourseId}/pvp`);
+                    if (res.data && res.data.length > 0) {
+                        pvpAssessmentId = res.data[0].assessmentId;
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch PvP assessment for course, using default ID: 1', err);
+                }
+
+                // Send the socket event
+                sendChallenge(receiverId, pvpAssessmentId);
+            })(),
             {
                 loading: `Challenging ${targetName}...`,
-                success: () => {
-                    // Update PvP score in Local State and LocalStorage
-                    const currentSaved = localStorage.getItem(`leaderboard_pvp_points_user_${currentUserId}`);
-                    const newPvpPoints = (currentSaved ? Number(currentSaved) : 0) + 5;
-                    localStorage.setItem(`leaderboard_pvp_points_user_${currentUserId}`, String(newPvpPoints));
-
-                    // Mutate Local Course Leaderboard
-                    setCourseLeaderboards(prev => {
-                        const copy = { ...prev };
-                        const list = copy[selectedCourseId] ? [...copy[selectedCourseId]] : [];
-                        const meIndex = list.findIndex(e => e.isCurrentUser);
-                        if (meIndex !== -1) {
-                            list[meIndex] = {
-                                ...list[meIndex],
-                                pvp: list[meIndex].pvp + 5,
-                                total: list[meIndex].total + 5
-                            };
-                            list.sort((a, b) => b.total - a.total);
-                            list.forEach((e, idx) => { e.rank = idx + 1; });
-                            copy[selectedCourseId] = list;
-                        }
-                        return copy;
-                    });
-
-                    // Mutate Local Overall Leaderboard
-                    setOverallLeaderboard(prev => {
-                        const list = [...prev];
-                        const meIndex = list.findIndex(e => e.isCurrentUser);
-                        if (meIndex !== -1) {
-                            list[meIndex] = {
-                                ...list[meIndex],
-                                pvp: list[meIndex].pvp + 5,
-                                total: list[meIndex].total + 5
-                            };
-                            list.sort((a, b) => b.total - a.total);
-                            list.forEach((e, idx) => { e.rank = idx + 1; });
-                        }
-                        return list;
-                    });
-
-                    // Update local courses list rank too if matching courseId
-                    setCourses(prev => {
-                        return prev.map(c => {
-                            if (c.courseId === selectedCourseId) {
-                                const list = courseLeaderboards[selectedCourseId] || [];
-                                const meIndex = list.findIndex(e => e.isCurrentUser);
-                                return {
-                                    ...c,
-                                    yourRank: meIndex !== -1 ? list[meIndex].rank : c.yourRank
-                                };
-                            }
-                            return c;
-                        });
-                    });
-
-                    return `You won the challenge against ${targetName}! +5 PvP pts.`;
-                },
-                error: 'Failed to send challenge.',
+                success: `Challenge invitation sent to ${targetName}!`,
+                error: `Could not send challenge to ${targetName}.`
             }
         );
     };

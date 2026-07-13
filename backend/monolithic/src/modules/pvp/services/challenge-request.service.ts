@@ -238,4 +238,45 @@ export class ChallengeRequestService {
       status:challenge.status
     }
   }
+
+  async getOnlinePlayers(userId: number, courseId?: number) {
+    const onlineIds = this.connectionManager.getOnlineUsers();
+    const result: any[] = [];
+    for (const id of onlineIds) {
+      if (id === userId) continue;
+      
+      // If courseId is provided, check if the user is enrolled in the same course
+      if (courseId) {
+        try {
+          const isEnrolled = await this.enrollmentService.checkEnrollment(id, courseId);
+          if (!isEnrolled) continue;
+        } catch (e) {
+          continue; // Not enrolled or error
+        }
+      }
+      
+      try {
+        const profile = await this.learnerService.viewLearnerProfile(id);
+        result.push({
+          userId: id,
+          fullName: profile.fullName,
+          email: profile.email,
+          avatarUrl: profile.avatarUrl,
+          bio: profile.bio,
+          level: profile.level
+        });
+      } catch (e) {
+        // Fallback
+        result.push({
+          userId: id,
+          fullName: `User #${id}`,
+          email: '',
+          avatarUrl: '',
+          bio: '',
+          level: ''
+        });
+      }
+    }
+    return result;
+  }
 }
