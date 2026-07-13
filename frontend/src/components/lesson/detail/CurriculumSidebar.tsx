@@ -1,4 +1,4 @@
-import { BookOpen, Video, ClipboardList } from 'lucide-react';
+import { BookOpen, Video, ClipboardList, ChevronRight } from 'lucide-react';
 import { LessonStatusIcon } from './LessonStatusIcon';
 import type { Lesson, Module } from '../../../types/lesson/lesson.types';
 
@@ -9,6 +9,7 @@ interface CurriculumSidebarProps {
   totalLessons: number;
   onToggleModule: (id: string | number) => void;
   onLessonClick: (lesson: Lesson) => void;
+  onToggleSidebar?: () => void;
 }
 
 export function CurriculumSidebar({
@@ -18,13 +19,25 @@ export function CurriculumSidebar({
   totalLessons,
   onToggleModule,
   onLessonClick,
+  onToggleSidebar,
 }: CurriculumSidebarProps) {
   return (
     <div className="w-[360px] flex-shrink-0 space-y-4" style={{ position: 'sticky', top: 80, maxHeight: 'calc(100vh - 100px)', overflowY: 'auto' }}>
       <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#F3F4F6]">
-          <span className="text-sm text-[#111827]" style={{ fontWeight: 600 }}>Lesson Curriculum</span>
-          <span className="text-xs text-[#9CA3AF]">{totalLessons} lessons</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm text-[#111827]" style={{ fontWeight: 600 }}>Lesson Curriculum</span>
+            <span className="text-xs text-[#9CA3AF]">({totalLessons})</span>
+          </div>
+          {onToggleSidebar && (
+            <button
+              onClick={onToggleSidebar}
+              className="p-1 hover:bg-[#F3F4F6] rounded-md text-[#6B7280] hover:text-[#E11D48] transition-colors"
+              title="Thu gọn danh mục"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          )}
         </div>
 
         <div className="bg-[#FAFAFA] divide-y divide-[#F3F4F6]">

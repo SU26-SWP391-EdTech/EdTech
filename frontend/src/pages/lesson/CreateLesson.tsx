@@ -101,6 +101,8 @@ export function CreateLessonPage() {
             <LessonAssessmentSection
               assessments={hook.assessments}
               setAssessments={hook.setAssessments}
+              courseId={hook.selectedCourseId}
+              lessonId={hook.editingLessonId || hook.savedLessonId}
             />
           )}
 

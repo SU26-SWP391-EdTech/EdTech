@@ -14,6 +14,23 @@ import { getMyEnrollments, updateEnrollmentProgress } from '../../services/enrol
 import api from '../../lib/axios';
 
 function getLessonType(lesson: any) {
+  if (lesson.type === 'Assessment') return 'Assessment';
+  if (lesson.hasAssessment) return 'Assessment';
+  if (lesson.assessments && lesson.assessments.length > 0) return 'Assessment';
+
+  const lessonId = lesson.lessonId || lesson.id;
+  if (lessonId) {
+    const savedAss = localStorage.getItem(`assessments_lesson_${lessonId}`);
+    if (savedAss) {
+      try {
+        const parsed = JSON.parse(savedAss);
+        if (parsed && parsed.length > 0) {
+          return 'Assessment';
+        }
+      } catch (e) {}
+    }
+  }
+
   const hasVideo = Boolean(lesson.videoUrl);
   const hasReading = Boolean(lesson.content);
 
@@ -100,6 +117,7 @@ export function useLessonPage() {
         id: String(l.lessonId),
         title: l.title,
         duration: (() => {
+          if (getLessonType(l) === 'Assessment') return '15m';
           const hasVideo = Boolean(l.videoUrl);
           const hasReading = Boolean(l.content);
           const videoMin = l.videoDuration ? Math.round(l.videoDuration / 60) : 0;
@@ -120,6 +138,7 @@ export function useLessonPage() {
         content: l.content || '',
         hasVideo: Boolean(l.videoUrl),
         hasReading: Boolean(l.content),
+        hasAssessment: getLessonType(l) === 'Assessment',
         prerequisites: l.prerequisites || [],
       })),
     }
@@ -232,6 +251,9 @@ export function useLessonPage() {
         preview: l.preview || false,
         videoUrl: l.videoUrl || '',
         content: l.content || '',
+        hasVideo: l.hasVideo,
+        hasReading: l.hasReading,
+        hasAssessment: l.hasAssessment,
         status,
       };
     });

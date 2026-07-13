@@ -103,19 +103,75 @@ export function useLessonPersistence({
             const nextLessonId = Number(saved.lessonId);
 
             // Persist assessments to localStorage and attempt to save to backend API
-            localStorage.setItem(`assessments_lesson_${nextLessonId}`, JSON.stringify(form.assessments));
+            const savedAssessments = [];
             for (const ass of form.assessments) {
                 try {
-                    await api.post('/assessment', {
+                    const response = await api.post('/assessment', {
                         courseId: data.selectedCourseId,
                         lessonId: nextLessonId,
                         title: ass.title,
                         type: ass.type,
                     });
+                    if (response.data && response.data.assessmentId) {
+                        const assessmentId = response.data.assessmentId;
+                        const savedQuestions = [];
+                        const questionsList = ass.questions || [];
+
+                        for (let qIdx = 0; qIdx < questionsList.length; qIdx++) {
+                            const q = questionsList[qIdx];
+                            try {
+                                const qResponse = await api.post(`/question/courses/${data.selectedCourseId}/lesson/${nextLessonId}/assessment/${assessmentId}`, {
+                                    content: q.content,
+                                    type: q.type,
+                                    points: q.points || 10,
+                                    position: qIdx + 1
+                                });
+                                if (qResponse.data && qResponse.data.questionId) {
+                                    const questionId = qResponse.data.questionId;
+                                    const savedOptions = [];
+                                    const optionsList = q.options || [];
+
+                                    for (let oIdx = 0; oIdx < optionsList.length; oIdx++) {
+                                        const opt = optionsList[oIdx];
+                                        try {
+                                            const optResponse = await api.post(`/question/${questionId}/option`, {
+                                                content: opt.content,
+                                                isCorrect: opt.isCorrect,
+                                                position: oIdx + 1
+                                            });
+                                            savedOptions.push(optResponse.data);
+                                        } catch (optErr) {
+                                            console.warn('Failed to save question option to backend API:', optErr);
+                                        }
+                                    }
+                                    savedQuestions.push({
+                                        ...q,
+                                        questionId,
+                                        options: savedOptions
+                                    });
+                                } else {
+                                    savedQuestions.push(q);
+                                }
+                            } catch (qErr) {
+                                console.warn('Failed to save question to backend API:', qErr);
+                                savedQuestions.push(q);
+                            }
+                        }
+
+                        savedAssessments.push({
+                            ...ass,
+                            assessmentId,
+                            questions: savedQuestions
+                        });
+                    } else {
+                        savedAssessments.push(ass);
+                    }
                 } catch (apiErr) {
                     console.warn('Failed to save assessment to backend API:', apiErr);
+                    savedAssessments.push(ass);
                 }
             }
+            localStorage.setItem(`assessments_lesson_${nextLessonId}`, JSON.stringify(savedAssessments));
 
             if (existingId) {
                 await updateCourse(data.selectedCourseId, { status: 'draft' });

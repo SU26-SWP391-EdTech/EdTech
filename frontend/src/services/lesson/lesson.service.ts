@@ -11,6 +11,7 @@ export interface Lesson {
     updatedAt: string | null;
     courseId?: number;
     prerequisites?: { prerequisiteLessonId: number; targetLessonId: number }[];
+    assessments?: any[];
 }
 
 export interface CreateLessonDto {

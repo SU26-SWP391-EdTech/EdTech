@@ -24,7 +24,7 @@ export class ProgressService {
     private readonly lessonPrerequisiteService: LessonPrerequisiteService,
 
     private readonly learnerService: LearnersService,
-  ) {}
+  ) { }
 
   // find lesson progress by userId and lessonId
   public async findByUserAndLessonService(
