@@ -6,6 +6,7 @@ import {
 import { LearnersService } from 'src/modules/learners/learners.service';
 import { AssessmentService } from './assessment.service';
 import { AssessmentSessionRepository } from '../repository/assessment-session.repository';
+import { AssessmentSession } from '../entities/assessment-session.entity';
 
 @Injectable()
 export class AssessmentSessionService {
@@ -48,5 +49,12 @@ export class AssessmentSessionService {
       }
 
       return assessmentSession;
+    }
+
+    public async findByCourseAndUser(
+      courseId: number,
+      userId: number,
+    ): Promise<AssessmentSession[]> {
+      return await this.assessmentSessionRepository.findByCourseAndUser(courseId, userId);
     }
 }

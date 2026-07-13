@@ -49,4 +49,18 @@ export class AssessmentSessionRepository {
       where: { sessionId },
     });
   }
+
+  public async findByCourseAndUser(
+    courseId: number,
+    userId: number,
+): Promise<AssessmentSession[]> {
+    return this.repo.createQueryBuilder('session')
+        .innerJoin('session.assessment', 'assessment')
+        .innerJoin('session.user', 'user')
+        .where('assessment.courseId = :courseId', { courseId })
+        .andWhere('user.userId = :userId', { userId })
+        .getMany();
+}
+
+  
 }
