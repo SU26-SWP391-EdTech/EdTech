@@ -6,6 +6,8 @@ import { AssessmentSessionService } from "../assessment/service/assessment-sessi
 import { LeaderboardRule } from "./entities/leaderboard-rule.entity";
 import { UpdateLeaderboardRuleDto } from "./dto/update-leaderboard-rule.dto";
 import { EnrollmentsService } from "../enrollments/enrollments.service";
+import { LeaderboardResponse } from "./dto/leaderboard-response.dto";
+import { UsersService } from "../users/users.service";
 
 @Injectable()
 export class LeaderboardService{
@@ -14,6 +16,7 @@ export class LeaderboardService{
         private readonly coursesService: CoursesService,
         private readonly assessmentSessionService: AssessmentSessionService,
         private readonly enrollmentsService: EnrollmentsService,
+        private readonly usersService: UsersService,
     ){}
 
     async createLeaderboardRule(
@@ -118,5 +121,31 @@ export class LeaderboardService{
         }
     
         return totalPoint;
+    }
+
+    public async getLeaderboard(): Promise<LeaderboardResponse[]> {
+      const learners = await this.usersService.findAllLearners();
+    
+      const leaderboard: LeaderboardResponse[] = [];
+    
+      for (const learner of learners) {
+        const totalPoint = await this.calculateOverall(learner.userId);
+    
+        leaderboard.push({
+          rank: 0,
+          userId: learner.userId,
+          fullName: learner.fullName,
+          avatar: learner.avatar,
+          totalPoint,
+        });
+      }
+    
+      leaderboard.sort((a, b) => b.totalPoint - a.totalPoint);
+    
+      leaderboard.forEach((item, index) => {
+        item.rank = index + 1;
+      });
+    
+      return leaderboard;
     }
 }

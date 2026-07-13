@@ -100,4 +100,18 @@ export class LeaderboardController {
   ) {
     return await this.leaderboardService.updateLeaderboardRule(courseId, dto);
   }
+
+  @Get()
+  @Roles(RoleEnum.LEARNER, RoleEnum.ACADEMIC_MANAGER, RoleEnum.ADMIN)
+  @ApiOperation({
+    summary: 'Get overall leaderboard',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Overall leaderboard retrieved successfully',
+  })
+  @ApiBearerAuth()
+  async getLeaderboard() {
+    return await this.leaderboardService.getLeaderboard();
+  }
 }
