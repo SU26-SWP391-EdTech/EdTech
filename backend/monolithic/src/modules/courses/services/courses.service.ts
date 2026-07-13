@@ -350,7 +350,7 @@ export class CoursesService {
     };
   }
 
-  public async findCourseByIdService(courseId: number): Promise<Course | null> {
+  public async findCourseByIdService(courseId: number): Promise<Course> {
     const course = await this.coursesRepository.findCourseById(courseId);
     if (!course) {
       throw new NotFoundException(`Not found course with ID ${courseId}`);

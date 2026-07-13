@@ -570,4 +570,15 @@ export class UsersService implements OnApplicationBootstrap {
       topCourses: top5Courses,
     };
   }
+
+  public async findAllLearners(): Promise<User[]> {
+    return await this.userRepo.find({
+      where: {
+        role: {
+          roleName: RoleEnum.LEARNER,
+        },
+      },
+      relations: ['role'],
+    });
+  }
 }

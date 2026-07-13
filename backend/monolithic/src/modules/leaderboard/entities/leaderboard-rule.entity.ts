@@ -7,7 +7,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 
-@Entity('leaderbpoard_rules')
+@Entity('leaderboard_rules')
 export class LeaderboardRule {
   @PrimaryGeneratedColumn({
     name: 'rule_id',
@@ -38,7 +38,7 @@ export class LeaderboardRule {
   })
   attemptWeight!: number;
 
-  // leaderbpoard_rules 1 - 1 courses
+  // leaderboard_rules 1 - 1 courses
   @OneToOne(() => Course, {
     nullable: false
   })
