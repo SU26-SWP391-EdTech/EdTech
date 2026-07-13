@@ -25,7 +25,7 @@ export class BattleService {
     private readonly battleSessionManager: BattleSessionManager,
     private readonly roomManager: RoomManager,
     private readonly socketService: SocketService,
-  ) {}
+  ) { }
 
   async createBattle(createBattleDto: CreateBattleDto) {
     const {
@@ -283,6 +283,42 @@ export class BattleService {
     }, BattleConfig.QUESTION_TIME * 1000);
 
     this.battleSessionManager.setQuestionTimer(matchId, questionTimer);
+
+    // If opponent is mock user (ID 12), schedule the bot response
+    if (session.player2Id === 12) {
+      this.scheduleBotAnswer(session, 12, question);
+    } else if (session.player1Id === 12) {
+      this.scheduleBotAnswer(session, 12, question);
+    }
+  }
+
+  private scheduleBotAnswer(session: BattleState, botId: number, question: BattleQuestion): void {
+    const delayMs = 3000 + Math.random() * 3000; // 3 to 6 seconds delay
+    setTimeout(async () => {
+      try {
+        const currentSession = this.battleSessionManager.getSession(session.matchId);
+        if (!currentSession || currentSession.currentQuestionId !== question.questionId) {
+          return;
+        }
+        if (currentSession.playerAnswers[botId]) {
+          return;
+        }
+
+        const randomOption = question.options[Math.floor(Math.random() * question.options.length)];
+        if (!randomOption) return;
+
+        await this.submitAnswer(
+          {
+            matchId: session.matchId,
+            questionId: question.questionId,
+            optionId: randomOption.optionId,
+          },
+          botId,
+        );
+      } catch (error) {
+        console.error('Failed to submit bot answer:', error.message);
+      }
+    }, delayMs);
   }
 
   private async handleQuestionTimeout(

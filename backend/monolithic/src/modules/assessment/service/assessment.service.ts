@@ -24,7 +24,7 @@ export class AssessmentService {
 
     // 1. Verify course exists
     const course = await this.courseService.validateCourseOwner(userId, courseId);
-    
+
     let lesson: Lesson | null = null;
     // 2. Verify lesson exists and belongs to the course if provided
     if (lessonId) {
@@ -59,7 +59,7 @@ export class AssessmentService {
     return assessment;
   }
 
-  async findAssessment(assessmentId: number, lessonId: number, courseId: number){
+  async findAssessment(assessmentId: number, lessonId: number, courseId: number) {
     const assessment = await this.assessmentRepository.findAssessmentWithRelation(assessmentId, lessonId, courseId);
     if (!assessment) {
       throw new NotFoundException(

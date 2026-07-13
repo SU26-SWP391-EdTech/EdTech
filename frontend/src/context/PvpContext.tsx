@@ -278,10 +278,10 @@ export function usePvp() {
     const context = useContext(PvpContext);
     if (!context) {
         return {
-            sendChallenge: () => {},
-            approveChallenge: () => {},
-            rejectChallenge: () => {},
-            cancelChallenge: () => {},
+            sendChallenge: () => { },
+            approveChallenge: () => { },
+            rejectChallenge: () => { },
+            cancelChallenge: () => { },
             isConnected: false,
         };
     }

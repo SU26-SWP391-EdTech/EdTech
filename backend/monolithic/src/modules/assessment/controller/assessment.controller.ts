@@ -24,7 +24,7 @@ export class AssessmentController {
   constructor(
     private readonly assessmentService: AssessmentService,
     private readonly assessmentSessionService: AssessmentSessionService,
-  ) {}
+  ) { }
 
   @Post()
   @Roles(RoleEnum.COURSE_PROVIDER)
@@ -36,9 +36,9 @@ export class AssessmentController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Course or Lesson not found' })
   async create(
-    @Body() 
+    @Body()
     createAssessmentDto: CreateAssessmentDto,
-    
+
     @CurrentUser()
     user: JwtPayloadUser,
   ) {

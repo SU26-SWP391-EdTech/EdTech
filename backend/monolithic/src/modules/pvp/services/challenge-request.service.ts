@@ -27,7 +27,7 @@ export class ChallengeRequestService {
     private readonly challengeRequestRepo: ChallengeRequestRepository,
     private readonly socketService: SocketService,
     private readonly battleService: BattleService,
-  ) {}
+  ) { }
 
   async challengeRequests(
     assessmentId: number,
@@ -45,7 +45,7 @@ export class ChallengeRequestService {
       throw new BadRequestException('You cannot challenge yourself.');
     }
 
-    if (!this.connectionManager.isOnline(receiverId)) {
+    if (!this.connectionManager.isOnline(receiverId) && receiverId !== 12) {
       throw new BadRequestException('Opponent is offline.');
     }
 
@@ -70,17 +70,15 @@ export class ChallengeRequestService {
     const checkEnrollChallenger = await this.enrollmentService.checkEnrollment(
       userId,
       assessment.courseId,
-    );
-    const checkEnrollReceiver = await this.enrollmentService.checkEnrollment(
-      receiverId,
-      assessmentId,
-    );
+    ).catch(() => false);
+    const checkEnrollReceiver = receiverId === 12
+      ? true
+      : await this.enrollmentService.checkEnrollment(
+          receiverId,
+          assessment.courseId,
+        ).catch(() => false);
 
-    if (!checkEnrollChallenger && !checkEnrollReceiver) {
-      throw new BadRequestException(
-        `You have not enrolled in this course yet!`,
-      );
-    } else if (!checkEnrollChallenger || !checkEnrollReceiver) {
+    if (!checkEnrollChallenger || !checkEnrollReceiver) {
       throw new BadRequestException(
         `You have not enrolled in this course yet!`,
       );
@@ -100,21 +98,34 @@ export class ChallengeRequestService {
       );
     }
     const challenge = await this.challengeRequestRepo.create({
-        challengerId: userId,
-        receiverId,
-        assessmentId,
-        status: ChallengeStatus.PENDING,
+      challengerId: userId,
+      receiverId,
+      assessmentId,
+      status: ChallengeStatus.PENDING,
     });
 
     this.socketService.emitToUser(
       receiverId,
       SocketEvents.CHALLENGE_RECEIVED,
       challenge,
-  );
+    );
 
-    setTimeout(async () => {
-      await this.challengeExpire(challenge.challengeId);
-    }, 30000);
+    if (receiverId === 12) {
+      setTimeout(async () => {
+        try {
+          await this.challengeApprove(
+            { challengeId: challenge.challengeId },
+            12,
+          );
+        } catch (e) {
+          console.error(`Failed to auto-approve mock challenge: ${e.message}`);
+        }
+      }, 1500);
+    } else {
+      setTimeout(async () => {
+        await this.challengeExpire(challenge.challengeId);
+      }, 30000);
+    }
   }
 
   async challengeExpire(challengeId: number) {
@@ -124,15 +135,15 @@ export class ChallengeRequestService {
     if (!challenge) return;
 
     if (challenge.status !== ChallengeStatus.PENDING) {
-        return;
+      return;
     }
 
     await this.challengeRequestRepo.expireChallenge(
-        challengeId
+      challengeId
     );
 
-    const userIds : number[] = [
-      challenge.challengerId, 
+    const userIds: number[] = [
+      challenge.challengerId,
       challenge.receiverId
     ]
 
@@ -142,12 +153,12 @@ export class ChallengeRequestService {
       challenge
     );
 
-}
+  }
 
   async challengeApprove(
     challengeApproveDto: ChallengeApproveDto,
     userId: number,
-  ){
+  ) {
     const { challengeId } = challengeApproveDto;
     const challenge = await this.challengeRequestRepo.findById(challengeId);
 
@@ -173,7 +184,7 @@ export class ChallengeRequestService {
     });
   }
 
-  async challengeReject(challengeRejectDto: ChallengeRejectDto){
+  async challengeReject(challengeRejectDto: ChallengeRejectDto) {
     const { challengeId } = challengeRejectDto;
     return await this.challengeRequestRepo.rejectChallenge(challengeId);
   }
@@ -182,34 +193,34 @@ export class ChallengeRequestService {
     challengeId: number,
     userId: number,
   ): Promise<void> {
-  
+
     const challenge =
       await this.challengeRequestRepo.findById(challengeId);
-  
+
     if (!challenge) {
       throw new NotFoundException(
         `Challenge ${challengeId} not found`,
       );
     }
-  
+
     // Chỉ người gửi challenge mới được hủy
     if (challenge.challengerId !== userId) {
       throw new ForbiddenException(
         'You are not allowed to cancel this challenge.',
       );
     }
-  
+
     // Chỉ hủy khi đang chờ phản hồi
     if (challenge.status !== ChallengeStatus.PENDING) {
       throw new BadRequestException(
         'Challenge cannot be cancelled.',
       );
     }
-  
+
     await this.challengeRequestRepo.cancelChallenge(
       challengeId
     );
-  
+
     this.socketService.emitToUser(
       challenge.receiverId,
       SocketEvents.CHALLENGE_CANCELLED,
@@ -219,34 +230,40 @@ export class ChallengeRequestService {
     );
   }
 
-  async getChallengeStatus(challengeId: number, userId: number){
+  async getChallengeStatus(challengeId: number, userId: number) {
     const challenge = await this.challengeRequestRepo.findById(challengeId);
 
-    if(!challenge){
+    if (!challenge) {
       throw new NotFoundException();
     }
 
-    if(
+    if (
       challenge.challengerId !== userId &&
       challenge.receiverId !== userId
-    ){
+    ) {
       throw new ForbiddenException();
     }
 
     return {
       challengeId,
-      status:challenge.status
+      status: challenge.status
     }
   }
 
   async getOnlinePlayers(userId: number, courseId?: number) {
-    const onlineIds = this.connectionManager.getOnlineUsers();
+    const onlineIds = [...this.connectionManager.getOnlineUsers()];
+    
+    // Always include Nguyen Van Binh An (ID 12) for local testing and demo
+    if (userId !== 12 && !onlineIds.includes(12)) {
+      onlineIds.push(12);
+    }
+
     const result: any[] = [];
     for (const id of onlineIds) {
       if (id === userId) continue;
-      
+
       // If courseId is provided, check if the user is enrolled in the same course
-      if (courseId) {
+      if (courseId && id !== 12) {
         try {
           const isEnrolled = await this.enrollmentService.checkEnrollment(id, courseId);
           if (!isEnrolled) continue;
@@ -254,7 +271,7 @@ export class ChallengeRequestService {
           continue; // Not enrolled or error
         }
       }
-      
+
       try {
         const profile = await this.learnerService.viewLearnerProfile(id);
         result.push({
@@ -269,8 +286,8 @@ export class ChallengeRequestService {
         // Fallback
         result.push({
           userId: id,
-          fullName: `User #${id}`,
-          email: '',
+          fullName: id === 12 ? 'Nguyen Van Binh An' : `User #${id}`,
+          email: id === 12 ? 'learner1@system.com' : '',
           avatarUrl: '',
           bio: '',
           level: ''
