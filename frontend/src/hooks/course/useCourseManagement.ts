@@ -9,40 +9,56 @@ import {
     Monitor, Database, Palette, Megaphone, Briefcase, Settings
 } from 'lucide-react';
 
+/**
+ * Custom hook quản lý danh sách khóa học dành cho Giảng viên (Provider) và Quản lý đào tạo (Academic Manager).
+ * Hỗ trợ các chức năng: tìm kiếm, lọc trạng thái, sắp xếp theo cột, drag-and-drop sắp xếp vị trí hiển thị,
+ * phê duyệt (approve), từ chối (reject) và xóa khóa học.
+ */
 export function useCourseManagement() {
     const location = useLocation();
     const navigate = useNavigate();
+
+    // Xác định xem URL hiện tại thuộc về trang Provider (Giảng viên) hay Academic Manager (Kiểm duyệt)
     const isProvider = location.pathname.startsWith('/provider');
     const isPendingPage = location.pathname.includes('pending-courses');
 
+    // Lấy thông tin tài khoản hiện tại từ auth store
     const user = useAuthStore((state) => state.user);
-    const [courses, setCourses] = useState<Course[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
 
-    const [search, setSearch] = useState('');
-    const [statusFilter, setStatusFilter] = useState(isPendingPage ? 'Pending Review' : 'All Status');
-    const [selectedId, setSelectedId] = useState<number | undefined>(undefined);
-    const [showModal, setShowModal] = useState(false);
-    const [selectedCourseForEdit, setSelectedCourseForEdit] = useState<Course | undefined>(undefined);
-    const [isViewOnly, setIsViewOnly] = useState(false);
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [selectedCourseForDelete, setSelectedCourseForDelete] = useState<Course | undefined>(undefined);
-    const [deleteLoading, setDeleteLoading] = useState(false);
-    const [sortField, setSortField] = useState<'title' | 'students' | 'created' | 'updated'>('created');
-    const [sortAsc, setSortAsc] = useState(false);
+    // --- 1. QUẢN LÝ TRẠNG THÁI (STATE) ---
+    const [courses, setCourses] = useState<Course[]>([]);                     // Danh sách gốc khóa học
+    const [isLoading, setIsLoading] = useState(false);                        // Trạng thái đang call API load khóa học
+    const [search, setSearch] = useState('');                                 // Chuỗi tìm kiếm khóa học
+    const [statusFilter, setStatusFilter] = useState(isPendingPage ? 'Pending Review' : 'All Status'); // Trạng thái cần lọc
+    const [selectedId, setSelectedId] = useState<number | undefined>(undefined); // ID khóa học đang được chọn xem chi tiết
+    const [showModal, setShowModal] = useState(false);                        // Trạng thái hiển thị modal Tạo/Sửa khóa học
+    const [selectedCourseForEdit, setSelectedCourseForEdit] = useState<Course | undefined>(undefined); // Khóa học đang được edit
+    const [isViewOnly, setIsViewOnly] = useState(false);                      // Cờ xem chi tiết dạng Read-only
+    const [showDeleteModal, setShowDeleteModal] = useState(false);            // Trạng thái hiển thị modal xác nhận xóa
+    const [selectedCourseForDelete, setSelectedCourseForDelete] = useState<Course | undefined>(undefined); // Khóa học đang chọn để xóa
+    const [deleteLoading, setDeleteLoading] = useState(false);                // Trạng thái đang xử lý API xóa
+    const [sortField, setSortField] = useState<'title' | 'students' | 'created' | 'updated'>('created'); // Trường dùng để sắp xếp
+    const [sortAsc, setSortAsc] = useState(false);                            // Cờ sắp xếp tăng dần/giảm dần
 
+    /**
+     * Tải danh sách khóa học từ Backend và map dữ liệu về đúng định dạng hiển thị cho giao diện.
+     */
     const fetchCourses = async () => {
         setIsLoading(true);
         try {
             const params: any = {};
+            // Nếu là Provider, chỉ lấy các khóa học do chính giảng viên đó tạo
             if (isProvider && user?.userId) {
                 params.userId = user.userId;
             }
+            // Nếu ở trang kiểm duyệt, chỉ lấy các khóa học đang chờ duyệt
             if (isPendingPage) {
                 params.status = 'pending';
             }
             const res = await searchCourses(params);
             const backendCourses = res.data?.items || [];
+            
+            // Map dữ liệu Backend sang dữ liệu Frontend UI
             const mapped: Course[] = backendCourses.map((item: BackendCourse): Course => {
                 const initials = item.user?.fullName ? item.user.fullName.split(' ').map(n => n[0]).join('') : 'U';
                 const formattedDuration = item.duration ? `${Math.floor(item.duration / 60)}h ${item.duration % 60}m` : '0h';
@@ -96,10 +112,14 @@ export function useCourseManagement() {
         }
     };
 
+    // Tự động fetch khóa học khi người dùng đổi trang hoặc ID tài khoản thay đổi
     useEffect(() => {
         fetchCourses();
     }, [isProvider, isPendingPage, user?.userId]);
 
+    /**
+     * Gửi yêu cầu xóa khóa học lên backend.
+     */
     const handleDeleteCourse = async () => {
         if (!selectedCourseForDelete) return;
         setDeleteLoading(true);
@@ -117,11 +137,14 @@ export function useCourseManagement() {
         }
     };
 
+    // --- 2. LOGIC TÌM KIẾM, LỌC VÀ SẮP XẾP (COMPUTED VALUES) ---
     const filtered = useMemo(() => {
         return courses
             .filter(c => {
                 const q = search.toLowerCase();
+                // Kiểm tra từ khóa trong tiêu đề, tên provider và mô tả
                 const matchQ = !q || c.title.toLowerCase().includes(q) || c.provider.toLowerCase().includes(q) || c.description.toLowerCase().includes(q);
+                // Kiểm tra bộ lọc trạng thái
                 const matchSt = isPendingPage ? c.status === 'Pending Review' : (statusFilter === 'All Status' || c.status === statusFilter);
                 return matchQ && matchSt;
             })
@@ -135,8 +158,10 @@ export function useCourseManagement() {
             });
     }, [courses, search, statusFilter, sortField, sortAsc]);
 
+    // Khóa học đang được chọn để hiển thị thông tin chi tiết trên sidebar/panel phụ
     const selectedCourse = filtered.find(c => c.id === selectedId) ?? filtered[0];
 
+    // Tính toán số liệu thống kê tổng hợp để hiển thị trên Dashboard Dashboard Cards
     const stats = {
         total: courses.length,
         published: courses.filter(c => c.status === 'Published').length,
@@ -145,6 +170,9 @@ export function useCourseManagement() {
         enrollments: courses.reduce((s, c) => s + c.students, 0),
     };
 
+    /**
+     * Thay đổi chiều sắp xếp hoặc trường thông tin sắp xếp danh sách.
+     */
     const toggleSort = (field: typeof sortField) => {
         console.log('toggleSort clicked: field =', field, 'current sortField =', sortField, 'current sortAsc =', sortAsc);
         if (sortField === field) {
@@ -155,6 +183,7 @@ export function useCourseManagement() {
         }
     };
 
+    // --- 3. LOGIC KÉO THẢ SẮP XẾP HÀNG (DRAG AND DROP) ---
     const [draggedCourseIndex, setDraggedCourseIndex] = useState<number | null>(null);
 
     const handleCourseDragOver = (fromIdx: number, toIdx: number) => {
@@ -173,6 +202,10 @@ export function useCourseManagement() {
         }
     };
 
+    // --- 4. HÀM KIỂM DUYỆT KHÓA HỌC (ACADEMIC MANAGER) ---
+    /**
+     * Duyệt đưa khóa học lên Publish công khai.
+     */
     const handleApproveCourse = async (courseId: number) => {
         try {
             await approveCourse(courseId);
@@ -184,6 +217,9 @@ export function useCourseManagement() {
         }
     };
 
+    /**
+     * Từ chối duyệt khóa học và gửi kèm lý do từ chối.
+     */
     const handleRejectCourse = async (courseId: number, reason: string) => {
         try {
             await rejectCourse(courseId, reason);

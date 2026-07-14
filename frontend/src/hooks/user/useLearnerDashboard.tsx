@@ -6,19 +6,29 @@ import { getLearningPaths, type LearningPath, getFollowedLearningPathIds } from 
 import type { NodeState } from '../../components/User/dashboard/learner/RoadmapNode';
 import { getLearnerProfile } from '../../services/learner/learner.services';
 
+/**
+ * Custom hook quản lý dữ liệu trang Dashboard dành cho Học viên (Learner Dashboard).
+ * Tải đồng thời thông tin:
+ * - Hồ sơ học viên (streak học tập, điểm PvP).
+ * - Các khóa học đã đăng ký (enrollments) để tính toán thống kê (số khóa học đã xong, tổng giờ học).
+ * - Danh sách lộ trình học tập (learning paths) và danh sách các lộ trình học viên đang theo dõi (followed).
+ * - Tạo sơ đồ học tập (Roadmap Nodes) động theo từng lộ trình học tập, phản ánh trạng thái đã đăng ký (enrolled) hay chưa (not-enrolled).
+ */
 export function useLearnerDashboard() {
     const user = useAuthStore((state) => state.user);
-    const [profile, setProfile] = useState<any>(null);
-    const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-    const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);
-    const [followedPathIds, setFollowedPathIds] = useState<number[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [profile, setProfile] = useState<any>(null);                           // Hồ sơ chi tiết học viên
+    const [enrollments, setEnrollments] = useState<Enrollment[]>([]);             // Các khóa học đang tham gia
+    const [learningPaths, setLearningPaths] = useState<LearningPath[]>([]);       // Toàn bộ lộ trình học tập
+    const [followedPathIds, setFollowedPathIds] = useState<number[]>([]);         // Mảng ID các lộ trình đang theo dõi
+    const [isLoading, setIsLoading] = useState<boolean>(true);                    // Trạng thái đang tải dữ liệu
 
+    // --- 1. EFFECT: TẢI TOÀN BỘ DỮ LIỆU BAN ĐẦU ---
     useEffect(() => {
         const loadDashboardData = async () => {
             if (!user) return;
             try {
                 setIsLoading(true);
+                // Thực hiện gọi API song song để tối ưu hóa thời gian tải trang
                 const [profileData, enrollmentsData, pathsData, followedIds] = await Promise.all([
                     getLearnerProfile(user.userId),
                     getMyEnrollments(),
@@ -26,10 +36,12 @@ export function useLearnerDashboard() {
                     getFollowedLearningPathIds()
                 ]);
 
+                // Đếm số lượng khóa học đã hoàn thành (tiến độ 100% hoặc trạng thái completed)
                 const completedCount = enrollmentsData.filter(
                     e => e.status === 'completed' || e.progress === 100
                 ).length;
 
+                // Tính toán tổng số giờ học dựa trên thời lượng khóa học và tiến độ tương ứng
                 const totalHours = enrollmentsData.reduce((acc, curr) => {
                     const duration = curr.course.duration || 10;
                     return acc + Math.round(duration * (curr.progress / 100));
@@ -58,7 +70,7 @@ export function useLearnerDashboard() {
         loadDashboardData();
     }, [user]);
 
-    // Summary stats based on profile & enrollments
+    // --- 2. TỔNG HỢP CÁC CHỈ SỐ THỐNG KÊ (STATS CARD DATA) ---
     const activeStats = [
         {
             id: 'streak',
@@ -92,11 +104,13 @@ export function useLearnerDashboard() {
         },
     ];
 
-    // Continue Learning courses mapping
+    // --- 3. KHÓA HỌC ĐANG HỌC DANG DỞ (CONTINUE LEARNING) ---
+    // Lọc ra các khóa học đang học để hiển thị trên phần "Học tiếp" của dashboard
     const continueCourses = enrollments
         .filter(e => e.status === 'active' && e.progress < 100)
         .slice(0, 3)
         .map((enrollment, idx) => {
+            // Xác định xem khóa học này có thuộc lộ trình nào không để hiển thị nhãn lộ trình
             const parentPath = learningPaths.find(p =>
                 p.learningPathCourses?.some(lpc => lpc.courseId === enrollment.course.courseId)
             );
@@ -120,12 +134,13 @@ export function useLearnerDashboard() {
             };
         });
 
-    const [selectedPathId, setSelectedPathId] = useState<number | null>(null);
+    const [selectedPathId, setSelectedPathId] = useState<number | null>(null); // ID lộ trình đang được học viên chọn xem sơ đồ
 
     const followedPaths = learningPaths.filter(path =>
         followedPathIds.includes(path.learningPathId)
     );
 
+    // Tự động chọn lộ trình đầu tiên trong số các lộ trình đang theo dõi làm mặc định
     useEffect(() => {
         if (followedPathIds.length > 0) {
             if (selectedPathId === null || !followedPathIds.includes(selectedPathId)) {
@@ -136,13 +151,14 @@ export function useLearnerDashboard() {
         }
     }, [followedPathIds, selectedPathId]);
 
-    // Roadmap active path & nodes mapping (only display paths that are followed)
+    // --- 4. TẠO SƠ ĐỒ LỘ TRÌNH HỌC TẬP DƯỚI DẠNG ROADMAP NODES ---
     const activePath = learningPaths.find(path =>
         path.learningPathId === selectedPathId
     ) || null;
 
     const pathCourses = activePath ? [...(activePath.learningPathCourses || [])].sort((a, b) => a.position - b.position) : [];
 
+    // Duyệt qua danh sách khóa học thuộc lộ trình và gắn trạng thái đã đăng ký (enrolled / not-enrolled)
     const roadmapNodes = pathCourses.map((lpc, idx) => {
         const enrollment = enrollments.find(e => e.course.courseId === lpc.courseId);
         const state: NodeState = enrollment ? 'enrolled' : 'not-enrolled';

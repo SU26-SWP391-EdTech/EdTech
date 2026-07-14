@@ -9,6 +9,24 @@ import { getMyEnrollments, enrollCourse } from '../../services/enrollment/enroll
 import { getAcademicProfile } from '../../services/user/user.service';
 import api from '../../lib/axios';
 
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useAuthStore } from '../../stores/auth/auth.stores';
+import toast from 'react-hot-toast';
+import type { Module, LessonStatus } from '../../types/course/course-detail.types';
+import { getCourseById, approveCourse, rejectCourse, searchCourses } from '../../services/course/course.service';
+import { getLessonsByCourse } from '../../services/lesson/lesson.service';
+import { getMyEnrollments, enrollCourse } from '../../services/enrollment/enrollment.service';
+import { getAcademicProfile } from '../../services/user/user.service';
+import api from '../../lib/axios';
+
+/**
+ * Xác định phân loại của bài học (Assessment, Video, Reading, hoặc kết hợp).
+ * Ưu tiên nhận diện bài kiểm tra (Assessment) trước qua các trường dữ liệu hoặc localStorage.
+ * 
+ * @param lesson - Đối tượng bài học cần kiểm tra
+ * @returns Phân loại bài học dưới dạng chuỗi ('Assessment' | 'Video & Reading' | 'Video' | 'Reading')
+ */
 function getLessonType(lesson: any) {
   if (lesson.type === 'Assessment') return 'Assessment';
   if (lesson.hasAssessment) return 'Assessment';
@@ -36,8 +54,14 @@ function getLessonType(lesson: any) {
   return 'Reading';
 }
 
+/**
+ * Tính toán thời lượng làm bài hoặc học của một bài học (phút).
+ * 
+ * @param lesson - Đối tượng bài học
+ * @returns Thời lượng tính bằng phút
+ */
 function getLessonDurationMinutes(lesson: any) {
-  if (getLessonType(lesson) === 'Assessment') return 15;
+  if (getLessonType(lesson) === 'Assessment') return 15; // Mặc định bài kiểm tra là 15 phút
   const hasVideo = Boolean(lesson.videoUrl);
   const hasReading = Boolean(lesson.content);
   const videoMin = lesson.videoDuration ? Math.round(Number(lesson.videoDuration) / 60) : 0;
@@ -51,9 +75,15 @@ function getLessonDurationMinutes(lesson: any) {
   if (hasReading) {
     return 10;
   }
-  return 10; // Default fallback for any lesson type
+  return 10; // Thời gian mặc định nếu không xác định được
 }
 
+/**
+ * Định dạng số phút học của khóa học thành chuỗi hiển thị (Giờ/Phút).
+ * 
+ * @param totalMinutes - Tổng số phút
+ * @returns Chuỗi định dạng thời gian
+ */
 function formatCourseHours(totalMinutes: number) {
   const hours = totalMinutes / 60;
   if (hours === 0) return '0 hours';
@@ -61,28 +91,39 @@ function formatCourseHours(totalMinutes: number) {
   return `${Number.isInteger(hours) ? hours : hours.toFixed(1)} hours`;
 }
 
+/**
+ * Custom hook quản lý chi tiết khóa học, danh sách bài học, thông tin giảng viên/provider,
+ * trạng thái đăng ký học của learner và các chức năng phê duyệt/từ chối dành cho Admin/Manager.
+ */
 export function useCourseDetail() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
+  // Lấy thông tin user hiện tại và role
   const user = useAuthStore((state) => state.user);
   const role = user?.roleName?.toLowerCase() || 'guest';
 
-  // Get active course ID from URL or location state, default to 1 (since 1 is a valid course in DB)
+  // Lấy ID khóa học từ URL query params hoặc state chuyển trang, mặc định là khóa học số 1
   const courseId = Number(searchParams.get('id') || location.state?.courseId || 1);
 
-  const [course, setCourse] = useState<any>(null);
-  const [lessonsList, setLessonsList] = useState<any[]>([]);
-  const [enrollments, setEnrollments] = useState<any[]>([]);
-  const [providerProfile, setProviderProfile] = useState<any>(null);
-  const [providerCoursesCount, setProviderCoursesCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [completedLessonIds, setCompletedLessonIds] = useState<Set<string>>(new Set());
+  // --- 1. QUẢN LÝ TRẠNG THÁI (STATE) ---
+  const [course, setCourse] = useState<any>(null);                        // Thông tin chung của khóa học
+  const [lessonsList, setLessonsList] = useState<any[]>([]);              // Danh sách bài học của khóa học
+  const [enrollments, setEnrollments] = useState<any[]>([]);              // Danh sách các khóa học học viên đã đăng ký
+  const [providerProfile, setProviderProfile] = useState<any>(null);      // Hồ sơ của giảng viên/nhà cung cấp khóa học
+  const [providerCoursesCount, setProviderCoursesCount] = useState(0);    // Số lượng khóa học đã duyệt của giảng viên này
+  const [isLoading, setIsLoading] = useState(true);                        // Trạng thái loading chung
+  const [completedLessonIds, setCompletedLessonIds] = useState<Set<string>>(new Set()); // Tập hợp ID các bài học đã hoàn thành
 
+  /**
+   * Tải toàn bộ thông tin chi tiết khóa học, danh sách bài học, thông tin provider 
+   * và tiến độ học tập (nếu user là learner đã đăng ký học).
+   */
   async function loadData() {
     try {
       setIsLoading(true);
+      // Gọi song song API lấy khóa học và danh sách bài học
       const [courseData, lessonsData] = await Promise.all([
         getCourseById(courseId),
         getLessonsByCourse(courseId),
@@ -92,6 +133,7 @@ export function useCourseDetail() {
 
       const providerId = courseData.user?.userId;
 
+      // Nếu có giảng viên, tải thêm hồ sơ học thuật và danh sách khóa học của họ
       if (providerId) {
         const [profileResult, coursesResult] = await Promise.allSettled([
           getAcademicProfile(providerId),
@@ -114,12 +156,14 @@ export function useCourseDetail() {
         setProviderCoursesCount(0);
       }
 
+      // Nếu user là learner, kiểm tra xem đã đăng ký khóa này chưa và lấy tiến độ học
       if (role === 'learner') {
         const enrollData = await getMyEnrollments();
         setEnrollments(enrollData);
 
         const isEnrolled = enrollData.some((e: any) => e.course?.courseId === courseId);
         if (isEnrolled) {
+          // Lấy trạng thái hoàn thành của từng bài học
           const progressPromises = lessonsData.map(async (l: any) => {
             try {
               const res = await api.get(`/progress/lessonId/${l.lessonId}/complete`);
@@ -144,7 +188,7 @@ export function useCourseDetail() {
       }
     } catch (error) {
       console.warn('Failed to load real course details, using mock fallback:', error);
-      // Fallback mock course structure to prevent page crashes
+      // Dữ liệu giả lập (mock fallback) phòng trường hợp API lỗi để tránh crash trang
       setCourse({
         courseId,
         title: courseId === 8 ? 'Node.js Backend Engineering' : 'Course Detail',
@@ -166,10 +210,12 @@ export function useCourseDetail() {
     }
   }
 
+  // Tải lại dữ liệu khi ID khóa học hoặc Role thay đổi
   useEffect(() => {
     loadData();
   }, [courseId, role]);
 
+  // Tránh lỗi null object khi chưa tải xong dữ liệu
   const matchedCourse = course || {
     courseId,
     title: 'Loading course...',
@@ -188,7 +234,7 @@ export function useCourseDetail() {
     bio: providerProfile?.bio || '',
     rating: 4.8,
   };
-  const relatedCourses: any[] = []; // empty related courses for now or static fallback
+  const relatedCourses: any[] = []; // Chờ nâng cấp danh sách khóa học liên quan
 
   const outcomes = [
     'Gain a deep understanding of core concepts and principles.',
@@ -198,9 +244,10 @@ export function useCourseDetail() {
   ];
   const skills = ['Technology', 'Programming', 'Development'];
 
+  // Kiểm tra xem learner hiện tại đã tham gia khóa học này chưa
   const isEnrolled = role === 'learner' && enrollments.some(e => e.course?.courseId === matchedCourse.courseId);
 
-  // Enrollment handler calling the real API
+  // --- 2. HÀM ĐĂNG KÝ HỌC (ENROLL COURSE) ---
   const handleEnroll = async () => {
     if (role === 'guest') {
       toast.error('Please sign in to enroll in courses.');
@@ -227,6 +274,7 @@ export function useCourseDetail() {
     }
   };
 
+  // Các role đặc biệt không tham gia học (khách, provider, admin, manager)
   const isSpecialRole = ['guest', 'course provider', 'admin', 'academic manager'].includes(role);
 
   const currentEnrollment = enrollments.find(e => e.course?.courseId === matchedCourse.courseId);
@@ -238,6 +286,7 @@ export function useCourseDetail() {
   const courseDurationLabel = formatCourseHours(totalLessonMinutes);
   const completedLessons = enrolled ? completedLessonIds.size : 0;
 
+  // Kiểm tra bài học có bị khóa do chưa hoàn thành bài học tiên quyết (prerequisite) không
   const isLockedByPrerequisites = (l: any) => {
     if (!l.prerequisites || l.prerequisites.length === 0) return false;
     return l.prerequisites.some((prereq: any) => {
@@ -246,13 +295,14 @@ export function useCourseDetail() {
     });
   };
 
+  // Xác định bài học tiếp theo cần học (chưa hoàn thành và không bị khóa bởi bài tiên quyết)
   const currentLessonId = enrolled ? lessonsList.find((l) => {
     const isCompleted = completedLessonIds.has(String(l.lessonId));
     const isLocked = isLockedByPrerequisites(l);
     return !isCompleted && !isLocked;
   })?.lessonId : null;
 
-  // Build the dynamic curriculum with a single main module
+  // --- 3. DỰNG LẠI KHUNG CHƯƠNG TRÌNH HỌC (CURRICULUM) ---
   const dynamicCurriculum: Module[] = [
     {
       id: 'm1',
@@ -304,6 +354,7 @@ export function useCourseDetail() {
   const instructorAvatar = instructorName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase();
   const instructorAvatarUrl = providerProfile?.avatarUrl || matchedCourse.user?.avatarUrl || matchedCourse.user?.avatar || '';
 
+  // Phân giải đường dẫn chi tiết khóa học dựa trên vai trò của người dùng
   const getCourseDetailPath = (id: number) => {
     if (role === 'learner') return `/learner/courses/detail?id=${id}`;
     if (role === 'course provider') return `/provider/courses/detail?id=${id}`;
@@ -311,6 +362,7 @@ export function useCourseDetail() {
     return `/courses/detail?id=${id}`;
   };
 
+  // Phân giải đường dẫn hồ sơ giảng viên dựa trên vai trò của người dùng
   const getProviderProfilePath = (id: number) => {
     if (role === 'learner') return `/learner/providers/${id}`;
     if (role === 'course provider') return `/provider/providers/${id}`;
@@ -319,6 +371,7 @@ export function useCourseDetail() {
     return `/providers/${id}`;
   };
 
+  // --- 4. HÀM HỌC TIẾP (CONTINUE COURSE) ---
   const handleContinueCourse = () => {
     if (!enrolled) {
       handleEnroll();
@@ -338,6 +391,7 @@ export function useCourseDetail() {
     navigate(`/learner/lesson?courseId=${matchedCourse.courseId}&lessonId=${nextLesson.id}`);
   };
 
+  // --- 5. HÀM PHÊ DUYỆT KHÓA HỌC (ADMIN/MANAGER) ---
   const handleApproveCourse = async (id: number) => {
     try {
       await approveCourse(id);
@@ -349,6 +403,7 @@ export function useCourseDetail() {
     }
   };
 
+  // --- 6. HÀM TỪ CHỐI KHÓA HỌC (ADMIN/MANAGER) ---
   const handleRejectCourse = async (id: number, reason: string) => {
     try {
       await rejectCourse(id);

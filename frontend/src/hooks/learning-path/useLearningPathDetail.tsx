@@ -42,24 +42,34 @@ function formatDuration(totalMinutes: number) {
   return `${hours}h ${mins}m`;
 }
 
+/**
+ * Custom hook quản lý thông tin chi tiết Lộ trình học tập (Learning Path Detail) cho Học viên.
+ * Hỗ trợ các chức năng: tự động tính toán sơ đồ lộ trình (roadmap nodes) dưới dạng chuỗi các khóa học tuần tự,
+ * xác định trạng thái học tập của từng nút khóa học (Hoàn thành, Đang học, Khóa học tiếp theo, Đã khóa),
+ * tải danh sách bài học thuộc khóa học đang active, hiển thị tiến độ học tập trung bình,
+ * đăng ký khóa học đơn lẻ, và điều hướng vào bài học cụ thể.
+ */
 export function useLearningPathDetail() {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>(); // Lấy ID lộ trình học tập từ URL params
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
 
-  const [path, setPath] = useState<LearningPath | null>(null);
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [liked, setLiked] = useState<Set<number>>(new Set());
-  const [activeCourseId, setActiveCourseId] = useState<number | null>(null);
-  const [activeCourseLessons, setActiveCourseLessons] = useState<any[]>([]);
+  // --- 1. QUẢN LÝ TRẠNG THÁI (STATE) ---
+  const [path, setPath] = useState<LearningPath | null>(null);             // Thông tin chi tiết lộ trình học
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);         // Danh sách các khóa học học viên đã đăng ký học
+  const [isLoading, setIsLoading] = useState(true);                        // Trạng thái đang tải dữ liệu từ API
+  const [liked, setLiked] = useState<Set<number>>(new Set());              // Set chứa ID các lộ trình được thích (like)
+  const [activeCourseId, setActiveCourseId] = useState<number | null>(null); // ID khóa học đang được chọn hiển thị giáo trình chi tiết
+  const [activeCourseLessons, setActiveCourseLessons] = useState<any[]>([]); // Danh sách bài học của khóa học đang active
 
+  // --- 2. EFFECT: TẢI DỮ LIỆU LỘ TRÌNH VÀ ENROLLMENTS ---
   useEffect(() => {
     async function loadPathData() {
       if (!id) return;
       try {
         setIsLoading(true);
 
+        // Tải thông tin lộ trình theo ID
         const targetPath = await getLearningPathById(parseInt(id));
         if (!targetPath) {
           toast.error('Learning Path not found!');
@@ -69,6 +79,7 @@ export function useLearningPathDetail() {
 
         setPath(targetPath);
 
+        // Nếu user đã đăng nhập với vai trò Learner, tải danh sách đăng ký học tập của họ
         const isLearner = user?.roleName?.toLowerCase() === 'learner';
         let activeEnrollments: Enrollment[] = [];
         if (user && isLearner) {
@@ -76,11 +87,11 @@ export function useLearningPathDetail() {
         }
         setEnrollments(activeEnrollments);
 
-        // Find active/current course in path to display details first
+        // Tìm kiếm khóa học hiện tại mà học viên đang học dở để mặc định hiển thị chi tiết bài học
         const pathCourses = targetPath.learningPathCourses || [];
         const currentCourse = pathCourses.find(pc => {
           const e = activeEnrollments.find((e: Enrollment) => e.course?.courseId === pc.courseId);
-          return e && e.progress < 100;
+          return e && e.progress < 100; // Khóa học đang học dở (tiến độ dưới 100%)
         }) || pathCourses[0];
 
         if (currentCourse) {
@@ -97,6 +108,7 @@ export function useLearningPathDetail() {
     loadPathData();
   }, [id, navigate, user]);
 
+  // --- 3. EFFECT: TẢI DANH SÁCH BÀI HỌC CỦA KHÓA HỌC DANG ACTIVE ---
   useEffect(() => {
     async function loadActiveCourseLessons() {
       if (!activeCourseId) {
@@ -114,9 +126,11 @@ export function useLearningPathDetail() {
     loadActiveCourseLessons();
   }, [activeCourseId]);
 
+  // Danh sách khóa học được sắp xếp theo đúng thứ tự (position) trong lộ trình
   const pathCourses = [...(path?.learningPathCourses || [])].sort((a, b) => a.position - b.position);
 
-  // Generate roadmap nodes dynamically based on active enrollments
+  // --- 4. LOGIC XÂY DỰNG SƠ ĐỒ LỘ TRÌNH (COMPUTED ROADMAP NODES) ---
+  // Tự động phân loại trạng thái của các nút dựa trên tiến độ học tập tuần tự
   let foundFirstUnenrolled = false;
   const roadmapNodes: CourseNode[] = pathCourses.map((pc, idx) => {
     const enrollment = enrollments.find(e => e.course?.courseId === pc.courseId);
@@ -125,17 +139,17 @@ export function useLearningPathDetail() {
 
     let state: NodeState = 'locked';
     if (completed) {
-      state = 'completed';
+      state = 'completed'; // Đã hoàn thành khóa học
     } else if (enrolled) {
-      state = 'current';
+      state = 'current';   // Đang trong tiến trình học khóa học này
     } else if (!foundFirstUnenrolled) {
-      state = 'upcoming';
+      state = 'upcoming';  // Khóa học tiếp theo cần đăng ký học
       foundFirstUnenrolled = true;
     } else {
-      state = 'locked';
+      state = 'locked';    // Các khóa học phía sau bị khóa cho đến khi hoàn thành các bước trước
     }
 
-    // Assign dynamic icon
+    // Gán icon động tùy thuộc vào nội dung tiêu đề khóa học
     let icon = React.createElement(Code, { className: "w-5 h-5" });
     if (pc.course?.title.toLowerCase().includes('figma') || pc.course?.title.toLowerCase().includes('design')) {
       icon = React.createElement(Layers, { className: "w-5 h-5" });
@@ -161,20 +175,24 @@ export function useLearningPathDetail() {
     };
   });
 
-  // Calculate statistics
+  // Tính toán số liệu thống kê tổng hợp của lộ trình
   const totalCourses = pathCourses.length;
   const completedCourses = roadmapNodes.filter(n => n.state === 'completed').length;
   const totalMinutes = roadmapNodes.reduce((sum, n) => sum + (n.course?.duration || 0), 0);
   const totalDurationLabel = formatDuration(totalMinutes);
   
-  // Calculate average progress
+  // Tính toán tiến độ trung bình của học viên trên lộ trình hiện tại
   const totalProgressSum = roadmapNodes.reduce((acc, n) => acc + n.progress, 0);
   const overallProgress = totalCourses > 0 ? Math.round(totalProgressSum / totalCourses) : 0;
 
-  // Generate modules for the selected active course dynamically
+  // Lấy node tương ứng với khóa học đang được chọn xem chi tiết bài học
   const selectedNode = roadmapNodes.find(n => n.id === activeCourseId) || roadmapNodes[0];
   const activeCourse = selectedNode?.course;
 
+  /**
+   * Tạo cấu trúc Modules bài học giả lập cho khóa học đang chọn,
+   * tự động đánh dấu hoàn thành (`done`) dựa trên tỉ lệ phần trăm tiến độ (`progress`) của học viên.
+   */
   const generateModulesForCourse = (course: Course, progress: number, lessonsList: any[]): Module[] => {
     if (!course || !lessonsList || lessonsList.length === 0) return [];
 
@@ -199,8 +217,13 @@ export function useLearningPathDetail() {
     ];
   };
 
+  // Danh sách module bài học hiển thị chi tiết giáo trình ở panel phụ
   const currentModules = activeCourse ? generateModulesForCourse(activeCourse, selectedNode.progress, activeCourseLessons) : [];
 
+  /**
+   * Tiếp tục học khóa học cụ thể.
+   * Nếu khóa học đang bị khóa (`locked`), hiển thị thông báo lỗi yêu cầu hoàn thành các khóa trước.
+   */
   const handleContinueCourse = (courseId: number) => {
     const node = roadmapNodes.find(n => n.id === courseId);
     if (!node || node.state === 'locked') {
@@ -211,7 +234,10 @@ export function useLearningPathDetail() {
     navigate(`/learner/lesson?courseId=${courseId}`);
   };
 
-  // Actions
+  // --- 5. HÀM XỬ LÝ HÀNH ĐỘNG (LEARNER ACTIONS) ---
+  /**
+   * Đăng ký tham gia một khóa học đơn lẻ thuộc lộ trình.
+   */
   const handleEnrollSingleCourse = async (courseId: number) => {
     if (!user) {
       toast.error('Please sign in to enroll.');
@@ -230,6 +256,7 @@ export function useLearningPathDetail() {
       await enrollCourse(courseId);
       toast.success('Successfully enrolled in course!');
       
+      // Tải lại danh sách enrollments để cập nhật giao diện
       const activeEnrollments = await getMyEnrollments();
       setEnrollments(activeEnrollments);
     } catch (err: any) {
@@ -239,7 +266,10 @@ export function useLearningPathDetail() {
     }
   };
 
-
+  /**
+   * Bắt đầu vào học một bài học cụ thể.
+   * Đảm bảo học viên đã đăng ký khóa học đó trước khi truy cập.
+   */
   const handleStartLesson = (lessonId: number) => {
     if (!user) {
       toast.error('Please sign in to study.');
