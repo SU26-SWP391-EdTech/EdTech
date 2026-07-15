@@ -13,6 +13,13 @@ import { getLessonsByCourse } from '../../services/lesson/lesson.service';
 import { getMyEnrollments, updateEnrollmentProgress } from '../../services/enrollment/enrollment.service';
 import api from '../../lib/axios';
 
+/**
+ * Xác định loại hình bài học (Lesson Type) dựa vào các trường thông tin của bài học.
+ * Các loại hình: 'Assessment' (Bài kiểm tra), 'Video & Reading' (Video và tài liệu đọc), 'Video', 'Reading'.
+ * 
+ * @param lesson - Thông tin bài học cần phân loại
+ * @returns Loại hình bài học dưới dạng chuỗi
+ */
 function getLessonType(lesson: any) {
   if (lesson.type === 'Assessment') return 'Assessment';
   if (lesson.hasAssessment) return 'Assessment';
@@ -20,6 +27,7 @@ function getLessonType(lesson: any) {
 
   const lessonId = lesson.lessonId || lesson.id;
   if (lessonId) {
+    // Kiểm tra trong localStorage xem bài học này có bài test PvP/Quiz đính kèm nào được lưu tạm không
     const savedAss = localStorage.getItem(`assessments_lesson_${lessonId}`);
     if (savedAss) {
       try {
@@ -40,27 +48,37 @@ function getLessonType(lesson: any) {
   return 'Reading';
 }
 
+/**
+ * Custom hook quản lý vòng đời và tương tác trên trang Học bài học (Lesson Page).
+ * Tải thông tin giáo trình khóa học, danh sách bài học, tiến độ hoàn thành từ Backend.
+ * Xử lý cơ chế mở khóa bài học dựa trên ràng buộc bài học tiên quyết (Prerequisites).
+ * Tự động gửi API ghi nhận bắt đầu học khi mở bài học mới.
+ * Hỗ trợ ghi chép bài học (Notes), thảo luận (Discussion), sao chép mã nguồn ví dụ, và điều hướng chuyển bài học.
+ */
 export function useLessonPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Parse courseId and lessonId from URL
-  const courseId = Number(searchParams.get('courseId') || 8);
-  const activeLessonId = searchParams.get('lessonId');
+  // --- 1. PARSE THÔNG TIN URL ---
+  const courseId = Number(searchParams.get('courseId') || 8); // ID khóa học, mặc định 8 nếu thiếu
+  const activeLessonId = searchParams.get('lessonId');        // ID bài học hiện đang chọn học
 
-  const [course, setCourse] = useState<any>(null);
-  const [lessonsList, setLessonsList] = useState<any[]>([]);
-  const [enrollments, setEnrollments] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [completedLessonIds, setCompletedLessonIds] = useState<Set<string>>(new Set());
+  // --- 2. QUẢN LÝ TRẠNG THÁI (STATE) ---
+  const [course, setCourse] = useState<any>(null);                                    // Chi tiết khóa học hiện tại
+  const [lessonsList, setLessonsList] = useState<any[]>([]);                          // Danh sách bài học của khóa học
+  const [enrollments, setEnrollments] = useState<any[]>([]);                          // Thông tin đăng ký học của user
+  const [isLoading, setIsLoading] = useState(true);                                   // Trạng thái đang tải dữ liệu
+  const [completedLessonIds, setCompletedLessonIds] = useState<Set<string>>(new Set()); // Tập hợp các ID bài học học viên đã hoàn thành
 
   const user = useAuthStore((state) => state.user);
   const role = user?.roleName?.toLowerCase() || 'guest';
 
+  // --- 3. EFFECT: TẢI TOÀN BỘ DỮ LIỆU BAN ĐẦU ---
   useEffect(() => {
     async function loadData() {
       try {
         setIsLoading(true);
+        // Tải đồng thời thông tin khóa học và danh sách bài học tương ứng
         const [courseData, lessonsData] = await Promise.all([
           getCourseById(courseId),
           getLessonsByCourse(courseId),
@@ -68,11 +86,12 @@ export function useLessonPage() {
         setCourse(courseData);
         setLessonsList(lessonsData);
 
+        // Nếu là Học viên, tải thêm tiến độ đăng ký học và kiểm tra trạng thái hoàn thành của từng bài học
         if (role === 'learner') {
           const enrolls = await getMyEnrollments();
           setEnrollments(enrolls);
 
-          // Fetch progress status for each lesson concurrently
+          // Gọi API kiểm tra xem từng bài học đã được đánh dấu hoàn thành (COMPLETED) chưa
           const progressPromises = lessonsData.map(async (l: any) => {
             try {
               const res = await api.get(`/progress/lessonId/${l.lessonId}/complete`);
@@ -108,6 +127,7 @@ export function useLessonPage() {
     curriculum: [],
   };
 
+  // Định dạng danh sách bài học thô thành cấu trúc sử dụng trong giao diện Lesson Page
   const rawModules = [
     {
       id: 'm1',
@@ -149,16 +169,17 @@ export function useLessonPage() {
   const isSpecialRole = ['guest', 'course provider', 'admin', 'academic manager'].includes(role);
   const progressVal = isSpecialRole ? 0 : (isEnrolled ? (currentEnrollment?.progress ?? 0) : 0);
 
-  // States
-  const [videoProgress] = useState(34);
-  const [expandedModules, setExpandedModules] = useState<string[]>([]);
-  const [noteText, setNoteText] = useState('');
-  const [notes, setNotes] = useState<Note[]>(SAVED_NOTES);
-  const [copiedCode, setCopiedCode] = useState(false);
-  const [questionText, setQuestionText] = useState('');
-  const [activeTab, setActiveTab] = useState<'content' | 'notes' | 'discussion'>('content');
+  // --- 4. CÁC STATE PHỤ TRÊN GIAO DIỆN ---
+  const [videoProgress] = useState(34);                                         // Phần trăm xem video (mô phỏng)
+  const [expandedModules, setExpandedModules] = useState<string[]>([]);           // Các module đang được mở rộng trên cây sidebar
+  const [noteText, setNoteText] = useState('');                                   // Nội dung ghi chú mới nhập
+  const [notes, setNotes] = useState<Note[]>(SAVED_NOTES);                       // Danh sách các ghi chú cá nhân của bài học
+  const [copiedCode, setCopiedCode] = useState(false);                            // Trạng thái đã sao chép code ví dụ
+  const [questionText, setQuestionText] = useState('');                           // Nội dung câu hỏi thảo luận mới nhập
+  const [activeTab, setActiveTab] = useState<'content' | 'notes' | 'discussion'>('content'); // Tab tương tác hiện tại
 
-  // Auto-start active lesson if it is not completed or started yet
+  // --- 5. EFFECT: TỰ ĐỘNG KHỞI TẠO TIẾN ĐỘ HỌC BÀI HỌC (START PROGRESS) ---
+  // Khi học viên chọn một bài học chưa hoàn thành, tự động gọi API `/progress/lesson/{id}/start` để ghi nhận
   useEffect(() => {
     if (role !== 'learner' || !activeLessonId || isLoading) return;
     
@@ -167,7 +188,6 @@ export function useLessonPage() {
 
     async function checkAndStartProgress() {
       try {
-        // Try getting progress status
         const res = await api.get(`/progress/lessonId/${activeLessonId}/complete`);
         if (!res.data || !res.data.status) {
           try {
@@ -189,22 +209,23 @@ export function useLessonPage() {
     checkAndStartProgress();
   }, [activeLessonId, role, isLoading]);
 
-  // Map modules and status
   const hasTrackedLessonProgress = completedLessonIds.size > 0;
   const completedFromProgressCount = !hasTrackedLessonProgress && rawModules.length > 0
     ? Math.round((progressVal / 100) * rawModules.reduce((acc: number, mod: any) => acc + (mod.lessons || []).length, 0))
     : 0;
 
-  // Helper to check if lesson has unmet prerequisites
+  /**
+   * Helper kiểm tra bài học có bị khóa do chưa hoàn thành các bài học tiên quyết (Prerequisites) hay không.
+   */
   const isLockedByPrerequisites = (l: any) => {
     if (!l.prerequisites || l.prerequisites.length === 0) return false;
     return l.prerequisites.some((prereq: any) => {
       const reqId = String(prereq.prerequisiteLessonId);
-      return !completedLessonIds.has(reqId);
+      return !completedLessonIds.has(reqId); // Nếu có bất kỳ bài tiên quyết nào chưa hoàn thành -> Bài này bị khóa
     });
   };
 
-  // Find the first uncompleted and unlocked lesson
+  // Xác định ID bài học hiện tại mà học viên nên học (bài chưa xong đầu tiên không bị khóa)
   const currentLessonId = rawModules
     .flatMap(m => m.lessons)
     .find(l => {
@@ -215,6 +236,7 @@ export function useLessonPage() {
     })?.id;
 
   let lessonCounter = 0;
+  // Map lại cấu trúc bài học và gán trạng thái động ('completed', 'locked', 'current', 'upcoming')
   const modules: Module[] = rawModules.map((m: any) => {
     let completedInModule = 0;
     const mappedLessons = (m.lessons || []).map((l: any) => {
@@ -273,7 +295,7 @@ export function useLessonPage() {
   const completedLessons = modules.reduce((acc, m) => acc + m.lessons.filter(l => l.status === 'completed').length, 0);
   const overallProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
-  // Active lesson matching
+  // Lấy ra bài học active hiện tại dựa trên ID từ URL
   let activeLesson: Lesson | undefined;
   for (const mod of modules) {
     const found = mod.lessons.find(l => String(l.id) === String(activeLessonId));
@@ -283,7 +305,7 @@ export function useLessonPage() {
     }
   }
 
-  // Fallback to first current or first lesson overall
+  // Fallback: nếu không tìm thấy bài học active trên URL, lấy bài học có status 'current' đầu tiên
   if (!activeLesson) {
     for (const mod of modules) {
       const found = mod.lessons.find(l => l.status === 'current');
@@ -293,6 +315,7 @@ export function useLessonPage() {
       }
     }
   }
+  // Fallback 2: nếu vẫn không có, mặc định chọn bài học đầu tiên
   if (!activeLesson && modules.length > 0 && modules[0].lessons.length > 0) {
     activeLesson = modules[0].lessons[0];
   }
@@ -305,21 +328,22 @@ export function useLessonPage() {
   const activeVideoUrl = activeLesson?.videoUrl?.trim();
   const youtubeEmbedUrl = getYoutubeEmbedUrl(activeVideoUrl);
 
-  // Auto-expand active module on mount/active lesson changes
+  // Tự động expand module chứa bài học active trên sidebar khi load trang
   useEffect(() => {
     if (activeModuleId) {
       setExpandedModules(prev => prev.includes(activeModuleId) ? prev : [...prev, activeModuleId]);
     }
   }, [activeLessonId, activeModuleId]);
 
-
-
+  // --- 6. HÀM XỬ LÝ HÀNH ĐỘNG (INTERACTION HANDLERS) ---
+  // Ẩn/hiện module trên sidebar
   const toggleModule = (id: string | number) => {
     setExpandedModules(prev =>
       prev.includes(String(id)) ? prev.filter(m => m !== String(id)) : [...prev, String(id)]
     );
   };
 
+  // Sao chép code ví dụ của khóa học vào clipboard
   const handleCopyCode = () => {
     setCopiedCode(true);
     navigator.clipboard.writeText(getMockCode(matchedCourse.title).code);
@@ -327,6 +351,7 @@ export function useLessonPage() {
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
+  // Thêm một dòng ghi chép cá nhân tương ứng mốc thời gian video
   const handleAddNote = () => {
     if (!noteText.trim()) return;
     const mins = Math.floor((videoProgress / 100) * 18);
@@ -341,11 +366,19 @@ export function useLessonPage() {
     toast.success('Note added!');
   };
 
+  // Xóa ghi chú cá nhân
   const handleDeleteNote = (noteId: number) => {
     setNotes(prev => prev.filter(note => note.id !== noteId));
     toast.success('Note deleted.');
   };
 
+  /**
+   * Đồng bộ trạng thái hoàn thành bài học (PERSIST COMPLETION) lên Backend.
+   * Gửi API PATCH `/progress/lesson/{id}/complete` và tải lại enrollments để cập nhật thanh tiến độ tổng thể.
+   * 
+   * @param lesson - Bài học được đánh dấu hoàn thành
+   * @param showToast - Có hiển thị toast thông báo thành công/thất bại hay không
+   */
   const persistLessonCompletion = async (lesson: Lesson, showToast = true) => {
     if (role !== 'learner') {
       if (showToast) toast.error('Only learners can update course progress.');
@@ -358,7 +391,7 @@ export function useLessonPage() {
     }
 
     try {
-      // 1. Call progress complete API
+      // Gọi API hoàn thành bài học
       await api.patch(`/progress/lesson/${lessonId}/complete`);
 
       const nextCompletedIds = new Set(completedLessonIds);
@@ -367,6 +400,7 @@ export function useLessonPage() {
 
       if (showToast) toast.success('Marked lesson as completed!');
       
+      // Tải lại thông tin enrollments mới nhất
       const enrolls = await getMyEnrollments();
       setEnrollments(enrolls);
     } catch (err) {
@@ -375,12 +409,14 @@ export function useLessonPage() {
     }
   };
 
+  // Xử lý khi nhấn nút "Đánh dấu hoàn thành" bài học active hiện tại
   const handleMarkComplete = () => {
     if (activeLesson) {
       persistLessonCompletion(activeLesson);
     }
   };
 
+  // Xử lý khi click chọn một bài học từ sidebar. Ngăn chặn nếu bài học đang bị khóa.
   const handleLessonClick = (lesson: Lesson) => {
     if (lesson.status === 'locked') {
       if (role === 'guest') {
@@ -393,6 +429,7 @@ export function useLessonPage() {
     setSearchParams({ courseId: String(courseId), lessonId: String(lesson.id) });
   };
 
+  // Điều hướng sang bài học phía trước (Previous Lesson)
   const handlePrevLesson = () => {
     if (activeLessonIndex > 0) {
       const prev = flatLessons[activeLessonIndex - 1];
@@ -408,6 +445,7 @@ export function useLessonPage() {
     }
   };
 
+  // Điều hướng sang bài học tiếp theo (Next Lesson)
   const handleNextLesson = () => {
     if (activeLessonIndex < flatLessons.length - 1) {
       const next = flatLessons[activeLessonIndex + 1];
@@ -423,10 +461,7 @@ export function useLessonPage() {
     }
   };
 
-
-
-
-
+  // Quay trở lại trang chi tiết khóa học tương ứng với vai trò của user
   const handleBackToCourse = () => {
     if (role === 'learner') {
       navigate(`/learner/courses/detail?id=${courseId}`);
