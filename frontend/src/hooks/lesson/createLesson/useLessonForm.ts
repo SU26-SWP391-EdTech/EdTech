@@ -1,6 +1,7 @@
 import { useCallback, useState, useEffect } from 'react';
 
 import type {
+  Assessment,
   LessonStatus,
   Objective,
   QuizQuestion,
@@ -54,7 +55,7 @@ export function useLessonForm() {
   // --- 5. EFFECT: TỰ ĐỘNG TÍNH TOÁN THỜI LƯỢNG BÀI HỌC (DURATION) ---
   // Tự động cập nhật tổng thời lượng dựa trên các hình thức được tích chọn
   useEffect(() => {
-    let calculated = 0;
+    let calculated: number;
     if (hasAssessment) {
       calculated = 15; // Mặc định 15 phút cho bài kiểm tra
     } else if (hasVideo && hasReading) {
@@ -66,6 +67,7 @@ export function useLessonForm() {
     } else {
       calculated = 10; // Fallback mặc định
     }
+    // eslint-disable-next-line
     setDuration(calculated > 0 ? String(calculated) : '');
   }, [hasVideo, hasReading, hasAssessment, videoDurationInput]);
 
@@ -119,18 +121,44 @@ export function useLessonForm() {
     }
     const hasRead = Boolean(cleanReadingContent.trim());
 
-    // Nạp dữ liệu các bài kiểm tra được lưu trữ tạm ở localStorage để xác định trạng thái hasAssessment
-    const savedAss = localStorage.getItem(`assessments_lesson_${lesson.lessonId}`);
+    // Nạp dữ liệu các bài kiểm tra từ API (nếu có) hoặc localStorage để xác định trạng thái hasAssessment
     let hasAss = false;
     let loadedAssessments: Assessment[] = [];
-    if (savedAss) {
-      try {
-        loadedAssessments = JSON.parse(savedAss);
-        hasAss = loadedAssessments && loadedAssessments.length > 0;
-      } catch (e) {
-        loadedAssessments = [];
+    
+    if (lesson.assessments && lesson.assessments.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      loadedAssessments = lesson.assessments.map((ass: any) => ({
+        id: String(ass.assessmentId || ass.id),
+        assessmentId: ass.assessmentId,
+        title: ass.title,
+        type: ass.type,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        questions: (ass.questions || []).map((q: any) => ({
+          id: String(q.questionId || q.id),
+          content: q.content,
+          type: q.type,
+          points: Number(q.points),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          options: (q.options || []).map((o: any) => ({
+            id: String(o.optionId || o.id),
+            content: o.content,
+            isCorrect: Boolean(o.isCorrect),
+          })),
+        })),
+      }));
+      hasAss = true;
+    } else {
+      const savedAss = localStorage.getItem(`assessments_lesson_${lesson.lessonId}`);
+      if (savedAss) {
+        try {
+          loadedAssessments = JSON.parse(savedAss);
+          hasAss = loadedAssessments && loadedAssessments.length > 0;
+        } catch {
+          loadedAssessments = [];
+        }
       }
     }
+    
     setAssessments(loadedAssessments);
 
     setHasAssessment(hasAss);
