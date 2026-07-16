@@ -42,4 +42,17 @@ export class EnrollmentsRepository {
             },
         });
     }
+
+    public async findByUserId(
+        userId: number,
+    ): Promise<Enrollment[]> {
+        return await this.repo.find({
+            where: {
+                user: {
+                    userId,
+                },
+            },
+            relations: ['course'],
+        });
+    }
 }

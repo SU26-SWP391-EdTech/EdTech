@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { Plus, Trash2, CheckCircle2, X, HelpCircle, Check, Award } from 'lucide-react';
 import type { Assessment, AssessmentQuestion, AssessmentType, QuestionType, QuestionOption } from '../../../types/lesson/create-lesson.types';
+import { QuestionService } from '../../../services/assessment/question.service';
 
 interface Props {
   assessments: Assessment[];
   setAssessments: React.Dispatch<React.SetStateAction<Assessment[]>>;
+  courseId?: number | null;
+  lessonId?: number | null;
 }
 
 const Label = ({ children, required }: { children: React.ReactNode; required?: boolean }) => (
@@ -13,7 +16,7 @@ const Label = ({ children, required }: { children: React.ReactNode; required?: b
   </label>
 );
 
-export function LessonAssessmentSection({ assessments, setAssessments }: Props) {
+export function LessonAssessmentSection({ assessments, setAssessments, courseId, lessonId }: Props) {
   // Assessment Form State
   const [newTitle, setNewTitle] = useState('');
   const [newType, setNewType] = useState<AssessmentType>('LESSON_QUIZ');
@@ -40,7 +43,32 @@ export function LessonAssessmentSection({ assessments, setAssessments }: Props) 
   };
 
   // Delete Assessment
-  const handleDeleteAssessment = (id: string) => {
+  const handleDeleteAssessment = async (id: string | number) => {
+    const target = assessments.find(a => a.id === id);
+    if (target && courseId && lessonId) {
+      const numericAssessmentId = typeof target.id === 'number' || !String(target.id).startsWith('ast-')
+        ? Number(target.id)
+        : Number(target.assessmentId);
+        
+      if (numericAssessmentId) {
+        for (const q of target.questions || []) {
+          const isDbQuestion = typeof q.id === 'number' || !String(q.id).startsWith('q-');
+          const numericQuestionId = isDbQuestion ? Number(q.id) : Number((q as any).questionId);
+          if (numericQuestionId) {
+            try {
+              await QuestionService.deleteQuestion(
+                Number(courseId),
+                Number(lessonId),
+                numericAssessmentId,
+                numericQuestionId
+              );
+            } catch (err) {
+              console.error('Failed to delete question from backend:', err);
+            }
+          }
+        }
+      }
+    }
     setAssessments(prev => prev.filter(a => a.id !== id));
   };
 
@@ -71,7 +99,7 @@ export function LessonAssessmentSection({ assessments, setAssessments }: Props) 
   };
 
   // Save Question
-  const handleSaveQuestion = () => {
+  const handleSaveQuestion = async () => {
     if (!activeAssessmentId || !qContent.trim()) return;
 
     // Filter out blank options
@@ -81,13 +109,59 @@ export function LessonAssessmentSection({ assessments, setAssessments }: Props) 
       isCorrect: correctIndices.includes(idx),
     }));
 
-    const newQuestion: AssessmentQuestion = {
+    let newQuestion: AssessmentQuestion = {
       id: `q-${Date.now()}`,
       content: qContent.trim(),
       type: qType,
       points: qPoints,
       options: filteredOptions,
     };
+
+    const isDbAssessment = typeof activeAssessmentId === 'number' || !String(activeAssessmentId).startsWith('ast-');
+    if (isDbAssessment && courseId && lessonId) {
+      try {
+        const qResponse = await QuestionService.createQuestion(
+          Number(courseId),
+          Number(lessonId),
+          Number(activeAssessmentId),
+          {
+            content: newQuestion.content,
+            type: newQuestion.type === 'MULTIPLE_CHOICE_MULTI' ? 'MULTIPLE_CHOICE_MULTI' : 'MULTIPLE_CHOICE_SINGLE',
+            points: newQuestion.points,
+          }
+        );
+        if (qResponse && qResponse.questionId) {
+          const dbQuestionId = qResponse.questionId;
+          const savedOptions = [];
+          
+          for (let idx = 0; idx < filteredOptions.length; idx++) {
+            const opt = filteredOptions[idx];
+            try {
+              const optResponse = await QuestionService.createQuestionOption(dbQuestionId, {
+                content: opt.content,
+                isCorrect: opt.isCorrect,
+              });
+              savedOptions.push({
+                id: optResponse.optionId,
+                content: optResponse.content,
+                isCorrect: optResponse.isCorrect,
+              });
+            } catch (optErr) {
+              console.warn('Failed to save option during direct add:', optErr);
+              savedOptions.push(opt);
+            }
+          }
+          
+          newQuestion = {
+            ...newQuestion,
+            id: dbQuestionId,
+            options: savedOptions,
+          };
+        }
+      } catch (err) {
+        console.error('Failed to immediately save question to backend:', err);
+      }
+    }
 
     setAssessments(prev => prev.map(a => {
       if (a.id === activeAssessmentId) {
@@ -109,7 +183,27 @@ export function LessonAssessmentSection({ assessments, setAssessments }: Props) 
   };
 
   // Delete Question
-  const handleDeleteQuestion = (assessmentId: string, questionId: string) => {
+  const handleDeleteQuestion = async (assessmentId: string | number, questionId: string | number) => {
+    const isDbQuestion = typeof questionId === 'number' || !String(questionId).startsWith('q-');
+    if (isDbQuestion && courseId && lessonId) {
+      try {
+        const numericAssessmentId = typeof assessmentId === 'number' || !String(assessmentId).startsWith('ast-')
+          ? Number(assessmentId)
+          : Number(assessments.find(a => a.id === assessmentId)?.assessmentId);
+        
+        if (numericAssessmentId) {
+          await QuestionService.deleteQuestion(
+            Number(courseId),
+            Number(lessonId),
+            numericAssessmentId,
+            Number(questionId)
+          );
+        }
+      } catch (err) {
+        console.error('Failed to delete question from backend:', err);
+      }
+    }
+
     setAssessments(prev => prev.map(a => {
       if (a.id === assessmentId) {
         return {

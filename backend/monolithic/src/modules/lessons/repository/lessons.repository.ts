@@ -26,6 +26,11 @@ export class LessonsRepository {
           },
         },
         prerequisites: true,
+        assessments: {
+          questions: {
+            options: true,
+          },
+        },
       },
     });
   }
@@ -68,7 +73,7 @@ export class LessonsRepository {
       where: {
         course: { courseId },
       },
-      relations: ['prerequisites'],
+      relations: ['prerequisites', 'course', 'assessments'],
       order: {
         position: 'ASC',
       },

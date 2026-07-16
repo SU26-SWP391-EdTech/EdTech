@@ -101,6 +101,26 @@ export function PvpBattlePage() {
     const [status, setStatus] = useState<'loading' | 'playing' | 'waiting_next' | 'gameover' | 'opponent_left' | 'error'>('loading');
     const [matchResult, setMatchResult] = useState<any>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [pointsAwarded, setPointsAwarded] = useState(false);
+
+    // Award PvP points when the player wins a match (or opponent forfeits)
+    useEffect(() => {
+        if (!currentUser?.userId || !matchId || pointsAwarded) return;
+        
+        let won = false;
+        if (status === 'opponent_left') {
+            won = true;
+        } else if (status === 'gameover' && matchResult) {
+            won = matchResult.winner === currentUser.userId;
+        }
+
+        if (won) {
+            const currentSaved = localStorage.getItem(`leaderboard_pvp_points_user_${currentUser.userId}`);
+            const newPvpPoints = (currentSaved ? Number(currentSaved) : 0) + 5;
+            localStorage.setItem(`leaderboard_pvp_points_user_${currentUser.userId}`, String(newPvpPoints));
+            setPointsAwarded(true);
+        }
+    }, [status, matchResult, currentUser?.userId, matchId, pointsAwarded]);
 
     // Fetch Opponent Profile on mount
     useEffect(() => {

@@ -4,6 +4,12 @@ import type { ProfileData } from '../../components/User/Profile/admin/EditProfil
 import { getUserById, updateUser } from '../../services/user/user.service';
 import toast from 'react-hot-toast';
 
+/**
+ * Chuyển đổi mã tên vai trò thành nhãn hiển thị thân thiện trên giao diện.
+ * 
+ * @param roleName - Tên vai trò dạng chữ viết thường hoặc camelCase từ database
+ * @returns Nhãn hiển thị viết hoa chuẩn hóa (ví dụ: 'Academic Manager')
+ */
 const mapRoleNameToLabel = (roleName?: string): string => {
     if (!roleName) return 'User';
     switch (roleName.toLowerCase()) {
@@ -15,12 +21,19 @@ const mapRoleNameToLabel = (roleName?: string): string => {
     }
 };
 
+/**
+ * Custom hook quản lý thông tin hồ sơ của Quản trị viên (Admin Profile).
+ * Hỗ trợ tải thông tin chi tiết qua `getUserById`, 
+ * cập nhật thông tin qua `updateUser` bằng cách chuyển đổi file ảnh đại diện sang chuỗi Base64 (FileReader),
+ * và đồng bộ hóa thông tin người dùng trong Auth Store cục bộ.
+ */
 export function useAdminProfile() {
-    const [showEdit, setShowEdit] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [showEdit, setShowEdit] = useState(false); // Trạng thái ẩn/hiện modal chỉnh sửa hồ sơ
+    const [loading, setLoading] = useState(false);   // Trạng thái đang giao tiếp API với server
 
     const loggedInUser = useAuthStore((state) => state.user);
 
+    // Khởi tạo trạng thái profile ban đầu từ thông tin lưu trong Auth Store cục bộ
     const [profile, setProfile] = useState<ProfileData>(() => ({
         name: loggedInUser?.fullName || '',
         email: loggedInUser?.email || '',
@@ -34,6 +47,9 @@ export function useAdminProfile() {
         role: loggedInUser?.roleName ? mapRoleNameToLabel(loggedInUser.roleName) : 'User',
     }));
 
+    /**
+     * Gọi API lấy thông tin chi tiết của quản trị viên theo userId.
+     */
     const fetchProfileData = useCallback(async () => {
         if (!loggedInUser) return;
         try {
@@ -76,6 +92,7 @@ export function useAdminProfile() {
         }
     }, [loggedInUser]);
 
+    // Sử dụng cleanup function với biến active để tránh cập nhật state khi component đã unmounted
     useEffect(() => {
         let active = true;
         const load = async () => {
@@ -90,6 +107,13 @@ export function useAdminProfile() {
         };
     }, [fetchProfileData]);
 
+    /**
+     * Gửi yêu cầu cập nhật hồ sơ quản trị viên lên Backend.
+     * Hỗ trợ đọc file ảnh cục bộ (avatarFile) và chuyển đổi thành chuỗi Base64 bằng FileReader trước khi gửi qua API JSON.
+     * Cập nhật đồng bộ thông tin trong Auth Store.
+     * 
+     * @param updated - Thông tin cập nhật bao gồm tên, ảnh đại diện, chuyên môn, số năm kinh nghiệm, avatar file.
+     */
     const handleSave = async (updated: {
         name: string;
         avatar: string;
@@ -103,6 +127,7 @@ export function useAdminProfile() {
             setLoading(true);
             let avatarUrlToSend = updated.avatar;
 
+            // Nếu người dùng tải lên file ảnh đại diện mới, chuyển đổi file sang Base64
             if (updated.avatarFile) {
                 avatarUrlToSend = await new Promise<string>((resolve, reject) => {
                     const reader = new FileReader();
@@ -112,11 +137,13 @@ export function useAdminProfile() {
                 });
             }
 
+            // Gọi API cập nhật thông tin User cơ bản
             const res = await updateUser(loggedInUser.userId, {
                 fullName: updated.name,
                 avatar_url: avatarUrlToSend,
             });
 
+            // Cập nhật Auth Store cục bộ
             useAuthStore.setState({
                 user: {
                     ...loggedInUser,

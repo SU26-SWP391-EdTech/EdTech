@@ -10,15 +10,23 @@ import {
     mapEnrollmentToMyLearningCourse,
 } from '../../utils/learner/myLearningMappers';
 
+/**
+ * Custom hook quản lý thông tin học tập cá nhân của Học viên (Learner - "My Learning").
+ * Tải danh sách khóa học học viên đã tham gia, hiển thị số liệu thống kê (hoàn thành, đang học, chưa bắt đầu),
+ * hỗ trợ bộ lọc tab trạng thái, công cụ tìm kiếm và các hành động điều hướng (xem chi tiết, tiếp tục học bài học tiếp theo).
+ */
 export function useMyLearning() {
     const navigate = useNavigate();
-    const [tab, setTab] = useState<MyLearningTab>('all');
-    const [search, setSearch] = useState('');
-    const [isLoading, setIsLoading] = useState(true);
-    const [courses, setCourses] = useState<MyLearningCourse[]>([]);
 
+    // --- 1. QUẢN LÝ TRẠNG THÁI (STATE) ---
+    const [tab, setTab] = useState<MyLearningTab>('all');                 // Tab phân loại trạng thái học tập ('all', 'in_progress', 'completed')
+    const [search, setSearch] = useState('');                             // Chuỗi tìm kiếm khóa học của học viên
+    const [isLoading, setIsLoading] = useState(true);                     // Trạng thái đang call API tải danh sách đăng ký học
+    const [courses, setCourses] = useState<MyLearningCourse[]>([]);       // Danh sách khóa học đã tham gia (đã map sang kiểu hiển thị)
+
+    // --- 2. EFFECT: TẢI DANH SÁCH ĐĂNG KÝ HỌC (ENROLLMENTS) ---
     useEffect(() => {
-        let cancelled = false;
+        let cancelled = false; // Cờ chống race condition nếu component bị unmount trước khi API trả về kết quả
 
         async function loadEnrollments() {
             setIsLoading(true);
@@ -26,6 +34,7 @@ export function useMyLearning() {
             try {
                 const enrollments = await getMyEnrollments();
                 if (!cancelled) {
+                    // Map danh sách Enrollment thô từ Backend sang danh sách khóa học dạng hiển thị
                     setCourses(enrollments.map(mapEnrollmentToMyLearningCourse));
                 }
             } catch (error: any) {
@@ -42,12 +51,15 @@ export function useMyLearning() {
         loadEnrollments();
 
         return () => {
-            cancelled = true;
+            cancelled = true; // Clean up hủy bỏ cập nhật state khi unmount
         };
     }, []);
 
+    // --- 3. LOGIC TÍNH TOÁN VÀ BỘ LỌC (COMPUTED VALUES) ---
+    // Tính toán số liệu thống kê học tập (Số khóa học hoàn thành, đang học, tổng số giờ...)
     const stats = useMemo(() => getMyLearningStats(courses), [courses]);
 
+    // Lọc danh sách khóa học hiển thị theo Tab đang chọn và theo ô nhập liệu Tìm kiếm
     const filteredCourses = useMemo(() => {
         const byTab = filterMyLearningCourses(courses, tab);
         const keyword = search.trim().toLowerCase();
@@ -60,10 +72,17 @@ export function useMyLearning() {
         ));
     }, [courses, search, tab]);
 
+    // --- 4. HÀM ĐIỀU HƯỚNG HỌC TẬP (NAVIGATION) ---
+    /**
+     * Chuyển sang trang xem chi tiết thông tin khóa học (Landing page của learner).
+     */
     function openCourse(courseId: number) {
         navigate(`/learner/courses/detail?id=${courseId}`);
     }
 
+    /**
+     * Chuyển hướng thẳng tới lớp học để tiếp tục bài học dang dở của học viên.
+     */
     function continueCourse(courseId: number) {
         navigate(`/learner/lesson?courseId=${courseId}`);
     }

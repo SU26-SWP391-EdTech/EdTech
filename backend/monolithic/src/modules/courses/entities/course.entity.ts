@@ -1,7 +1,7 @@
 import { CourseStatus } from 'src/common/enums/course.enum';
 import { Assessment } from 'src/modules/assessment/entities/assessment.entity';
 import { Enrollment } from 'src/modules/enrollments/entities/enrollment.entity';
-import { LeaderboardRule } from 'src/modules/leaderboard/entities/learderboard-rule.entity';
+import { LeaderboardRule } from 'src/modules/leaderboard/entities/leaderboard-rule.entity';
 import { LearningPathCourse } from 'src/modules/learning-paths/entities/learning-path-course.entity';
 import { Lesson } from 'src/modules/lessons/entities/lesson.entity';
 import { User } from 'src/modules/users/entities/user.entity';
