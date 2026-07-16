@@ -9,17 +9,6 @@ import { getMyEnrollments, enrollCourse } from '../../services/enrollment/enroll
 import { getAcademicProfile } from '../../services/user/user.service';
 import api from '../../lib/axios';
 
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { useAuthStore } from '../../stores/auth/auth.stores';
-import toast from 'react-hot-toast';
-import type { Module, LessonStatus } from '../../types/course/course-detail.types';
-import { getCourseById, approveCourse, rejectCourse, searchCourses } from '../../services/course/course.service';
-import { getLessonsByCourse } from '../../services/lesson/lesson.service';
-import { getMyEnrollments, enrollCourse } from '../../services/enrollment/enrollment.service';
-import { getAcademicProfile } from '../../services/user/user.service';
-import api from '../../lib/axios';
-
 /**
  * Xác định phân loại của bài học (Assessment, Video, Reading, hoặc kết hợp).
  * Ưu tiên nhận diện bài kiểm tra (Assessment) trước qua các trường dữ liệu hoặc localStorage.

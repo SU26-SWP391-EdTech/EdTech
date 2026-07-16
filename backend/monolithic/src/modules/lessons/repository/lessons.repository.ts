@@ -26,7 +26,11 @@ export class LessonsRepository {
           },
         },
         prerequisites: true,
-        assessments: true,
+        assessments: {
+          questions: {
+            options: true,
+          },
+        },
       },
     });
   }

@@ -91,8 +91,8 @@ const CourseList = ({ filtered, canDelete, setDeleteId, onView, onEdit, onSubmit
                                 <button onClick={() => onView(c.courseId)} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px', border: '1px solid #E5E7EB', borderRadius: 8, background: '#fff', cursor: 'pointer', fontSize: 12.5, fontWeight: 500, color: '#374151' }}>
                                     <Eye size={13} /> View
                                 </button>
-                                {/* Edit only for DRAFT or REJECTED */}
-                                {(statusKey === 'DRAFT' || statusKey === 'REJECTED') && (
+                                {/* Edit only for DRAFT, REJECTED or APPROVED */}
+                                {(statusKey === 'DRAFT' || statusKey === 'REJECTED' || statusKey === 'APPROVED') && (
                                     <button onClick={() => onEdit(c.courseId)} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '7px 14px', border: '1px solid #E5E7EB', borderRadius: 8, background: '#fff', cursor: 'pointer', fontSize: 12.5, fontWeight: 500, color: '#374151' }}>
                                         <Edit2 size={13} /> Edit
                                     </button>
