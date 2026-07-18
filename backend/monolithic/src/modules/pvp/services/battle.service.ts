@@ -3,7 +3,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { AssessmentType } from 'src/common/enums/assessment-type.enum';
 import { PvpMatchStatus } from 'src/common/enums/pvp-match-status.enum';
+import { Question } from 'src/modules/question/entities/question.entity';
 import { BattleConfig } from '../constants/battle-config.constant';
 import { SocketEvents } from '../constants/socket-events.constant';
 import { CreateBattleDto } from '../dto/battle/create-battle.dto';
@@ -44,8 +46,20 @@ export class BattleService {
       });
     }
 
-    const questions =
-      await this.matchRepository.findAssessmentQuestions(assessmentId);
+    let questions: Question[];
+
+    if (assessment.type === AssessmentType.PVP) {
+      questions = await this.matchRepository.findQuestionsByCourseId(
+        assessment.courseId,
+      );
+
+      if (questions.length === 0) {
+        questions = await this.matchRepository.findAssessmentQuestions(1);
+      }
+    } else {
+      questions =
+        await this.matchRepository.findAssessmentQuestions(assessmentId);
+    }
 
     if (questions.length === 0) {
       throw new BadRequestException({

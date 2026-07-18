@@ -9,6 +9,9 @@ import { CreateAssessmentDto } from '../dto/create-assessment.dto';
 import { CoursesService } from 'src/modules/courses/services/courses.service';
 import { LessonsService } from 'src/modules/lessons/service/lessons.service';
 import { Lesson } from 'src/modules/lessons/entities/lesson.entity';
+import { Question } from 'src/modules/question/entities/question.entity';
+import { QuestionType } from 'src/common/enums/question-type.enum';
+import { AssessmentType } from 'src/common/enums/assessment-type.enum';
 
 @Injectable()
 export class AssessmentService {
@@ -67,5 +70,9 @@ export class AssessmentService {
       );
     }
     return assessment;
+  }
+
+  async getPvpQuestion(courseId: number){
+    return await this.assessmentRepository.getPvpQuestion(courseId);
   }
 }

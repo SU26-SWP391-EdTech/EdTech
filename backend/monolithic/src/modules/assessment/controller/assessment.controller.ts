@@ -86,4 +86,9 @@ export class AssessmentController {
       assessmentId,
     );
   }
+
+  @Get('course/:courseId/pvp')
+  async getPvpQuestion(@Param('courseId', ParseIntPipe) courseId: number){
+    return await this.assessmentService.getPvpQuestion(courseId);
+  }
 }
