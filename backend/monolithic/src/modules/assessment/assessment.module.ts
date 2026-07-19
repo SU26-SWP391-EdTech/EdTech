@@ -12,6 +12,7 @@ import { AssessmentSessionRepository } from './repository/assessment-session.rep
 import { LearnersModule } from '../learners/learners.module';
 import { AssessmentSessionController } from './controller/assessment-session.controller';
 import { ProgressModule } from '../progress/progress.module';
+import { LearnerStreakService } from '../learners/learner-streak.service';
 
 @Module({
   imports: [
@@ -26,13 +27,19 @@ import { ProgressModule } from '../progress/progress.module';
     AssessmentSessionController
   ],
   providers: [
-    AssessmentService, 
+    AssessmentService,
     AssessmentRepository,
-    
+
     AssessmentSessionService,
-    AssessmentSessionRepository
-    
+    AssessmentSessionRepository,
+
+    LearnerStreakService,
   ],
-  exports: [AssessmentService, AssessmentRepository],
+  exports: [
+    AssessmentService,
+    AssessmentRepository,
+    AssessmentSessionRepository,
+  ],
 })
 export class AssessmentModule { }
+

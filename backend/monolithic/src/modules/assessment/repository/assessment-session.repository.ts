@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AssessmentSession } from '../entities/assessment-session.entity';
 import { Repository } from 'typeorm';
+import { AssessmentType } from 'src/common/enums/assessment-type.enum';
 
 @Injectable()
 export class AssessmentSessionRepository {
@@ -62,5 +63,25 @@ export class AssessmentSessionRepository {
         .getMany();
 }
 
-  
+
+  public async findLatestCompletedEligible(
+    userId: number,
+    eligibleTypes: AssessmentType[],
+    excludeSessionId?: number,
+  ): Promise<AssessmentSession | null> {
+    const qb = this.repo
+      .createQueryBuilder('session')
+      .innerJoin('session.assessment', 'assessment')
+      .where('session.userId = :userId', { userId })
+      .andWhere('session.completedAt IS NOT NULL')
+      .andWhere('assessment.type IN (:...types)', { types: eligibleTypes })
+      .orderBy('session.completedAt', 'DESC')
+      .take(1);
+
+    if (excludeSessionId !== undefined) {
+      qb.andWhere('session.sessionId != :excludeSessionId', { excludeSessionId });
+    }
+
+    return qb.getOne();
+  }
 }

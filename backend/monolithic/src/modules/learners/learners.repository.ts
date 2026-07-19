@@ -1,7 +1,9 @@
-import { InjectRepository } from "@nestjs/typeorm";
+import { Injectable } from "@nestjs/common";
 import { Learner } from "./entities/learner.entity";
 import { Repository } from "typeorm";
+import { InjectRepository } from "@nestjs/typeorm";
 
+@Injectable()
 export class LearnerRepository {
     constructor(
         @InjectRepository(Learner)
@@ -12,5 +14,9 @@ export class LearnerRepository {
         return await this.repo.findOneBy({
             userId
         })
+    }
+
+    public async saveLearner(learner: Learner): Promise<Learner> {
+        return await this.repo.save(learner);
     }
 }
