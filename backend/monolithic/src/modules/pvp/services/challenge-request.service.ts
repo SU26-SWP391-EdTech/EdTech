@@ -251,19 +251,30 @@ export class ChallengeRequestService {
   }
 
   async getOnlinePlayers(userId: number, courseId?: number) {
-    const onlineIds = [...this.connectionManager.getOnlineUsers()];
-    
-    // Always include Nguyen Van Binh An (ID 12) for local testing and demo
-    if (userId !== 12 && !onlineIds.includes(12)) {
-      onlineIds.push(12);
+    const fs = require('fs');
+    const path = require('path');
+    const logPath = path.join(__dirname, '../../../../debug_connections.log');
+    const details: any[] = [];
+    for (const [uid, sid] of (this.connectionManager as any).userConnections.entries()) {
+      let extra = 'no socket found';
+      if (this.socketService && (this.socketService as any).server) {
+        const socket = (this.socketService as any).server.sockets.sockets.get(sid);
+        if (socket) {
+          extra = `user-agent: ${socket.handshake.headers['user-agent']}`;
+        }
+      }
+      details.push({ uid, sid, extra });
     }
+    const logMsg = `[${new Date().toISOString()}] userConnections details: ${JSON.stringify(details)}\n`;
+    fs.appendFileSync(logPath, logMsg);
+    const onlineIds = [...this.connectionManager.getOnlineUsers()];
 
     const result: any[] = [];
     for (const id of onlineIds) {
       if (id === userId) continue;
 
       // If courseId is provided, check if the user is enrolled in the same course
-      if (courseId && id !== 12) {
+      if (courseId) {
         try {
           const isEnrolled = await this.enrollmentService.checkEnrollment(id, courseId);
           if (!isEnrolled) continue;
@@ -286,8 +297,8 @@ export class ChallengeRequestService {
         // Fallback
         result.push({
           userId: id,
-          fullName: id === 12 ? 'Nguyen Van Binh An' : `User #${id}`,
-          email: id === 12 ? 'learner1@system.com' : '',
+          fullName: `User #${id}`,
+          email: '',
           avatarUrl: '',
           bio: '',
           level: ''

@@ -61,6 +61,12 @@ export class PvpGateway implements OnGatewayConnection, OnGatewayDisconnect, OnG
       this.connectionManager.addConnection(payload.userId, client.id);
 
       console.log(`User ${payload.userId} connected`);
+
+      // Broadcast that a player went online
+      this.server.emit('online_players_changed', {
+        userId: payload.userId,
+        status: 'online',
+      });
     } catch (error) {
       console.error('Socket connection error during handshake verification:', error);
       client.disconnect();
@@ -72,6 +78,12 @@ export class PvpGateway implements OnGatewayConnection, OnGatewayDisconnect, OnG
 
     if(user){
         this.connectionManager.removeConnection(client.id);
+
+        // Broadcast that a player went offline
+        this.server.emit('online_players_changed', {
+          userId: user.userId,
+          status: 'offline',
+        });
     }
 
     console.log(`${client.id} disconnected`);

@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, Not, In } from 'typeorm';
 import { PvpMatch } from '../entities/pvp-match.entity';
 import { Assessment } from 'src/modules/assessment/entities/assessment.entity';
 import { Question } from 'src/modules/question/entities/question.entity';
 import { QuestionOption } from 'src/modules/question/entities/question-option.entity';
 import { PvpMatchStatus } from 'src/common/enums/pvp-match-status.enum';
+import { AssessmentType } from 'src/common/enums/assessment-type.enum';
 
 @Injectable()
 export class MatchRepository {
@@ -43,6 +44,36 @@ export class MatchRepository {
     return await this.questionRepo.find({
       where: {
         assessmentId,
+      },
+      relations: {
+        options: true,
+      },
+      order: {
+        position: 'ASC',
+        options: {
+          position: 'ASC',
+        },
+      },
+    });
+  }
+
+  async findQuestionsByCourseId(courseId: number): Promise<Question[]> {
+    const assessments = await this.assessmentRepo.find({
+      where: {
+        courseId,
+        type: Not(AssessmentType.PVP),
+      },
+    });
+
+    if (assessments.length === 0) {
+      return [];
+    }
+
+    const assessmentIds = assessments.map((a) => a.assessmentId);
+
+    return await this.questionRepo.find({
+      where: {
+        assessmentId: In(assessmentIds),
       },
       relations: {
         options: true,

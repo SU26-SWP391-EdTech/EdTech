@@ -45,6 +45,16 @@ export class AssessmentController {
     return await this.assessmentService.createService(user.userId, createAssessmentDto);
   }
 
+  @Get('courses/:courseId/pvp')
+  @Roles(RoleEnum.LEARNER)
+  @ApiOperation({ summary: 'Get or create PvP assessment for a course' })
+  @ApiResponse({ status: 200, description: 'PvP assessment retrieved successfully' })
+  async getOrCreatePvp(
+    @Param('courseId', ParseIntPipe) courseId: number,
+  ) {
+    return await this.assessmentService.getOrCreatePvpAssessment(courseId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get assessment detail by ID' })
   @ApiResponse({

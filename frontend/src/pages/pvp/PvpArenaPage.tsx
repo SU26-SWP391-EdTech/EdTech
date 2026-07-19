@@ -5,6 +5,7 @@ import { usePvp } from '../../context/PvpContext';
 import { getLearnerProfile } from '../../services/learner/learner.services';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 import { getMyEnrollments } from '../../services/enrollment/enrollment.service';
+import { pvpSocket } from '../../services/pvp/pvp-socket';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 
@@ -37,10 +38,10 @@ export function PvpArenaPage() {
             try {
                 const list = await getMyEnrollments();
                 setCourses(list);
-                if (list.length > 0) {
+                if (list && list.length > 0) {
                     setSelectedCourseId(list[0].course.courseId);
                 } else {
-                    setSelectedCourseId(1); // fallback
+                    setSelectedCourseId(null);
                 }
             } catch (err) {
                 console.error('Failed to fetch user enrollments:', err);
@@ -58,7 +59,11 @@ export function PvpArenaPage() {
 
     // 2. Fetch and filter candidates for the selected course (online only)
     useEffect(() => {
-        if (!selectedCourseId) return;
+        if (!selectedCourseId) {
+            setPlayers([]);
+            setLoading(false);
+            return;
+        }
         let isMounted = true;
         
         async function fetchRealOnline() {
@@ -87,12 +92,21 @@ export function PvpArenaPage() {
 
         loadAllData();
 
+        // Listen for real-time online status changes
+        const handleOnlineStatusChange = (data: any) => {
+            console.log('Real-time online status change event:', data);
+            fetchRealOnline();
+        };
+
+        pvpSocket.on('online_players_changed', handleOnlineStatusChange);
+
         const interval = setInterval(() => {
             fetchRealOnline();
         }, 10000);
 
         return () => {
             isMounted = false;
+            pvpSocket.off('online_players_changed', handleOnlineStatusChange);
             clearInterval(interval);
         };
     }, [selectedCourseId, currentUser?.userId]);
@@ -196,55 +210,69 @@ export function PvpArenaPage() {
                     <p style={{ fontSize: 12, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 12 }}>
                         Select course to duel in
                     </p>
-                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', overflowX: 'auto', paddingBottom: 8 }}>
-                        {courses.map((item) => {
-                            const c = item.course;
-                            const isSelected = selectedCourseId === c.courseId;
-                            return (
-                                <button
-                                    key={c.courseId}
-                                    onClick={() => setSelectedCourseId(c.courseId)}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 8,
-                                        padding: '10px 18px',
-                                        borderRadius: 99,
-                                        background: isSelected 
-                                            ? 'linear-gradient(135deg, #E11D48, #BE123C)' 
-                                            : '#FFFFFF',
-                                        border: isSelected
-                                            ? '1px solid #E11D48'
-                                            : '1px solid #E2E8F0',
-                                        color: isSelected ? '#fff' : '#475569',
-                                        fontSize: 13.5,
-                                        fontWeight: 600,
-                                        cursor: 'pointer',
-                                        boxShadow: isSelected ? '0 4px 12px rgba(225, 29, 72, 0.15)' : '0 1px 2px rgba(0,0,0,0.02)',
-                                        transition: 'all 0.15s',
-                                        whiteSpace: 'nowrap'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        if (!isSelected) {
-                                            e.currentTarget.style.background = '#F8FAFC';
-                                            e.currentTarget.style.color = '#111827';
-                                            e.currentTarget.style.borderColor = '#CBD5E1';
-                                        }
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (!isSelected) {
-                                            e.currentTarget.style.background = '#FFFFFF';
-                                            e.currentTarget.style.color = '#475569';
-                                            e.currentTarget.style.borderColor = '#E2E8F0';
-                                        }
-                                    }}
-                                >
-                                    <BookOpen size={15} />
-                                    {c.title}
-                                </button>
-                            );
-                        })}
-                    </div>
+                    {courses.length === 0 ? (
+                        <div style={{
+                            backgroundColor: '#FFF1F2',
+                            border: '1px dashed #FECDD3',
+                            borderRadius: 16,
+                            padding: '16px 24px',
+                            color: '#E11D48',
+                            fontSize: 14.5,
+                            fontWeight: 600
+                        }}>
+                            Hãy tham gia khóa học để tìm người pvp
+                        </div>
+                    ) : (
+                        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', overflowX: 'auto', paddingBottom: 8 }}>
+                            {courses.map((item) => {
+                                const c = item.course;
+                                const isSelected = selectedCourseId === c.courseId;
+                                return (
+                                    <button
+                                        key={c.courseId}
+                                        onClick={() => setSelectedCourseId(c.courseId)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 8,
+                                            padding: '10px 18px',
+                                            borderRadius: 99,
+                                            background: isSelected 
+                                                ? 'linear-gradient(135deg, #E11D48, #BE123C)' 
+                                                : '#FFFFFF',
+                                            border: isSelected
+                                                ? '1px solid #E11D48'
+                                                : '1px solid #E2E8F0',
+                                            color: isSelected ? '#fff' : '#475569',
+                                            fontSize: 13.5,
+                                            fontWeight: 600,
+                                            cursor: 'pointer',
+                                            boxShadow: isSelected ? '0 4px 12px rgba(225, 29, 72, 0.15)' : '0 1px 2px rgba(0,0,0,0.02)',
+                                            transition: 'all 0.15s',
+                                            whiteSpace: 'nowrap'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (!isSelected) {
+                                                e.currentTarget.style.background = '#F8FAFC';
+                                                e.currentTarget.style.color = '#111827';
+                                                e.currentTarget.style.borderColor = '#CBD5E1';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (!isSelected) {
+                                                e.currentTarget.style.background = '#FFFFFF';
+                                                e.currentTarget.style.color = '#475569';
+                                                e.currentTarget.style.borderColor = '#E2E8F0';
+                                            }
+                                        }}
+                                    >
+                                        <BookOpen size={15} />
+                                        {c.title}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
 
                 {/* Main Content Layout Grid */}
@@ -323,7 +351,9 @@ export function PvpArenaPage() {
                                             color: '#64748B',
                                             fontSize: 14
                                         }}>
-                                            No active classmates online right now. Invite your classmates to join the arena!
+                                            {courses.length === 0 
+                                                ? 'Hãy tham gia khóa học để tìm người pvp'
+                                                : 'No active classmates online right now. Invite your classmates to join the arena!'}
                                         </div>
                                     ) : (
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 20 }}>

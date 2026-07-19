@@ -17,6 +17,8 @@ import { BattleSessionManager } from '../manager/battle-session.manager';
 import { RoomManager } from '../manager/room.manager';
 import { MatchRepository } from '../repositories/match.repository';
 import { SocketService } from './socket.service';
+import { AssessmentType } from 'src/common/enums/assessment-type.enum';
+import { Question } from 'src/modules/question/entities/question.entity';
 
 @Injectable()
 export class BattleService {
@@ -44,8 +46,17 @@ export class BattleService {
       });
     }
 
-    const questions =
-      await this.matchRepository.findAssessmentQuestions(assessmentId);
+    let questions: Question[] = [];
+    if (assessment.type === AssessmentType.PVP) {
+      questions = await this.matchRepository.findQuestionsByCourseId(assessment.courseId);
+    } else {
+      questions = await this.matchRepository.findAssessmentQuestions(assessmentId);
+    }
+
+    // Fallback if no questions are found in the course's other assessments
+    if (questions.length === 0) {
+      questions = await this.matchRepository.findAssessmentQuestions(1); // fallback to Spring Boot PvP questions
+    }
 
     if (questions.length === 0) {
       throw new BadRequestException({
