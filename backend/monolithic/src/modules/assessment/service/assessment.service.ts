@@ -12,6 +12,7 @@ import { Lesson } from 'src/modules/lessons/entities/lesson.entity';
 import { AssessmentType } from 'src/common/enums/assessment-type.enum';
 import { Not, In } from 'typeorm';
 import { Question } from 'src/modules/question/entities/question.entity';
+import { QuestionType } from 'src/common/enums/question-type.enum';
 
 @Injectable()
 export class AssessmentService {
@@ -142,5 +143,9 @@ export class AssessmentService {
     }
 
     return pvpAssessment;
+  }
+
+  async getPvpQuestion(courseId: number){
+    return await this.assessmentRepository.getPvpQuestion(courseId);
   }
 }

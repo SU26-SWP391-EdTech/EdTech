@@ -42,6 +42,16 @@ export class AssessmentSession {
   })
   score: number;
 
+  @Column({
+    name: 'earned_points',
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    nullable: false,
+    default: 0,
+  })
+  earnedPoints: number;
+
   @CreateDateColumn({
     name: 'started_at',
     type: 'timestamp',

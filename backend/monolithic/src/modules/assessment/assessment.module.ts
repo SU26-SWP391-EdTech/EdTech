@@ -13,13 +13,15 @@ import { LearnersModule } from '../learners/learners.module';
 import { AssessmentSessionController } from './controller/assessment-session.controller';
 import { Question } from '../question/entities/question.entity';
 import { QuestionOption } from '../question/entities/question-option.entity';
+import { ProgressModule } from '../progress/progress.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Assessment, AssessmentSession, Question, QuestionOption]),
     CoursesModule,
     LessonsModule,
-    LearnersModule
+    LearnersModule,
+    ProgressModule
   ],
   controllers: [
     AssessmentController,

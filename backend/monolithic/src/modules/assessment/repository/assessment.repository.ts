@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Assessment } from '../entities/assessment.entity';
+import { AssessmentType } from 'src/common/enums/assessment-type.enum';
 @Injectable()
 export class AssessmentRepository extends Repository<Assessment> {
   constructor(private dataSource: DataSource) {
@@ -10,22 +11,24 @@ export class AssessmentRepository extends Repository<Assessment> {
   // Find an assessment by ID with relations (course, lesson, questions, and options)
   async findById(assessmentId: number): Promise<Assessment | null> {
     return this.findOne({
-      where: { assessmentId,
-       },
+      where: {
+        assessmentId,
+      },
       relations: ['course', 'lesson', 'questions', 'questions.options'],
     });
   }
 
-  async findAssessmentWithRelation(assessmentId: number, lessonId: number, courseId:number): Promise<Assessment | null> {
+  async findAssessmentWithRelation(assessmentId: number, lessonId: number, courseId: number): Promise<Assessment | null> {
     return this.findOne({
-      where: { assessmentId,
+      where: {
+        assessmentId,
         lesson: {
           lessonId,
         },
         course: {
           courseId,
         }
-       },
+      },
       relations: ['course', 'lesson', 'questions', 'questions.options'],
     });
   }
@@ -44,5 +47,32 @@ export class AssessmentRepository extends Repository<Assessment> {
       where: { lessonId },
       relations: ['course'],
     });
+  }
+
+  async getPvpQuestion(courseId: number) {
+    return this.createQueryBuilder('assessment')
+      .leftJoin('assessment.questions', 'question')
+      .addSelect([
+        'question.questionId',
+        'question.content',
+        'question.point',
+        'question.position',
+      ])
+      .leftJoin('question.options', 'option')
+      .addSelect([
+        'option.optionId',
+        'option.content',
+        'option.isCorrect',
+        'option.position',
+      ])
+      .where('assessment.type = :type', {
+        type: AssessmentType.PVP,
+      })
+      .andWhere('assessment.courseId = :courseId', {
+        courseId,
+      })
+      .orderBy('question.position', 'ASC')
+      .addOrderBy('option.position', 'ASC')
+      .getMany();
   }
 }
