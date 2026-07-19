@@ -28,6 +28,11 @@ interface UseCoursePersistenceOptions {
   title: string;
 }
 
+/**
+ * Custom hook quản lý đồng bộ dữ liệu khóa học và bài học của giảng viên lên Backend (Persistence).
+ * Hỗ trợ các chức năng: đồng bộ các thao tác thêm/sửa/xóa bài học, lưu khóa học dưới dạng nháp (draft) 
+ * hoặc gửi kiểm duyệt (pending), tự động lưu nháp khóa học trước khi chuyển hướng sang trình soạn thảo bài học.
+ */
 export function useCoursePersistence({
   deletedLessonIds,
   editId,
@@ -38,7 +43,16 @@ export function useCoursePersistence({
   thumbnailFile,
   title,
 }: UseCoursePersistenceOptions) {
+
+  /**
+   * Đồng bộ hóa danh sách bài học của khóa học lên Backend:
+   * 1. Xóa các bài học trong danh sách chờ xóa (`deletedLessonIds`).
+   * 2. Duyệt qua danh sách bài học hiện tại, tạo bài học mới (nếu ID bắt đầu bằng 'l-') hoặc cập nhật bài học cũ.
+   * 
+   * @param courseId - ID của khóa học chứa các bài học này
+   */
   async function syncLessons(courseId: number) {
+    // 1. Thực hiện xóa các bài học bị người dùng bấm xóa trong quá trình chỉnh sửa
     for (const lessonId of deletedLessonIds) {
       try {
         await apiDeleteLesson(lessonId);
@@ -47,6 +61,7 @@ export function useCoursePersistence({
       }
     }
 
+    // 2. Đồng bộ thêm mới/cập nhật và cập nhật lại thứ tự sắp xếp (index) của bài học
     let index = 1;
     for (const lesson of lessons) {
       try {
@@ -63,6 +78,11 @@ export function useCoursePersistence({
     }
   }
 
+  /**
+   * Xử lý nộp khóa học lên hệ thống (Lưu nháp hoặc Gửi yêu cầu duyệt).
+   * 
+   * @param status - Trạng thái khóa học: 'draft' (Lưu nháp) hoặc 'pending' (Gửi kiểm duyệt)
+   */
   async function handleSubmit(status: 'draft' | 'pending') {
     if (!title.trim()) {
       toast.error('Course Title is required.');
@@ -71,6 +91,7 @@ export function useCoursePersistence({
 
     setIsSubmitting(true);
     try {
+      // Dựng đối tượng FormData (vì có gửi tệp tin ảnh thumbnail)
       const formData = await buildCourseFormData({
         status,
         thumbnailFile,
@@ -79,21 +100,26 @@ export function useCoursePersistence({
 
       let courseId = editId;
       if (editId) {
+        // Cập nhật thông tin khóa học hiện tại
         await updateCourse(editId, formData);
         await updateCourse(editId, { status: 'draft' });
       } else {
+        // Tạo mới khóa học
         const newCourse = status === 'pending'
           ? await submitNewCourseToReview(formData)
           : await createCourse(formData);
         courseId = newCourse.courseId;
       }
 
+      // Đồng bộ các bài học thuộc khóa học
       await syncLessons(courseId!);
 
+      // Nếu đang chỉnh sửa khóa học và muốn gửi duyệt
       if (editId && status === 'pending') {
         await submitCourseToReview(editId);
       }
 
+      // Xóa bản nháp tạm lưu ở Local Storage nếu tạo mới thành công
       if (!editId) {
         clearCourseDraft();
       }
@@ -111,8 +137,14 @@ export function useCoursePersistence({
     }
   }
 
+  /**
+   * Đảm bảo khóa học nháp tồn tại trong DB trước khi tạo bài học.
+   * Nếu là khóa học mới tạo chưa được lưu nháp trên DB, tự động lưu nháp trước rồi lấy ID khóa học.
+   * 
+   * @returns ID của khóa học trong DB, hoặc null nếu lưu nháp thất bại
+   */
   async function ensureCourseExistsForLesson() {
-    if (editId) return editId;
+    if (editId) return editId; // Đã có sẵn khóa học
 
     if (!title.trim()) {
       toast.error('Course Title is required before creating a lesson.');
@@ -143,13 +175,20 @@ export function useCoursePersistence({
     }
   }
 
+  /**
+   * Chuyển sang trang soạn thảo chi tiết nội dung bài học (Lesson Editor).
+   * 
+   * @param lessonId - ID của bài học cần chỉnh sửa (nếu có, bỏ trống nếu là tạo mới bài học)
+   */
   async function openLessonEditor(lessonId?: string) {
     const courseId = await ensureCourseExistsForLesson();
     if (!courseId) return;
 
+    // Thiết lập đường dẫn quay lại và các query params chuyển tiếp
     const backUrl = encodeURIComponent(`/provider/courses/create?id=${courseId}`);
     const lessonParam = lessonId ? `&lessonId=${lessonId}` : '';
     const courseTitleParam = !editId && title.trim() ? `&courseTitle=${encodeURIComponent(title.trim())}` : '';
+    
     navigate(`/provider/lessons/create?redirectBack=${backUrl}&isCourseBuilder=true&courseId=${courseId}${lessonParam}${courseTitleParam}`);
   }
 

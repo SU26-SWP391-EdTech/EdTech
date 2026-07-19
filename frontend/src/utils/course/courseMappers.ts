@@ -14,13 +14,15 @@ export function mapBackendLessonToCourseBuilderLesson(lesson: BackendLesson): Co
     }
     const hasReading = Boolean(cleanReadingContent.trim());
     
-    const savedAss = localStorage.getItem(`assessments_lesson_${lesson.lessonId}`);
-    let hasAssessment = false;
-    if (savedAss) {
-      try {
-        const parsed = JSON.parse(savedAss);
-        hasAssessment = parsed && parsed.length > 0;
-      } catch (e) {}
+    let hasAssessment = Boolean(lesson.assessments && lesson.assessments.length > 0);
+    if (!hasAssessment) {
+      const savedAss = localStorage.getItem(`assessments_lesson_${lesson.lessonId}`);
+      if (savedAss) {
+        try {
+          const parsed = JSON.parse(savedAss);
+          hasAssessment = parsed && parsed.length > 0;
+        } catch (e) {}
+      }
     }
 
     let type: CourseBuilderLessonType = 'Reading';

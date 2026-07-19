@@ -15,18 +15,27 @@ import { useLessonQuizModal } from './useLessonQuizModal';
 import { useLessonResourceModal } from './useLessonResourceModal';
 import { useLessonToast } from './useLessonToast';
 
+/**
+ * Hook điều phối trung tâm (Orchestrator) cho tính năng Tạo / Chỉnh sửa bài học (Lesson Builder).
+ * Tích hợp các sub-hook chuyên trách để quản lý toàn bộ form bài học, tải danh sách khóa học/bài học,
+ * luồng lưu nháp (draft flow), hiển thị modal đính kèm tài nguyên (Resource Modal), 
+ * quản lý câu hỏi trắc nghiệm (Quiz Modal), và giao tiếp API đồng bộ dữ liệu (Persistence).
+ */
 export function useCreateLesson() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const user = useAuthStore(state => state.user);
 
-  const videoInputRef = useRef<HTMLInputElement | null>(null);
-  const [modal, setModal] = useState<ModalType>(null);
+  // --- 1. THAM CHIẾU VÀ STATE UI CỦA TRANG ---
+  const videoInputRef = useRef<HTMLInputElement | null>(null);             // Tham chiếu đến input file upload video
+  const [modal, setModal] = useState<ModalType>(null);                     // Loại modal đang mở ('resource' | 'quiz' | null)
 
-  const form = useLessonForm();
-  const toast = useLessonToast();
+  // --- 2. TÍCH HỢP CÁC SUB-HOOKS CHUYÊN TRÁCH ---
+  const form = useLessonForm();                                            // Quản lý các trường dữ liệu form bài học (tiêu đề, content, duration, videoUrl...)
+  const toast = useLessonToast();                                          // Quản lý hiển thị thông báo popup phản hồi người dùng
 
+  // Quản lý tải và nạp danh sách khóa học & bài học hiện tại từ API
   const data = useLessonData({
     userId: user?.userId,
     searchParams,
@@ -34,26 +43,33 @@ export function useCreateLesson() {
     hydrateFromApiLesson: form.hydrateFromApiLesson,
   });
 
+  // Quản lý luồng lưu nháp (Draft Flow) hỗ trợ liên kết tạm thời giữa bài học với khóa học nháp
   const draftFlow = useLessonDraftFlow({
     searchParams,
   });
 
+  /**
+   * Reset toàn bộ các trường nhập liệu của form và định danh bài học về trạng thái trống.
+   */
   function resetForm() {
     form.resetFormFields();
     data.resetLessonIdentity();
   }
 
+  // Quản lý dữ liệu biểu mẫu trên modal Thêm Tài nguyên học tập (Resource)
   const resourceModal = useLessonResourceModal({
     setResources: form.setResources,
     setModal,
   });
 
+  // Quản lý dữ liệu biểu mẫu trên modal Soạn câu hỏi trắc nghiệm / Tự luận (Quiz Questions)
   const quizModal = useLessonQuizModal({
     setQuizQuestions: form.setQuizQuestions,
     setModal,
     showFeedback: toast.showFeedback,
   });
 
+  // Quản lý đồng bộ, lưu trữ thông tin bài học lên Backend (Tạo mới / Chỉnh sửa)
   const persistence = useLessonPersistence({
     searchParams,
     navigate,
@@ -63,6 +79,12 @@ export function useCreateLesson() {
     showFeedback: toast.showFeedback,
   });
 
+  /**
+   * Tổng hợp và đóng gói chuỗi JSON nội dung bài học nâng cao.
+   * Kết hợp thông tin: tài liệu đọc, mục tiêu khóa học, tài nguyên tải về, và danh sách câu hỏi kiểm tra.
+   * 
+   * @returns Chuỗi JSON nội dung bài học
+   */
   function getContentValue() {
     return buildLessonContent({
       hasReading: form.hasReading,
@@ -77,7 +99,7 @@ export function useCreateLesson() {
     searchParams,
     navigate,
 
-    // form
+    // Form states & setters
     hasVideo: form.hasVideo,
     setHasVideo: form.setHasVideo,
 
@@ -129,7 +151,7 @@ export function useCreateLesson() {
     prerequisiteLessonIds: form.prerequisiteLessonIds,
     setPrerequisiteLessonIds: form.setPrerequisiteLessonIds,
 
-    // UI
+    // Trạng thái giao diện (UI)
     modal,
     setModal,
 
@@ -139,7 +161,7 @@ export function useCreateLesson() {
 
     isSaving: persistence.isSaving,
 
-    // data
+    // Dữ liệu khóa học/bài học liên kết
     courses: data.courses,
 
     selectedCourseId: data.selectedCourseId,
@@ -157,7 +179,7 @@ export function useCreateLesson() {
 
     draftCourseTitle: draftFlow.draftCourseTitle,
 
-    // resource modal
+    // Dữ liệu Resource Modal
     rName: resourceModal.rName,
     setRName: resourceModal.setRName,
 
@@ -167,7 +189,7 @@ export function useCreateLesson() {
     rVisibility: resourceModal.rVisibility,
     setRVisibility: resourceModal.setRVisibility,
 
-    // quiz modal
+    // Dữ liệu Quiz Modal
     qText: quizModal.qText,
     setQText: quizModal.setQText,
 
@@ -183,7 +205,7 @@ export function useCreateLesson() {
     shortAnswer: quizModal.shortAnswer,
     setShortAnswer: quizModal.setShortAnswer,
 
-    // handlers
+    // Các hàm xử lý hành động (Action Handlers)
     handleSaveLesson: persistence.handleSaveLesson,
 
     handleVideoFileChange: form.handleVideoFileChange,

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useMyCourse } from '../../hooks/course/useMyCourse';
@@ -7,6 +7,7 @@ import StatusGuide from '../../components/course/my-courses/StatusGuide';
 import Filters from '../../components/course/my-courses/Filters';
 import CourseList from '../../components/course/my-courses/CourseList';
 import DeleteModal from '../../components/course/my-courses/DeleteModal';
+import EditWarningModal from '../../components/course/my-courses/EditWarningModal';
 
 export function MyCoursesPage() {
     const navigate = useNavigate();
@@ -26,8 +27,11 @@ export function MyCoursesPage() {
         handleSubmitForReview
     } = useMyCourse();
 
+    const [editWarningId, setEditWarningId] = useState<number | null>(null);
+
     useEffect(() => {
         fetchCourses();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleCreateCourse = () => {
@@ -40,14 +44,27 @@ export function MyCoursesPage() {
     };
 
     const handleEditCourse = (id: number) => {
-        // Navigates to the course builder / edit page
-        navigate(`/provider/courses/create?id=${id}`);
+        const course = filtered.find(c => c.courseId === id);
+        if (course && course.status?.toLowerCase() === 'approved') {
+            setEditWarningId(id);
+        } else {
+            // Navigates directly to the course builder / edit page
+            navigate(`/provider/courses/create?id=${id}`);
+        }
+    };
+
+    const handleConfirmEditApproved = () => {
+        if (editWarningId !== null) {
+            const id = editWarningId;
+            setEditWarningId(null);
+            navigate(`/provider/courses/create?id=${id}`);
+        }
     };
 
     const handleSubmitCourse = async (id: number) => {
         try {
             await handleSubmitForReview(id);
-        } catch (error) {
+        } catch {
             toast.error('Failed to submit course for review. Please try again.');
         }
     };
@@ -57,7 +74,7 @@ export function MyCoursesPage() {
             await handleDeleteCourse(id);
             toast.success('Course deleted successfully!');
             setDeleteId(null);
-        } catch (error) {
+        } catch {
             toast.error('Failed to delete course. Please try again.');
         }
     };
@@ -106,6 +123,13 @@ export function MyCoursesPage() {
                 deleteId={deleteId} 
                 setDeleteId={setDeleteId} 
                 onConfirmDelete={handleConfirmDelete} 
+            />
+
+            {/* Edit Warning modal */}
+            <EditWarningModal
+                isOpen={editWarningId !== null}
+                onClose={() => setEditWarningId(null)}
+                onConfirm={handleConfirmEditApproved}
             />
         </div>
     );
