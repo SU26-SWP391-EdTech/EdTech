@@ -24,6 +24,9 @@ export class AssessmentSessionRepository {
         userId,
         assessmentId,
       },
+      order: {
+        startedAt: 'DESC',
+      },
     });
   }
 

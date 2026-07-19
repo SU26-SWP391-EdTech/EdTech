@@ -19,6 +19,7 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { JwtPayloadUser } from 'src/common/decorators/current-user.decorator';
 import { AssessmentSessionService } from '../service/assessment-session.service';
 import { SubmitAssessmentDto } from '../dto/submit-answer.dto';
+
 @ApiTags('Assessments')
 @Controller('assessment')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -89,9 +90,8 @@ export class AssessmentController {
     );
   }
 
-<<<<<<< HEAD
   @Get('course/:courseId/pvp')
-  async getPvpQuestion(@Param('courseId', ParseIntPipe) courseId: number){
+  async getPvpQuestion(@Param('courseId', ParseIntPipe) courseId: number) {
     return await this.assessmentService.getPvpQuestion(courseId);
 =======
   // learner when complete assessment will complete assessment_sessions
@@ -110,6 +110,7 @@ export class AssessmentController {
   //     user.userId,
   //   );
   // }
+  }
 
   // Submit the test and get it graded and will complete assessment_sessions
   @Patch(':id/session/submit')
@@ -133,6 +134,18 @@ export class AssessmentController {
       assessmentId,
       submitAnswerDto,
     );
->>>>>>> develop
+  }
+
+  @Get('lesson/:lessonId/result')
+  @Roles(RoleEnum.LEARNER)
+  @ApiOperation({ summary: 'Get last assessment result for a lesson' })
+  async getAssessmentResult(
+    @Param('lessonId', ParseIntPipe) lessonId: number,
+    @CurrentUser() user: JwtPayloadUser,
+  ) {
+    return await this.assessmentSessionService.getAssessmentResultByLessonService(
+      user.userId,
+      lessonId,
+    );
   }
 }
