@@ -89,6 +89,11 @@ export class AssessmentController {
     );
   }
 
+<<<<<<< HEAD
+  @Get('course/:courseId/pvp')
+  async getPvpQuestion(@Param('courseId', ParseIntPipe) courseId: number){
+    return await this.assessmentService.getPvpQuestion(courseId);
+=======
   // learner when complete assessment will complete assessment_sessions
   // @Patch(':id/session/complete')
   // @Roles(RoleEnum.LEARNER)
@@ -128,5 +133,6 @@ export class AssessmentController {
       assessmentId,
       submitAnswerDto,
     );
+>>>>>>> develop
   }
 }
