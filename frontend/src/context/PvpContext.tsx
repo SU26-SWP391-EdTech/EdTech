@@ -80,13 +80,11 @@ export function PvpProvider({ children }: { children: React.ReactNode }) {
 
         const handleBattleStarted = (battleInfo: any) => {
             console.log('SocketEvent battleStarted:', battleInfo);
-            const opponentId = incomingChallenge
-                ? incomingChallenge.challengerId
-                : lastChallengedUserId;
+            const opponentId = user?.userId === battleInfo.challengerId
+                ? battleInfo.receiverId
+                : battleInfo.challengerId;
 
-            const challengerId = incomingChallenge
-                ? opponentId
-                : user?.userId;
+            const challengerId = battleInfo.challengerId;
 
             setIncomingChallenge(null);
             setChallengerProfile(null);

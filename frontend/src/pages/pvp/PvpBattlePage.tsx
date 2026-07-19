@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Swords, Trophy, AlertCircle, ArrowLeft, Loader, CheckCircle2, XCircle, Clock, ShieldAlert, Award, Star, Zap, User } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -90,6 +90,7 @@ export function PvpBattlePage() {
     const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
     const [submitted, setSubmitted] = useState(false);
     const [questionCountdown, setQuestionCountdown] = useState(15);
+    const hasSubmittedRef = useRef(false);
 
     // Live score state
     const [scores, setScores] = useState({ player1Score: 0, player2Score: 0 });
@@ -241,6 +242,7 @@ export function PvpBattlePage() {
             setQuestionCountdown(15);
             setSelectedOptionId(null);
             setSubmitted(false);
+            hasSubmittedRef.current = false;
             setStatus('playing');
         };
 
@@ -333,6 +335,7 @@ export function PvpBattlePage() {
                                     setActiveQuestion(battleQuestions[nextIdx]);
                                     setSelectedOptionId(null);
                                     setSubmitted(false);
+                                    hasSubmittedRef.current = false;
                                     setQuestionCountdown(15);
                                     setStatus('playing');
                                 }, 1000);
@@ -372,8 +375,9 @@ export function PvpBattlePage() {
     };
 
     const handleSubmitAnswer = () => {
-        if (selectedOptionId === null || submitted || !activeQuestion) return;
+        if (selectedOptionId === null || submitted || hasSubmittedRef.current || !activeQuestion) return;
 
+        hasSubmittedRef.current = true;
         if (isMock) {
             setSubmitted(true);
             toast.success('Answer submitted! Waiting for opponent...');
@@ -405,6 +409,7 @@ export function PvpBattlePage() {
                         setActiveQuestion(battleQuestions[nextIdx]);
                         setSelectedOptionId(null);
                         setSubmitted(false);
+                        hasSubmittedRef.current = false;
                         setQuestionCountdown(15);
                         setStatus('playing');
                     }, 1000);

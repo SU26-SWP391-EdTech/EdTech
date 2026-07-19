@@ -134,6 +134,8 @@ export class BattleService {
         assessmentId,
         roomId: room.roomId,
         totalQuestions: battleQuestions.length,
+        challengerId,
+        receiverId,
       },
     );
 
@@ -158,10 +160,7 @@ export class BattleService {
     }
 
     if (session.playerAnswers[userId]) {
-      throw new BadRequestException({
-        code: 'DUPLICATE_SUBMISSION',
-        message: 'You have already submitted an answer for this question.',
-      });
+      return;
     }
 
     const selectedOption = currentQuestion.options.find(
