@@ -11,13 +11,15 @@ import { AssessmentSessionService } from './service/assessment-session.service'
 import { AssessmentSessionRepository } from './repository/assessment-session.repository';
 import { LearnersModule } from '../learners/learners.module';
 import { AssessmentSessionController } from './controller/assessment-session.controller';
+import { ProgressModule } from '../progress/progress.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Assessment, AssessmentSession]),
     CoursesModule,
     LessonsModule,
-    LearnersModule
+    LearnersModule,
+    ProgressModule
   ],
   controllers: [
     AssessmentController,
