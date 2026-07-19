@@ -11,23 +11,25 @@ export class AssessmentRepository extends Repository<Assessment> {
   // Find an assessment by ID with relations (course, lesson, and questions)
   async findById(assessmentId: number): Promise<Assessment | null> {
     return this.findOne({
-      where: { assessmentId,
-       },
-      relations: ['course', 'lesson', 'questions'],
+      where: {
+        assessmentId,
+      },
+      relations: ['course', 'lesson', 'questions', 'questions.options'],
     });
   }
 
-  async findAssessmentWithRelation(assessmentId: number, lessonId: number, courseId:number): Promise<Assessment | null> {
+  async findAssessmentWithRelation(assessmentId: number, lessonId: number, courseId: number): Promise<Assessment | null> {
     return this.findOne({
-      where: { assessmentId,
+      where: {
+        assessmentId,
         lesson: {
           lessonId,
         },
         course: {
           courseId,
         }
-       },
-      relations: ['course', 'lesson', 'questions'],
+      },
+      relations: ['course', 'lesson', 'questions', 'questions.options'],
     });
   }
 

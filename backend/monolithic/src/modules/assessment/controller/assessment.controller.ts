@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   UseGuards,
+  Patch,
 } from '@nestjs/common';
 import { AssessmentService } from '../service/assessment.service';
 import { CreateAssessmentDto } from '../dto/create-assessment.dto';
@@ -17,6 +18,7 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { JwtPayloadUser } from 'src/common/decorators/current-user.decorator';
 import { AssessmentSessionService } from '../service/assessment-session.service';
+import { SubmitAssessmentDto } from '../dto/submit-answer.dto';
 @ApiTags('Assessments')
 @Controller('assessment')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -24,7 +26,7 @@ export class AssessmentController {
   constructor(
     private readonly assessmentService: AssessmentService,
     private readonly assessmentSessionService: AssessmentSessionService,
-  ) {}
+  ) { }
 
   @Post()
   @Roles(RoleEnum.COURSE_PROVIDER)
@@ -36,9 +38,9 @@ export class AssessmentController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Course or Lesson not found' })
   async create(
-    @Body() 
+    @Body()
     createAssessmentDto: CreateAssessmentDto,
-    
+
     @CurrentUser()
     user: JwtPayloadUser,
   ) {
@@ -71,7 +73,7 @@ export class AssessmentController {
   }
 
   // learner start quiz will craete assessment_sessions
-  @Get(':id/session')
+  @Post(':id/session')
   @Roles(RoleEnum.LEARNER)
   @ApiOperation({ summary: 'Start quiz will craete assessment_sessions' })
   async createAssesmentSession(
@@ -87,8 +89,50 @@ export class AssessmentController {
     );
   }
 
+<<<<<<< HEAD
   @Get('course/:courseId/pvp')
   async getPvpQuestion(@Param('courseId', ParseIntPipe) courseId: number){
     return await this.assessmentService.getPvpQuestion(courseId);
+=======
+  // learner when complete assessment will complete assessment_sessions
+  // @Patch(':id/session/complete')
+  // @Roles(RoleEnum.LEARNER)
+  // @ApiOperation({ summary: "Update time of learner when complete this assessment" })
+  // async updateAssessmentSessionTime(
+  //   @Param('id', ParseIntPipe)
+  //   assessmentId: number,
+
+  //   @CurrentUser()
+  //   user: JwtPayloadUser,
+  // ) {
+  //   return await this.assessmentSessionService.updateAssessmentSessionTimeService(
+  //     assessmentId,
+  //     user.userId,
+  //   );
+  // }
+
+  // Submit the test and get it graded and will complete assessment_sessions
+  @Patch(':id/session/submit')
+  @Roles(RoleEnum.LEARNER)
+  @ApiOperation({ summary: 'Submit the test and get it graded' })
+  @ApiBody({
+    type: SubmitAssessmentDto,
+  })
+  async submitAssessment(
+    @Param('id', ParseIntPipe)
+    assessmentId: number,
+
+    @Body()
+    submitAnswerDto: SubmitAssessmentDto,
+
+    @CurrentUser()
+    user: JwtPayloadUser,
+  ) {
+    return await this.assessmentSessionService.submitAssessmentSessionService(
+      user.userId,
+      assessmentId,
+      submitAnswerDto,
+    );
+>>>>>>> develop
   }
 }
