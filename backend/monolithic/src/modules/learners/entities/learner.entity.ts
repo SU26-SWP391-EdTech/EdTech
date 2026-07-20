@@ -69,7 +69,7 @@ export class Learner {
     name: 'streak_life',
     type: 'int',
     nullable: false,
-    default: 1,
+    default: 2,
   })
   streakLife!: number;
 
