@@ -27,7 +27,6 @@ export function AdminHeader() {
         if (path === '/admin') return 'dashboard';
         if (path === '/admin/usermanagement') return 'users';
         if (path === '/admin/analytics') return 'analytics';
-        if (path === '/admin/leaderboard') return 'leaderboard';
         return '';
     };
 
@@ -60,8 +59,6 @@ export function AdminHeader() {
                                     navigate('/admin');
                                 } else if (item.id === 'analytics') {
                                     navigate('/admin/analytics');
-                                } else if (item.id === 'leaderboard') {
-                                    navigate('/admin/leaderboard');
                                 }
                             }}
                         />

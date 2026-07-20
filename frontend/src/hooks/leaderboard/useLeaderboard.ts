@@ -7,6 +7,8 @@ import {
     getOverallLeaderboardData
 } from '../../services/leaderboard/leaderboard.service';
 import type { LeaderboardEntry, CourseRankInfo, LeaderboardTab, EnrollFilter } from '../../types/leaderboard/leaderboard.types';
+import { usePvp } from '../../context/PvpContext';
+import api from '../../lib/axios';
 
 /**
  * Custom hook quản lý Bảng xếp hạng học tập (Leaderboard).
@@ -17,6 +19,7 @@ import type { LeaderboardEntry, CourseRankInfo, LeaderboardTab, EnrollFilter } f
 export function useLeaderboard() {
     const user = useAuthStore(state => state.user);
     const currentUserId = user?.userId || 1;
+    const { sendChallenge } = usePvp();
 
     // --- 1. QUẢN LÝ TRẠNG THÁI (STATE) ---
     // Trạng thái điều hướng & bộ lọc trên giao diện
@@ -61,7 +64,7 @@ export function useLeaderboard() {
                 setCourseLeaderboards(courseDataMap);
 
                 // Tải dữ liệu bảng xếp hạng tổng hợp hệ thống
-                const overallData = JSON.parse(JSON.stringify(getOverallLeaderboardData()));
+                const overallData = JSON.parse(JSON.stringify(await getOverallLeaderboardData()));
                 setOverallLeaderboard(overallData);
             } catch (err) {
                 console.error('Failed to load leaderboard data:', err);
@@ -120,6 +123,26 @@ export function useLeaderboard() {
         }
     }, [currentUserId, isLoading]);
 
+    // Sync selectedCourseId when enrollFilter changes to ensure a course matching the filter is selected
+    useEffect(() => {
+        if (courses.length === 0) return;
+
+        const currentCourse = courses.find(c => c.courseId === selectedCourseId);
+        if (!currentCourse) return;
+
+        if (enrollFilter === 'enrolled' && !currentCourse.isEnrolled) {
+            const firstEnrolled = courses.find(c => c.isEnrolled);
+            if (firstEnrolled) {
+                setSelectedCourseId(firstEnrolled.courseId);
+            }
+        } else if (enrollFilter === 'not_enrolled' && currentCourse.isEnrolled) {
+            const firstUnenrolled = courses.find(c => !c.isEnrolled);
+            if (firstUnenrolled) {
+                setSelectedCourseId(firstUnenrolled.courseId);
+            }
+        }
+    }, [enrollFilter, courses, selectedCourseId]);
+
     // --- 4. LOGIC LỌC DỮ LIỆU BẢNG XẾP HẠNG (COMPUTED VALUES) ---
     // Lọc danh sách khóa học hiển thị trong Dropdown chọn khóa học
     const filteredCoursesDropdown = useMemo(() => {
@@ -177,70 +200,28 @@ export function useLeaderboard() {
         if (!challengeModalEntry) return;
 
         const targetName = challengeModalEntry.fullName;
-        setChallengeModalEntry(null); // Đóng modal thách đấu
+        const receiverId = challengeModalEntry.userId;
+        setChallengeModalEntry(null);
 
         toast.promise(
-            new Promise((resolve) => setTimeout(resolve, 1500)), // Tạo hiệu ứng chờ thách đấu
+            (async () => {
+                let pvpAssessmentId = 1; // Fallback to 1 (seeded)
+                try {
+                    const res = await api.get(`/assessment/courses/${selectedCourseId}/pvp`);
+                    if (res.data && res.data.length > 0) {
+                        pvpAssessmentId = res.data[0].assessmentId;
+                    }
+                } catch (err) {
+                    console.warn('Failed to fetch PvP assessment for course, using default ID: 1', err);
+                }
+
+                // Send the socket event
+                sendChallenge(receiverId, pvpAssessmentId);
+            })(),
             {
                 loading: `Challenging ${targetName}...`,
-                success: () => {
-                    // Cập nhật điểm PvP trong Local Storage
-                    const currentSaved = localStorage.getItem(`leaderboard_pvp_points_user_${currentUserId}`);
-                    const newPvpPoints = (currentSaved ? Number(currentSaved) : 0) + 5;
-                    localStorage.setItem(`leaderboard_pvp_points_user_${currentUserId}`, String(newPvpPoints));
-
-                    // Cập nhật điểm PvP trực tiếp trên Bảng xếp hạng khóa học của state
-                    setCourseLeaderboards(prev => {
-                        const copy = { ...prev };
-                        const list = copy[selectedCourseId] ? [...copy[selectedCourseId]] : [];
-                        const meIndex = list.findIndex(e => e.isCurrentUser);
-                        if (meIndex !== -1) {
-                            list[meIndex] = {
-                                ...list[meIndex],
-                                pvp: list[meIndex].pvp + 5,
-                                total: list[meIndex].total + 5
-                            };
-                            list.sort((a, b) => b.total - a.total);
-                            list.forEach((e, idx) => { e.rank = idx + 1; });
-                            copy[selectedCourseId] = list;
-                        }
-                        return copy;
-                    });
-
-                    // Cập nhật điểm PvP trực tiếp trên Bảng xếp hạng tổng hợp của state
-                    setOverallLeaderboard(prev => {
-                        const list = [...prev];
-                        const meIndex = list.findIndex(e => e.isCurrentUser);
-                        if (meIndex !== -1) {
-                            list[meIndex] = {
-                                ...list[meIndex],
-                                pvp: list[meIndex].pvp + 5,
-                                total: list[meIndex].total + 5
-                            };
-                            list.sort((a, b) => b.total - a.total);
-                            list.forEach((e, idx) => { e.rank = idx + 1; });
-                        }
-                        return list;
-                    });
-
-                    // Cập nhật thứ hạng hiển thị trong danh sách khóa học
-                    setCourses(prev => {
-                        return prev.map(c => {
-                            if (c.courseId === selectedCourseId) {
-                                const list = courseLeaderboards[selectedCourseId] || [];
-                                const meIndex = list.findIndex(e => e.isCurrentUser);
-                                return {
-                                    ...c,
-                                    yourRank: meIndex !== -1 ? list[meIndex].rank : c.yourRank
-                                };
-                            }
-                            return c;
-                        });
-                    });
-
-                    return `You won the challenge against ${targetName}! +5 PvP pts.`;
-                },
-                error: 'Failed to send challenge.',
+                success: `Challenge invitation sent to ${targetName}!`,
+                error: `Could not send challenge to ${targetName}.`
             }
         );
     };

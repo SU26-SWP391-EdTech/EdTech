@@ -7,7 +7,6 @@ import { PlatformSetup } from '../pages/admin/PlatformSetup';
 import { UserManagement } from '../pages/admin/UserManagement';
 import { Dashboard } from '../pages/admin/AdminDashBoard';
 import { AnalyticsDashboard } from '../pages/admin/AdminAnalytics';
-import { LeaderboardPage } from '../pages/leaderboard/LeaderboardPage';
 
 export const adminRoutes: RouteObject = {
     path: '/admin',
@@ -25,7 +24,6 @@ export const adminRoutes: RouteObject = {
                 { path: 'analytics', element: <AnalyticsDashboard /> },
                 { path: 'adminprofile', element: <AdminProfile /> },
                 { path: 'settings', element: <PlatformSettings /> },
-                { path: 'leaderboard', element: <LeaderboardPage /> },
             ],
         },
         { path: 'setup', element: <PlatformSetup /> },

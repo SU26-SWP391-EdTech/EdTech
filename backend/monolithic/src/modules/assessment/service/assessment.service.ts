@@ -9,9 +9,10 @@ import { CreateAssessmentDto } from '../dto/create-assessment.dto';
 import { CoursesService } from 'src/modules/courses/services/courses.service';
 import { LessonsService } from 'src/modules/lessons/service/lessons.service';
 import { Lesson } from 'src/modules/lessons/entities/lesson.entity';
+import { AssessmentType } from 'src/common/enums/assessment-type.enum';
+import { Not, In } from 'typeorm';
 import { Question } from 'src/modules/question/entities/question.entity';
 import { QuestionType } from 'src/common/enums/question-type.enum';
-import { AssessmentType } from 'src/common/enums/assessment-type.enum';
 
 @Injectable()
 export class AssessmentService {
@@ -27,7 +28,7 @@ export class AssessmentService {
 
     // 1. Verify course exists
     const course = await this.courseService.validateCourseOwner(userId, courseId);
-    
+
     let lesson: Lesson | null = null;
     // 2. Verify lesson exists and belongs to the course if provided
     if (lessonId) {
@@ -59,10 +60,57 @@ export class AssessmentService {
     if (!assessment) {
       throw new NotFoundException(`Assessment with ID ${id} not found`);
     }
+
+    if (assessment.type === AssessmentType.PVP) {
+      const questionRepo = this.assessmentRepository.manager.getRepository(Question);
+      const assessments = await this.assessmentRepository.find({
+        where: {
+          courseId: assessment.courseId,
+          type: Not(AssessmentType.PVP),
+        },
+      });
+
+      if (assessments.length > 0) {
+        const assessmentIds = assessments.map((a) => a.assessmentId);
+        assessment.questions = await questionRepo.find({
+          where: {
+            assessmentId: In(assessmentIds),
+          },
+          relations: {
+            options: true,
+          },
+          order: {
+            position: 'ASC',
+            options: {
+              position: 'ASC',
+            },
+          },
+        });
+      }
+
+      // Fallback if course has no questions
+      if (!assessment.questions || assessment.questions.length === 0) {
+        assessment.questions = await questionRepo.find({
+          where: {
+            assessmentId: 1, // Fallback to Spring Boot quiz
+          },
+          relations: {
+            options: true,
+          },
+          order: {
+            position: 'ASC',
+            options: {
+              position: 'ASC',
+            },
+          },
+        });
+      }
+    }
+
     return assessment;
   }
 
-  async findAssessment(assessmentId: number, lessonId: number, courseId: number){
+  async findAssessment(assessmentId: number, lessonId: number, courseId: number) {
     const assessment = await this.assessmentRepository.findAssessmentWithRelation(assessmentId, lessonId, courseId);
     if (!assessment) {
       throw new NotFoundException(
@@ -70,6 +118,31 @@ export class AssessmentService {
       );
     }
     return assessment;
+  }
+
+  async getOrCreatePvpAssessment(courseId: number): Promise<Assessment> {
+    const course = await this.courseService.findOne(courseId);
+    if (!course) {
+      throw new NotFoundException(`Course with ID ${courseId} not found`);
+    }
+
+    let pvpAssessment = await this.assessmentRepository.findOne({
+      where: {
+        courseId,
+        type: AssessmentType.PVP,
+      },
+    });
+
+    if (!pvpAssessment) {
+      pvpAssessment = this.assessmentRepository.create({
+        courseId,
+        title: `${course.title} PvP Challenge`,
+        type: AssessmentType.PVP,
+      });
+      pvpAssessment = await this.assessmentRepository.save(pvpAssessment);
+    }
+
+    return pvpAssessment;
   }
 
   async getPvpQuestion(courseId: number){

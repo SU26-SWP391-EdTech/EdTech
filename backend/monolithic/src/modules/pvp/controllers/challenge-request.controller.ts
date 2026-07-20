@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Body, Req, UseGuards, ParseIntPipe, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Req, UseGuards, ParseIntPipe, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import { ChallengeRequestService } from '../services/challenge-request.service';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
@@ -14,6 +14,20 @@ import type { JwtPayloadUser } from 'src/common/decorators/current-user.decorato
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ChallengeRequestController {
   constructor(private readonly challengeRequestService: ChallengeRequestService) { }
+
+  @Get('online')
+  @Roles(RoleEnum.LEARNER)
+  @ApiOperation({ summary: 'Get list of online players for PvP' })
+  @ApiResponse({ status: 200, description: 'List of online players returned successfully' })
+  async getOnlinePlayers(
+    @CurrentUser() user: JwtPayloadUser,
+    @Query('courseId') courseId?: number,
+  ) {
+    return this.challengeRequestService.getOnlinePlayers(
+      user.userId,
+      courseId ? Number(courseId) : undefined,
+    );
+  }
 
   @Post(':userId')
   @Roles(RoleEnum.LEARNER)

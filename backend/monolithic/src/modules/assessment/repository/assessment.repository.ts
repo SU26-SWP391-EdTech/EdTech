@@ -8,7 +8,7 @@ export class AssessmentRepository extends Repository<Assessment> {
     super(Assessment, dataSource.createEntityManager());
   }
 
-  // Find an assessment by ID with relations (course, lesson, and questions)
+  // Find an assessment by ID with relations (course, lesson, questions, and options)
   async findById(assessmentId: number): Promise<Assessment | null> {
     return this.findOne({
       where: {

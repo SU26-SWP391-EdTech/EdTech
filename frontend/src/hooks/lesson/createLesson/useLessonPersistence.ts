@@ -63,6 +63,14 @@ export function useLessonPersistence({
             return null;
         }
 
+        // Validate PVP assessments if present
+        for (const ass of form.assessments) {
+            if (ass.type === 'PVP' && ass.questions.length < 5) {
+                showFeedback(`PvP Arena Quiz "${ass.title}" must have at least 5 questions (currently has ${ass.questions.length}).`);
+                return null;
+            }
+        }
+
         return saveToApi(nextStatus);
     }
 
