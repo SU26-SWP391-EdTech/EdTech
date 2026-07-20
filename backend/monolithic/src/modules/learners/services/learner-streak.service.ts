@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AssessmentType } from 'src/common/enums/assessment-type.enum';
-import { AssessmentSessionRepository } from '../../assessment/repository/assessment-session.repository';
+import { AssessmentSessionRepository } from 'src/modules/assessment/repository/assessment-session.repository';
 import { LearnerRepository } from '../learners.repository';
 
 const ELIGIBLE_TYPES: AssessmentType[] = [
