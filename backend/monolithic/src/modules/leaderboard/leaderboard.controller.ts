@@ -101,6 +101,26 @@ export class LeaderboardController {
     return await this.leaderboardService.updateLeaderboardRule(courseId, dto);
   }
 
+  @Get('course/:courseId')
+  @Roles(RoleEnum.LEARNER, RoleEnum.ACADEMIC_MANAGER, RoleEnum.ADMIN)
+  @ApiOperation({
+    summary: 'Get leaderboard for a specific course',
+  })
+  @ApiParam({
+    name: 'courseId',
+    type: Number,
+    description: 'ID of the course',
+    example: 1,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Course leaderboard retrieved successfully',
+  })
+  @ApiBearerAuth()
+  async getCourseLeaderboard(@Param('courseId', ParseIntPipe) courseId: number) {
+    return await this.leaderboardService.getCourseLeaderboard(courseId);
+  }
+
   @Get()
   @Roles(RoleEnum.LEARNER, RoleEnum.ACADEMIC_MANAGER, RoleEnum.ADMIN)
   @ApiOperation({

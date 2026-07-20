@@ -103,23 +103,6 @@ export class AssessmentController {
   @Get('course/:courseId/pvp')
   async getPvpQuestion(@Param('courseId', ParseIntPipe) courseId: number) {
     return await this.assessmentService.getPvpQuestion(courseId);
-=======
-  // learner when complete assessment will complete assessment_sessions
-  // @Patch(':id/session/complete')
-  // @Roles(RoleEnum.LEARNER)
-  // @ApiOperation({ summary: "Update time of learner when complete this assessment" })
-  // async updateAssessmentSessionTime(
-  //   @Param('id', ParseIntPipe)
-  //   assessmentId: number,
-
-  //   @CurrentUser()
-  //   user: JwtPayloadUser,
-  // ) {
-  //   return await this.assessmentSessionService.updateAssessmentSessionTimeService(
-  //     assessmentId,
-  //     user.userId,
-  //   );
-  // }
   }
 
   // Submit the test and get it graded and will complete assessment_sessions

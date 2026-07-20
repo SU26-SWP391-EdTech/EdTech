@@ -5,6 +5,7 @@ import { getMyEnrollments, type Enrollment } from '../../services/enrollment/enr
 import { getLearningPaths, type LearningPath, getFollowedLearningPathIds } from '../../services/learning-path/learning-path.service';
 import type { NodeState } from '../../components/User/dashboard/learner/RoadmapNode';
 import { getLearnerProfile } from '../../services/learner/learner.services';
+import { getStreak } from '../../utils/learner/streakUtils';
 
 /**
  * Custom hook quản lý dữ liệu trang Dashboard dành cho Học viên (Learner Dashboard).
@@ -47,9 +48,11 @@ export function useLearnerDashboard() {
                     return acc + Math.round(duration * (curr.progress / 100));
                 }, 0);
 
+                const streakData = getStreak(user.userId);
+
                 setProfile({
                     ...profileData,
-                    streakCount: (profileData as any).streakCount ?? 0,
+                    streakCount: streakData.currentStreak,
                     completedCourses: completedCount,
                     learningHours: totalHours,
                 });

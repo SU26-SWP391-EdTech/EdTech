@@ -6,17 +6,22 @@ import { AssessmentModule } from '../assessment/assessment.module';
 import { LessonsModule } from '../lessons/lessons.module';
 import { CoursesModule } from '../courses/courses.module';
 import { EnrollmentsModule } from '../enrollments/enrollments.module';
-import { User } from '../users/entities/user.entity';
-import { Assessment } from '../assessment/entities/assessment.entity';
-import { Lesson } from '../lessons/entities/lesson.entity';
-import { Course } from '../courses/entities/course.entity';
-import { Enrollment } from '../enrollments/entities/enrollment.entity';
+import { LeaderboardController } from './leaderboard.controller';
+import { LeaderboardService } from './leaderboard.service';
+import { LeaderboardRepository } from './leaderboard.repository';
+import { Learner } from '../learners/entities/learner.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([LeaderboardRule, User, Assessment, Lesson, Course, Enrollment])
+    TypeOrmModule.forFeature([LeaderboardRule, Learner]),
+    UsersModule,
+    AssessmentModule,
+    LessonsModule,
+    CoursesModule,
+    EnrollmentsModule,
   ],
-  providers: [UsersModule, AssessmentModule, LessonsModule, CoursesModule, EnrollmentsModule],
+  controllers: [LeaderboardController],
+  providers: [LeaderboardService, LeaderboardRepository],
+  exports: [LeaderboardService],
 })
-export class LeaderboardModule {
-}
+export class LeaderboardModule {}

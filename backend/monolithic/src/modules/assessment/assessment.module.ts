@@ -35,6 +35,6 @@ import { ProgressModule } from '../progress/progress.module';
     AssessmentSessionRepository
     
   ],
-  exports: [AssessmentService, AssessmentRepository],
+  exports: [AssessmentService, AssessmentRepository, AssessmentSessionService, AssessmentSessionRepository],
 })
 export class AssessmentModule { }

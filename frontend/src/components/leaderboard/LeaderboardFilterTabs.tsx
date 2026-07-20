@@ -59,34 +59,6 @@ export function LeaderboardFilterTabs({
             {/* Course & Enrollment filters — only shown in "By Course" tab */}
             {tab === 'course' && (
                 <>
-                    {/* Enrollment state filters */}
-                    <div style={{ display: 'flex', gap: 2, background: '#F1F5F9', border: '1px solid #E2E8F0', borderRadius: 8, padding: 2 }}>
-                        {[
-                            { value: 'all', label: 'All Courses' },
-                            { value: 'enrolled', label: 'Enrolled' },
-                            { value: 'not_enrolled', label: 'Not Enrolled' }
-                        ].map(opt => (
-                            <button
-                                key={opt.value}
-                                onClick={() => setEnrollFilter(opt.value as EnrollFilter)}
-                                style={{
-                                    padding: '5px 12px',
-                                    borderRadius: 6,
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    fontSize: 12,
-                                    fontWeight: 500,
-                                    background: enrollFilter === opt.value ? '#fff' : 'transparent',
-                                    color: enrollFilter === opt.value ? '#1E293B' : '#64748B',
-                                    boxShadow: enrollFilter === opt.value ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
-                                    transition: 'all 0.15s'
-                                }}
-                            >
-                                {opt.label}
-                            </button>
-                        ))}
-                    </div>
-
                     {/* Course dropdown */}
                     <div style={{ position: 'relative' }}>
                         <button

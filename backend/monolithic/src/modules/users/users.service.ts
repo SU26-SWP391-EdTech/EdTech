@@ -578,7 +578,7 @@ export class UsersService implements OnApplicationBootstrap {
           roleName: RoleEnum.LEARNER,
         },
       },
-      relations: ['role'],
+      relations: ['role', 'learner', 'learner.pvpWins', 'enrollments'],
     });
   }
 }
