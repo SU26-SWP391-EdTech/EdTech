@@ -16,6 +16,10 @@ export class ConnectionManager {
    * User kết nối websocket
    */
   addConnection(userId: number, socketId: string): void {
+    const oldSocketId = this.userConnections.get(userId);
+    if (oldSocketId && oldSocketId !== socketId) {
+      this.socketConnections.delete(oldSocketId);
+    }
     this.userConnections.set(userId, socketId);
     this.socketConnections.set(socketId, userId);
   }
@@ -29,7 +33,10 @@ export class ConnectionManager {
     if (!userId) return;
 
     this.socketConnections.delete(socketId);
-    this.userConnections.delete(userId);
+    
+    if (this.userConnections.get(userId) === socketId) {
+      this.userConnections.delete(userId);
+    }
   }
 
   /**

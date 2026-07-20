@@ -23,22 +23,13 @@ export class ChallengeRequestRepository {
         return await this.challengeRepo
           .createQueryBuilder('challenge')
           .where(
-            '(challenge.challengerId = :player1Id AND challenge.receiverId = :player2Id)',
+            '((challenge.challengerId = :player1Id AND challenge.receiverId = :player2Id) OR (challenge.challengerId = :player2Id AND challenge.receiverId = :player1Id)) AND challenge.status = :status',
             {
               player1Id,
               player2Id,
+              status: ChallengeStatus.PENDING,
             },
           )
-          .orWhere(
-            '(challenge.challengerId = :player2Id AND challenge.receiverId = :player1Id)',
-            {
-              player1Id,
-              player2Id,
-            },
-          )
-          .andWhere('challenge.status = :status', {
-            status: ChallengeStatus.PENDING,
-          })
           .getOne();
       }
 

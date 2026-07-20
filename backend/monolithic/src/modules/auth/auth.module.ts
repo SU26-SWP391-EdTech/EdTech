@@ -19,9 +19,11 @@ import { PlatformSettingsModule } from '../platform-settings/platform-settings.m
     MailModule,
     PlatformSettingsModule,
     PassportModule,
-    JwtModule.register({
-      secret: jwtConstants.secret,
-      signOptions: { expiresIn: jwtConstants.expiresIn },
+    JwtModule.registerAsync({
+      useFactory: () => ({
+        secret: jwtConstants.secret,
+        signOptions: { expiresIn: jwtConstants.expiresIn },
+      }),
     }),
   ],
   controllers: [AuthController],

@@ -7,6 +7,7 @@ import {
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
 } from '@nestjs/websockets';
 
 import { Server, Socket } from 'socket.io';
@@ -27,7 +28,7 @@ import { LeaveBattleDto } from '../dto/battle/leave-battle.dto';
     origin: '*',
   },
 })
-export class PvpGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class PvpGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
   constructor(
     private readonly connectionManager: ConnectionManager,
     private readonly challengeRequestService: ChallengeRequestService,
@@ -46,18 +47,28 @@ export class PvpGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleConnection(client: Socket) {
     try {
       const token = client.handshake.auth.token;
+      console.log('Connecting socket with token:', token ? `${token.substring(0, 15)}...` : 'none');
       if (!token) {
+        console.warn('Socket connection rejected: No token provided');
         client.disconnect();
         return;
       }
       const payload = this.jwtService.verify(token);
+      console.log('Socket token verified successfully for user:', payload.userId);
 
       client.data.user = payload;
 
       this.connectionManager.addConnection(payload.userId, client.id);
 
       console.log(`User ${payload.userId} connected`);
+
+      // Broadcast that a player went online
+      this.server.emit('online_players_changed', {
+        userId: payload.userId,
+        status: 'online',
+      });
     } catch (error) {
+      console.error('Socket connection error during handshake verification:', error);
       client.disconnect();
     }
   }
@@ -67,6 +78,12 @@ export class PvpGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if(user){
         this.connectionManager.removeConnection(client.id);
+
+        // Broadcast that a player went offline
+        this.server.emit('online_players_changed', {
+          userId: user.userId,
+          status: 'offline',
+        });
     }
 
     console.log(`${client.id} disconnected`);

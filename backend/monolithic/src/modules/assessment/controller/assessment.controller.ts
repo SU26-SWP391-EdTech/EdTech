@@ -19,6 +19,7 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { JwtPayloadUser } from 'src/common/decorators/current-user.decorator';
 import { AssessmentSessionService } from '../service/assessment-session.service';
 import { SubmitAssessmentDto } from '../dto/submit-answer.dto';
+
 @ApiTags('Assessments')
 @Controller('assessment')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -26,7 +27,7 @@ export class AssessmentController {
   constructor(
     private readonly assessmentService: AssessmentService,
     private readonly assessmentSessionService: AssessmentSessionService,
-  ) { }
+  ) {}
 
   @Post()
   @Roles(RoleEnum.COURSE_PROVIDER)
@@ -44,7 +45,21 @@ export class AssessmentController {
     @CurrentUser()
     user: JwtPayloadUser,
   ) {
-    return await this.assessmentService.createService(user.userId, createAssessmentDto);
+    return await this.assessmentService.createService(
+      user.userId,
+      createAssessmentDto,
+    );
+  }
+
+  @Get('courses/:courseId/pvp')
+  @Roles(RoleEnum.LEARNER)
+  @ApiOperation({ summary: 'Get or create PvP assessment for a course' })
+  @ApiResponse({
+    status: 200,
+    description: 'PvP assessment retrieved successfully',
+  })
+  async getOrCreatePvp(@Param('courseId', ParseIntPipe) courseId: number) {
+    return await this.assessmentService.getOrCreatePvpAssessment(courseId);
   }
 
   @Get(':id')
@@ -106,7 +121,6 @@ export class AssessmentController {
   //   );
   // }
 
-  // Submit the test and get it graded and will complete assessment_sessions
   @Patch(':id/session/submit')
   @Roles(RoleEnum.LEARNER)
   @ApiOperation({ summary: 'Submit the test and get it graded' })
@@ -130,8 +144,18 @@ export class AssessmentController {
     );
   }
 
-  @Get('course/:courseId/pvp')
-  async getPvpQuestion(@Param('courseId', ParseIntPipe) courseId: number){
-    return await this.assessmentService.getPvpQuestion(courseId);
+  @Get('lesson/:lessonId/result')
+  @Roles(RoleEnum.LEARNER)
+  @ApiOperation({ summary: 'Get last assessment result for a lesson' })
+  async getAssessmentResult(
+    @Param('lessonId', ParseIntPipe) lessonId: number,
+    @CurrentUser() user: JwtPayloadUser,
+  ) {
+    return await this.assessmentSessionService.getAssessmentResultByLessonService(
+      user.userId,
+      lessonId,
+    );
   }
 }
+
+// Submit the test and get it graded and will complete assessment_sessions

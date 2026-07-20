@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { login as loginApi, register as registerApi, verifyEmail as verifyEmailApi, logout as logoutApi, getMe } from '../../services/auth/auth.service';
 import type { User } from '../../services/auth/auth.service';
+import { pvpSocket } from '../../services/pvp/pvp-socket';
 
 export type { User };
 
@@ -103,6 +104,11 @@ export const useAuthStore = create<AuthState>()(
                 // Clear state lập tức và đồng bộ ở Client để UI chuyển hướng ngay về trang login
                 sessionStorage.removeItem('explore_cache_enrollments');
                 sessionStorage.removeItem('explore_cache_enrolled_paths');
+                try {
+                    pvpSocket.disconnect();
+                } catch (e) {
+                    console.warn('Failed to disconnect PvP socket:', e);
+                }
                 set({
                     user: null,
                     token: null,
@@ -130,6 +136,9 @@ export const useAuthStore = create<AuthState>()(
                     });
                     return user;
                 } catch (err: any) {
+                    try {
+                        pvpSocket.disconnect();
+                    } catch (e) {}
                     set({
                         user: null,
                         token: null,
@@ -158,6 +167,11 @@ if (typeof window !== 'undefined') {
     window.addEventListener('auth:logout', () => {
         sessionStorage.removeItem('explore_cache_enrollments');
         sessionStorage.removeItem('explore_cache_enrolled_paths');
+        try {
+            pvpSocket.disconnect();
+        } catch (e) {
+            console.warn('Failed to disconnect PvP socket on auth:logout:', e);
+        }
         useAuthStore.setState({
             user: null,
             token: null,

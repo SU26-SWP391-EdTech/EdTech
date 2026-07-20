@@ -8,6 +8,7 @@ import { Learner } from './entities/learner.entity';
 import { GetLearnerProfileDto } from './dto/get-learner-profile.dto';
 import { UpdateLearnerInfoDto } from './dto/update-learner-info.dto';
 import { LearnerRepository } from './learners.repository';
+import { PvpStatus } from 'src/common/enums/pvp-status.enum';
 
 @Injectable()
 export class LearnersService {
@@ -140,9 +141,20 @@ export class LearnersService {
   }
 
   public async getLearnerProfileById(userId: number): Promise<Learner> {
-    const learner = await this.learnerRepo.findLeanerById(userId);
+    let learner = await this.learnerRepo.findLeanerById(userId);
     if (!learner) {
-      throw new NotFoundException("Can not find leaner profile by " + userId);
+      const user = await this.userRepository.findOne({ where: { userId } });
+      if (!user) {
+        throw new NotFoundException("Can not find user by ID " + userId);
+      }
+      learner = this.learnerRepository.create({
+        userId,
+        currentStreak: 0,
+        longestStreak: 0,
+        streakLife: 1,
+        pvpStatus: PvpStatus.IDLE,
+      });
+      learner = await this.learnerRepository.save(learner);
     }
     return learner;
   }

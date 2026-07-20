@@ -23,6 +23,7 @@ export function LearnerHeader() {
         if (path === '/learner/my-learning') return 'my-learning';
         if (path === '/learner/explore') return 'explore';
         if (path === '/learner/leaderboard') return 'leaderboard';
+        if (path.includes('/learner/pvp')) return 'pvp';
         return '';
     };
 
@@ -56,6 +57,8 @@ export function LearnerHeader() {
                                     navigate('/learner/explore');
                                 } else if (item.id === 'leaderboard') {
                                     navigate('/learner/leaderboard');
+                                } else if (item.id === 'pvp') {
+                                    navigate('/learner/pvp');
                                 }
                             }}
                         />

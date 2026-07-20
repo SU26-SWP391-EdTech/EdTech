@@ -289,6 +289,11 @@ export function LessonAssessmentSection({ assessments, setAssessments, courseId,
                   </span>
                   <h3 style={{ fontSize: 13.5, fontWeight: 700, color: '#111827', margin: 0 }}>{ast.title}</h3>
                   <span style={{ fontSize: 12, color: '#64748B' }}>({ast.questions.length} questions)</span>
+                  {ast.type === 'PVP' && ast.questions.length < 5 && (
+                    <span style={{ fontSize: 11, color: '#E11D48', fontWeight: 600, background: '#FFF1F3', padding: '2px 8px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      ⚠️ Needs at least 5 questions ({ast.questions.length}/5)
+                    </span>
+                  )}
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button

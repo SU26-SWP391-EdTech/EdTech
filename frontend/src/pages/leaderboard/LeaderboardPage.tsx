@@ -82,7 +82,6 @@ export function LeaderboardPage() {
                 tab={tab}
                 searchedList={searchedList}
                 totalCourses={courses.length}
-                setChallengeModalEntry={setChallengeModalEntry}
             />
 
             {/* Legend guide */}
@@ -94,17 +93,6 @@ export function LeaderboardPage() {
                     <span><strong style={{ color: '#374151' }}>Courses</strong> — completed out of {courses.length}</span>
                 )}
             </div>
-
-            {/* PVP Challenge Modal */}
-            <ChallengeModal
-                challengeModalEntry={challengeModalEntry}
-                setChallengeModalEntry={setChallengeModalEntry}
-                tab={tab}
-                selectedCourseTitle={selectedCourse.title}
-                currentUserCourseEntry={currentUserCourseEntry}
-                currentUserOverallEntry={currentUserOverallEntry}
-                handleSendChallenge={handleSendChallenge}
-            />
         </div>
     );
 }

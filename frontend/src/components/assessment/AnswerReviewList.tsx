@@ -79,9 +79,10 @@ export function AnswerReviewList({ reviews }: AnswerReviewListProps) {
                         {expanded && (
                             <div style={{ padding: '0 16px 16px', borderTop: '1px solid #F3F4F6' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12 }}>
-                                    {a.options.map(opt => {
-                                        const wasSelected = a.selected.includes(opt.id);
-                                        const isCorrectOpt = a.correct.includes(opt.id);
+                                    {a.options.map((opt, idx) => {
+                                        const wasSelected = a.selected.some(id => String(id) === String(opt.id));
+                                        const isCorrectOpt = a.correct.some(id => String(id) === String(opt.id));
+                                        const optionLetter = String.fromCharCode(65 + idx);
                                         
                                         let bg = '#F8FAFC';
                                         let border = '#E5E7EB';
@@ -111,11 +112,26 @@ export function AnswerReviewList({ reviews }: AnswerReviewListProps) {
                                                 }}
                                             >
                                                 <span style={{ fontSize: 11, fontWeight: 700, color: isCorrectOpt ? '#16A34A' : wasSelected ? '#E11D48' : '#9CA3AF', minWidth: 14 }}>
-                                                    {opt.id.toUpperCase()}
+                                                    {optionLetter}
                                                 </span>
                                                 <span style={{ fontSize: 13, color: isCorrectOpt ? '#374151' : '#6B7280', flex: 1 }}>
                                                     {opt.text}
                                                 </span>
+                                                {wasSelected && (
+                                                    <span 
+                                                        style={{ 
+                                                            fontSize: 10, 
+                                                            padding: '2px 8px', 
+                                                            borderRadius: 4, 
+                                                            background: isCorrectOpt ? '#D1FAE5' : '#FEE2E2', 
+                                                            color: isCorrectOpt ? '#065F46' : '#991B1B', 
+                                                            fontWeight: 600,
+                                                            marginRight: 6
+                                                        }}
+                                                    >
+                                                        Đáp án của bạn
+                                                    </span>
+                                                )}
                                                 {wasSelected && !isCorrectOpt && <XCircle size={13} style={{ color: '#E11D48' }} />}
                                                 {isCorrectOpt && <CheckCircle2 size={13} style={{ color: '#16A34A' }} />}
                                             </div>
