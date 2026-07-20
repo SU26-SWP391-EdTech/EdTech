@@ -82,6 +82,10 @@ export class ProgressController {
     @CurrentUser()
     user: JwtPayloadUser
   ) {
-    return this.progressService.findByUserAndLessonService(user.userId, lessonId);
+    try {
+      return await this.progressService.findByUserAndLessonService(user.userId, lessonId);
+    } catch (e) {
+      return { status: null };
+    }
   }
 }
