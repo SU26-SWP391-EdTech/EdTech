@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { LearnerStreakService } from './learner-streak.service';
+import { LearnerStreakService } from './services/learner-streak.service';
 import { LearnerRepository } from './learners.repository';
 import { AssessmentSessionRepository } from '../assessment/repository/assessment-session.repository';
 import { Learner } from './entities/learner.entity';

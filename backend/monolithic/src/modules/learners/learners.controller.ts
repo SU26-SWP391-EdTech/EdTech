@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, ParseIntPipe, Req, UseGuards } from '@nestjs/common';
-import { LearnersService } from './learners.service';
+import { LearnersService } from './services/learners.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { EditLearnerProfileDto } from './dto/edit-learner-profile.dto';
 import { ChangePasswordDto } from '../users/dto/change-password.dto';
