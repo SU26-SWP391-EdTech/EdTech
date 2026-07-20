@@ -1,4 +1,4 @@
-import { io, Socket } from 'socket.io-client';
+import { io, Socket} from 'socket.io-client'; 
 import { useAuthStore } from '../../stores/auth/auth.stores';
 
 class PvpSocketService {
