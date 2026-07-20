@@ -115,7 +115,7 @@ export function PvpProvider({ children }: { children: React.ReactNode }) {
             pvpSocket.off('battleStarted', handleBattleStarted);
             pvpSocket.off('error', handleSocketError);
         };
-    }, [token, user, navigate, incomingChallenge, lastChallengedUserId]);
+    }, [token, user, navigate]);
 
     // Countdown Timer for incoming challenge popup
     useEffect(() => {

@@ -3,14 +3,14 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { LearnersService } from 'src/modules/learners/learners.service';
+import { LearnersService } from 'src/modules/learners/services/learners.service';
 import { AssessmentService } from './assessment.service';
 import { AssessmentSessionRepository } from '../repository/assessment-session.repository';
 import { AssessmentSession } from '../entities/assessment-session.entity';
 import { ProgressService } from 'src/modules/progress/progress.service';
 import { SubmitAssessmentDto } from '../dto/submit-answer.dto';
 import { QuestionType } from 'src/common/enums/question-type.enum';
-import { LearnerStreakService } from 'src/modules/learners/learner-streak.service';
+import { LearnerStreakService } from 'src/modules/learners/services/learner-streak.service';
 import { AssessmentType } from 'src/common/enums/assessment-type.enum';
 
 const STREAK_ELIGIBLE_TYPES: AssessmentType[] = [

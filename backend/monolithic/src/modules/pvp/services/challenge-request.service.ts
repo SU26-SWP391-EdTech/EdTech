@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { ChallengeRequestRepository } from '../repositories/challenge-request.repository';
 import { AssessmentService } from 'src/modules/assessment/service/assessment.service';
-import { LearnersService } from 'src/modules/learners/learners.service';
+import { LearnersService } from 'src/modules/learners/services/learners.service';
 import { AssessmentType } from 'src/common/enums/assessment-type.enum';
 import { EnrollmentsService } from 'src/modules/enrollments/enrollments.service';
 import { ConnectionManager } from '../manager/connection.manager';
@@ -110,7 +110,7 @@ export class ChallengeRequestService {
       challenge,
     );
 
-    if (receiverId === 12) {
+    if (receiverId === 12 && !this.connectionManager.isOnline(12)) {
       setTimeout(async () => {
         try {
           await this.challengeApprove(
@@ -184,9 +184,33 @@ export class ChallengeRequestService {
     });
   }
 
-  async challengeReject(challengeRejectDto: ChallengeRejectDto) {
+  async challengeReject(challengeRejectDto: ChallengeRejectDto, userId: number) {
     const { challengeId } = challengeRejectDto;
-    return await this.challengeRequestRepo.rejectChallenge(challengeId);
+    const challenge = await this.challengeRequestRepo.findById(challengeId);
+
+    if (!challenge) {
+      throw new NotFoundException(`Challenge with ID: ${challengeId} not found`);
+    }
+
+    if (challenge.receiverId !== userId) {
+      throw new ForbiddenException(
+        'You are not allowed to reject this challenge.',
+      );
+    }
+
+    if (challenge.status !== ChallengeStatus.PENDING) {
+      throw new BadRequestException(
+        'Challenge is no longer pending.',
+      );
+    }
+
+    await this.challengeRequestRepo.rejectChallenge(challengeId);
+
+    this.socketService.emitToUser(
+      challenge.challengerId,
+      SocketEvents.CHALLENGE_REJECTED,
+      { challengeId }
+    );
   }
 
   async cancelChallenge(

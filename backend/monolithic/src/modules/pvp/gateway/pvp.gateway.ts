@@ -125,7 +125,8 @@ export class PvpGateway implements OnGatewayConnection, OnGatewayDisconnect, OnG
   ){
     await this.handleSocketAction(client, async () => {
       await this.challengeRequestService.challengeReject(
-        challengeRejectDto
+        challengeRejectDto,
+        client.data.user.userId,
       );
     });
   }
