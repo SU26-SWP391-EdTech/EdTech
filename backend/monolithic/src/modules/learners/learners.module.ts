@@ -18,12 +18,14 @@ import { LearnerRepository } from './learners.repository';
 
   controllers: [LearnersController],
   providers: [
-    LearnersService, 
+    LearnersService,
     CloudinaryService,
-    LearnerRepository
+    LearnerRepository,
   ],
   exports: [
-    LearnersService
-  ]
+    LearnersService,
+    LearnerRepository,
+  ],
 })
 export class LearnersModule { }
+

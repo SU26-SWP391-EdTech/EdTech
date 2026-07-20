@@ -14,6 +14,7 @@ import { AssessmentSessionController } from './controller/assessment-session.con
 import { Question } from '../question/entities/question.entity';
 import { QuestionOption } from '../question/entities/question-option.entity';
 import { ProgressModule } from '../progress/progress.module';
+import { LearnerStreakService } from '../learners/learner-streak.service';
 
 @Module({
   imports: [
@@ -28,13 +29,19 @@ import { ProgressModule } from '../progress/progress.module';
     AssessmentSessionController
   ],
   providers: [
-    AssessmentService, 
+    AssessmentService,
     AssessmentRepository,
-    
+
     AssessmentSessionService,
-    AssessmentSessionRepository
-    
+    AssessmentSessionRepository,
+
+    LearnerStreakService,
   ],
-  exports: [AssessmentService, AssessmentRepository],
+  exports: [
+    AssessmentService,
+    AssessmentRepository,
+    AssessmentSessionRepository,
+  ],
 })
 export class AssessmentModule { }
+

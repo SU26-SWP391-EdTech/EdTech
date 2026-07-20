@@ -10,6 +10,13 @@ import { AssessmentSession } from '../entities/assessment-session.entity';
 import { ProgressService } from 'src/modules/progress/progress.service';
 import { SubmitAssessmentDto } from '../dto/submit-answer.dto';
 import { QuestionType } from 'src/common/enums/question-type.enum';
+import { LearnerStreakService } from 'src/modules/learners/learner-streak.service';
+import { AssessmentType } from 'src/common/enums/assessment-type.enum';
+
+const STREAK_ELIGIBLE_TYPES: AssessmentType[] = [
+  AssessmentType.PRACTICE,
+  AssessmentType.LESSON_QUIZ,
+];
 
 @Injectable()
 export class AssessmentSessionService {
@@ -18,6 +25,7 @@ export class AssessmentSessionService {
     private readonly assessmentService: AssessmentService,
     private readonly assessmentSessionRepository: AssessmentSessionRepository,
     private readonly progressService: ProgressService,
+    private readonly learnerStreakService: LearnerStreakService,
   ) { }
 
 
@@ -180,7 +188,16 @@ export class AssessmentSessionService {
       }
     }
 
-    // 7. Response
+    // 7. Update Streak: update learner streak for eligible assessment types
+    if (STREAK_ELIGIBLE_TYPES.includes(assessment.type)) {
+      try {
+        await this.learnerStreakService.updateStreak(userId, new Date());
+      } catch (error) {
+        // Handle any errors gracefully so we don't block the grading response
+      }
+    }
+
+    // 8. Response
     return {
       score,
       earnedPoints,

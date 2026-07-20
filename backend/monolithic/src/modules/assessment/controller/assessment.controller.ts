@@ -27,7 +27,7 @@ export class AssessmentController {
   constructor(
     private readonly assessmentService: AssessmentService,
     private readonly assessmentSessionService: AssessmentSessionService,
-  ) { }
+  ) {}
 
   @Post()
   @Roles(RoleEnum.COURSE_PROVIDER)
@@ -45,16 +45,20 @@ export class AssessmentController {
     @CurrentUser()
     user: JwtPayloadUser,
   ) {
-    return await this.assessmentService.createService(user.userId, createAssessmentDto);
+    return await this.assessmentService.createService(
+      user.userId,
+      createAssessmentDto,
+    );
   }
 
   @Get('courses/:courseId/pvp')
   @Roles(RoleEnum.LEARNER)
   @ApiOperation({ summary: 'Get or create PvP assessment for a course' })
-  @ApiResponse({ status: 200, description: 'PvP assessment retrieved successfully' })
-  async getOrCreatePvp(
-    @Param('courseId', ParseIntPipe) courseId: number,
-  ) {
+  @ApiResponse({
+    status: 200,
+    description: 'PvP assessment retrieved successfully',
+  })
+  async getOrCreatePvp(@Param('courseId', ParseIntPipe) courseId: number) {
     return await this.assessmentService.getOrCreatePvpAssessment(courseId);
   }
 
@@ -100,10 +104,6 @@ export class AssessmentController {
     );
   }
 
-  @Get('course/:courseId/pvp')
-  async getPvpQuestion(@Param('courseId', ParseIntPipe) courseId: number) {
-    return await this.assessmentService.getPvpQuestion(courseId);
-=======
   // learner when complete assessment will complete assessment_sessions
   // @Patch(':id/session/complete')
   // @Roles(RoleEnum.LEARNER)
@@ -120,9 +120,7 @@ export class AssessmentController {
   //     user.userId,
   //   );
   // }
-  }
 
-  // Submit the test and get it graded and will complete assessment_sessions
   @Patch(':id/session/submit')
   @Roles(RoleEnum.LEARNER)
   @ApiOperation({ summary: 'Submit the test and get it graded' })
@@ -159,3 +157,5 @@ export class AssessmentController {
     );
   }
 }
+
+// Submit the test and get it graded and will complete assessment_sessions
