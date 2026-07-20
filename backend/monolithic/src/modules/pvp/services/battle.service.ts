@@ -17,8 +17,8 @@ import { BattleSessionManager } from '../manager/battle-session.manager';
 import { RoomManager } from '../manager/room.manager';
 import { MatchRepository } from '../repositories/match.repository';
 import { SocketService } from './socket.service';
-import { AssessmentType } from 'src/common/enums/assessment-type.enum';
-import { Question } from 'src/modules/question/entities/question.entity';
+
+import { ConnectionManager } from '../manager/connection.manager';
 
 @Injectable()
 export class BattleService {
@@ -27,6 +27,7 @@ export class BattleService {
     private readonly battleSessionManager: BattleSessionManager,
     private readonly roomManager: RoomManager,
     private readonly socketService: SocketService,
+    private readonly connectionManager: ConnectionManager,
   ) { }
 
   async createBattle(createBattleDto: CreateBattleDto) {
@@ -297,10 +298,10 @@ export class BattleService {
 
     this.battleSessionManager.setQuestionTimer(matchId, questionTimer);
 
-    // If opponent is mock user (ID 12), schedule the bot response
-    if (session.player2Id === 12) {
+    // If opponent is mock user (ID 12) and bot is not online, schedule the bot response
+    if (session.player2Id === 12 && !this.connectionManager.isOnline(12)) {
       this.scheduleBotAnswer(session, 12, question);
-    } else if (session.player1Id === 12) {
+    } else if (session.player1Id === 12 && !this.connectionManager.isOnline(12)) {
       this.scheduleBotAnswer(session, 12, question);
     }
   }
