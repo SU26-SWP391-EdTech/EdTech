@@ -17,7 +17,6 @@ import { BattleSessionManager } from '../manager/battle-session.manager';
 import { RoomManager } from '../manager/room.manager';
 import { MatchRepository } from '../repositories/match.repository';
 import { SocketService } from './socket.service';
-
 import { ConnectionManager } from '../manager/connection.manager';
 import { AssessmentType } from 'src/common/enums/assessment-type.enum';
 import { Question } from 'src/modules/question/entities/question.entity';

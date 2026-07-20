@@ -128,4 +128,8 @@ export class EnrollmentsService {
   async findEnrollmentByUserId(userId: number){
     return await this.enrollmentsRepo.findByUserId(userId);
   }
+
+  async findEnrollmentsByCourseId(courseId: number) {
+    return await this.enrollmentsRepo.findByCourseId(courseId);
+  }
 }

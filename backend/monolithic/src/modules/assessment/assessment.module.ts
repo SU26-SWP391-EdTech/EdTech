@@ -41,6 +41,7 @@ import { LearnerStreakService } from '../learners/services/learner-streak.servic
   exports: [
     AssessmentService,
     AssessmentRepository,
+    AssessmentSessionService,
     AssessmentSessionRepository,
   ],
 })

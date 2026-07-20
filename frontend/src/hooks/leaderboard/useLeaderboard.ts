@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 import toast from 'react-hot-toast';
+import { updateStreak } from '../../utils/learner/streakUtils';
 import {
     getLeaderboardCourses,
     getCourseLeaderboardData,
@@ -57,14 +58,14 @@ export function useLeaderboard() {
 
                 // Tải dữ liệu bảng xếp hạng chi tiết của từng khóa học
                 const courseDataMap: Record<number, LeaderboardEntry[]> = {};
-                fetchedCourses.forEach(c => {
-                    // Sao chép sâu (deep clone) dữ liệu mock để có thể sửa đổi điểm số (PvP) cục bộ mà không ảnh hưởng cache service
-                    courseDataMap[c.courseId] = JSON.parse(JSON.stringify(getCourseLeaderboardData(c.courseId)));
-                });
+                await Promise.all(fetchedCourses.map(async (c) => {
+                    const data = await getCourseLeaderboardData(c.courseId, currentUserId);
+                    courseDataMap[c.courseId] = data;
+                }));
                 setCourseLeaderboards(courseDataMap);
 
                 // Tải dữ liệu bảng xếp hạng tổng hợp hệ thống
-                const overallData = JSON.parse(JSON.stringify(await getOverallLeaderboardData()));
+                const overallData = await getOverallLeaderboardData(currentUserId);
                 setOverallLeaderboard(overallData);
             } catch (err) {
                 console.error('Failed to load leaderboard data:', err);

@@ -12,6 +12,7 @@ import { getCourseById } from '../../services/course/course.service';
 import { getLessonsByCourse } from '../../services/lesson/lesson.service';
 import { getMyEnrollments, updateEnrollmentProgress } from '../../services/enrollment/enrollment.service';
 import api from '../../lib/axios';
+import { updateStreak } from '../../utils/learner/streakUtils';
 
 /**
  * Xác định loại hình bài học (Lesson Type) dựa vào các trường thông tin của bài học.
@@ -403,6 +404,11 @@ export function useLessonPage() {
       // Tải lại thông tin enrollments mới nhất
       const enrolls = await getMyEnrollments();
       setEnrollments(enrolls);
+
+      // Cập nhật streak học tập của học viên
+      if (user?.userId) {
+        updateStreak(user.userId);
+      }
     } catch (err) {
       console.error('Failed to update progress on backend:', err);
       toast.error('Failed to update progress on server.');
