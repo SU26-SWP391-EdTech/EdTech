@@ -190,4 +190,40 @@ export class AssessmentSessionService {
       questions: questionsResponse,
     };
   }
+
+  public async getAssessmentResultByLessonService(userId: number, lessonId: number) {
+    const assessments = await this.assessmentService.findAssessmentsByLessonId(lessonId);
+    if (!assessments || assessments.length === 0) {
+      throw new NotFoundException(`No assessments found for lesson ID ${lessonId}`);
+    }
+
+    const assessment = assessments[0];
+
+    const session = await this.assessmentSessionRepository.getAssessmentSessionByUserIdAndAssessmentId(userId, assessment.assessmentId);
+    if (!session) {
+      throw new NotFoundException(`No session found for user ${userId} and assessment ${assessment.assessmentId}`);
+    }
+
+    const fullAssessment = await this.assessmentService.findOneService(assessment.assessmentId);
+
+    const totalQuestions = fullAssessment.questions?.length || 0;
+    const earnedPoints = Number(session.earnedPoints) || 0;
+    const score = Number(session.score) || 0;
+
+    const correctQuestions = Math.round((score / 100) * totalQuestions);
+
+    return {
+      summary: {
+        score,
+        totalQuestions,
+        correctCount: correctQuestions,
+        incorrectCount: totalQuestions - correctQuestions,
+        duration: '0 phút',
+        assessment: fullAssessment.title || 'Bài kiểm tra',
+        submittedAt: session.completedAt ? session.completedAt.toLocaleString('vi-VN') : '',
+        pointsEarned: earnedPoints,
+      },
+      reviews: [],
+    };
+  }
 }

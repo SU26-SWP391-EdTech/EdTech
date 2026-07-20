@@ -75,4 +75,8 @@ export class AssessmentService {
   async getPvpQuestion(courseId: number){
     return await this.assessmentRepository.getPvpQuestion(courseId);
   }
+
+  async findAssessmentsByLessonId(lessonId: number): Promise<Assessment[]> {
+    return await this.assessmentRepository.findByLessonId(lessonId);
+  }
 }
