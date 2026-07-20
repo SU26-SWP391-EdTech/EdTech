@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable, NotFoundException, UseInterceptors } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { User } from '../users/entities/user.entity';
-import { EditLearnerProfileDto } from './dto/edit-learner-profile.dto';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { User } from 'src/modules/users/entities/user.entity';
+import { EditLearnerProfileDto } from '../dto/edit-learner-profile.dto';
+import { CloudinaryService } from 'src/modules/cloudinary/cloudinary.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Learner } from './entities/learner.entity';
-import { GetLearnerProfileDto } from './dto/get-learner-profile.dto';
-import { UpdateLearnerInfoDto } from './dto/update-learner-info.dto';
-import { LearnerRepository } from './learners.repository';
+import { Learner } from '../entities/learner.entity';
+import { GetLearnerProfileDto } from '../dto/get-learner-profile.dto';
+import { UpdateLearnerInfoDto } from '../dto/update-learner-info.dto';
+import { LearnerRepository } from '../learners.repository';
 import { PvpStatus } from 'src/common/enums/pvp-status.enum';
 
 @Injectable()

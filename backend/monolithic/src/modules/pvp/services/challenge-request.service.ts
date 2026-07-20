@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { ChallengeRequestRepository } from '../repositories/challenge-request.repository';
 import { AssessmentService } from 'src/modules/assessment/service/assessment.service';
-import { LearnersService } from 'src/modules/learners/learners.service';
+import { LearnersService } from 'src/modules/learners/services/learners.service';
 import { AssessmentType } from 'src/common/enums/assessment-type.enum';
 import { EnrollmentsService } from 'src/modules/enrollments/enrollments.service';
 import { ConnectionManager } from '../manager/connection.manager';

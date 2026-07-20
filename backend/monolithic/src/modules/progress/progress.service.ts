@@ -9,7 +9,7 @@ import { ProgressRepository } from './progress.repository';
 import { LearnerLessonProgress } from './entities/learner-lesson-progress.entity';
 import { LessonsService } from '../lessons/service/lessons.service';
 import { LessonProgressStatus } from 'src/common/enums/lesson-progress-status.enum';
-import { LearnersService } from '../learners/learners.service';
+import { LearnersService } from '../learners/services/learners.service';
 import { LessonPrerequisiteService } from '../lessons/service/lesson-prerequisite.service';
 
 @Injectable()

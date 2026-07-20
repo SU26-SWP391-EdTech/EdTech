@@ -3,9 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { AssessmentType } from 'src/common/enums/assessment-type.enum';
 import { PvpMatchStatus } from 'src/common/enums/pvp-match-status.enum';
-import { Question } from 'src/modules/question/entities/question.entity';
 import { BattleConfig } from '../constants/battle-config.constant';
 import { SocketEvents } from '../constants/socket-events.constant';
 import { CreateBattleDto } from '../dto/battle/create-battle.dto';
