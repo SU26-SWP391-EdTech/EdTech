@@ -32,7 +32,6 @@ export class QuestionController {
 
   @Roles(RoleEnum.COURSE_PROVIDER)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('courses/:courseId/lesson/:lessonId/assessment/:assessmentId')
   @ApiOperation({ summary: 'Create a question for an assessment' })
   @ApiBody({ type: CreateQuestionDto })
