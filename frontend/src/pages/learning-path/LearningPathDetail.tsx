@@ -52,18 +52,7 @@ export function LearningPathDetail() {
               <div className="flex items-center justify-between mb-5">
                 <div>
                   <h2 className="text-[#111827]" style={{ fontSize: '17px', fontWeight: 700 }}>Learning Roadmap</h2>
-                  <p className="text-xs text-[#9CA3AF] mt-0.5">{completedCourses} of {totalCourses} courses completed · follow the path sequentially</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  {(['completed', 'current', 'upcoming', 'locked'] as const).map(state => (
-                    <div key={state} className="flex items-center gap-1">
-                      <div className="w-2 h-2 rounded-full" style={{
-                        backgroundColor: state === 'completed' ? '#16A34A' : state === 'current' ? '#E11D48' : state === 'upcoming' ? '#D1D5DB' : '#F3F4F6',
-                        border: state === 'locked' ? '1px solid #E5E7EB' : 'none'
-                      }} />
-                      <span className="text-[10px] text-[#9CA3AF] capitalize">{state}</span>
-                    </div>
-                  ))}
+                  <p className="text-xs text-[#9CA3AF] mt-0.5">{totalCourses} courses in this path</p>
                 </div>
               </div>
 
@@ -72,7 +61,7 @@ export function LearningPathDetail() {
                   key={node.id} 
                   node={node} 
                   isLast={i === roadmapNodes.length - 1} 
-                  onSelect={() => node.state !== 'locked' && setActiveCourseId(node.id)}
+                  onSelect={() => setActiveCourseId(node.id)}
                   onEnroll={() => handleEnrollSingleCourse(node.id)}
                   onContinue={() => handleContinueCourse(node.id)}
                 />
@@ -87,7 +76,7 @@ export function LearningPathDetail() {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h2 className="text-[#111827]" style={{ fontSize: '17px', fontWeight: 700 }}>Course Content</h2>
-                    <p className="text-xs text-[#9CA3AF] mt-0.5">{activeCourse.title} — {roadmapNodes.find(n => n.id === activeCourseId)?.progress || 0}% complete</p>
+                    <p className="text-xs text-[#9CA3AF] mt-0.5">{activeCourse.title}</p>
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
