@@ -130,23 +130,19 @@ export function useLearningPathDetail() {
   const pathCourses = [...(path?.learningPathCourses || [])].sort((a, b) => a.position - b.position);
 
   // --- 4. LOGIC XÂY DỰNG SƠ ĐỒ LỘ TRÌNH (COMPUTED ROADMAP NODES) ---
-  // Tự động phân loại trạng thái của các nút dựa trên tiến độ học tập tuần tự
-  let foundFirstUnenrolled = false;
+  // Cho phép tự do mở khóa và truy cập/đăng ký tất cả các khóa học trong lộ trình
   const roadmapNodes: CourseNode[] = pathCourses.map((pc, idx) => {
     const enrollment = enrollments.find(e => e.course?.courseId === pc.courseId);
     const enrolled = !!enrollment;
     const completed = enrollment?.status === 'completed' || enrollment?.progress === 100;
 
-    let state: NodeState = 'locked';
+    let state: NodeState = 'upcoming';
     if (completed) {
       state = 'completed'; // Đã hoàn thành khóa học
     } else if (enrolled) {
       state = 'current';   // Đang trong tiến trình học khóa học này
-    } else if (!foundFirstUnenrolled) {
-      state = 'upcoming';  // Khóa học tiếp theo cần đăng ký học
-      foundFirstUnenrolled = true;
     } else {
-      state = 'locked';    // Các khóa học phía sau bị khóa cho đến khi hoàn thành các bước trước
+      state = 'upcoming';  // Có thể tự do đăng ký/mở khóa học
     }
 
     // Gán icon động tùy thuộc vào nội dung tiêu đề khóa học
@@ -226,12 +222,13 @@ export function useLearningPathDetail() {
    */
   const handleContinueCourse = (courseId: number) => {
     const node = roadmapNodes.find(n => n.id === courseId);
-    if (!node || node.state === 'locked') {
-      toast.error('This course is locked. Please complete or enroll in the previous courses first.');
-      return;
-    }
+    if (!node) return;
 
-    navigate(`/learner/lesson?courseId=${courseId}`);
+    if (node.state === 'completed' || node.state === 'current') {
+      navigate(`/learner/lesson?courseId=${courseId}`);
+    } else {
+      navigate(`/learner/courses/detail?id=${courseId}`);
+    }
   };
 
   // --- 5. HÀM XỬ LÝ HÀNH ĐỘNG (LEARNER ACTIONS) ---

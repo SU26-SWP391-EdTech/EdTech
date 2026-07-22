@@ -86,7 +86,7 @@ export default function LearningRoadmapSection({
                     </div>
 
                     {/* Footer */}
-                    <div className="pt-4 border-t border-[#F3F4F6] flex items-center justify-between text-xs text-[#9CA3AF]">
+                    <div className="pt-7 border-t border-[#F3F4F6] flex items-center justify-between text-xs text-[#9CA3AF]">
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#10B981]" /><span>Enrolled</span></div>
                             <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-[#D1D5DB]" /><span>Not enrolled</span></div>

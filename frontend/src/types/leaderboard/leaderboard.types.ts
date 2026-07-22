@@ -2,6 +2,7 @@ export interface LeaderboardEntry {
     rank: number;
     userId: number;
     fullName: string;
+    avatarUrl?: string;
     initials: string;
     isCurrentUser: boolean;
     score: number;

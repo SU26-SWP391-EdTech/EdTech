@@ -56,7 +56,7 @@ export function CurriculumSidebar({
                     : 'hover:bg-[#F8FAFC]'
                 }`}
               >
-                <LessonStatusIcon status={lesson.status} />
+                <LessonStatusIcon status={lesson.status} isCurrent={isCurrent} />
                 <div className="flex w-9 flex-shrink-0 items-center gap-1">
                   {(lesson.hasVideo || lesson.type === 'Video' || lesson.type === 'Video & Reading') && (
                     <Video className="h-3.5 w-3.5 text-[#E11D48]" />

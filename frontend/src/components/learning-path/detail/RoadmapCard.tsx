@@ -69,14 +69,6 @@ export default function RoadmapCard({
                   {node.description}
                 </p>
               </div>
-              <div className="flex flex-col items-end gap-1.5 shrink-0">
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border ${cfg.badge}`} style={{ fontWeight: 500 }}>
-                  {node.state === 'completed' && 'Done'}
-                  {node.state === 'current' && 'Active'}
-                  {node.state === 'upcoming' && 'Next'}
-                  {node.state === 'locked' && 'Locked'}
-                </span>
-              </div>
             </div>
 
             {/* Meta */}
@@ -87,20 +79,6 @@ export default function RoadmapCard({
                 <span key={t} className="px-1.5 py-0.5 bg-[#F3F4F6] text-[#6B7280] rounded text-[10px]">{t}</span>
               ))}
             </div>
-
-            {/* Progress bar */}
-            {node.progress > 0 && (
-              <div className="mt-2.5">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] text-[#9CA3AF]">Progress</span>
-                  <span className="text-[10px]" style={{ fontWeight: 600, color: node.state === 'completed' ? '#16A34A' : '#E11D48' }}>{node.progress}%</span>
-                </div>
-                <div className="h-1.5 bg-[#E5E7EB] rounded-full overflow-hidden">
-                  <div className="h-full rounded-full transition-all"
-                    style={{ width: `${node.progress}%`, backgroundColor: node.state === 'completed' ? '#16A34A' : '#E11D48' }} />
-                </div>
-              </div>
-            )}
 
             {/* CTA for current/upcoming */}
             {node.state === 'current' && (

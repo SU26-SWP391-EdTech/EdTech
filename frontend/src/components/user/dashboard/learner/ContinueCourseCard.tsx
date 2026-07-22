@@ -36,11 +36,11 @@ export default function ContinueCourseCard({
             className="bg-white border border-[#E5E7EB] rounded-2xl p-5 hover:border-[#E11D48]/30 hover:shadow-md transition-all group cursor-pointer"
         >
             <div className="flex items-start gap-4 mb-4" >
-                <div className="w-14 h-14 rounded-xl flex-shrink-0 flex items-center justify-center text-white text-sm shadow-sm" style={!thumbnailUrl ?{ background: gradient, fontWeight: 700 }: undefined}>
+                <div className="w-14 h-14 rounded-xl flex-shrink-0 flex items-center justify-center text-white text-sm shadow-sm" style={!thumbnailUrl ? { background: gradient, fontWeight: 700 } : undefined}>
                     {thumbnailUrl ? (
                         <img src={thumbnailUrl} alt={title} className="w-full h-full object-cover rounded-xl" />
-                    ) : 
-                    (initials)}
+                    ) :
+                        (initials)}
                 </div>
                 <div className="flex-1 min-w-0">
                     <p className="text-sm text-[#111827] truncate" style={{ fontWeight: 600 }}>{title}</p>
