@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../stores/auth/auth.stores';
@@ -20,6 +20,7 @@ export function useExplore() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const tabParam = searchParams.get('tab') as Tab | null;
+    const tagParam = searchParams.get('tag');
 
     // Lấy thông tin user hiện tại từ auth store
     const user = useAuthStore((state) => state.user);
@@ -37,6 +38,22 @@ export function useExplore() {
     // Các trạng thái của bộ lọc
     const [searchTerm, setSearchTerm] = useState('');                         // Từ khóa tìm kiếm
     const [selectedLanguage, setSelectedLanguage] = useState('all');          // Bộ lọc ngôn ngữ học tập ('all', 'English', 'Vietnamese'...)
+    const [selectedTag, setSelectedTag] = useState<string | null>(tagParam);   // Thẻ tag được chọn để lọc khóa học
+
+    useEffect(() => {
+        if (tagParam) {
+            setSelectedTag(tagParam);
+        }
+    }, [tagParam]);
+
+    // Gom danh sách tất cả các thẻ tag có sẵn từ các khóa học
+    const allTags = useMemo(() => {
+        const set = new Set<string>();
+        courses.forEach(c => {
+            extractCourseTags(c).forEach(t => set.add(t));
+        });
+        return Array.from(set).sort();
+    }, [courses]);
 
     /**
      * Tải dữ liệu các khóa học đã được duyệt, danh sách các lộ trình học tập,
@@ -236,6 +253,7 @@ export function useExplore() {
         setSelectedLanguage,
         selectedTag,
         setSelectedTag,
+        allTags,
         isLoading,
         enrollingId,
         filteredCourses,

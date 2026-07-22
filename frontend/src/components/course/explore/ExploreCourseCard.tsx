@@ -12,6 +12,7 @@ interface ExploreCourseCardProps {
     onEnroll: () => void;
     enrolling: boolean;
     onClick?: () => void;
+    onTagClick?: (tag: string) => void;
     role?: string;
 }
 
@@ -27,6 +28,7 @@ export default function ExploreCourseCard({
     onEnroll,
     enrolling,
     onClick,
+    onTagClick,
     role
 }: ExploreCourseCardProps) {
     const badgeMap: Record<string, { color: string; tint: string }> = {
@@ -58,13 +60,24 @@ export default function ExploreCourseCard({
                     <div className="flex items-center gap-2 text-[11px] text-[#6B7280] mb-3">
                         <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{duration}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 mb-3 flex-wrap">
-                        {tags.map((t, idx) => (
-                            <span key={`${t}-${idx}`} className="px-2 py-0.5 text-[10px] bg-[#F1F5F9] text-[#475569] border border-[#CBD5E1] rounded-md font-medium">
-                                #{t}
-                            </span>
-                        ))}
-                    </div>
+                    {tags && tags.length > 0 && (
+                        <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+                            {tags.map((t, idx) => (
+                                <span
+                                    key={`${t}-${idx}`}
+                                    onClick={(e) => {
+                                        if (onTagClick) {
+                                            e.stopPropagation();
+                                            onTagClick(t);
+                                        }
+                                    }}
+                                    className={`px-2 py-0.5 text-[10px] rounded-md font-medium transition-colors ${onTagClick ? 'bg-[#F1F5F9] text-[#E11D48] hover:bg-[#FFE4E6] border border-[#FECDD3] cursor-pointer' : 'bg-[#F1F5F9] text-[#475569] border border-[#CBD5E1]'}`}
+                                >
+                                    #{t}
+                                </span>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
             {role === 'learner' && (
