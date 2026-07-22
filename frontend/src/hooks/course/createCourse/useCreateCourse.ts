@@ -32,6 +32,9 @@ export function useCreateCourse() {
   const form = useCourseForm();                      // Quản lý thông tin form cơ bản (tiêu đề, ngôn ngữ, outcomes...)
   const thumbnail = useCourseThumbnail();            // Quản lý hình ảnh thumbnail và upload
   const lessonState = useCourseLessons();  // Quản lý danh sách bài học và tương tác kéo thả sắp xếp
+  const hydrateFromCourse = form.hydrateFromCourse;
+  const setThumbnailPreview = thumbnail.setThumbnailPreview;
+  const setLessons = lessonState.setLessons;
 
   // Lấy ra bản nháp đầy đủ thông tin khóa học hiện tại (kèm danh sách bài học hiện có)
   const getCurrentCourseDraft = () => form.getCurrentCourseDraft(
@@ -60,13 +63,13 @@ export function useCreateCourse() {
       try {
         // Tải thông tin chung của khóa học và đổ vào form + thumbnail preview
         const course = await getCourseById(editId);
-        form.hydrateFromCourse(course);
-        thumbnail.setThumbnailPreview(course.thumbnailUrl || null);
+        hydrateFromCourse(course);
+        setThumbnailPreview(course.thumbnailUrl || null);
 
         // Tải danh sách bài học của khóa học đó và map sang cấu trúc dùng trong Builder
         const lessonsFromBackend = await getLessonsByCourse(editId);
         const mappedLessons = lessonsFromBackend.map(mapBackendLessonToCourseBuilderLesson);
-        lessonState.setLessons(mappedLessons);
+        setLessons(mappedLessons);
       } catch (err) {
         console.error('Failed to load course details for edit:', err);
         toast.error('Failed to load course details.');
@@ -76,7 +79,7 @@ export function useCreateCourse() {
     };
 
     loadCourseData();
-  }, [editId]);
+  }, [editId, hydrateFromCourse, setLessons, setThumbnailPreview]);
 
   // Kích hoạt nộp duyệt khóa học
   function handleSubmitForReviewClick() {

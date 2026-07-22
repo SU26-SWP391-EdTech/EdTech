@@ -11,9 +11,6 @@ export function PendingCourses() {
     const [showRejectModal, setShowRejectModal] = useState(false);
 
     const {
-        isProvider,
-        navigate,
-        courses,
         isLoading,
         search,
         setSearch,
@@ -21,11 +18,6 @@ export function PendingCourses() {
         setStatusFilter,
         selectedId,
         setSelectedId,
-        setSelectedCourseForEdit,
-        setIsViewOnly,
-        setShowModal,
-        setSelectedCourseForDelete,
-        setShowDeleteModal,
         filtered,
         selectedCourse,
         toggleSort,
@@ -77,7 +69,6 @@ export function PendingCourses() {
                             {/* Table */}
                             <CourseTable
                                 filtered={filtered}
-                                courses={courses}
                                 selectedId={selectedId}
                                 setSelectedId={setSelectedId}
                                 isLoading={isLoading}
@@ -88,13 +79,6 @@ export function PendingCourses() {
                                 handleApproveCourse={handleApproveCourse}
                                 setSelectedRejectCourseId={setSelectedRejectCourseId}
                                 setShowRejectModal={setShowRejectModal}
-                                isProvider={isProvider}
-                                navigate={navigate}
-                                setSelectedCourseForEdit={setSelectedCourseForEdit}
-                                setIsViewOnly={setIsViewOnly}
-                                setShowModal={setShowModal}
-                                setSelectedCourseForDelete={setSelectedCourseForDelete}
-                                setShowDeleteModal={setShowDeleteModal}
                             />
                         </div>
 

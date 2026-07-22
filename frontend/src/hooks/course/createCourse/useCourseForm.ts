@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import type { BackendCourse } from '../../../services/course/course.service';
 import { extractCourseTags } from '../../../services/course/course.service';
@@ -25,7 +25,7 @@ export function useCourseForm() {
    * 
    * @param course - Dữ liệu khóa học từ Backend
    */
-  function hydrateFromCourse(course: BackendCourse) {
+  const hydrateFromCourse = useCallback((course: BackendCourse) => {
     setTitle(course.title || '');
     setDescription(course.description || '');
     setLanguage(course.language || 'English');
@@ -35,7 +35,7 @@ export function useCourseForm() {
     const totalDuration = course.duration || 0;
     setDurationHours(Math.floor(totalDuration / 60)); // Chuyển đổi tổng số phút thành giờ
     setDurationMinutes(totalDuration % 60);           // Phần số phút dư ra
-  }
+  }, []);
 
   /**
    * Thu thập dữ liệu form hiện tại cùng danh sách bài học để tạo đối tượng bản nháp khóa học (CourseDraft).

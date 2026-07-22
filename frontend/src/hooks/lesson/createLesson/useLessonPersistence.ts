@@ -10,6 +10,7 @@ import {
 import { updateCourse } from '../../../services/course/course.service';
 
 import type {
+    Assessment,
     LessonStatus,
 } from '../../../types/lesson/create-lesson.types';
 
@@ -134,175 +135,80 @@ export function useLessonPersistence({
                 );
 
             const nextLessonId = Number(saved.lessonId);
-            const persistedLesson = existingId
-                ? (await api.get('/lessons/' + nextLessonId)).data
-                : null;
-            const persistedAssessments: Array<{
+            const treePayload = {
+                assessments: form.assessments.map(assessment => {
+                    const assessmentId = Number(
+                        assessment.assessmentId ||
+                        (!String(assessment.id).startsWith('ast-') ? assessment.id : 0)
+                    );
+                    return {
+                        ...(assessmentId > 0 ? { assessmentId } : {}),
+                        title: assessment.title,
+                        type: assessment.type,
+                        questions: assessment.questions.map((question, questionIndex) => {
+                            const questionId = !String(question.id).startsWith('q-')
+                                ? Number(question.id)
+                                : 0;
+                            return {
+                                ...(questionId > 0 ? { questionId } : {}),
+                                content: question.content,
+                                type: question.type,
+                                points: question.points || 10,
+                                position: questionIndex + 1,
+                                options: question.options.map((option, optionIndex) => {
+                                    const optionId = !String(option.id).startsWith('opt-')
+                                        ? Number(option.id)
+                                        : 0;
+                                    return {
+                                        ...(optionId > 0 ? { optionId } : {}),
+                                        content: option.content,
+                                        isCorrect: option.isCorrect,
+                                        position: optionIndex + 1,
+                                    };
+                                }),
+                            };
+                        }),
+                    };
+                }),
+            };
+            const treeResponse = await api.put(
+                '/assessment/courses/' + data.selectedCourseId +
+                '/lesson/' + nextLessonId + '/tree',
+                treePayload,
+            );
+            const savedAssessments: Assessment[] = treeResponse.data.map((assessment: {
                 assessmentId: number;
+                title: string;
+                type: Assessment['type'];
                 questions?: Array<{
                     questionId: number;
-                    options?: Array<{ optionId: number }>;
+                    content: string;
+                    type: Assessment['questions'][number]['type'];
+                    points: number;
+                    options?: Array<{
+                        optionId: number;
+                        content: string;
+                        isCorrect: boolean;
+                    }>;
                 }>;
-            }> = persistedLesson?.assessments || [];
-
-            const submittedAssessmentIds = new Set(
-                form.assessments
-                    .map(ass => Number(
-                        ass.assessmentId ||
-                        (!String(ass.id).startsWith('ast-') ? ass.id : 0)
-                    ))
-                    .filter(Number.isFinite)
-                    .filter(Boolean)
-            );
-
-            for (const persistedAssessment of persistedAssessments) {
-                const persistedAssessmentId = Number(persistedAssessment.assessmentId);
-                if (!submittedAssessmentIds.has(persistedAssessmentId)) {
-                    await api.delete('/assessment/' + persistedAssessmentId);
-                }
-            }
-
-            // Persist the assessment tree without duplicating existing records.
-            // IDs prefixed with ast-/q-/opt- only exist on the client.
-            const savedAssessments = [];
-            for (const ass of form.assessments) {
-                let assessmentId = Number(
-                    ass.assessmentId ||
-                    (!String(ass.id).startsWith('ast-') ? ass.id : 0)
-                );
-
-                if (!assessmentId) {
-                    const response = await api.post('/assessment', {
-                        courseId: data.selectedCourseId,
-                        lessonId: nextLessonId,
-                        title: ass.title,
-                        type: ass.type,
-                    });
-                    assessmentId = Number(response.data?.assessmentId);
-                    if (!assessmentId) {
-                        throw new Error('Assessment was created without an assessmentId');
-                    }
-                }
-
-                const persistedAssessment = persistedAssessments.find(
-                    item => Number(item.assessmentId) === assessmentId
-                );
-                const submittedQuestionIds = new Set(
-                    (ass.questions || [])
-                        .map(question => (
-                            !String(question.id).startsWith('q-')
-                                ? Number(question.id)
-                                : 0
-                        ))
-                        .filter(Number.isFinite)
-                        .filter(Boolean)
-                );
-
-                for (const persistedQuestion of persistedAssessment?.questions || []) {
-                    const persistedQuestionId = Number(persistedQuestion.questionId);
-                    if (!submittedQuestionIds.has(persistedQuestionId)) {
-                        const deleteQuestionPath = '/question/courses/' + data.selectedCourseId +
-                            '/lesson/' + nextLessonId + '/assessment/' + assessmentId +
-                            '/question/' + persistedQuestionId;
-                        await api.delete(deleteQuestionPath);
-                    }
-                }
-
-                const savedQuestions = [];
-                for (let qIdx = 0; qIdx < (ass.questions || []).length; qIdx++) {
-                    const q = ass.questions[qIdx];
-                    let questionId = !String(q.id).startsWith('q-') ? Number(q.id) : 0;
-                    const questionPayload = {
-                        content: q.content,
-                        type: q.type,
-                        points: q.points || 10,
-                        position: qIdx + 1,
-                    };
-                    const questionBasePath = '/question/courses/' + data.selectedCourseId +
-                        '/lesson/' + nextLessonId + '/assessment/' + assessmentId;
-
-                    if (questionId) {
-                        await api.patch(questionBasePath + '/question/' + questionId, questionPayload);
-                    } else {
-                        const qResponse = await api.post(questionBasePath, questionPayload);
-                        questionId = Number(qResponse.data?.questionId);
-                        if (!questionId) {
-                            throw new Error('Question was created without a questionId');
-                        }
-                    }
-
-                    const savedOptions = [];
-                    const persistedQuestion = (persistedAssessment?.questions || []).find(
-                        item => Number(item.questionId) === questionId
-                    );
-                    const submittedOptionIds = new Set(
-                        (q.options || [])
-                            .map(option => (
-                                !String(option.id).startsWith('opt-')
-                                    ? Number(option.id)
-                                    : 0
-                            ))
-                            .filter(Number.isFinite)
-                            .filter(Boolean)
-                    );
-
-                    for (const persistedOption of persistedQuestion?.options || []) {
-                        const persistedOptionId = Number(persistedOption.optionId);
-                        if (!submittedOptionIds.has(persistedOptionId)) {
-                            await api.delete('/question/option/' + persistedOptionId);
-                        }
-                    }
-
-                    for (let oIdx = 0; oIdx < (q.options || []).length; oIdx++) {
-                        const opt = q.options[oIdx];
-                        let optionId = !String(opt.id).startsWith('opt-') ? Number(opt.id) : 0;
-
-                        if (optionId) {
-                            const optResponse = await api.patch('/question/option/' + optionId, {
-                                content: opt.content,
-                                isCorrect: opt.isCorrect,
-                            });
-                            savedOptions.push(optResponse.data);
-                        } else {
-                            const optResponse = await api.post('/question/' + questionId + '/option', {
-                                content: opt.content,
-                                isCorrect: opt.isCorrect,
-                                position: oIdx + 1,
-                            });
-                            optionId = Number(optResponse.data?.optionId);
-                            if (!optionId) {
-                                throw new Error('Question option was created without an optionId');
-                            }
-                            savedOptions.push(optResponse.data);
-                        }
-                    }
-
-                    const optionIds = savedOptions
-                        .map(option => Number(option.optionId || option.id))
-                        .filter(Number.isFinite);
-                    if (optionIds.length > 0) {
-                        await api.patch('/question/' + questionId + '/options/reorder', { optionIds });
-                    }
-
-                    savedQuestions.push({
-                        ...q,
-                        id: String(questionId),
-                        questionId,
-                        options: savedOptions.map(option => ({
-                            id: String(option.optionId || option.id),
-                            content: option.content,
-                            isCorrect: Boolean(option.isCorrect),
-                        })),
-                    });
-                }
-
-                savedAssessments.push({
-                    ...ass,
-                    id: String(assessmentId),
-                    assessmentId,
-                    questions: savedQuestions,
-                });
-            }
+            }) => ({
+                id: String(assessment.assessmentId),
+                assessmentId: assessment.assessmentId,
+                title: assessment.title,
+                type: assessment.type,
+                questions: (assessment.questions || []).map(question => ({
+                    id: String(question.questionId),
+                    content: question.content,
+                    type: question.type,
+                    points: Number(question.points),
+                    options: (question.options || []).map(option => ({
+                        id: String(option.optionId),
+                        content: option.content,
+                        isCorrect: Boolean(option.isCorrect),
+                    })),
+                })),
+            }));
+            form.setAssessments(savedAssessments);
             // Lưu kết quả đồng bộ Assessment xuống localStorage để cache cục bộ
             localStorage.setItem(`assessments_lesson_${nextLessonId}`, JSON.stringify(savedAssessments));
 

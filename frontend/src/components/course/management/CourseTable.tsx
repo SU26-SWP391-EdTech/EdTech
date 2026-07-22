@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Trash2, CheckCircle2, X, ArrowUp, ArrowDown, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
+import { CheckCircle2, X, ArrowUp, ArrowDown, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { CourseThumbnail } from './CourseThumbnail';
 import { StatusBadge } from './StatusBadge';
 import type { Course } from '../../../types/course/course-management.types';
@@ -8,7 +8,6 @@ const PAGE_SIZE = 5;
 
 interface CourseTableProps {
     filtered: Course[];
-    courses: Course[];
     selectedId: number | undefined;
     setSelectedId: (id: number) => void;
     isLoading: boolean;
@@ -19,13 +18,6 @@ interface CourseTableProps {
     handleApproveCourse?: (id: number) => void;
     setSelectedRejectCourseId?: (id: number | null) => void;
     setShowRejectModal?: (val: boolean) => void;
-    isProvider: boolean;
-    navigate: any;
-    setSelectedCourseForEdit: (c: Course | undefined) => void;
-    setIsViewOnly: (val: boolean) => void;
-    setShowModal: (val: boolean) => void;
-    setSelectedCourseForDelete: (c: Course | undefined) => void;
-    setShowDeleteModal: (val: boolean) => void;
 }
 
 function formatDuration(raw: string | number | undefined): string {
@@ -44,7 +36,6 @@ function formatDuration(raw: string | number | undefined): string {
 
 export function CourseTable({
     filtered,
-    courses,
     selectedId,
     setSelectedId,
     isLoading,
@@ -55,13 +46,6 @@ export function CourseTable({
     handleApproveCourse,
     setSelectedRejectCourseId,
     setShowRejectModal,
-    isProvider,
-    navigate,
-    setSelectedCourseForEdit,
-    setIsViewOnly,
-    setShowModal,
-    setSelectedCourseForDelete,
-    setShowDeleteModal,
 }: CourseTableProps) {
     const [page, setPage] = useState(1);
 
@@ -69,21 +53,16 @@ export function CourseTable({
     const safePage = Math.min(page, totalPages);
     const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-    // Reset to page 1 when filter changes
-    React.useEffect(() => {
-        setPage(1);
-    }, [filtered.length]);
-
     const renderSortIcon = (field: 'title' | 'students' | 'created' | 'updated') => {
         if (sortField !== field) return <ArrowUpDown className="w-3.5 h-3.5 text-[#9CA3AF] opacity-50" />;
         return sortAsc ? <ArrowUp className="w-3.5 h-3.5 text-[#E11D48] font-bold" /> : <ArrowDown className="w-3.5 h-3.5 text-[#E11D48] font-bold" />;
     };
 
     const renderPageButtons = () => {
-        const buttons: React.ReactNode[] = [];
+        const buttons: ReactNode[] = [];
         const maxVisible = 5;
         let start = Math.max(1, safePage - Math.floor(maxVisible / 2));
-        let end = Math.min(totalPages, start + maxVisible - 1);
+        const end = Math.min(totalPages, start + maxVisible - 1);
         if (end - start + 1 < maxVisible) start = Math.max(1, end - maxVisible + 1);
 
         for (let p = start; p <= end; p++) {
