@@ -11,14 +11,16 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { LearnerStreakService } from '../services/learner-streak.service';
+import { Public } from 'src/common/decorators/public.decorator';
 
-@ApiTags('Learner Streak')
+@ApiTags('Learner-Streak')
 @Controller('learner-streak')
 export class LearnerStreakController {
   constructor(
     private readonly learnerStreakService: LearnerStreakService,
   ) {}
 
+  @Public()
   @Get(':userId')
   @ApiOperation({
     summary: 'Get current streak of a learner',

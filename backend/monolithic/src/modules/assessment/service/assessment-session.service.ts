@@ -191,7 +191,10 @@ export class AssessmentSessionService {
     // 7. Update Streak: update learner streak for eligible assessment types
     if (STREAK_ELIGIBLE_TYPES.includes(assessment.type)) {
       try {
-        await this.learnerStreakService.updateStreak(userId, new Date());
+        if(!session.completedAt){
+          throw new NotFoundException("Leaner hasn't complete this assessment")
+        }
+        await this.learnerStreakService.updateStreak(userId, session?.completedAt, session.sessionId);
       } catch (error) {
         // Handle any errors gracefully so we don't block the grading response
       }
@@ -243,4 +246,5 @@ export class AssessmentSessionService {
       reviews: [],
     };
   }
+
 }
