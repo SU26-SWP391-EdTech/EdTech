@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { X, Image, AlertCircle, BookOpen, ChevronDown } from 'lucide-react';
 import { createCourse, updateCourse } from '../../../services/course/course.service';
 import type { Course, CourseStatus, Category } from '../../../types/course/course-management.types';
+import { TagSelector } from './TagSelector';
 import toast from 'react-hot-toast';
 
 const CATEGORIES = ['Web Development', 'Data Science', 'Design', 'Marketing', 'Business', 'DevOps'];
@@ -23,6 +24,11 @@ export function CourseModal({ course, onClose, onSuccess, isViewOnly = false }: 
   const [duration, setDuration] = useState(course?.duration || '');
   const [language, setLanguage] = useState(course?.language || 'English');
   const [projectUrl, setProjectUrl] = useState(course?.projectUrl || '');
+  const [tags, setTags] = useState<string[]>(
+    (course as any)?.tags ||
+    ((course as any)?.courseTags?.map((ct: any) => ct.tag?.name).filter(Boolean) as string[]) ||
+    []
+  );
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(course?.thumbnailUrl || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,6 +91,9 @@ export function CourseModal({ course, onClose, onSuccess, isViewOnly = false }: 
       formData.append('language', language);
       formData.append('duration', String(parseDurationToMinutes(duration)));
       formData.append('projectUrl', projectUrl);
+      if (tags && tags.length > 0) {
+        formData.append('tags', JSON.stringify(tags));
+      }
       if (thumbnailFile) {
         formData.append('thumbnailUrl', thumbnailFile);
       }
@@ -235,7 +244,7 @@ export function CourseModal({ course, onClose, onSuccess, isViewOnly = false }: 
             )}
           </div>
 
-          {/* Duration + Language row */}
+          {/* Duration + Project URL row */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs text-[#374151] mb-1.5" style={{ fontWeight: 500 }}>Duration</label>
@@ -250,6 +259,21 @@ export function CourseModal({ course, onClose, onSuccess, isViewOnly = false }: 
             </div>
 
             <div>
+              <label className="block text-xs text-[#374151] mb-1.5" style={{ fontWeight: 500 }}>Project URL</label>
+              <input
+                type="text"
+                value={projectUrl}
+                onChange={e => setProjectUrl(e.target.value)}
+                placeholder="e.g. https://github.com/your-repo"
+                disabled={isViewOnly}
+                className="w-full px-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 transition-colors disabled:bg-gray-50 disabled:text-[#6B7280]"
+              />
+            </div>
+          </div>
+
+          {/* Language + Course Tags row */}
+          <div className="grid grid-cols-2 gap-3 items-start">
+            <div>
               <label className="block text-xs text-[#374151] mb-1.5" style={{ fontWeight: 500 }}>Language</label>
               <input
                 type="text"
@@ -260,18 +284,11 @@ export function CourseModal({ course, onClose, onSuccess, isViewOnly = false }: 
                 className="w-full px-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 transition-colors disabled:bg-gray-50 disabled:text-[#6B7280]"
               />
             </div>
-          </div>
 
-          {/* Project URL */}
-          <div>
-            <label className="block text-xs text-[#374151] mb-1.5" style={{ fontWeight: 500 }}>Project URL</label>
-            <input
-              type="text"
-              value={projectUrl}
-              onChange={e => setProjectUrl(e.target.value)}
-              placeholder="e.g. https://github.com/your-repo"
+            <TagSelector
+              selectedTags={tags}
+              onChange={setTags}
               disabled={isViewOnly}
-              className="w-full px-3 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#E11D48] focus:ring-2 focus:ring-[#E11D48]/15 transition-colors disabled:bg-gray-50 disabled:text-[#6B7280]"
             />
           </div>
         </div>

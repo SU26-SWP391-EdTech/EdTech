@@ -5,6 +5,7 @@ import SectionHeader from '../../components/course/my-learning/SectionHeader';
 import HeroDiscovery from '../../components/course/explore/HeroDiscovery';
 import ExplorePathCard from '../../components/course/explore/ExplorePathCard';
 import ExploreCourseCard from '../../components/course/explore/ExploreCourseCard';
+import { extractCourseTags } from '../../services/course/course.service';
 
 type Tab = 'all' | 'courses' | 'paths' | 'recommended' | 'saved';
 
@@ -176,7 +177,7 @@ export function ExplorePage() {
                                                                  title={course.title}
                                                                  provider={course.user?.fullName || "Senior Instructor"}
                                                                  duration={formatDuration(course.duration || 0)}
-                                                                 tags={[course.language || 'English']}
+                                                                 tags={extractCourseTags(course)}
                                                                  thumb={getCourseGradient(index)}
                                                                  thumbnailUrl={course.thumbnailUrl}
                                                                  isEnrolled={isEnrolled(course.courseId)}

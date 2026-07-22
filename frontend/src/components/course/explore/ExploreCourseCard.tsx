@@ -59,8 +59,10 @@ export default function ExploreCourseCard({
                         <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{duration}</span>
                     </div>
                     <div className="flex items-center gap-1.5 mb-3 flex-wrap">
-                        {tags.map((t) => (
-                            <span key={t} className="px-1.5 py-0.5 text-[10px] bg-[#F8FAFC] text-[#6B7280] rounded capitalize" style={{ fontWeight: 500 }}>{t}</span>
+                        {tags.map((t, idx) => (
+                            <span key={`${t}-${idx}`} className="px-2 py-0.5 text-[10px] bg-[#F1F5F9] text-[#475569] border border-[#CBD5E1] rounded-md font-medium">
+                                #{t}
+                            </span>
                         ))}
                     </div>
                 </div>

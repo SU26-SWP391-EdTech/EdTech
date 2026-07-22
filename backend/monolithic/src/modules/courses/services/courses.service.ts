@@ -49,10 +49,17 @@ export class CoursesService {
       createCourseDto.thumbnailUrl = uploaded.secure_url;
     }
 
-    return this.coursesRepository.createCourse({
-      ...createCourseDto,
+    const { tags, ...courseData } = createCourseDto;
+    const newCourse = await this.coursesRepository.createCourse({
+      ...courseData,
       user: courseProvider,
     });
+
+    if (tags && tags.length > 0) {
+      await this.tagsService.setCourseTags(newCourse.courseId, tags);
+    }
+
+    return this.findOne(newCourse.courseId);
   }
 
   async createAndSubmitToReview(
@@ -75,11 +82,18 @@ export class CoursesService {
       createCourseDto.thumbnailUrl = uploaded.secure_url;
     }
 
-    return this.coursesRepository.createCourse({
-      ...createCourseDto,
+    const { tags, ...courseData } = createCourseDto;
+    const newCourse = await this.coursesRepository.createCourse({
+      ...courseData,
       status: CourseStatus.PENDING,
       user: courseProvider,
     });
+
+    if (tags && tags.length > 0) {
+      await this.tagsService.setCourseTags(newCourse.courseId, tags);
+    }
+
+    return this.findOne(newCourse.courseId);
   }
 
   async findAll(): Promise<Course[]> {

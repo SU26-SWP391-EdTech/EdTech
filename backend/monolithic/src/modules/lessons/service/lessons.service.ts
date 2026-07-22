@@ -116,11 +116,14 @@ export class LessonsService {
       throw new NotFoundException(`Lesson with ID ${lessonId} not found`);
     }
 
-    // Instructor sở hữu course
-    if (
-      lesson.course.user.userId === userId &&
-      lesson.course.user.role.roleName === RoleEnum.COURSE_PROVIDER
-    ) {
+    // Allow Course Providers, Academic Managers, Admins, or Course Owner
+    const isOwnerOrStaff =
+      lesson.course.user?.userId === userId ||
+      lesson.course.user?.role?.roleName === RoleEnum.COURSE_PROVIDER ||
+      lesson.course.user?.role?.roleName === RoleEnum.ACADEMIC_MANAGER ||
+      lesson.course.user?.role?.roleName === RoleEnum.ADMIN;
+
+    if (isOwnerOrStaff) {
       return lesson;
     }
 
@@ -132,7 +135,6 @@ export class LessonsService {
         course: {
           courseId: lesson.course.courseId,
         },
-        status: EnrollmentStatus.ACTIVE,
       },
     });
 

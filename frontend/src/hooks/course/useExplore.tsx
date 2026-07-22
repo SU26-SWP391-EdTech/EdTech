@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../stores/auth/auth.stores';
-import { searchCourses } from '../../services/course/course.service';
+import { searchCourses, extractCourseTags } from '../../services/course/course.service';
 import { getMyEnrollments, enrollCourse } from '../../services/enrollment/enrollment.service';
 import { getLearningPaths, followLearningPath, unfollowLearningPath, getFollowedLearningPathIds } from '../../services/learning-path/learning-path.service';
 import type { Course } from '../../services/course/course.service';
@@ -182,12 +182,16 @@ export function useExplore() {
         const matchesLanguage = selectedLanguage === 'all' ||
             (course.language && course.language.toLowerCase() === selectedLanguage.toLowerCase());
 
+        // Lọc theo Tag
+        const courseTags = extractCourseTags(course);
+        const matchesTag = !selectedTag || courseTags.some((t: string) => t.toLowerCase() === selectedTag.toLowerCase());
+
         // Nếu đã đăng nhập làm learner, ẩn các khóa học đã đăng ký học rồi để chỉ hiển thị các khóa học mới
         const isLearner = user?.roleName?.toLowerCase() === 'learner';
         const enrollmentStatus = isEnrolled(course.courseId);
         const matchesEnrollment = isLearner ? !enrollmentStatus : true;
 
-        return matchesSearch && matchesLanguage && matchesEnrollment;
+        return matchesSearch && matchesLanguage && matchesTag && matchesEnrollment;
     });
 
     // Lọc danh sách lộ trình học tập hiển thị
@@ -230,6 +234,8 @@ export function useExplore() {
         setSearchTerm,
         selectedLanguage,
         setSelectedLanguage,
+        selectedTag,
+        setSelectedTag,
         isLoading,
         enrollingId,
         filteredCourses,

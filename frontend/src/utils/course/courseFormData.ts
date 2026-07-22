@@ -26,6 +26,10 @@ export async function buildCourseFormData(options: {
         formData.append('projectUrl', draft.projectUrl);
     }
 
+    if (draft.tags && draft.tags.length > 0) {
+        formData.append('tags', JSON.stringify(draft.tags));
+    }
+
     let fileToUpload = options.thumbnailFile;
     if (!fileToUpload && draft.thumbnailPreview?.startsWith('data:image')) {
         fileToUpload = await dataUrlToFile(draft.thumbnailPreview, 'thumbnail.png');

@@ -70,10 +70,12 @@ export class CoursesRepository extends Repository<Course> {
     // Tạo QueryBuilder với tên alias là 'course'
     const queryBuilder = this.createQueryBuilder('course');
 
-    // Nạp thêm các quan hệ cần hiển thị (ví dụ: thông tin người tạo, tổ chức)
+    // Nạp thêm các quan hệ cần hiển thị (ví dụ: thông tin người tạo, tổ chức, tags)
     queryBuilder
       .leftJoin('course.user', 'user')
-      .addSelect(['user.userId', 'user.fullName', 'user.avatar']);
+      .addSelect(['user.userId', 'user.fullName', 'user.avatar'])
+      .leftJoinAndSelect('course.courseTag', 'courseTag')
+      .leftJoinAndSelect('courseTag.tag', 'tag');
 
     // 1. Tìm kiếm text động theo Title hoặc Description (không phân biệt chữ hoa chữ thường)
     if (search) {
@@ -133,6 +135,8 @@ export class CoursesRepository extends Repository<Course> {
       .leftJoin('course.user', 'user')
       .addSelect(['user.userId', 'user.fullName', 'user.email', 'user.avatar'])
       .leftJoinAndSelect('course.lessons', 'lessons')
+      .leftJoinAndSelect('course.courseTag', 'courseTag')
+      .leftJoinAndSelect('courseTag.tag', 'tag')
       .where('course.courseId = :id', { id })
       .getOne();
   }

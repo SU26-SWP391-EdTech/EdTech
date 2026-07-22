@@ -75,7 +75,7 @@ export class AssessmentService {
                 cachedTitle = lesson.assessments[0].title || '';
             }
         } catch (e) {
-            console.warn('Failed to load lesson details in assessment fallback:', e);
+            // Silently ignore 403 (unenrolled learner) or 404
         }
 
         const attempts = this.getLocalAttempts(lessonId);
@@ -129,25 +129,39 @@ export class AssessmentService {
     }
 
     public static async getQuestions(lessonId: number): Promise<AssessmentQuestion[]> {
+        const normalizeQuestion = (q: any, idx: number): AssessmentQuestion => {
+            const qId = q.id || q.questionId || (idx + 1);
+            const isMulti = q.type === 'MULTIPLE_CHOICE_MULTI' || q.type === 'multiple-choice';
+            return {
+                id: qId,
+                type: isMulti ? 'multiple-choice' : 'single-choice',
+                content: q.content || q.title || `Câu hỏi ${idx + 1}`,
+                points: q.points ? Number(q.points) : 10,
+                options: (q.options || []).map((opt: any, oIdx: number) => ({
+                    id: String(opt.id || opt.optionId || `opt-${qId}-${oIdx + 1}`),
+                    text: opt.text || opt.content || `Phương án ${oIdx + 1}`,
+                })),
+            };
+        };
+
         let assessmentId: number | null = null;
         const savedAss = localStorage.getItem(`assessments_lesson_${lessonId}`);
         if (savedAss) {
             try {
                 const parsed = JSON.parse(savedAss);
-                if (parsed && parsed.length > 0 && parsed[0].questions && parsed[0].questions.length > 0) {
-                    return parsed[0].questions.map((q: any, idx: number) => ({
-                        id: idx + 1,
-                        type: q.type === 'MULTIPLE_CHOICE_MULTI' ? 'multiple-choice' : 'single-choice',
-                        content: q.content,
-                        points: q.points ? Number(q.points) : 10,
-                        options: (q.options || []).map((opt: any) => ({
-                            id: opt.id || String(Math.random()),
-                            text: opt.content,
-                        }))
-                    }));
-                }
-                if (parsed && parsed.length > 0) {
-                    assessmentId = parsed[0].assessmentId;
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    const rawQuestions: any[] = [];
+                    for (const ast of parsed) {
+                        if (ast.questions && Array.isArray(ast.questions) && ast.questions.length > 0) {
+                            rawQuestions.push(...ast.questions);
+                        }
+                    }
+                    if (rawQuestions.length > 0) {
+                        return rawQuestions.map((q: any, idx: number) => normalizeQuestion(q, idx));
+                    }
+                    if (parsed[0].assessmentId) {
+                        assessmentId = parsed[0].assessmentId;
+                    }
                 }
             } catch (e) {
                 console.warn('Failed to parse localStorage assessments:', e);
@@ -158,10 +172,20 @@ export class AssessmentService {
         try {
             lesson = await getLessonById(lessonId);
             if (lesson && lesson.assessments && lesson.assessments.length > 0) {
-                assessmentId = lesson.assessments[0].assessmentId;
+                assessmentId = lesson.assessments[0].assessmentId || assessmentId;
+
+                const embeddedQuestions: any[] = [];
+                for (const ast of lesson.assessments) {
+                    if (ast.questions && Array.isArray(ast.questions) && ast.questions.length > 0) {
+                        embeddedQuestions.push(...ast.questions);
+                    }
+                }
+                if (embeddedQuestions.length > 0) {
+                    return embeddedQuestions.map((q: any, idx: number) => normalizeQuestion(q, idx));
+                }
             }
         } catch (e) {
-            console.warn('Failed to fetch lesson details for questions:', e);
+            // Silently ignore 403 (unenrolled learner) or 404
         }
 
         if (assessmentId) {
@@ -169,19 +193,10 @@ export class AssessmentService {
                 const targetCourseId = lesson?.course?.courseId || lesson?.courseId || 8;
                 const response = await api.get(`/assessment/courses/${targetCourseId}/lesson/${lessonId}/assessment/${assessmentId}`);
                 if (response.data && response.data.questions && response.data.questions.length > 0) {
-                    return response.data.questions.map((q: any, idx: number) => ({
-                        id: q.questionId || idx + 1,
-                        type: q.type === 'MULTIPLE_CHOICE_MULTI' ? 'multiple-choice' : 'single-choice',
-                        content: q.content,
-                        points: q.points ? Number(q.points) : 10,
-                        options: (q.options || []).map((opt: any) => ({
-                            id: opt.optionId || opt.id || String(Math.random()),
-                            text: opt.content,
-                        }))
-                    }));
+                    return response.data.questions.map((q: any, idx: number) => normalizeQuestion(q, idx));
                 }
             } catch (err) {
-                console.warn('Failed to fetch assessment questions from backend hierarchical route:', err);
+                // Silently fallback if route fails
             }
         }
 
@@ -189,29 +204,15 @@ export class AssessmentService {
             try {
                 const targetCourseId = lesson?.course?.courseId || lesson?.courseId || 8;
                 const response = await api.get(`/question/courses/${targetCourseId}/lesson/${lessonId}/questions`);
-                if (response.data && response.data.length > 0) {
-                    return response.data.map((q: any, idx: number) => ({
-                        id: q.questionId || idx + 1,
-                        type: q.type === 'MULTIPLE_CHOICE_MULTI' ? 'multiple-choice' : 'single-choice',
-                        content: q.content,
-                        points: q.points ? Number(q.points) : 10,
-                        options: (q.options || []).map((opt: any) => ({
-                            id: opt.optionId || opt.id || String(Math.random()),
-                            text: opt.content,
-                        }))
-                    }));
+                if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+                    return response.data.map((q: any, idx: number) => normalizeQuestion(q, idx));
                 }
             } catch (err) {
-                console.warn('Failed to fetch questions directly via QuestionController:', err);
+                // Silently fallback if route fails
             }
         }
 
-        try {
-            const response = await api.get(`/assessment/lesson/${lessonId}/questions`);
-            return response.data;
-        } catch {
-            return [];
-        }
+        return [];
     }
 
     public static async submitAnswers(
