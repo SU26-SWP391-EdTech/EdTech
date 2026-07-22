@@ -15,9 +15,20 @@ export class LearnerStreakService {
     private readonly assessmentSessionRepository: AssessmentSessionRepository,
   ) {}
 
+  public async getCurrentStreak(
+    userId: number
+  ){
+    const learner = await this.learnerRepository.findLeanerById(userId);
+    if (!learner) {
+      throw new NotFoundException(`Learner ${userId} not found`);
+    }
+    return learner.currentStreak;
+  }
+
   public async updateStreak(
     learnerId: number,
     completedAt: Date,
+    currentSessionId: number,
   ): Promise<void> {
     // 1. Load learner
     const learner = await this.learnerRepository.findLeanerById(learnerId);
@@ -35,7 +46,7 @@ export class LearnerStreakService {
       await this.assessmentSessionRepository.findLatestCompletedEligible(
         learnerId,
         ELIGIBLE_TYPES,
-        undefined, // no session to exclude; we query only *before* today
+        currentSessionId, // no session to exclude; we query only *before* today
       );
 
     // For Rule 2: check if previous session was already today
