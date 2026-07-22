@@ -55,23 +55,29 @@ export class BattleService {
         assessment.courseId,
       );
 
-      if (questions.length === 0) {
-        questions = await this.matchRepository.findAssessmentQuestions(1);
-      }
+
     } else {
       questions =
         await this.matchRepository.findAssessmentQuestions(assessmentId);
     }
 
-    if (questions.length === 0) {
+    const validQuestions = questions.filter(q => q.options && q.options.length >= 2);
+
+    console.log(`[PVP DEBUG] Fetched ${questions.length} questions from DB.`);
+    console.log(`[PVP DEBUG] Valid questions after filter: ${validQuestions.length}`);
+    if (questions.length !== validQuestions.length) {
+      console.log(`[PVP DEBUG] Invalid questions (missing options):`, questions.filter(q => !q.options || q.options.length < 2).map(q => ({ id: q.questionId, optionsLength: q.options?.length })));
+    }
+
+    if (validQuestions.length === 0) {
       throw new BadRequestException({
         code: 'QUESTION_NOT_FOUND',
-        message: 'Assessment does not contain any battle questions.',
+        message: 'Assessment does not contain any valid battle questions (must have at least 2 options).',
       });
     }
 
     // Shuffle and select up to 5 questions for competitive PvP match
-    const shuffledQuestions = [...questions].sort(() => 0.5 - Math.random());
+    const shuffledQuestions = [...validQuestions].sort(() => 0.5 - Math.random());
     const selectedQuestions = shuffledQuestions.slice(0, 5);
 
     const match = await this.matchRepository.createMatch({
@@ -139,7 +145,10 @@ export class BattleService {
       },
     );
 
-    await this.emitCurrentQuestion(match.matchId);
+    setTimeout(async () => {
+      await this.emitCurrentQuestion(match.matchId);
+    }, 3000);
+
     return match;
   }
 
@@ -299,41 +308,6 @@ export class BattleService {
 
     this.battleSessionManager.setQuestionTimer(matchId, questionTimer);
 
-    // If opponent is mock user (ID 12) and bot is not online, schedule the bot response
-    if (session.player2Id === 12 && !this.connectionManager.isOnline(12)) {
-      this.scheduleBotAnswer(session, 12, question);
-    } else if (session.player1Id === 12 && !this.connectionManager.isOnline(12)) {
-      this.scheduleBotAnswer(session, 12, question);
-    }
-  }
-
-  private scheduleBotAnswer(session: BattleState, botId: number, question: BattleQuestion): void {
-    const delayMs = 3000 + Math.random() * 3000; // 3 to 6 seconds delay
-    setTimeout(async () => {
-      try {
-        const currentSession = this.battleSessionManager.getSession(session.matchId);
-        if (!currentSession || currentSession.currentQuestionId !== question.questionId) {
-          return;
-        }
-        if (currentSession.playerAnswers[botId]) {
-          return;
-        }
-
-        const randomOption = question.options[Math.floor(Math.random() * question.options.length)];
-        if (!randomOption) return;
-
-        await this.submitAnswer(
-          {
-            matchId: session.matchId,
-            questionId: question.questionId,
-            optionId: randomOption.optionId,
-          },
-          botId,
-        );
-      } catch (error) {
-        console.error('Failed to submit bot answer:', error.message);
-      }
-    }, delayMs);
   }
 
   private async handleQuestionTimeout(
@@ -391,6 +365,7 @@ export class BattleService {
       },
     );
 
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     await this.emitCurrentQuestion(matchId);
   }
 

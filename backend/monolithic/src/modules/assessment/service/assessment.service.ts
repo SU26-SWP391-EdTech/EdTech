@@ -145,7 +145,7 @@ export class AssessmentService {
     return pvpAssessment;
   }
 
-  async getPvpQuestion(courseId: number){
+  async getPvpQuestion(courseId: number) {
     return await this.assessmentRepository.getPvpQuestion(courseId);
   }
 
