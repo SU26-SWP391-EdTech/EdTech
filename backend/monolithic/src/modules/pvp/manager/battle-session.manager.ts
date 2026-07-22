@@ -15,6 +15,16 @@ export class BattleSessionManager {
     return this.sessions.get(matchId);
   }
 
+  getSessionByUserId(userId: number): BattleState | undefined {
+    const sessionsArray = Array.from(this.sessions.values());
+    for (const session of sessionsArray) {
+      if (session.player1Id === userId || session.player2Id === userId) {
+        return session;
+      }
+    }
+    return undefined;
+  }
+
   removeSession(matchId: number): void {
     const session = this.sessions.get(matchId);
 

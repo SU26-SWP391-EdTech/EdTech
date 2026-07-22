@@ -64,7 +64,7 @@ export class ConnectionManager {
    * Danh sách user đang online
    */
   getOnlineUsers(): number[] {
-    return [...this.userConnections.keys()];
+    return Array.from(this.userConnections.keys());
   }
 
   /**
