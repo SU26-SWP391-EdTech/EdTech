@@ -20,6 +20,7 @@ import { SocketService } from './socket.service';
 import { ConnectionManager } from '../manager/connection.manager';
 import { AssessmentType } from 'src/common/enums/assessment-type.enum';
 import { Question } from 'src/modules/question/entities/question.entity';
+import { QuestionType } from 'src/common/enums/question-type.enum';
 
 @Injectable()
 export class BattleService {
@@ -172,18 +173,43 @@ export class BattleService {
       return;
     }
 
-    const selectedOption = currentQuestion.options.find(
-      (option) => option.optionId === submitAnswerDto.optionId,
-    );
+    let isCorrect = false;
 
-    if (!selectedOption) {
-      throw new BadRequestException({
-        code: 'INVALID_OPTION',
-        message: 'Submitted option does not belong to the current question.',
-      });
+    if (currentQuestion.type === QuestionType.MULTIPLE_CHOICE_MULTI) {
+      if (!submitAnswerDto.optionIds || submitAnswerDto.optionIds.length === 0) {
+        throw new BadRequestException({
+          code: 'INVALID_OPTION',
+          message: 'Missing options for multiple choice question.',
+        });
+      }
+
+      const correctOptions = currentQuestion.options.filter(o => o.isCorrect).map(o => o.optionId);
+      const submittedOptions = [...new Set(submitAnswerDto.optionIds)].sort();
+      const sortedCorrect = correctOptions.sort();
+
+      isCorrect = submittedOptions.length === sortedCorrect.length &&
+                  submittedOptions.every((val, index) => val === sortedCorrect[index]);
+    } else {
+      if (!submitAnswerDto.optionId) {
+        throw new BadRequestException({
+          code: 'INVALID_OPTION',
+          message: 'Missing option for single choice question.',
+        });
+      }
+
+      const selectedOption = currentQuestion.options.find(
+        (option) => option.optionId === submitAnswerDto.optionId,
+      );
+
+      if (!selectedOption) {
+        throw new BadRequestException({
+          code: 'INVALID_OPTION',
+          message: 'Submitted option does not belong to the current question.',
+        });
+      }
+
+      isCorrect = selectedOption.isCorrect;
     }
-
-    const isCorrect = selectedOption.isCorrect;
 
     if (isCorrect) {
       if (userId === session.player1Id) {
@@ -197,7 +223,8 @@ export class BattleService {
       session.matchId,
       {
         userId,
-        optionId: selectedOption.optionId,
+        optionId: submitAnswerDto.optionId,
+        optionIds: submitAnswerDto.optionIds,
         isCorrect,
         answeredAt: new Date(),
       },

@@ -68,7 +68,8 @@ export class Question {
     () => Assessment,
     (assessment) => assessment.questions,
     {
-      nullable: false
+      nullable: false,
+      onDelete: 'CASCADE',
     },
   )
   @JoinColumn({
@@ -79,6 +80,7 @@ export class Question {
   @OneToMany(
     () => QuestionOption,
     (option) => option.question,
+    { cascade: ['insert'] }
   )
   options!: QuestionOption[];
 }

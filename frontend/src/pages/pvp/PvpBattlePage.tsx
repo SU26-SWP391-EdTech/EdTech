@@ -26,6 +26,7 @@ export function PvpBattlePage() {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [totalQuestions, setTotalQuestions] = useState(5);
     const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
+    const [selectedOptionIds, setSelectedOptionIds] = useState<number[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const [questionCountdown, setQuestionCountdown] = useState(15);
     const hasSubmittedRef = useRef(false);
@@ -112,6 +113,7 @@ export function PvpBattlePage() {
             setCurrentQuestionIndex(data.questionIndex);
             setQuestionCountdown(15);
             setSelectedOptionId(null);
+            setSelectedOptionIds([]);
             setSubmitted(false);
             hasSubmittedRef.current = false;
             setStatus('playing');
@@ -197,20 +199,34 @@ export function PvpBattlePage() {
 
     const handleOptionSelect = (optionId: number) => {
         if (submitted || status !== 'playing') return;
-        setSelectedOptionId(optionId);
+        
+        if (activeQuestion?.type === 'MULTIPLE_CHOICE_MULTI') {
+            setSelectedOptionIds(prev => 
+                prev.includes(optionId) ? prev.filter(id => id !== optionId) : [...prev, optionId]
+            );
+        } else {
+            setSelectedOptionId(optionId);
+        }
     };
 
     const handleSubmitAnswer = () => {
-        if (selectedOptionId === null || submitted || hasSubmittedRef.current || !activeQuestion) return;
+        if (submitted || hasSubmittedRef.current || !activeQuestion) return;
+        
+        if (activeQuestion.type === 'MULTIPLE_CHOICE_MULTI') {
+            if (selectedOptionIds.length === 0) return;
+        } else {
+            if (selectedOptionId === null) return;
+        }
 
         hasSubmittedRef.current = true;
 
 
-        console.log(`Submitting answer for question ${activeQuestion.questionId}, option: ${selectedOptionId}`);
+        console.log(`Submitting answer for question ${activeQuestion.questionId}`);
         pvpSocket.emit('submitAnswer', {
             matchId,
             questionId: activeQuestion.questionId,
-            optionId: selectedOptionId
+            optionId: selectedOptionId || undefined,
+            optionIds: selectedOptionIds.length > 0 ? selectedOptionIds : undefined
         });
 
         setSubmitted(true);
@@ -842,7 +858,9 @@ export function PvpBattlePage() {
                         {/* Options Stack */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                             {activeQuestion.options?.map((option: any) => {
-                                const isSelected = selectedOptionId === option.optionId;
+                                const isSelected = activeQuestion?.type === 'MULTIPLE_CHOICE_MULTI'
+                                    ? selectedOptionIds.includes(option.optionId)
+                                    : selectedOptionId === option.optionId;
                                 return (
                                     <button
                                         key={option.optionId}
@@ -935,51 +953,60 @@ export function PvpBattlePage() {
                             >
                                 <XCircle size={15} /> surrender
                             </button>
-                            <button
-                                onClick={handleSubmitAnswer}
-                                disabled={selectedOptionId === null || submitted}
-                                style={{
-                                    flex: 1,
-                                    padding: '12px 20px',
-                                    border: 'none',
-                                    borderRadius: 12,
-                                    background: selectedOptionId === null || submitted
-                                        ? '#E2E8F0'
-                                        : 'linear-gradient(135deg, #E11D48, #BE123C)',
-                                    color: selectedOptionId === null || submitted ? '#94A3B8' : '#fff',
-                                    fontSize: 14.5,
-                                    fontWeight: 700,
-                                    cursor: selectedOptionId === null || submitted ? 'not-allowed' : 'pointer',
-                                    boxShadow: selectedOptionId === null || submitted
-                                        ? 'none'
-                                        : '0 4px 12px rgba(225, 29, 72, 0.15)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: 6,
-                                    transition: 'all 0.15s'
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (selectedOptionId !== null && !submitted) {
-                                        e.currentTarget.style.transform = 'translateY(-1px)';
-                                        e.currentTarget.style.boxShadow = '0 6px 16px rgba(225, 29, 72, 0.2)';
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (selectedOptionId !== null && !submitted) {
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(225, 29, 72, 0.15)';
-                                    }
-                                }}
-                            >
-                                {submitted ? (
-                                    <>
-                                        <CheckCircle2 size={15} className="text-emerald-600" /> Answer Locked
-                                    </>
-                                ) : (
-                                    'Lock In Answer'
-                                )}
-                            </button>
+                            
+                            {(() => {
+                                const isSubmitDisabled = activeQuestion?.type === 'MULTIPLE_CHOICE_MULTI'
+                                    ? selectedOptionIds.length === 0 || submitted
+                                    : selectedOptionId === null || submitted;
+
+                                return (
+                                    <button
+                                        onClick={handleSubmitAnswer}
+                                        disabled={isSubmitDisabled}
+                                        style={{
+                                            flex: 1,
+                                            padding: '12px 20px',
+                                            border: 'none',
+                                            borderRadius: 12,
+                                            background: isSubmitDisabled
+                                                ? '#E2E8F0'
+                                                : 'linear-gradient(135deg, #E11D48, #BE123C)',
+                                            color: isSubmitDisabled ? '#94A3B8' : '#fff',
+                                            fontSize: 14.5,
+                                            fontWeight: 700,
+                                            cursor: isSubmitDisabled ? 'not-allowed' : 'pointer',
+                                            boxShadow: isSubmitDisabled
+                                                ? 'none'
+                                                : '0 4px 12px rgba(225, 29, 72, 0.15)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: 6,
+                                            transition: 'all 0.15s'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (!isSubmitDisabled) {
+                                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                                e.currentTarget.style.boxShadow = '0 6px 16px rgba(225, 29, 72, 0.2)';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (!isSubmitDisabled) {
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(225, 29, 72, 0.15)';
+                                            }
+                                        }}
+                                    >
+                                        {submitted ? (
+                                            <>
+                                                <CheckCircle2 size={15} className="text-emerald-600" /> Answer Locked
+                                            </>
+                                        ) : (
+                                            'Lock In Answer'
+                                        )}
+                                    </button>
+                                );
+                            })()}
                         </div>
                     </div>
                 ) : (

@@ -74,7 +74,11 @@ export class MatchRepository {
     return await this.questionRepo.find({
       where: {
         assessmentId: In(assessments.map((assessment) => assessment.assessmentId)),
-        type: In([QuestionType.MULTIPLE_CHOICE_SINGLE, QuestionType.TRUE_FALSE]),
+        type: In([
+          QuestionType.MULTIPLE_CHOICE_SINGLE,
+          QuestionType.TRUE_FALSE,
+          QuestionType.MULTIPLE_CHOICE_MULTI,
+        ]),
       },
       relations: {
         options: true,

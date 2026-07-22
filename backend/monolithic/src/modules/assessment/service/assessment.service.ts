@@ -49,6 +49,7 @@ export class AssessmentService {
       lessonId: lessonId || undefined,
       title,
       type,
+      questions: createAssessmentDto.questions,
     });
 
     return await this.assessmentRepository.save(assessment);
