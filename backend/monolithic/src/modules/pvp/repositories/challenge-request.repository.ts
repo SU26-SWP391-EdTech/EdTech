@@ -20,16 +20,15 @@ export class ChallengeRequestRepository {
         player1Id: number,
         player2Id: number,
       ): Promise<ChallengeRequest | null> {
+        const thirtyFiveSecondsAgo = new Date(Date.now() - 35000);
         return await this.challengeRepo
           .createQueryBuilder('challenge')
           .where(
-            '((challenge.challengerId = :player1Id AND challenge.receiverId = :player2Id) OR (challenge.challengerId = :player2Id AND challenge.receiverId = :player1Id)) AND challenge.status = :status',
-            {
-              player1Id,
-              player2Id,
-              status: ChallengeStatus.PENDING,
-            },
+            '((challenge.challengerId = :player1Id AND challenge.receiverId = :player2Id) OR (challenge.challengerId = :player2Id AND challenge.receiverId = :player1Id))',
+            { player1Id, player2Id }
           )
+          .andWhere('challenge.status = :status', { status: ChallengeStatus.PENDING })
+          .andWhere('challenge.createdAt >= :time', { time: thirtyFiveSecondsAgo })
           .getOne();
       }
 

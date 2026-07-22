@@ -22,7 +22,7 @@ export function PvpArenaPage() {
     const navigate = useNavigate();
     const { sendChallenge } = usePvp();
     const currentUser = useAuthStore((state) => state.user);
-    
+
     // Enrollments and Course selection states
     const [courses, setCourses] = useState<any[]>([]);
     const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
@@ -65,7 +65,7 @@ export function PvpArenaPage() {
             return;
         }
         let isMounted = true;
-        
+
         async function fetchRealOnline() {
             try {
                 const res = await api.get<PvpPlayer[]>(`/challenge_request/online`, {
@@ -112,7 +112,7 @@ export function PvpArenaPage() {
     }, [selectedCourseId, currentUser?.userId]);
 
     const getPvpAssessmentId = async () => {
-        let pvpAssessmentId = 1;
+        let pvpAssessmentId = 3;
         if (selectedCourseId) {
             try {
                 const res = await api.get(`/assessment/courses/${selectedCourseId}/pvp`);
@@ -120,7 +120,7 @@ export function PvpArenaPage() {
                     pvpAssessmentId = res.data[0].assessmentId;
                 }
             } catch (err) {
-                console.warn('Failed to fetch PvP assessment for course, using default: 1', err);
+                console.warn('Failed to fetch PvP assessment for course, using default: 3', err);
             }
         }
         return pvpAssessmentId;
@@ -142,7 +142,7 @@ export function PvpArenaPage() {
     // Filter players by Search term
     const filteredOnline = players.filter((p) => {
         return p.fullName.toLowerCase().includes(search.toLowerCase()) ||
-               p.email.toLowerCase().includes(search.toLowerCase());
+            p.email.toLowerCase().includes(search.toLowerCase());
     });
 
     return (
@@ -153,7 +153,7 @@ export function PvpArenaPage() {
             fontFamily: "'Inter', 'SF Pro Display', sans-serif"
         }}>
             <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-                
+
                 {/* Header banner */}
                 <div style={{
                     background: 'linear-gradient(135deg, #FFF1F3 0%, #FFE4E6 100%)',
@@ -237,8 +237,8 @@ export function PvpArenaPage() {
                                             gap: 8,
                                             padding: '10px 18px',
                                             borderRadius: 99,
-                                            background: isSelected 
-                                                ? 'linear-gradient(135deg, #E11D48, #BE123C)' 
+                                            background: isSelected
+                                                ? 'linear-gradient(135deg, #E11D48, #BE123C)'
                                                 : '#FFFFFF',
                                             border: isSelected
                                                 ? '1px solid #E11D48'
@@ -277,14 +277,14 @@ export function PvpArenaPage() {
 
                 {/* Main Content Layout Grid */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 32, alignItems: 'start' }}>
-                    
+
                     {/* Players Listing Section */}
                     <div>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
                             <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <Sparkles size={18} className="text-rose-500" /> Co-Learners
                             </h2>
-                            
+
                             {/* Search bar */}
                             <div style={{ position: 'relative', width: '100%', maxWidth: 300 }}>
                                 <Search size={14} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
@@ -324,7 +324,7 @@ export function PvpArenaPage() {
                             </div>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-                                
+
                                 {/* 1. Real Online Players Section */}
                                 <div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
@@ -340,7 +340,7 @@ export function PvpArenaPage() {
                                             Online Classmates ({filteredOnline.length})
                                         </h3>
                                     </div>
-                                    
+
                                     {filteredOnline.length === 0 ? (
                                         <div style={{
                                             backgroundColor: '#FFFFFF',
@@ -351,7 +351,7 @@ export function PvpArenaPage() {
                                             color: '#64748B',
                                             fontSize: 14
                                         }}>
-                                            {courses.length === 0 
+                                            {courses.length === 0
                                                 ? 'Hãy tham gia khóa học để tìm người pvp'
                                                 : 'No active classmates online right now. Invite your classmates to join the arena!'}
                                         </div>
