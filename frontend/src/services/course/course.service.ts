@@ -47,9 +47,6 @@ export function extractCourseTags(course: BackendCourse): string[] {
       .map((ct) => ct.tag?.name)
       .filter((name): name is string => Boolean(name));
   }
-  if (course.language) {
-    return [course.language];
-  }
   return [];
 }
 

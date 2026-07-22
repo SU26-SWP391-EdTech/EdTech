@@ -16,6 +16,7 @@ export async function buildCourseFormData(options: {
     formData.append('title', draft.title || '');
     formData.append('description', draft.description || '');
     formData.append('language', draft.language || 'English');
+    formData.append('status', options.status);
 
     const lessonMinutes = (draft.lessons || []).reduce((sum, l) => {
         return sum + (parseInt(l.duration) || 0);
@@ -30,9 +31,7 @@ export async function buildCourseFormData(options: {
         formData.append('projectUrl', draft.projectUrl);
     }
 
-    if (draft.tags && draft.tags.length > 0) {
-        formData.append('tags', JSON.stringify(draft.tags));
-    }
+    formData.append('tags', JSON.stringify(draft.tags || []));
 
     let fileToUpload = options.thumbnailFile;
     if (!fileToUpload && draft.thumbnailPreview?.startsWith('data:image')) {

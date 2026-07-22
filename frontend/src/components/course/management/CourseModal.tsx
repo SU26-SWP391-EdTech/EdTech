@@ -91,9 +91,7 @@ export function CourseModal({ course, onClose, onSuccess, isViewOnly = false }: 
       formData.append('language', language);
       formData.append('duration', String(parseDurationToMinutes(duration)));
       formData.append('projectUrl', projectUrl);
-      if (tags && tags.length > 0) {
-        formData.append('tags', JSON.stringify(tags));
-      }
+      formData.append('tags', JSON.stringify(tags || []));
       if (thumbnailFile) {
         formData.append('thumbnailUrl', thumbnailFile);
       }

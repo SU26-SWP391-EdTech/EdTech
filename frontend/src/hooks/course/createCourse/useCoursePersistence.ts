@@ -92,10 +92,12 @@ export function useCoursePersistence({
 
       let courseId = editId;
       if (editId) {
-        // Editing an approved course first returns it to draft. This also makes
-        // tag changes legal under the backend's approved-course policy.
-        await updateCourse(editId, { status: 'draft' });
-        await updateCourse(editId, formData);
+        const updateFormData = await buildCourseFormData({
+          status: 'draft',
+          thumbnailFile,
+          draft: getCurrentCourseDraft(),
+        });
+        await updateCourse(editId, updateFormData);
       } else {
         // Tạo mới khóa học
         const newCourse = status === 'pending'
