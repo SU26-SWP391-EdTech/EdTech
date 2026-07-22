@@ -169,10 +169,10 @@ export function CourseTable({
                             className={`group cursor-pointer transition-colors ${i < paginated.length - 1 ? 'border-b border-[#F3F4F6]' : ''} ${selectedId === course.id ? 'bg-[#FFF8F9] border-l-2 border-l-[#E11D48]' : 'hover:bg-[#FAFAFA]'}`}
                         >
                             {/* Course */}
-                            <td className="px-4 py-3">
-                                <div className="flex items-center gap-3">
+                            <td className="px-4 py-3 max-w-[220px] sm:max-w-[280px] lg:max-w-[340px]">
+                                <div className="flex items-center gap-3 min-w-0">
                                     <CourseThumbnail course={course} size="sm" />
-                                    <div className="min-w-0 max-w-[200px] sm:max-w-[260px] lg:max-w-[320px]">
+                                    <div className="flex-1 min-w-0">
                                         <p className="text-sm text-[#111827] truncate" style={{ fontWeight: 600 }} title={course.title}>{course.title}</p>
                                         <p className="text-[10px] text-[#9CA3AF] truncate mt-0.5" title={course.description}>{course.description}</p>
                                     </div>

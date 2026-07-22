@@ -5,7 +5,6 @@ import { getMyEnrollments, type Enrollment } from '../../services/enrollment/enr
 import { getLearningPaths, type LearningPath, getFollowedLearningPathIds } from '../../services/learning-path/learning-path.service';
 import type { NodeState } from '../../components/User/dashboard/learner/RoadmapNode';
 import { getLearnerProfile } from '../../services/learner/learner.services';
-import { getStreak } from '../../utils/learner/streakUtils';
 
 /**
  * Custom hook quản lý dữ liệu trang Dashboard dành cho Học viên (Learner Dashboard).
@@ -48,11 +47,12 @@ export function useLearnerDashboard() {
                     return acc + Math.round(duration * (curr.progress / 100));
                 }, 0);
 
-                const streakData = getStreak(user.userId);
-
                 setProfile({
                     ...profileData,
-                    streakCount: streakData.currentStreak,
+                    streakCount: profileData.currentStreak ?? 0,
+                    longestStreak: profileData.longestStreak ?? 0,
+                    streakLife: profileData.streakLife ?? 1,
+                    activeDates: profileData.activeDates ?? [],
                     completedCourses: completedCount,
                     learningHours: totalHours,
                 });
@@ -75,16 +75,6 @@ export function useLearnerDashboard() {
 
     // --- 2. TỔNG HỢP CÁC CHỈ SỐ THỐNG KÊ (STATS CARD DATA) ---
     const activeStats = [
-        {
-            id: 'streak',
-            label: 'Day Streak',
-            value: (profile?.streakCount ?? 0).toString(),
-            sub: 'Active daily learning',
-            icon: React.createElement(Flame, { className: "w-5 h-5" }),
-            color: '#F59E0B',
-            bg: '#FFF7ED',
-            sparkData: (profile?.streakCount ?? 0) === 0 ? [0, 0, 0, 0, 0, 0, 0] : [0, 2, 3, 5, 4, 8, profile?.streakCount ?? 0],
-        },
         {
             id: 'completed',
             label: 'Courses Done',

@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException, UseInterceptors } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, MoreThanOrEqual } from 'typeorm';
 import { User } from 'src/modules/users/entities/user.entity';
 import { EditLearnerProfileDto } from '../dto/edit-learner-profile.dto';
 import { CloudinaryService } from 'src/modules/cloudinary/cloudinary.service';
@@ -9,6 +9,9 @@ import { GetLearnerProfileDto } from '../dto/get-learner-profile.dto';
 import { UpdateLearnerInfoDto } from '../dto/update-learner-info.dto';
 import { LearnerRepository } from '../learners.repository';
 import { PvpStatus } from 'src/common/enums/pvp-status.enum';
+import { LearnerLessonProgress } from 'src/modules/progress/entities/learner-lesson-progress.entity';
+import { LessonProgressStatus } from 'src/common/enums/lesson-progress-status.enum';
+import { AssessmentSession } from 'src/modules/assessment/entities/assessment-session.entity';
 
 @Injectable()
 export class LearnersService {
@@ -111,6 +114,50 @@ export class LearnersService {
       relations: ['user'],
     });
 
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const progressList = await this.learnerRepository.manager
+      .getRepository(LearnerLessonProgress)
+      .find({
+        where: {
+          userId: id,
+          status: LessonProgressStatus.COMPLETED,
+          completedAt: MoreThanOrEqual(thirtyDaysAgo),
+        },
+        select: ['completedAt'],
+      });
+
+    const assessmentSessions = await this.learnerRepository.manager
+      .getRepository(AssessmentSession)
+      .find({
+        where: {
+          userId: id,
+          completedAt: MoreThanOrEqual(thirtyDaysAgo),
+        },
+        select: ['completedAt'],
+      });
+
+    const activeDates = new Set<string>();
+    const toLocalYYYYMMDD = (d: Date) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    for (const p of progressList) {
+      if (p.completedAt) {
+        activeDates.add(toLocalYYYYMMDD(p.completedAt));
+      }
+    }
+    for (const s of assessmentSessions) {
+      if (s.completedAt) {
+        activeDates.add(toLocalYYYYMMDD(s.completedAt));
+      }
+    }
+    const sortedActiveDates = Array.from(activeDates).sort();
+
     if (learner && learner.user) {
       return {
         fullName: learner.user.fullName,
@@ -120,6 +167,10 @@ export class LearnersService {
         level: learner.level || '',
         bio: learner.bio || '',
         createdAt: learner.user.createdAt,
+        currentStreak: learner.currentStreak || 0,
+        longestStreak: learner.longestStreak || 0,
+        streakLife: learner.streakLife !== undefined ? learner.streakLife : 1,
+        activeDates: sortedActiveDates,
       };
     }
 
@@ -137,6 +188,10 @@ export class LearnersService {
       level: '',
       bio: '',
       createdAt: user.createdAt,
+      currentStreak: 0,
+      longestStreak: 0,
+      streakLife: 1,
+      activeDates: sortedActiveDates,
     };
   }
 

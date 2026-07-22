@@ -11,6 +11,7 @@ import { LessonsService } from '../lessons/service/lessons.service';
 import { LessonProgressStatus } from 'src/common/enums/lesson-progress-status.enum';
 import { LearnersService } from '../learners/services/learners.service';
 import { LessonPrerequisiteService } from '../lessons/service/lesson-prerequisite.service';
+import { LearnerStreakService } from '../learners/services/learner-streak.service';
 
 @Injectable()
 export class ProgressService {
@@ -24,6 +25,9 @@ export class ProgressService {
     private readonly lessonPrerequisiteService: LessonPrerequisiteService,
 
     private readonly learnerService: LearnersService,
+
+    @Inject(forwardRef(() => LearnerStreakService))
+    private readonly learnerStreakService: LearnerStreakService,
   ) { }
 
   // find lesson progress by userId and lessonId
@@ -96,6 +100,14 @@ export class ProgressService {
       lessonId,
       LessonProgressStatus.COMPLETED,
     );
+
+    // Update Streak when completing any lesson (Video, Reading, etc.)
+    try {
+      await this.learnerStreakService.updateStreak(userId, new Date());
+    } catch (error) {
+      // Gracefully handle error so that completion progress is not blocked
+    }
+
     return completeLesson;
   }
 

@@ -6,13 +6,15 @@ import { ProgressService } from './progress.service';
 import { ProgressRepository } from './progress.repository';
 import { LessonsModule } from '../lessons/lessons.module';
 import { LearnersModule } from '../learners/learners.module';
+import { AssessmentModule } from '../assessment/assessment.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([
     LearnerLessonProgress
   ]),
   forwardRef(() => LessonsModule),
-  LearnersModule
+  LearnersModule,
+  forwardRef(() => AssessmentModule),
   ],
   controllers: [ProgressController],
   providers: [

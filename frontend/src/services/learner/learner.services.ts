@@ -10,6 +10,8 @@ export interface LearnerProfile {
     createdAt: string;
     currentStreak?: number;
     longestStreak?: number;
+    streakLife?: number;
+    activeDates?: string[];
 }
 
 //get

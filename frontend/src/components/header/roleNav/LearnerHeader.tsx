@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDown, LogOut, UserCircle, BookOpen, Settings } from 'lucide-react';
 
@@ -8,6 +8,8 @@ import { NavItem } from '../shared/NavItem';
 import { LEARNER_NAV } from '../config/nav-config';
 import { useAuthStore } from '../../../stores/auth/auth.stores';
 import { getUserRoleLabel } from '../../../utils/user/roleUtils';
+import { getLearnerProfile } from '../../../services/learner/learner.services';
+import StreakFlame from '../../user/dashboard/learner/StreakFlame';
 
 export function LearnerHeader() {
     const navigate = useNavigate();
@@ -31,6 +33,20 @@ export function LearnerHeader() {
 
     const ACC = '#E11D48';
     const ACTIVE_BG = '#FFF1F3';
+
+    const [streak, setStreak] = useState<number | null>(null);
+
+    useEffect(() => {
+        if (user) {
+            getLearnerProfile(user.userId)
+                .then((profileData) => {
+                    setStreak(profileData.currentStreak ?? 0);
+                })
+                .catch(() => {
+                    setStreak(0);
+                });
+        }
+    }, [user]);
 
 
     return (
@@ -67,13 +83,16 @@ export function LearnerHeader() {
 
                 <div className="flex-1" />
 
-                {/* Streak commented out for future use */}
-                {/* 
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FEF3C7] border border-[#FDE68A] rounded-xl flex-shrink-0">
-                    <Flame className="w-3.5 h-3.5 text-[#D97706]" />
-                    <span className="text-xs text-[#D97706] font-bold">7</span>
-                </div>
-                */}
+                {streak !== null && (
+                    <div 
+                        onClick={() => navigate('/learner')}
+                        className="flex items-center gap-1.5 px-2.5 py-1 bg-[#FFF8F9] border border-[#FFE4E6] rounded-xl flex-shrink-0 cursor-pointer hover:bg-[#FFF1F3] transition-colors"
+                        title="Xem chi tiết Streak của bạn"
+                    >
+                        <StreakFlame streak={streak} size="sm" />
+                        <span className="text-xs text-[#374151] font-extrabold select-none">{streak}</span>
+                    </div>
+                )}
 
                 {/* <NotifBell count={3} accentColor={ACC} /> */}
 

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Assessment } from './entities/assessment.entity';
 import { AssessmentSession } from './entities/assessment-session.entity';
@@ -21,9 +21,9 @@ import { LearnerStreakService } from '../learners/services/learner-streak.servic
   imports: [
     TypeOrmModule.forFeature([Assessment, AssessmentSession, Question, QuestionOption]),
     CoursesModule,
-    LessonsModule,
+    forwardRef(() => LessonsModule),
     LearnersModule,
-    ProgressModule
+    forwardRef(() => ProgressModule)
   ],
   controllers: [
     AssessmentController,
@@ -43,6 +43,7 @@ import { LearnerStreakService } from '../learners/services/learner-streak.servic
     AssessmentRepository,
     AssessmentSessionService,
     AssessmentSessionRepository,
+    LearnerStreakService,
   ],
 })
 export class AssessmentModule { }
