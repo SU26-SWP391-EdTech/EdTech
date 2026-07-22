@@ -148,6 +148,7 @@ export function LessonAssessmentSection({ assessments, setAssessments, courseId,
               });
             } catch (optErr) {
               console.warn('Failed to save option during direct add:', optErr);
+              alert(`Cảnh báo: Không thể lưu Option "${opt.content}". Vui lòng thử lại. Lỗi: ${optErr}`);
               savedOptions.push(opt);
             }
           }
