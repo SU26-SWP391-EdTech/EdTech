@@ -48,7 +48,10 @@ export async function getLeaderboardCourses(currentUserId: number): Promise<Cour
 export async function getCourseLeaderboardData(courseId: number, currentUserId: number): Promise<LeaderboardEntry[]> {
     try {
         const response = await api.get(`/leaderboard/course/${courseId}`);
-        const data = response.data || [];
+        const rawData = response.data;
+        const data = Array.isArray(rawData)
+            ? rawData
+            : (Array.isArray(rawData?.data) ? rawData.data : (Array.isArray(rawData?.items) ? rawData.items : []));
         
         return data.map((item: any) => {
             const names = item.fullName ? item.fullName.trim().split(/\s+/) : [];
@@ -78,7 +81,10 @@ export async function getCourseLeaderboardData(courseId: number, currentUserId: 
 export async function getOverallLeaderboardData(currentUserId: number): Promise<(LeaderboardEntry & { coursesCompleted: number })[]> {
     try {
         const response = await api.get('/leaderboard');
-        const data = response.data || [];
+        const rawData = response.data;
+        const data = Array.isArray(rawData)
+            ? rawData
+            : (Array.isArray(rawData?.data) ? rawData.data : (Array.isArray(rawData?.items) ? rawData.items : []));
         
         return data.map((item: any) => {
             const names = item.fullName ? item.fullName.trim().split(/\s+/) : [];

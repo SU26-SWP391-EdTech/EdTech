@@ -42,4 +42,28 @@ export class GetLearnerProfileDto {
         description: 'Thời điểm tạo profile',
     })
     createdAt?: Date;
+
+    @ApiPropertyOptional({
+        example: 5,
+        description: 'Chuỗi ngày học liên tục hiện tại',
+    })
+    currentStreak?: number;
+
+    @ApiPropertyOptional({
+        example: 10,
+        description: 'Chuỗi ngày học liên tục dài nhất',
+    })
+    longestStreak?: number;
+
+    @ApiPropertyOptional({
+        example: 1,
+        description: 'Số mạng cứu streak còn lại',
+    })
+    streakLife?: number;
+
+    @ApiPropertyOptional({
+        example: ['2026-07-19', '2026-07-20'],
+        description: 'Danh sách các ngày hoàn thành bài học/kiểm tra',
+    })
+    activeDates?: string[];
 }
