@@ -31,7 +31,7 @@ export function useCreateCourse() {
   // --- 2. TÍCH HỢP CÁC HOOK CON CHUYÊN BIỆT (SUB-HOOKS) ---
   const form = useCourseForm();                      // Quản lý thông tin form cơ bản (tiêu đề, ngôn ngữ, outcomes...)
   const thumbnail = useCourseThumbnail();            // Quản lý hình ảnh thumbnail và upload
-  const lessonState = useCourseLessons({ editId });  // Quản lý danh sách bài học và tương tác kéo thả sắp xếp
+  const lessonState = useCourseLessons();  // Quản lý danh sách bài học và tương tác kéo thả sắp xếp
 
   // Lấy ra bản nháp đầy đủ thông tin khóa học hiện tại (kèm danh sách bài học hiện có)
   const getCurrentCourseDraft = () => form.getCurrentCourseDraft(

@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   UseGuards,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import { AssessmentService } from '../service/assessment.service';
 import { CreateAssessmentDto } from '../dto/create-assessment.dto';
@@ -85,6 +86,16 @@ export class AssessmentController {
       lessonId,
       courseId,
     );
+  }
+
+  @Delete(':id')
+  @Roles(RoleEnum.COURSE_PROVIDER)
+  async remove(
+    @Param('id', ParseIntPipe) assessmentId: number,
+    @CurrentUser() user: JwtPayloadUser,
+  ) {
+    await this.assessmentService.removeService(user.userId, assessmentId);
+    return { success: true };
   }
 
   // learner start quiz will craete assessment_sessions

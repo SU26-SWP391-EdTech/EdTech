@@ -12,6 +12,7 @@ import { Lesson } from 'src/modules/lessons/entities/lesson.entity';
 import { AssessmentType } from 'src/common/enums/assessment-type.enum';
 import { Not, In } from 'typeorm';
 import { Question } from 'src/modules/question/entities/question.entity';
+import { QuestionOption } from 'src/modules/question/entities/question-option.entity';
 import { QuestionType } from 'src/common/enums/question-type.enum';
 
 @Injectable()
@@ -118,6 +119,33 @@ export class AssessmentService {
       );
     }
     return assessment;
+  }
+
+  async removeService(userId: number, assessmentId: number): Promise<void> {
+    const assessment = await this.findOneService(assessmentId);
+    await this.courseService.validateCourseOwner(userId, assessment.courseId);
+
+    if (assessment.sessions?.length > 0) {
+      throw new BadRequestException(
+        'Assessment with learner sessions cannot be deleted',
+      );
+    }
+
+    const questionIds = (assessment.questions || []).map(
+      (question) => question.questionId,
+    );
+
+    await this.assessmentRepository.manager.transaction(async (manager) => {
+      if (questionIds.length > 0) {
+        await manager.delete(QuestionOption, {
+          questionId: In(questionIds),
+        });
+        await manager.delete(Question, {
+          assessmentId,
+        });
+      }
+      await manager.delete(Assessment, { assessmentId });
+    });
   }
 
   async getOrCreatePvpAssessment(courseId: number): Promise<Assessment> {

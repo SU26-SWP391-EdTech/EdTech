@@ -1,18 +1,13 @@
 import { useState } from 'react';
 import type { CourseBuilderLesson } from '../../../types/course/create-course.types';
 
-interface UseCourseLessonsOptions {
-  editId: number | null;
-}
-
 /**
  * Custom hook quản lý danh sách bài học và thứ tự sắp xếp bài học trong bộ công cụ tạo khóa học.
  * Hỗ trợ các tính năng: bật/tắt khóa bài học, xóa bài học (đồng bộ xóa API hoặc đưa vào hàng đợi xóa), 
  * kéo thả sắp xếp thứ tự hiển thị của các bài học.
  * 
- * @param editId - ID của khóa học đang chỉnh sửa (null nếu là tạo mới)
  */
-export function useCourseLessons({ editId }: UseCourseLessonsOptions) {
+export function useCourseLessons() {
   // --- 1. QUẢN LÝ TRẠNG THÁI (STATE) ---
   const [deletedLessonIds, setDeletedLessonIds] = useState<number[]>([]); // Danh sách ID các bài học thực tế đã bị xóa (chờ đồng bộ lưu)
   const [lessons, setLessons] = useState<CourseBuilderLesson[]>([]);     // Danh sách các bài học hiện tại trong builder

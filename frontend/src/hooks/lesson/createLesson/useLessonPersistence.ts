@@ -4,6 +4,7 @@ import type { NavigateFunction } from 'react-router-dom';
 import api from '../../../lib/axios';
 import {
     createLesson,
+    type Lesson,
     updateLesson,
 } from '../../../services/lesson/lesson.service';
 import { updateCourse } from '../../../services/course/course.service';
@@ -56,7 +57,7 @@ export function useLessonPersistence({
      * @param nextStatus - Trạng thái bài học tiếp theo ('draft' | 'published')
      * @returns Thông tin bài học đã lưu từ API hoặc null nếu thất bại
      */
-    async function persistLesson(nextStatus: LessonStatus): Promise<any | null> {
+    async function persistLesson(nextStatus: LessonStatus): Promise<Lesson | null> {
         if (!form.title.trim()) {
             form.setTitleError(true);
             showFeedback('Lesson title is required.');
@@ -133,6 +134,33 @@ export function useLessonPersistence({
                 );
 
             const nextLessonId = Number(saved.lessonId);
+            const persistedLesson = existingId
+                ? (await api.get('/lessons/' + nextLessonId)).data
+                : null;
+            const persistedAssessments: Array<{
+                assessmentId: number;
+                questions?: Array<{
+                    questionId: number;
+                    options?: Array<{ optionId: number }>;
+                }>;
+            }> = persistedLesson?.assessments || [];
+
+            const submittedAssessmentIds = new Set(
+                form.assessments
+                    .map(ass => Number(
+                        ass.assessmentId ||
+                        (!String(ass.id).startsWith('ast-') ? ass.id : 0)
+                    ))
+                    .filter(Number.isFinite)
+                    .filter(Boolean)
+            );
+
+            for (const persistedAssessment of persistedAssessments) {
+                const persistedAssessmentId = Number(persistedAssessment.assessmentId);
+                if (!submittedAssessmentIds.has(persistedAssessmentId)) {
+                    await api.delete('/assessment/' + persistedAssessmentId);
+                }
+            }
 
             // Persist the assessment tree without duplicating existing records.
             // IDs prefixed with ast-/q-/opt- only exist on the client.
@@ -153,6 +181,30 @@ export function useLessonPersistence({
                     assessmentId = Number(response.data?.assessmentId);
                     if (!assessmentId) {
                         throw new Error('Assessment was created without an assessmentId');
+                    }
+                }
+
+                const persistedAssessment = persistedAssessments.find(
+                    item => Number(item.assessmentId) === assessmentId
+                );
+                const submittedQuestionIds = new Set(
+                    (ass.questions || [])
+                        .map(question => (
+                            !String(question.id).startsWith('q-')
+                                ? Number(question.id)
+                                : 0
+                        ))
+                        .filter(Number.isFinite)
+                        .filter(Boolean)
+                );
+
+                for (const persistedQuestion of persistedAssessment?.questions || []) {
+                    const persistedQuestionId = Number(persistedQuestion.questionId);
+                    if (!submittedQuestionIds.has(persistedQuestionId)) {
+                        const deleteQuestionPath = '/question/courses/' + data.selectedCourseId +
+                            '/lesson/' + nextLessonId + '/assessment/' + assessmentId +
+                            '/question/' + persistedQuestionId;
+                        await api.delete(deleteQuestionPath);
                     }
                 }
 
@@ -180,6 +232,27 @@ export function useLessonPersistence({
                     }
 
                     const savedOptions = [];
+                    const persistedQuestion = (persistedAssessment?.questions || []).find(
+                        item => Number(item.questionId) === questionId
+                    );
+                    const submittedOptionIds = new Set(
+                        (q.options || [])
+                            .map(option => (
+                                !String(option.id).startsWith('opt-')
+                                    ? Number(option.id)
+                                    : 0
+                            ))
+                            .filter(Number.isFinite)
+                            .filter(Boolean)
+                    );
+
+                    for (const persistedOption of persistedQuestion?.options || []) {
+                        const persistedOptionId = Number(persistedOption.optionId);
+                        if (!submittedOptionIds.has(persistedOptionId)) {
+                            await api.delete('/question/option/' + persistedOptionId);
+                        }
+                    }
+
                     for (let oIdx = 0; oIdx < (q.options || []).length; oIdx++) {
                         const opt = q.options[oIdx];
                         let optionId = !String(opt.id).startsWith('opt-') ? Number(opt.id) : 0;
@@ -260,12 +333,13 @@ export function useLessonPersistence({
             }
 
             return saved;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Failed to save lesson:', error);
 
-            showFeedback(
-                error.response?.data?.message || 'Failed to save lesson.'
-            );
+            const message = error && typeof error === 'object' && 'response' in error
+                ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+                : undefined;
+            showFeedback(message || 'Failed to save lesson.');
 
             return null;
         } finally {
