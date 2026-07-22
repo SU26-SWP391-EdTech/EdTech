@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Swords, Zap, ChevronRight } from 'lucide-react';
+import { Swords, ChevronRight } from 'lucide-react';
 
 interface MiniPvpWidgetProps {
   profile?: any;
@@ -46,8 +46,8 @@ export default function MiniPvpWidget({ profile }: MiniPvpWidgetProps) {
         </div>
 
         <button
-          onClick={() => navigate('/learner/pvp/arena')}
-          className="text-xs text-indigo-200 hover:text-white font-semibold flex items-center gap-0.5 transition-colors"
+          onClick={() => navigate('/learner/pvp')}
+          className="text-xs text-indigo-200 hover:text-white font-semibold flex items-center gap-0.5 transition-colors cursor-pointer"
         >
           Arena <ChevronRight className="w-3.5 h-3.5" />
         </button>
@@ -67,18 +67,6 @@ export default function MiniPvpWidget({ profile }: MiniPvpWidgetProps) {
           <span className="text-sm">{tier.icon}</span>
           <span className={`text-xs font-bold ${tier.color}`}>{tier.name}</span>
         </div>
-      </div>
-
-      {/* Action Button */}
-      <div className="relative z-10 pt-1">
-        <button
-          onClick={() => navigate('/learner/pvp/arena')}
-          className="w-full py-2.5 px-4 bg-gradient-to-r from-[#E11D48] to-[#F43F5E] hover:from-[#BE123C] hover:to-[#E11D48] text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group cursor-pointer"
-        >
-          <Zap className="w-4 h-4 fill-amber-300 text-amber-300 transition-transform group-hover:scale-110" />
-          <span>Quick Match</span>
-          <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-        </button>
       </div>
     </div>
   );
