@@ -104,6 +104,7 @@ export function useLessonPersistence({
             // Đóng gói payload bài học chuẩn
             const payload = buildLessonApiPayload({
                 title: form.title,
+                description: form.description,
                 duration: form.duration,
                 hasVideo: form.hasVideo,
                 hasReading: form.hasReading,
@@ -133,77 +134,101 @@ export function useLessonPersistence({
 
             const nextLessonId = Number(saved.lessonId);
 
-            // --- LƯU TUẦN TỰ ASSESSMENT, CÂU HỎI & OPTION LÊN API ---
+            // Persist the assessment tree without duplicating existing records.
+            // IDs prefixed with ast-/q-/opt- only exist on the client.
             const savedAssessments = [];
             for (const ass of form.assessments) {
-                try {
-                    // 1. Tạo Assessment
+                let assessmentId = Number(
+                    ass.assessmentId ||
+                    (!String(ass.id).startsWith('ast-') ? ass.id : 0)
+                );
+
+                if (!assessmentId) {
                     const response = await api.post('/assessment', {
                         courseId: data.selectedCourseId,
                         lessonId: nextLessonId,
                         title: ass.title,
                         type: ass.type,
                     });
-                    if (response.data && response.data.assessmentId) {
-                        const assessmentId = response.data.assessmentId;
-                        const savedQuestions = [];
-                        const questionsList = ass.questions || [];
-
-                        // 2. Lặp qua từng câu hỏi của Assessment
-                        for (let qIdx = 0; qIdx < questionsList.length; qIdx++) {
-                            const q = questionsList[qIdx];
-                            try {
-                                const qResponse = await api.post(`/question/courses/${data.selectedCourseId}/lesson/${nextLessonId}/assessment/${assessmentId}`, {
-                                    content: q.content,
-                                    type: q.type,
-                                    points: q.points || 10,
-                                    position: qIdx + 1
-                                });
-                                if (qResponse.data && qResponse.data.questionId) {
-                                    const questionId = qResponse.data.questionId;
-                                    const savedOptions = [];
-                                    const optionsList = q.options || [];
-
-                                    // 3. Lặp qua từng đáp án lựa chọn của câu hỏi
-                                    for (let oIdx = 0; oIdx < optionsList.length; oIdx++) {
-                                        const opt = optionsList[oIdx];
-                                        try {
-                                            const optResponse = await api.post(`/question/${questionId}/option`, {
-                                                content: opt.content,
-                                                isCorrect: opt.isCorrect,
-                                                position: oIdx + 1
-                                            });
-                                            savedOptions.push(optResponse.data);
-                                        } catch (optErr) {
-                                            console.warn('Failed to save question option to backend API:', optErr);
-                                        }
-                                    }
-                                    savedQuestions.push({
-                                        ...q,
-                                        questionId,
-                                        options: savedOptions
-                                    });
-                                } else {
-                                    savedQuestions.push(q);
-                                }
-                            } catch (qErr) {
-                                console.warn('Failed to save question to backend API:', qErr);
-                                savedQuestions.push(q);
-                            }
-                        }
-
-                        savedAssessments.push({
-                            ...ass,
-                            assessmentId,
-                            questions: savedQuestions
-                        });
-                    } else {
-                        savedAssessments.push(ass);
+                    assessmentId = Number(response.data?.assessmentId);
+                    if (!assessmentId) {
+                        throw new Error('Assessment was created without an assessmentId');
                     }
-                } catch (apiErr) {
-                    console.warn('Failed to save assessment to backend API:', apiErr);
-                    savedAssessments.push(ass);
                 }
+
+                const savedQuestions = [];
+                for (let qIdx = 0; qIdx < (ass.questions || []).length; qIdx++) {
+                    const q = ass.questions[qIdx];
+                    let questionId = !String(q.id).startsWith('q-') ? Number(q.id) : 0;
+                    const questionPayload = {
+                        content: q.content,
+                        type: q.type,
+                        points: q.points || 10,
+                        position: qIdx + 1,
+                    };
+                    const questionBasePath = '/question/courses/' + data.selectedCourseId +
+                        '/lesson/' + nextLessonId + '/assessment/' + assessmentId;
+
+                    if (questionId) {
+                        await api.patch(questionBasePath + '/question/' + questionId, questionPayload);
+                    } else {
+                        const qResponse = await api.post(questionBasePath, questionPayload);
+                        questionId = Number(qResponse.data?.questionId);
+                        if (!questionId) {
+                            throw new Error('Question was created without a questionId');
+                        }
+                    }
+
+                    const savedOptions = [];
+                    for (let oIdx = 0; oIdx < (q.options || []).length; oIdx++) {
+                        const opt = q.options[oIdx];
+                        let optionId = !String(opt.id).startsWith('opt-') ? Number(opt.id) : 0;
+
+                        if (optionId) {
+                            const optResponse = await api.patch('/question/option/' + optionId, {
+                                content: opt.content,
+                                isCorrect: opt.isCorrect,
+                            });
+                            savedOptions.push(optResponse.data);
+                        } else {
+                            const optResponse = await api.post('/question/' + questionId + '/option', {
+                                content: opt.content,
+                                isCorrect: opt.isCorrect,
+                                position: oIdx + 1,
+                            });
+                            optionId = Number(optResponse.data?.optionId);
+                            if (!optionId) {
+                                throw new Error('Question option was created without an optionId');
+                            }
+                            savedOptions.push(optResponse.data);
+                        }
+                    }
+
+                    const optionIds = savedOptions
+                        .map(option => Number(option.optionId || option.id))
+                        .filter(Number.isFinite);
+                    if (optionIds.length > 0) {
+                        await api.patch('/question/' + questionId + '/options/reorder', { optionIds });
+                    }
+
+                    savedQuestions.push({
+                        ...q,
+                        id: String(questionId),
+                        questionId,
+                        options: savedOptions.map(option => ({
+                            id: String(option.optionId || option.id),
+                            content: option.content,
+                            isCorrect: Boolean(option.isCorrect),
+                        })),
+                    });
+                }
+
+                savedAssessments.push({
+                    ...ass,
+                    id: String(assessmentId),
+                    assessmentId,
+                    questions: savedQuestions,
+                });
             }
             // Lưu kết quả đồng bộ Assessment xuống localStorage để cache cục bộ
             localStorage.setItem(`assessments_lesson_${nextLessonId}`, JSON.stringify(savedAssessments));

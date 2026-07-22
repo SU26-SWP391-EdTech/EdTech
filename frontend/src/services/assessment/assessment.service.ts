@@ -88,7 +88,7 @@ export class AssessmentService {
         let pointsReward = 0;
 
         try {
-            const actualQuestions = await this.getQuestions(lessonId);
+            const actualQuestions = await this.getQuestions(lessonId, false);
             if (actualQuestions && actualQuestions.length > 0) {
                 questionCount = actualQuestions.length;
                 pointsReward = actualQuestions.reduce((sum, q) => sum + (q.points || 10), 0);
@@ -128,7 +128,10 @@ export class AssessmentService {
         return { metadata, attempts };
     }
 
-    public static async getQuestions(lessonId: number): Promise<AssessmentQuestion[]> {
+    public static async getQuestions(
+        lessonId: number,
+        requireOptions = true
+    ): Promise<AssessmentQuestion[]> {
         const normalizeQuestion = (q: any, idx: number): AssessmentQuestion => {
             const qId = q.id || q.questionId || (idx + 1);
             const isMulti = q.type === 'MULTIPLE_CHOICE_MULTI' || q.type === 'multiple-choice';
@@ -144,6 +147,14 @@ export class AssessmentService {
             };
         };
 
+        const normalizeQuestions = (questions: any[]): AssessmentQuestion[] =>
+            questions.map((question, index) => normalizeQuestion(question, index));
+
+        const hasCompleteOptions = (questions: AssessmentQuestion[]): boolean =>
+            questions.length > 0 && questions.every(question => question.options.length > 0);
+
+        let incompleteQuestions: AssessmentQuestion[] = [];
+
         let assessmentId: number | null = null;
         const savedAss = localStorage.getItem(`assessments_lesson_${lessonId}`);
         if (savedAss) {
@@ -157,7 +168,11 @@ export class AssessmentService {
                         }
                     }
                     if (rawQuestions.length > 0) {
-                        return rawQuestions.map((q: any, idx: number) => normalizeQuestion(q, idx));
+                        const cachedQuestions = normalizeQuestions(rawQuestions);
+                        if (hasCompleteOptions(cachedQuestions)) {
+                            return cachedQuestions;
+                        }
+                        incompleteQuestions = cachedQuestions;
                     }
                     if (parsed[0].assessmentId) {
                         assessmentId = parsed[0].assessmentId;
@@ -181,7 +196,11 @@ export class AssessmentService {
                     }
                 }
                 if (embeddedQuestions.length > 0) {
-                    return embeddedQuestions.map((q: any, idx: number) => normalizeQuestion(q, idx));
+                    const lessonQuestions = normalizeQuestions(embeddedQuestions);
+                    if (hasCompleteOptions(lessonQuestions)) {
+                        return lessonQuestions;
+                    }
+                    incompleteQuestions = lessonQuestions;
                 }
             }
         } catch (e) {
@@ -189,27 +208,44 @@ export class AssessmentService {
         }
 
         if (assessmentId) {
+            // This endpoint loads both questions and their options. Question-only
+            // endpoints use a DTO that intentionally omits the options relation.
+            try {
+                const response = await api.get(`/assessment/${assessmentId}`);
+                if (Array.isArray(response.data?.questions)) {
+                    const assessmentQuestions = normalizeQuestions(response.data.questions);
+                    if (hasCompleteOptions(assessmentQuestions)) {
+                        return assessmentQuestions;
+                    }
+                    if (assessmentQuestions.length > 0) {
+                        incompleteQuestions = assessmentQuestions;
+                    }
+                }
+            } catch (err) {
+                // Fall back to the hierarchical assessment route below.
+            }
+
             try {
                 const targetCourseId = lesson?.course?.courseId || lesson?.courseId || 8;
                 const response = await api.get(`/assessment/courses/${targetCourseId}/lesson/${lessonId}/assessment/${assessmentId}`);
                 if (response.data && response.data.questions && response.data.questions.length > 0) {
-                    return response.data.questions.map((q: any, idx: number) => normalizeQuestion(q, idx));
+                    const assessmentQuestions = normalizeQuestions(response.data.questions);
+                    if (hasCompleteOptions(assessmentQuestions)) {
+                        return assessmentQuestions;
+                    }
+                    incompleteQuestions = assessmentQuestions;
                 }
             } catch (err) {
                 // Silently fallback if route fails
             }
         }
 
-        if (lesson) {
-            try {
-                const targetCourseId = lesson?.course?.courseId || lesson?.courseId || 8;
-                const response = await api.get(`/question/courses/${targetCourseId}/lesson/${lessonId}/questions`);
-                if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-                    return response.data.map((q: any, idx: number) => normalizeQuestion(q, idx));
-                }
-            } catch (err) {
-                // Silently fallback if route fails
-            }
+        if (!requireOptions) {
+            return incompleteQuestions;
+        }
+
+        if (incompleteQuestions.length > 0) {
+            return incompleteQuestions;
         }
 
         return [];

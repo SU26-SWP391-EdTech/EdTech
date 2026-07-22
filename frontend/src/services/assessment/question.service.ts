@@ -2,19 +2,20 @@ import api from '../../lib/axios';
 
 export interface CreateQuestionPayload {
     content: string;
-    type: 'MULTIPLE_CHOICE_SINGLE' | 'MULTIPLE_CHOICE_MULTI';
+    type: 'MULTIPLE_CHOICE_SINGLE' | 'MULTIPLE_CHOICE_MULTI' | 'TRUE_FALSE';
     points?: number;
 }
 
 export interface UpdateQuestionPayload {
     content?: string;
-    type?: 'MULTIPLE_CHOICE_SINGLE' | 'MULTIPLE_CHOICE_MULTI';
+    type?: 'MULTIPLE_CHOICE_SINGLE' | 'MULTIPLE_CHOICE_MULTI' | 'TRUE_FALSE';
     points?: number;
 }
 
 export interface CreateQuestionOptionPayload {
     content: string;
     isCorrect: boolean;
+    position: number;
 }
 
 export interface UpdateQuestionOptionPayload {

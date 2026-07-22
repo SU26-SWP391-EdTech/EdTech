@@ -152,12 +152,16 @@ export class LessonsService {
     lessonId: number,
     dto: UpdateLessonDto,
     file?: Express.Multer.File,
+    currentUserId?: number,
   ): Promise<Lesson> {
     const lesson = await this.findOne(lessonId);
 
     if (!lesson) throw new NotFoundException('Lesson not exist');
 
-    const course = await this.courseService.findCourseByIdService(courseId);
+    if (!currentUserId) {
+      throw new ForbiddenException('Authenticated course owner is required');
+    }
+    const course = await this.courseService.validateCourseOwner(currentUserId, courseId);
 
     if (!course) {
       throw new NotFoundException(`Not found course with ID ${courseId}`);

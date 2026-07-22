@@ -1,7 +1,4 @@
 import { useState } from 'react';
-import toast from 'react-hot-toast';
-
-import { deleteLesson as apiDeleteLesson } from '../../../services/lesson/lesson.service';
 import type { CourseBuilderLesson } from '../../../types/course/create-course.types';
 
 interface UseCourseLessonsOptions {
@@ -43,19 +40,11 @@ export function useCourseLessons({ editId }: UseCourseLessonsOptions) {
    * @param lessonId - ID bài học cần xóa (chuỗi bắt đầu bằng 'l-' là bài mới tạo chưa lưu DB)
    */
   async function deleteLesson(lessonId: string) {
-    if (!lessonId.startsWith('l-') && editId) {
-      // Trường hợp sửa trực tiếp khóa học: Gọi API xóa bài học ngay lập tức
-      try {
-        await apiDeleteLesson(Number(lessonId));
-        toast.success('Lesson removed.');
-      } catch (err) {
-        console.error(`Failed to delete lesson ${lessonId}:`, err);
-        toast.error('Failed to remove lesson.');
-        return;
-      }
-    } else if (!lessonId.startsWith('l-')) {
-      // Trường hợp lưu nháp: Đưa ID vào hàng đợi chờ gửi yêu cầu lưu của cả khóa học
-      setDeletedLessonIds(prev => [...prev, Number(lessonId)]);
+    if (!lessonId.startsWith('l-')) {
+      // Persisted lessons are only removed after the user saves the course.
+      setDeletedLessonIds(prev => (
+        prev.includes(Number(lessonId)) ? prev : [...prev, Number(lessonId)]
+      ));
     }
 
     // Cập nhật giao diện xóa bài học

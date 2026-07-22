@@ -17,9 +17,13 @@ export async function buildCourseFormData(options: {
     formData.append('description', draft.description || '');
     formData.append('language', draft.language || 'English');
 
-    const totalMinutes = (draft.lessons || []).reduce((sum, l) => {
+    const lessonMinutes = (draft.lessons || []).reduce((sum, l) => {
         return sum + (parseInt(l.duration) || 0);
     }, 0);
+    const enteredMinutes =
+        (Number(draft.durationHours) || 0) * 60 +
+        (Number(draft.durationMinutes) || 0);
+    const totalMinutes = enteredMinutes > 0 ? enteredMinutes : lessonMinutes;
     formData.append('duration', String(totalMinutes));
 
     if (draft.projectUrl) {

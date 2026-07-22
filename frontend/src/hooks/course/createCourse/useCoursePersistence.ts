@@ -54,26 +54,18 @@ export function useCoursePersistence({
   async function syncLessons(courseId: number) {
     // 1. Thực hiện xóa các bài học bị người dùng bấm xóa trong quá trình chỉnh sửa
     for (const lessonId of deletedLessonIds) {
-      try {
-        await apiDeleteLesson(lessonId);
-      } catch (err) {
-        console.error(`Failed to delete lesson ${lessonId}:`, err);
-      }
+      await apiDeleteLesson(lessonId);
     }
 
     // 2. Đồng bộ thêm mới/cập nhật và cập nhật lại thứ tự sắp xếp (index) của bài học
     let index = 1;
     for (const lesson of lessons) {
-      try {
-        const payload = buildLessonSyncPayload(lesson, index++);
-        const isNew = lesson.id.startsWith('l-');
-        if (isNew) {
-          await createLesson(courseId, payload);
-        } else {
-          await updateLesson(courseId, Number(lesson.id), payload);
-        }
-      } catch (err) {
-        console.error('Failed to sync lesson:', err);
+      const payload = buildLessonSyncPayload(lesson, index++);
+      const isNew = lesson.id.startsWith('l-');
+      if (isNew) {
+        await createLesson(courseId, payload);
+      } else {
+        await updateLesson(courseId, Number(lesson.id), payload);
       }
     }
   }
@@ -100,9 +92,10 @@ export function useCoursePersistence({
 
       let courseId = editId;
       if (editId) {
-        // Cập nhật thông tin khóa học hiện tại
-        await updateCourse(editId, formData);
+        // Editing an approved course first returns it to draft. This also makes
+        // tag changes legal under the backend's approved-course policy.
         await updateCourse(editId, { status: 'draft' });
+        await updateCourse(editId, formData);
       } else {
         // Tạo mới khóa học
         const newCourse = status === 'pending'
@@ -131,7 +124,7 @@ export function useCoursePersistence({
       const message = err && typeof err === 'object' && 'response' in err
         ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
         : undefined;
-      toast.error(message || 'Failed to create course.');
+      toast.error(message || (editId ? 'Failed to update course.' : 'Failed to create course.'));
     } finally {
       setIsSubmitting(false);
     }

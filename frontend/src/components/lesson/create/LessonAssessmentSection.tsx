@@ -126,7 +126,7 @@ export function LessonAssessmentSection({ assessments, setAssessments, courseId,
           Number(activeAssessmentId),
           {
             content: newQuestion.content,
-            type: newQuestion.type === 'MULTIPLE_CHOICE_MULTI' ? 'MULTIPLE_CHOICE_MULTI' : 'MULTIPLE_CHOICE_SINGLE',
+            type: newQuestion.type,
             points: newQuestion.points,
           }
         );
@@ -140,6 +140,7 @@ export function LessonAssessmentSection({ assessments, setAssessments, courseId,
               const optResponse = await QuestionService.createQuestionOption(dbQuestionId, {
                 content: opt.content,
                 isCorrect: opt.isCorrect,
+                position: idx + 1,
               });
               savedOptions.push({
                 id: optResponse.optionId,

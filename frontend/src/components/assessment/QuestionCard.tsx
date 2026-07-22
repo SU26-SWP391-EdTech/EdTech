@@ -44,6 +44,21 @@ export function QuestionCard({ question, index, total, selectedAnswers, toggleOp
 
             {/* Options List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                {question.options.length === 0 && (
+                    <div
+                        role={'alert'}
+                        style={{
+                            padding: '12px 14px',
+                            borderRadius: 10,
+                            background: '#FFF7ED',
+                            color: '#9A3412',
+                            fontSize: 13.5,
+                            lineHeight: 1.5,
+                        }}
+                    >
+                        Câu hỏi này chưa có phương án trả lời. Vui lòng cập nhật lại câu hỏi trong phần quản lý bài học.
+                    </div>
+                )}
                 {question.options.map(opt => {
                     const selected = selectedAnswers.includes(opt.id);
                     return (

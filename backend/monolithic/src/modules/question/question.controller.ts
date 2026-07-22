@@ -11,7 +11,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { QuestionService } from './question.service';
 import { UpdateQuestionDto } from './dto/update-question.dto';
@@ -155,7 +154,6 @@ export class QuestionController {
 
   @Roles(RoleEnum.COURSE_PROVIDER)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post(':questionId/option')
   @ApiOperation({ summary: 'Create an option for a question' })
   @ApiBody({ type: CreateQuestionOptionDto })

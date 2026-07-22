@@ -45,6 +45,7 @@ export function buildLocalLessonDraft(options: {
 
 export function buildLessonApiPayload(options: {
     title: string;
+    description: string;
     duration: string;
     hasVideo: boolean;
     hasReading: boolean;
@@ -63,9 +64,9 @@ export function buildLessonApiPayload(options: {
     }
     return {
         title: options.title.trim(),
-        description: '',
+        description: options.description.trim(),
         videoDuration: options.hasVideo ? videoSec : undefined,
-        content: buildLessonContent(options) || undefined,
+        content: buildLessonContent(options),
         videoUrl: options.hasVideo ? options.videoUrl.trim() : '',
         prerequisiteLessonIds: options.prerequisiteLessonIds,
     };

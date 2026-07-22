@@ -187,7 +187,15 @@ export class CoursesService {
 
     Object.assign(course, courseData);
 
-    return this.coursesRepository.saveCourse(course);
+    await this.coursesRepository.saveCourse(course);
+
+    if (tags !== undefined) {
+      await this.tagsService.setCourseTags(id, tags);
+      const updatedCourse = await this.coursesRepository.findDetail(id);
+      return updatedCourse!;
+    }
+
+    return course;
   }
 
   //remove course
