@@ -19,7 +19,7 @@ export class CoursesRepository extends Repository<Course> {
 
   public async findAllCourses(): Promise<Course[]> {
     return await this.find({
-      relations: ['user'],
+      relations: ['user', 'courseTag', 'courseTag.tag'],
     });
   }
 
@@ -31,6 +31,9 @@ export class CoursesRepository extends Repository<Course> {
         lessons: true,
         assessments: {
           sessions: true,
+        },
+        courseTag: {
+          tag: true,
         },
       },
     });

@@ -41,7 +41,7 @@ export class CoursesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.COURSE_PROVIDER)
   @Post()
-  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @Throttle({ default: { limit: 30, ttl: 60000 } })
   @UseInterceptors(FileInterceptor('thumbnailUrl'))
   @ApiOperation({ summary: 'Create a course' })
   @ApiConsumes('multipart/form-data')
@@ -60,7 +60,7 @@ export class CoursesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.COURSE_PROVIDER)
   @Post('submit-to-review')
-  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @Throttle({ default: { limit: 30, ttl: 60000 } })
   @UseInterceptors(FileInterceptor('thumbnailUrl'))
   @ApiOperation({ summary: 'Create a course and submit it for review' })
   @ApiConsumes('multipart/form-data')
@@ -91,7 +91,7 @@ export class CoursesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.COURSE_PROVIDER)
   @Post(':courseId/submit-review')
-  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @Throttle({ default: { limit: 30, ttl: 60000 } })
   @ApiOperation({ summary: 'Submit an existing draft course for review' })
   @ApiResponse({
     status: 200,
@@ -110,7 +110,7 @@ export class CoursesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleEnum.COURSE_PROVIDER)
   @Post(':courseId/submit-to-review')
-  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @Throttle({ default: { limit: 30, ttl: 60000 } })
   @ApiOperation({ summary: 'Submit an existing draft course for review' })
   submitDraftToReviewLegacy(
     @Req() req,
