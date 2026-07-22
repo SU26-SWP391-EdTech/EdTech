@@ -91,22 +91,34 @@ export function LessonHeader({
                 <span>{Math.max(totalLessons - completedLessons, 0)} left</span>
               </div>
             </div>
-            {role == 'learner' && (
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={onMarkComplete}
-                  disabled={isCompleted}
-                  className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm transition-colors whitespace-nowrap ${isCompleted
-                      ? 'bg-[#10B981] text-white'
-                      : 'bg-[#E11D48] text-white hover:bg-[#BE123C]'
-                    }`}
-                  style={{ fontWeight: 500 }}
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  {isCompleted ? 'Completed!' : 'Mark as Completed'}
-                </button>
-              </div>
-            )}
+            {role === 'learner' && (() => {
+              const typeLower = activeLesson?.type?.toLowerCase() || '';
+              const isReadingLesson = typeLower === 'reading' || (!activeLesson?.hasVideo && !activeLesson?.videoUrl && !activeLesson?.hasAssessment && typeLower !== 'assessment');
+
+              return (
+                <div className="flex flex-col gap-2 items-end">
+                  {isCompleted ? (
+                    <span className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm bg-[#10B981] text-white whitespace-nowrap" style={{ fontWeight: 500 }}>
+                      <CheckCircle2 className="w-4 h-4" />
+                      Completed!
+                    </span>
+                  ) : isReadingLesson ? (
+                    <button
+                      onClick={onMarkComplete}
+                      className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm bg-[#E11D48] text-white hover:bg-[#BE123C] transition-colors whitespace-nowrap"
+                      style={{ fontWeight: 500 }}
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      Mark as Completed
+                    </button>
+                  ) : (
+                    <span className="text-xs text-slate-400 italic bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 whitespace-nowrap">
+                      {typeLower === 'assessment' ? 'Submit quiz to complete' : 'Watch 80% video to complete'}
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>

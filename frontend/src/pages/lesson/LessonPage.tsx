@@ -95,6 +95,12 @@ export function LessonPage() {
 
   const isAssessment = lesson.activeLesson?.type === 'Assessment';
 
+  const handleVideoProgressReach80 = async () => {
+    if (lesson.activeLesson && !lesson.isCompleted) {
+      await lesson.persistLessonCompletion(lesson.activeLesson, true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       {/* ── PAGE HEADER ─────────────────────────────────────────────────────── */}
@@ -157,6 +163,7 @@ export function LessonPage() {
                           activeLesson={lesson.activeLesson!}
                           activeVideoUrl={lesson.activeVideoUrl}
                           youtubeEmbedUrl={lesson.youtubeEmbedUrl}
+                          onVideoProgressReach80={handleVideoProgressReach80}
                         />
                       )}
                       {hasReading && (
