@@ -15,6 +15,16 @@ export class LearnerStreakService {
     private readonly assessmentSessionRepository: AssessmentSessionRepository,
   ) {}
 
+  public async getCurrentStreak(
+    userId: number
+  ){
+    const learner = await this.learnerRepository.findLeanerById(userId);
+    if (!learner) {
+      throw new NotFoundException(`Learner ${userId} not found`);
+    }
+    return learner.currentStreak;
+  }
+
   public async updateStreak(
     learnerId: number,
     completedAt: Date,

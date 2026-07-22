@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, ParseIntPipe, Req, UseGuards } from '@nestjs/common';
-import { LearnersService } from './services/learners.service';
+import { LearnersService } from '../services/learners.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { EditLearnerProfileDto } from './dto/edit-learner-profile.dto';
-import { ChangePasswordDto } from '../users/dto/change-password.dto';
-import { UsersService } from '../users/users.service';
-import { UpdateLearnerInfoDto } from './dto/update-learner-info.dto';
+import { EditLearnerProfileDto } from '../dto/edit-learner-profile.dto';
+import { ChangePasswordDto } from '../../users/dto/change-password.dto';
+import { UsersService } from '../../users/users.service';
+import { UpdateLearnerInfoDto } from '../dto/update-learner-info.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles/roles.guard';
 import { Roles } from 'src/common/decorators/roles/roles.decorator';

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { LearnersService } from './services/learners.service';
-import { LearnersController } from './learners.controller';
+import { LearnersController } from './controllers/learners.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
