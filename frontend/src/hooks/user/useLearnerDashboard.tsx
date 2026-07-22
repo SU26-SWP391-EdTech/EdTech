@@ -101,7 +101,7 @@ export function useLearnerDashboard() {
     // Lọc ra các khóa học đang học để hiển thị trên phần "Học tiếp" của dashboard
     const continueCourses = enrollments
         .filter(e => e.status === 'active' && e.progress < 100)
-        .slice(0, 3)
+        .slice(0, 1)
         .map((enrollment, idx) => {
             // Xác định xem khóa học này có thuộc lộ trình nào không để hiển thị nhãn lộ trình
             const parentPath = learningPaths.find(p =>

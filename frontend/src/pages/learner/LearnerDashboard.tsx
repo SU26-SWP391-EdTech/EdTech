@@ -8,17 +8,17 @@ import MiniLeaderboard from '../../components/user/dashboard/learner/MiniLeaderb
 import MiniPvpWidget from '../../components/user/dashboard/learner/MiniPvpWidget';
 
 export function LearnerDashboard() {
-    const navigate = useNavigate();
-    const {
-        profile,
-        continueCourses,
-        activePath,
-        followedPaths,
-        selectedPathId,
-        setSelectedPathId,
-        roadmapNodes,
-        enrolledCount,
-    } = useLearnerDashboard();
+  const navigate = useNavigate();
+  const {
+    profile,
+    continueCourses,
+    activePath,
+    followedPaths,
+    selectedPathId,
+    setSelectedPathId,
+    roadmapNodes,
+    enrolledCount,
+  } = useLearnerDashboard();
 
   return (
     <main className="max-w-[1440px] mx-auto px-8 py-8 space-y-8">
@@ -61,13 +61,13 @@ export function LearnerDashboard() {
       </div>
 
       {/* GitHub-style Learning Activity Heatmap with Integrated Streak */}
-      <StreakCalendarMap 
+      <StreakCalendarMap
         activeDates={profile?.activeDates ?? []}
         currentStreak={profile?.streakCount ?? 0}
         longestStreak={profile?.longestStreak ?? 0}
         streakLife={profile?.streakLife ?? 1}
       />
     </main>
-    );
+  );
 }
 
