@@ -5,6 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Repository, DataSource } from 'typeorm';
 import { ProgressRepository } from './progress.repository';
 import { LearnerLessonProgress } from './entities/learner-lesson-progress.entity';
 import { LessonsService } from '../lessons/service/lessons.service';
@@ -12,6 +13,9 @@ import { LessonProgressStatus } from 'src/common/enums/lesson-progress-status.en
 import { LearnersService } from '../learners/services/learners.service';
 import { LessonPrerequisiteService } from '../lessons/service/lesson-prerequisite.service';
 import { LearnerStreakService } from '../learners/services/learner-streak.service';
+import { Lesson } from '../lessons/entities/lesson.entity';
+import { Enrollment } from '../enrollments/entities/enrollment.entity';
+import { EnrollmentStatus } from 'src/common/enums/enrollment.enum';
 
 @Injectable()
 export class ProgressService {
@@ -28,6 +32,8 @@ export class ProgressService {
 
     @Inject(forwardRef(() => LearnerStreakService))
     private readonly learnerStreakService: LearnerStreakService,
+
+    private readonly dataSource: DataSource,
   ) { }
 
   // find lesson progress by userId and lessonId
@@ -106,6 +112,46 @@ export class ProgressService {
       await this.learnerStreakService.updateStreak(userId, new Date());
     } catch (error) {
       // Gracefully handle error so that completion progress is not blocked
+    }
+
+    // Update Enrollment progress for the course
+    try {
+      if (lesson && lesson.course && lesson.course.courseId) {
+        const courseId = lesson.course.courseId;
+        const totalLessons = await this.dataSource.getRepository(Lesson).count({
+          where: { course: { courseId } },
+        });
+
+        if (totalLessons > 0) {
+          const completedLessonsCount = await this.dataSource
+            .getRepository(LearnerLessonProgress)
+            .createQueryBuilder('progress')
+            .innerJoin('progress.lesson', 'lesson')
+            .where('progress.userId = :userId', { userId })
+            .andWhere('lesson.course_id = :courseId', { courseId })
+            .andWhere('progress.status = :status', { status: LessonProgressStatus.COMPLETED })
+            .getCount();
+
+          const calcProgress = Math.min(100, Math.round((completedLessonsCount / totalLessons) * 100));
+          const enrollmentRepo = this.dataSource.getRepository(Enrollment);
+          const enrollment = await enrollmentRepo.findOne({
+            where: { user: { userId }, course: { courseId } },
+          });
+
+          if (enrollment) {
+            enrollment.progress = calcProgress;
+            if (calcProgress >= 100) {
+              enrollment.status = EnrollmentStatus.COMPLETED;
+              if (!enrollment.completedAt) {
+                enrollment.completedAt = new Date();
+              }
+            }
+            await enrollmentRepo.save(enrollment);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to update course enrollment progress:', error);
     }
 
     return completeLesson;

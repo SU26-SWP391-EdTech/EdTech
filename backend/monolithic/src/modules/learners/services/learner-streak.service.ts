@@ -28,7 +28,7 @@ export class LearnerStreakService {
   public async updateStreak(
     learnerId: number,
     completedAt: Date,
-    currentSessionId: number,
+    currentSessionId?: number,
   ): Promise<void> {
     // 1. Load learner
     const learner = await this.learnerRepository.findLeanerById(learnerId);
