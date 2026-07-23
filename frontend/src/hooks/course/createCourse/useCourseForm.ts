@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import type { BackendCourse } from '../../../services/course/course.service';
+import { extractCourseTags } from '../../../services/course/course.service';
 import type { CourseBuilderLesson, CourseDraft } from '../../../types/course/create-course.types';
 
 /**
@@ -12,6 +13,7 @@ export function useCourseForm() {
   const [title, setTitle] = useState('');                                   // Tiêu đề khóa học
   const [description, setDescription] = useState('');                       // Mô tả khóa học
   const [language, setLanguage] = useState('English');                      // Ngôn ngữ giảng dạy (mặc định English)
+  const [tags, setTags] = useState<string[]>([]);                           // Thẻ khóa học (Course Tags)
   const [durationHours, setDurationHours] = useState(0);                    // Thời lượng khóa học: Số giờ
   const [durationMinutes, setDurationMinutes] = useState(0);                // Thời lượng khóa học: Số phút
   const [projectUrl, setProjectUrl] = useState('');                         // Đường dẫn link bài tập/dự án mẫu của khóa học
@@ -23,16 +25,17 @@ export function useCourseForm() {
    * 
    * @param course - Dữ liệu khóa học từ Backend
    */
-  function hydrateFromCourse(course: BackendCourse) {
+  const hydrateFromCourse = useCallback((course: BackendCourse) => {
     setTitle(course.title || '');
     setDescription(course.description || '');
     setLanguage(course.language || 'English');
     setProjectUrl(course.projectUrl || '');
+    setTags(extractCourseTags(course));
 
     const totalDuration = course.duration || 0;
     setDurationHours(Math.floor(totalDuration / 60)); // Chuyển đổi tổng số phút thành giờ
     setDurationMinutes(totalDuration % 60);           // Phần số phút dư ra
-  }
+  }, []);
 
   /**
    * Thu thập dữ liệu form hiện tại cùng danh sách bài học để tạo đối tượng bản nháp khóa học (CourseDraft).
@@ -46,6 +49,7 @@ export function useCourseForm() {
       title,
       description,
       language,
+      tags,
       durationHours,
       durationMinutes,
       projectUrl,
@@ -63,6 +67,8 @@ export function useCourseForm() {
     setDescription,
     language,
     setLanguage,
+    tags,
+    setTags,
     durationHours,
     setDurationHours,
     durationMinutes,

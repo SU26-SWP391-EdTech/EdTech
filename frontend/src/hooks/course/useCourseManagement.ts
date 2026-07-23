@@ -1,13 +1,18 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useCallback, useState, useMemo, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/auth/auth.stores';
-import { searchCourses, deleteCourse, approveCourse, rejectCourse } from '../../services/course/course.service';
+import { searchCourses, approveCourse, rejectCourse } from '../../services/course/course.service';
 import type { BackendCourse } from '../../services/course/course.service';
 import toast from 'react-hot-toast';
 import type { Course, CourseStatus, Category } from '../../types/course/course-management.types';
-import {
-    Monitor, Database, Palette, Megaphone, Briefcase, Settings
-} from 'lucide-react';
+
+function getApiErrorMessage(error: unknown, fallback: string): string {
+    if (error && typeof error === 'object' && 'response' in error) {
+        const response = (error as { response?: { data?: { message?: string } } }).response;
+        return response?.data?.message || fallback;
+    }
+    return fallback;
+}
 
 /**
  * Custom hook quản lý danh sách khóa học dành cho Giảng viên (Provider) và Quản lý đào tạo (Academic Manager).
@@ -24,6 +29,7 @@ export function useCourseManagement() {
 
     // Lấy thông tin tài khoản hiện tại từ auth store
     const user = useAuthStore((state) => state.user);
+    const userId = user?.userId;
 
     // --- 1. QUẢN LÝ TRẠNG THÁI (STATE) ---
     const [courses, setCourses] = useState<Course[]>([]);                     // Danh sách gốc khóa học
@@ -31,25 +37,19 @@ export function useCourseManagement() {
     const [search, setSearch] = useState('');                                 // Chuỗi tìm kiếm khóa học
     const [statusFilter, setStatusFilter] = useState(isPendingPage ? 'Pending Review' : 'All Status'); // Trạng thái cần lọc
     const [selectedId, setSelectedId] = useState<number | undefined>(undefined); // ID khóa học đang được chọn xem chi tiết
-    const [showModal, setShowModal] = useState(false);                        // Trạng thái hiển thị modal Tạo/Sửa khóa học
-    const [selectedCourseForEdit, setSelectedCourseForEdit] = useState<Course | undefined>(undefined); // Khóa học đang được edit
-    const [isViewOnly, setIsViewOnly] = useState(false);                      // Cờ xem chi tiết dạng Read-only
-    const [showDeleteModal, setShowDeleteModal] = useState(false);            // Trạng thái hiển thị modal xác nhận xóa
-    const [selectedCourseForDelete, setSelectedCourseForDelete] = useState<Course | undefined>(undefined); // Khóa học đang chọn để xóa
-    const [deleteLoading, setDeleteLoading] = useState(false);                // Trạng thái đang xử lý API xóa
     const [sortField, setSortField] = useState<'title' | 'students' | 'created' | 'updated'>('created'); // Trường dùng để sắp xếp
     const [sortAsc, setSortAsc] = useState(false);                            // Cờ sắp xếp tăng dần/giảm dần
 
     /**
      * Tải danh sách khóa học từ Backend và map dữ liệu về đúng định dạng hiển thị cho giao diện.
      */
-    const fetchCourses = async () => {
+    const fetchCourses = useCallback(async () => {
         setIsLoading(true);
         try {
-            const params: any = {};
+            const params: Record<string, string | number> = {};
             // Nếu là Provider, chỉ lấy các khóa học do chính giảng viên đó tạo
-            if (isProvider && user?.userId) {
-                params.userId = user.userId;
+            if (isProvider && userId) {
+                params.userId = userId;
             }
             // Nếu ở trang kiểm duyệt, chỉ lấy các khóa học đang chờ duyệt
             if (isPendingPage) {
@@ -110,32 +110,14 @@ export function useCourseManagement() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [isPendingPage, isProvider, userId]);
 
     // Tự động fetch khóa học khi người dùng đổi trang hoặc ID tài khoản thay đổi
     useEffect(() => {
+        // Loading remote data on route/account changes is the synchronization purpose of this effect.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchCourses();
-    }, [isProvider, isPendingPage, user?.userId]);
-
-    /**
-     * Gửi yêu cầu xóa khóa học lên backend.
-     */
-    const handleDeleteCourse = async () => {
-        if (!selectedCourseForDelete) return;
-        setDeleteLoading(true);
-        try {
-            await deleteCourse(selectedCourseForDelete.id);
-            toast.success('Course deleted successfully');
-            setShowDeleteModal(false);
-            setSelectedCourseForDelete(undefined);
-            fetchCourses();
-        } catch (err: any) {
-            console.error('Failed to delete course:', err);
-            toast.error(err.response?.data?.message || 'Failed to delete course');
-        } finally {
-            setDeleteLoading(false);
-        }
-    };
+    }, [fetchCourses]);
 
     // --- 2. LOGIC TÌM KIẾM, LỌC VÀ SẮP XẾP (COMPUTED VALUES) ---
     const filtered = useMemo(() => {
@@ -156,7 +138,7 @@ export function useCourseManagement() {
                 if (sortField === 'updated') return (new Date(a.updated).getTime() - new Date(b.updated).getTime()) * dir;
                 return (a.id - b.id) * dir;
             });
-    }, [courses, search, statusFilter, sortField, sortAsc]);
+    }, [courses, isPendingPage, search, statusFilter, sortField, sortAsc]);
 
     // Khóa học đang được chọn để hiển thị thông tin chi tiết trên sidebar/panel phụ
     const selectedCourse = filtered.find(c => c.id === selectedId) ?? filtered[0];
@@ -211,9 +193,9 @@ export function useCourseManagement() {
             await approveCourse(courseId);
             setCourses(prev => prev.map(c => c.id === courseId ? { ...c, status: 'Published' } : c));
             toast.success('Course approved successfully!');
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error('Failed to approve course:', e);
-            toast.error(e.response?.data?.message || 'Failed to approve course');
+            toast.error(getApiErrorMessage(e, 'Failed to approve course'));
         }
     };
 
@@ -225,9 +207,9 @@ export function useCourseManagement() {
             await rejectCourse(courseId, reason);
             setCourses(prev => prev.map(c => c.id === courseId ? { ...c, status: 'Rejected' } : c));
             toast.success('Course rejected successfully!');
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error('Failed to reject course:', e);
-            toast.error(e.response?.data?.message || 'Failed to reject course');
+            toast.error(getApiErrorMessage(e, 'Failed to reject course'));
         }
     };
 
@@ -242,21 +224,9 @@ export function useCourseManagement() {
         setStatusFilter,
         selectedId,
         setSelectedId,
-        showModal,
-        setShowModal,
-        selectedCourseForEdit,
-        setSelectedCourseForEdit,
-        isViewOnly,
-        setIsViewOnly,
-        showDeleteModal,
-        setShowDeleteModal,
-        selectedCourseForDelete,
-        setSelectedCourseForDelete,
-        deleteLoading,
         sortField,
         sortAsc,
         fetchCourses,
-        handleDeleteCourse,
         filtered,
         selectedCourse,
         stats,

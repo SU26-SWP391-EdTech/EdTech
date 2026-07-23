@@ -1,5 +1,7 @@
-import { BadgeCheck, Users, Clock, BookOpen, Languages, Calendar, Sparkles, Play } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { BadgeCheck, Users, Clock, BookOpen, Languages, Calendar, Sparkles, Play, Tag as TagIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { extractCourseTags } from '../../../services/course/course.service';
 
 interface CourseHeroProps {
   course: any;
@@ -34,6 +36,17 @@ export function CourseHero({
   onApprove,
   onReject,
 }: CourseHeroProps) {
+  const navigate = useNavigate();
+  const getRolePrefix = (r: string) => {
+    const roleLower = r?.toLowerCase() || '';
+    if (roleLower === 'learner') return '/learner';
+    if (roleLower === 'course provider') return '/provider';
+    if (roleLower === 'academic manager') return '/academic';
+    if (roleLower === 'admin') return '/admin';
+    return '';
+  };
+  const prefix = getRolePrefix(role);
+
   return (
     <div className="max-w-[1376px] mx-auto px-8 pt-6">
       <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#111827] via-[#1F2937] to-[#0F172A] border border-[#E5E7EB] shadow-lg">
@@ -53,9 +66,25 @@ export function CourseHero({
               <h1 className="text-[36px] text-white mb-2" style={{ fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
                 {course.title}
               </h1>
-              <p className="text-[15px] text-white/70 mb-5 max-w-2xl">
+              <p className="text-[15px] text-white/70 mb-4 max-w-2xl">
                 {course.description}
               </p>
+
+              {/* Course Tags */}
+              {extractCourseTags(course).length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5 mb-5">
+                  {extractCourseTags(course).map((tag, idx) => (
+                    <button
+                      key={`${tag}-${idx}`}
+                      onClick={() => navigate(`${prefix}/explore?tag=${encodeURIComponent(tag)}`)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-white/10 hover:bg-white/20 border border-white/20 text-white/90 hover:text-white rounded-lg text-xs font-medium backdrop-blur transition-all cursor-pointer"
+                    >
+                      <TagIcon className="w-3 h-3 text-[#F43F5E]" />
+                      #{tag}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               <div className="flex flex-wrap items-center gap-5 mb-5 text-sm text-white/70">
                 <span className="flex items-center gap-1.5"><Users className="w-4 h-4" />{(course.enrollmentCount || 0).toLocaleString()} learners</span>

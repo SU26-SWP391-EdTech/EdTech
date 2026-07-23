@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import { Plus, Trash2, CheckCircle2, X, HelpCircle, Check, Award } from 'lucide-react';
-import type { Assessment, AssessmentQuestion, AssessmentType, QuestionType, QuestionOption } from '../../../types/lesson/create-lesson.types';
-import { QuestionService } from '../../../services/assessment/question.service';
-import { AssessmentService } from '../../../services/assessment/assessment.service';
+import { Plus, Trash2, X, HelpCircle, Check, Award } from 'lucide-react';
+import type { Assessment, AssessmentQuestion, AssessmentType, QuestionType } from '../../../types/lesson/create-lesson.types';
 
 interface Props {
   assessments: Assessment[];
@@ -17,7 +15,7 @@ const Label = ({ children, required }: { children: React.ReactNode; required?: b
   </label>
 );
 
-export function LessonAssessmentSection({ assessments, setAssessments, courseId, lessonId }: Props) {
+export function LessonAssessmentSection({ assessments, setAssessments }: Props) {
   // Assessment Form State
   const [newTitle, setNewTitle] = useState('');
   const [newType, setNewType] = useState<AssessmentType>('LESSON_QUIZ');
@@ -44,41 +42,7 @@ export function LessonAssessmentSection({ assessments, setAssessments, courseId,
   };
 
   // Delete Assessment
-  const handleDeleteAssessment = async (id: string | number) => {
-    const target = assessments.find(a => a.id === id);
-    if (target && courseId && lessonId) {
-      const numericAssessmentId = typeof target.id === 'number' || !String(target.id).startsWith('ast-')
-        ? Number(target.id)
-        : Number(target.assessmentId);
-        
-      if (numericAssessmentId) {
-        for (const q of target.questions || []) {
-          const isDbQuestion = typeof q.id === 'number' || !String(q.id).startsWith('q-');
-          const numericQuestionId = isDbQuestion ? Number(q.id) : Number((q as any).questionId);
-          if (numericQuestionId) {
-            try {
-              await QuestionService.deleteQuestion(
-                Number(courseId),
-                Number(lessonId),
-                numericAssessmentId,
-                numericQuestionId
-              );
-            } catch (err) {
-              console.error('Failed to delete question from backend:', err);
-            }
-          }
-        }
-        
-        try {
-          await AssessmentService.deleteAssessment(numericAssessmentId);
-        } catch (err: any) {
-          console.error('Failed to delete assessment from backend:', err);
-          const msg = err.response?.data?.message || 'Failed to delete assessment. It might be linked to a PvP match or student progress.';
-          alert(msg);
-          return; // Stop and don't remove from UI if backend deletion fails
-        }
-      }
-    }
+  const handleDeleteAssessment = (id: string | number) => {
     setAssessments(prev => prev.filter(a => a.id !== id));
   };
 
@@ -119,62 +83,13 @@ export function LessonAssessmentSection({ assessments, setAssessments, courseId,
       isCorrect: correctIndices.includes(idx),
     }));
 
-    let newQuestion: AssessmentQuestion = {
+    const newQuestion: AssessmentQuestion = {
       id: `q-${Date.now()}`,
       content: qContent.trim(),
       type: qType,
       points: qPoints,
       options: filteredOptions,
     };
-
-    const isDbAssessment = typeof activeAssessmentId === 'number' || !String(activeAssessmentId).startsWith('ast-');
-    if (isDbAssessment && courseId && lessonId) {
-      try {
-        const qResponse = await QuestionService.createQuestion(
-          Number(courseId),
-          Number(lessonId),
-          Number(activeAssessmentId),
-          {
-            content: newQuestion.content,
-            type: newQuestion.type,
-            points: newQuestion.points,
-            position: assessments.find(a => a.id === activeAssessmentId)?.questions.length ? assessments.find(a => a.id === activeAssessmentId)!.questions.length + 1 : 1,
-          }
-        );
-        if (qResponse && qResponse.questionId) {
-          const dbQuestionId = qResponse.questionId;
-          const savedOptions = [];
-          
-          for (let idx = 0; idx < filteredOptions.length; idx++) {
-            const opt = filteredOptions[idx];
-            try {
-              const optResponse = await QuestionService.createQuestionOption(dbQuestionId, {
-                content: opt.content,
-                isCorrect: opt.isCorrect,
-                position: idx + 1,
-              });
-              savedOptions.push({
-                id: optResponse.optionId,
-                content: optResponse.content,
-                isCorrect: optResponse.isCorrect,
-              });
-            } catch (optErr) {
-              console.warn('Failed to save option during direct add:', optErr);
-              alert(`Cảnh báo: Không thể lưu Option "${opt.content}". Vui lòng thử lại. Lỗi: ${optErr}`);
-              savedOptions.push(opt);
-            }
-          }
-          
-          newQuestion = {
-            ...newQuestion,
-            id: dbQuestionId,
-            options: savedOptions,
-          };
-        }
-      } catch (err) {
-        console.error('Failed to immediately save question to backend:', err);
-      }
-    }
 
     setAssessments(prev => prev.map(a => {
       if (a.id === activeAssessmentId) {
@@ -196,27 +111,7 @@ export function LessonAssessmentSection({ assessments, setAssessments, courseId,
   };
 
   // Delete Question
-  const handleDeleteQuestion = async (assessmentId: string | number, questionId: string | number) => {
-    const isDbQuestion = typeof questionId === 'number' || !String(questionId).startsWith('q-');
-    if (isDbQuestion && courseId && lessonId) {
-      try {
-        const numericAssessmentId = typeof assessmentId === 'number' || !String(assessmentId).startsWith('ast-')
-          ? Number(assessmentId)
-          : Number(assessments.find(a => a.id === assessmentId)?.assessmentId);
-        
-        if (numericAssessmentId) {
-          await QuestionService.deleteQuestion(
-            Number(courseId),
-            Number(lessonId),
-            numericAssessmentId,
-            Number(questionId)
-          );
-        }
-      } catch (err) {
-        console.error('Failed to delete question from backend:', err);
-      }
-    }
-
+  const handleDeleteQuestion = (assessmentId: string | number, questionId: string | number) => {
     setAssessments(prev => prev.map(a => {
       if (a.id === assessmentId) {
         return {
@@ -352,7 +247,7 @@ export function LessonAssessmentSection({ assessments, setAssessments, courseId,
                           </div>
                           {/* Options visualizer */}
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingLeft: 8 }}>
-                            {q.options.map((opt, oidx) => (
+                            {q.options.map(opt => (
                               <div key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                 <div style={{
                                   width: 14, height: 14, borderRadius: '50%',

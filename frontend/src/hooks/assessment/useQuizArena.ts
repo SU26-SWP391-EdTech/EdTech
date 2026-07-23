@@ -148,7 +148,10 @@ export function useQuizArena(
      * Object.keys(answers) trả về question ID dưới dạng chuỗi,
      * nên cần Number(questionId) để truy cập lại answers.
      */
-    const answeredCount = Object.keys(answers).filter(k => answers[Number(k)]?.length > 0).length;
+    const answeredCount = questions.filter(q => {
+        const userAns = answers[q.id as any];
+        return Array.isArray(userAns) && userAns.length > 0;
+    }).length;
 
     return {
         questions,

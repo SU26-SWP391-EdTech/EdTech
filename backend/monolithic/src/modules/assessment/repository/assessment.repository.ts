@@ -14,7 +14,7 @@ export class AssessmentRepository extends Repository<Assessment> {
       where: {
         assessmentId,
       },
-      relations: ['course', 'lesson', 'questions', 'questions.options'],
+      relations: ['course', 'lesson', 'questions', 'questions.options', 'sessions'],
     });
   }
 

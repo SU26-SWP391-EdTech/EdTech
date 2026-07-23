@@ -7,6 +7,17 @@ export interface CourseUser {
   avatarUrl?: string | null;
 }
 
+export interface CourseTagItem {
+  tagId: number;
+  name: string;
+}
+
+export interface BackendCourseTag {
+  tagId?: number;
+  courseId?: number;
+  tag?: CourseTagItem;
+}
+
 export interface BackendCourse {
   courseId: number;
   title: string;
@@ -21,6 +32,22 @@ export interface BackendCourse {
   status: 'draft' | 'pending' | 'approved' | 'rejected';
   user: CourseUser;
   enrollmentCount?: number;
+  courseTags?: BackendCourseTag[];
+  courseTag?: BackendCourseTag[];
+  tags?: string[];
+}
+
+export function extractCourseTags(course: BackendCourse): string[] {
+  if (course.tags && course.tags.length > 0) {
+    return course.tags;
+  }
+  const tagList = course.courseTag || course.courseTags;
+  if (tagList && tagList.length > 0) {
+    return tagList
+      .map((ct) => ct.tag?.name)
+      .filter((name): name is string => Boolean(name));
+  }
+  return [];
 }
 
 export type Course = BackendCourse;

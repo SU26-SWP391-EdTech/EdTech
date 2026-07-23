@@ -11,7 +11,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Throttle } from '@nestjs/throttler';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { QuestionService } from './question.service';
 import { UpdateQuestionDto } from './dto/update-question.dto';

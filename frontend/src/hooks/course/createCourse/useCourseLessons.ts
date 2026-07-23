@@ -1,21 +1,13 @@
 import { useState } from 'react';
-import toast from 'react-hot-toast';
-
-import { deleteLesson as apiDeleteLesson } from '../../../services/lesson/lesson.service';
 import type { CourseBuilderLesson } from '../../../types/course/create-course.types';
-
-interface UseCourseLessonsOptions {
-  editId: number | null;
-}
 
 /**
  * Custom hook quản lý danh sách bài học và thứ tự sắp xếp bài học trong bộ công cụ tạo khóa học.
  * Hỗ trợ các tính năng: bật/tắt khóa bài học, xóa bài học (đồng bộ xóa API hoặc đưa vào hàng đợi xóa), 
  * kéo thả sắp xếp thứ tự hiển thị của các bài học.
  * 
- * @param editId - ID của khóa học đang chỉnh sửa (null nếu là tạo mới)
  */
-export function useCourseLessons({ editId }: UseCourseLessonsOptions) {
+export function useCourseLessons() {
   // --- 1. QUẢN LÝ TRẠNG THÁI (STATE) ---
   const [deletedLessonIds, setDeletedLessonIds] = useState<number[]>([]); // Danh sách ID các bài học thực tế đã bị xóa (chờ đồng bộ lưu)
   const [lessons, setLessons] = useState<CourseBuilderLesson[]>([]);     // Danh sách các bài học hiện tại trong builder
@@ -43,19 +35,11 @@ export function useCourseLessons({ editId }: UseCourseLessonsOptions) {
    * @param lessonId - ID bài học cần xóa (chuỗi bắt đầu bằng 'l-' là bài mới tạo chưa lưu DB)
    */
   async function deleteLesson(lessonId: string) {
-    if (!lessonId.startsWith('l-') && editId) {
-      // Trường hợp sửa trực tiếp khóa học: Gọi API xóa bài học ngay lập tức
-      try {
-        await apiDeleteLesson(Number(lessonId));
-        toast.success('Lesson removed.');
-      } catch (err) {
-        console.error(`Failed to delete lesson ${lessonId}:`, err);
-        toast.error('Failed to remove lesson.');
-        return;
-      }
-    } else if (!lessonId.startsWith('l-')) {
-      // Trường hợp lưu nháp: Đưa ID vào hàng đợi chờ gửi yêu cầu lưu của cả khóa học
-      setDeletedLessonIds(prev => [...prev, Number(lessonId)]);
+    if (!lessonId.startsWith('l-')) {
+      // Persisted lessons are only removed after the user saves the course.
+      setDeletedLessonIds(prev => (
+        prev.includes(Number(lessonId)) ? prev : [...prev, Number(lessonId)]
+      ));
     }
 
     // Cập nhật giao diện xóa bài học

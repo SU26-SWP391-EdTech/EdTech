@@ -127,13 +127,14 @@ export class TagsService {
         transactionManager,
       );
 
-      await transactionManager.insert(
-        CourseTag,
-        tagEntities.map((tag) => ({
+      const courseTags = tagEntities.map((tag) =>
+        transactionManager.create(CourseTag, {
           courseId,
           tagId: tag.tagId,
-        })),
+        }),
       );
+
+      await transactionManager.save(CourseTag, courseTags);
     };
 
     if (manager) {

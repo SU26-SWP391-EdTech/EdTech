@@ -6,8 +6,6 @@ import { CourseStats } from '../../components/course/management/CourseStats';
 import { CourseToolbar } from '../../components/course/management/CourseToolbar';
 import { CourseTable } from '../../components/course/management/CourseTable';
 import { CoursePreviewPanel } from '../../components/course/management/CoursePreviewPanel';
-import { CourseModal } from '../../components/course/management/CourseModal';
-import { DeleteCourseConfirmModal } from '../../components/course/management/DeleteCourseConfirmModal';
 
 const STATUSES = ['All Status', 'Published', 'Draft', 'Pending Review', 'Rejected'];
 
@@ -15,7 +13,6 @@ export function CourseManagement() {
     const {
         isProvider,
         navigate,
-        courses,
         isLoading,
         search,
         setSearch,
@@ -23,19 +20,6 @@ export function CourseManagement() {
         setStatusFilter,
         selectedId,
         setSelectedId,
-        showModal,
-        setShowModal,
-        selectedCourseForEdit,
-        setSelectedCourseForEdit,
-        isViewOnly,
-        setIsViewOnly,
-        showDeleteModal,
-        setShowDeleteModal,
-        selectedCourseForDelete,
-        setSelectedCourseForDelete,
-        deleteLoading,
-        fetchCourses,
-        handleDeleteCourse,
         filtered,
         selectedCourse,
         stats,
@@ -95,7 +79,6 @@ export function CourseManagement() {
                             {/* Table */}
                             <CourseTable
                                 filtered={filtered}
-                                courses={courses}
                                 selectedId={selectedId}
                                 setSelectedId={setSelectedId}
                                 isLoading={isLoading}
@@ -105,11 +88,6 @@ export function CourseManagement() {
                                 toggleSort={toggleSort}
                                 isProvider={isProvider}
                                 navigate={navigate}
-                                setSelectedCourseForEdit={setSelectedCourseForEdit}
-                                setIsViewOnly={setIsViewOnly}
-                                setShowModal={setShowModal}
-                                setSelectedCourseForDelete={setSelectedCourseForDelete}
-                                setShowDeleteModal={setShowDeleteModal}
                             />
                         </div>
 
@@ -131,32 +109,6 @@ export function CourseManagement() {
                     </div>
                 </div>
             </div>
-
-            {/* ── Modal ── */}
-            {showModal && (
-                <CourseModal
-                    course={selectedCourseForEdit}
-                    isViewOnly={isViewOnly}
-                    onClose={() => {
-                        setShowModal(false);
-                        setSelectedCourseForEdit(undefined);
-                        setIsViewOnly(false);
-                    }}
-                    onSuccess={fetchCourses}
-                />
-            )}
-
-            {showDeleteModal && selectedCourseForDelete && (
-                <DeleteCourseConfirmModal
-                    course={selectedCourseForDelete}
-                    onClose={() => {
-                        setShowDeleteModal(false);
-                        setSelectedCourseForDelete(undefined);
-                    }}
-                    onConfirm={handleDeleteCourse}
-                    loading={deleteLoading}
-                />
-            )}
         </>
     );
 }

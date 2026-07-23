@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsOptional, IsString, IsEnum } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, IsEnum, IsArray, ArrayMaxSize, MaxLength } from 'class-validator';
 import { CourseStatus } from 'src/common/enums/course.enum';
 
 export class CreateCourseDto {
@@ -52,4 +52,27 @@ export class CreateCourseDto {
   @Type(() => Number)
   @IsNumber()
   duration?: number;
+
+  @ApiPropertyOptional({
+    type: [String],
+    example: ['Backend', 'NestJS'],
+    description: 'Danh sách thẻ khóa học',
+  })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value !== 'string') return value;
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+    try {
+      const parsed = JSON.parse(trimmed);
+      return Array.isArray(parsed) ? parsed : value;
+    } catch {
+      return trimmed.split(',');
+    }
+  })
+  @IsArray()
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  @MaxLength(30, { each: true })
+  tags?: string[];
 }

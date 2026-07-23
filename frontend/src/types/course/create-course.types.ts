@@ -23,6 +23,7 @@ export interface CourseDraft {
     projectUrl?: string;
     outcomes?: string[];
     prerequisiteCourseIds?: number[];
+    tags?: string[];
     thumbnailPreview?: string | null;
     lessons?: CourseBuilderLesson[];
 }

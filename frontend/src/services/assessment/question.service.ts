@@ -4,14 +4,14 @@ import type { QuestionType } from '../../types/lesson/create-lesson.types';
 
 export interface CreateQuestionPayload {
     content: string;
-    type: QuestionType;
+    type: 'MULTIPLE_CHOICE_SINGLE' | 'MULTIPLE_CHOICE_MULTI' | 'TRUE_FALSE';
     points?: number;
     position: number;
 }
 
 export interface UpdateQuestionPayload {
     content?: string;
-    type?: QuestionType;
+    type?: 'MULTIPLE_CHOICE_SINGLE' | 'MULTIPLE_CHOICE_MULTI' | 'TRUE_FALSE';
     points?: number;
     position?: number;
 }

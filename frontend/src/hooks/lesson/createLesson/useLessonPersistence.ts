@@ -4,11 +4,13 @@ import type { NavigateFunction } from 'react-router-dom';
 import api from '../../../lib/axios';
 import {
     createLesson,
+    type Lesson,
     updateLesson,
 } from '../../../services/lesson/lesson.service';
 import { updateCourse } from '../../../services/course/course.service';
 
 import type {
+    Assessment,
     LessonStatus,
 } from '../../../types/lesson/create-lesson.types';
 
@@ -56,7 +58,7 @@ export function useLessonPersistence({
      * @param nextStatus - Trạng thái bài học tiếp theo ('draft' | 'published')
      * @returns Thông tin bài học đã lưu từ API hoặc null nếu thất bại
      */
-    async function persistLesson(nextStatus: LessonStatus): Promise<any | null> {
+    async function persistLesson(nextStatus: LessonStatus): Promise<Lesson | null> {
         if (!form.title.trim()) {
             form.setTitleError(true);
             showFeedback('Lesson title is required.');
@@ -102,6 +104,7 @@ export function useLessonPersistence({
             // Đóng gói payload bài học chuẩn
             const payload = buildLessonApiPayload({
                 title: form.title,
+                description: form.description,
                 duration: form.duration,
                 hasVideo: form.hasVideo,
                 hasReading: form.hasReading,
@@ -130,50 +133,80 @@ export function useLessonPersistence({
                 );
 
             const nextLessonId = Number(saved.lessonId);
-
-            // --- LƯU TUẦN TỰ ASSESSMENT, CÂU HỎI & OPTION LÊN API ---
-            const savedAssessments = [];
-            for (const ass of form.assessments) {
-                const isDbAssessment = typeof ass.id === 'number' || (ass as any).assessmentId != null || !String(ass.id).startsWith('ast-');
-                if (isDbAssessment) {
-                    savedAssessments.push(ass);
-                    continue;
-                }
-                try {
-                    // 1. Tạo Assessment cùng lúc với Question và Option
-                    const questionsPayload = (ass.questions || []).map((q, qIdx) => ({
-                        content: q.content,
-                        type: q.type,
-                        points: q.points || 10,
-                        position: qIdx + 1,
-                        options: (q.options || []).map((opt, oIdx) => ({
-                            content: opt.content,
-                            isCorrect: opt.isCorrect,
-                            position: oIdx + 1
-                        }))
-                    }));
-
-                    const response = await api.post('/assessment', {
-                        courseId: data.selectedCourseId,
-                        lessonId: nextLessonId,
-                        title: ass.title,
-                        type: ass.type,
-                        questions: questionsPayload
-                    });
-
-                    if (response.data && response.data.assessmentId) {
-                        savedAssessments.push({
-                            ...response.data,
-                            id: String(response.data.assessmentId)
-                        });
-                    } else {
-                        savedAssessments.push(ass);
-                    }
-                } catch (apiErr) {
-                    console.warn('Failed to save assessment to backend API:', apiErr);
-                    savedAssessments.push(ass);
-                }
-            }
+            const treePayload = {
+                assessments: form.assessments.map(assessment => {
+                    const assessmentId = Number(
+                        assessment.assessmentId ||
+                        (!String(assessment.id).startsWith('ast-') ? assessment.id : 0)
+                    );
+                    return {
+                        ...(assessmentId > 0 ? { assessmentId } : {}),
+                        title: assessment.title,
+                        type: assessment.type,
+                        questions: assessment.questions.map((question, questionIndex) => {
+                            const questionId = !String(question.id).startsWith('q-')
+                                ? Number(question.id)
+                                : 0;
+                            return {
+                                ...(questionId > 0 ? { questionId } : {}),
+                                content: question.content,
+                                type: question.type,
+                                points: question.points || 10,
+                                position: questionIndex + 1,
+                                options: question.options.map((option, optionIndex) => {
+                                    const optionId = !String(option.id).startsWith('opt-')
+                                        ? Number(option.id)
+                                        : 0;
+                                    return {
+                                        ...(optionId > 0 ? { optionId } : {}),
+                                        content: option.content,
+                                        isCorrect: option.isCorrect,
+                                        position: optionIndex + 1,
+                                    };
+                                }),
+                            };
+                        }),
+                    };
+                }),
+            };
+            const treeResponse = await api.put(
+                '/assessment/courses/' + data.selectedCourseId +
+                '/lesson/' + nextLessonId + '/tree',
+                treePayload,
+            );
+            const savedAssessments: Assessment[] = treeResponse.data.map((assessment: {
+                assessmentId: number;
+                title: string;
+                type: Assessment['type'];
+                questions?: Array<{
+                    questionId: number;
+                    content: string;
+                    type: Assessment['questions'][number]['type'];
+                    points: number;
+                    options?: Array<{
+                        optionId: number;
+                        content: string;
+                        isCorrect: boolean;
+                    }>;
+                }>;
+            }) => ({
+                id: String(assessment.assessmentId),
+                assessmentId: assessment.assessmentId,
+                title: assessment.title,
+                type: assessment.type,
+                questions: (assessment.questions || []).map(question => ({
+                    id: String(question.questionId),
+                    content: question.content,
+                    type: question.type,
+                    points: Number(question.points),
+                    options: (question.options || []).map(option => ({
+                        id: String(option.optionId),
+                        content: option.content,
+                        isCorrect: Boolean(option.isCorrect),
+                    })),
+                })),
+            }));
+            form.setAssessments(savedAssessments);
             // Lưu kết quả đồng bộ Assessment xuống localStorage để cache cục bộ
             localStorage.setItem(`assessments_lesson_${nextLessonId}`, JSON.stringify(savedAssessments));
             
@@ -207,12 +240,13 @@ export function useLessonPersistence({
             }
 
             return saved;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Failed to save lesson:', error);
 
-            showFeedback(
-                error.response?.data?.message || 'Failed to save lesson.'
-            );
+            const message = error && typeof error === 'object' && 'response' in error
+                ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+                : undefined;
+            showFeedback(message || 'Failed to save lesson.');
 
             return null;
         } finally {

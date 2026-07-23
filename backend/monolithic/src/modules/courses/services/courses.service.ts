@@ -26,9 +26,9 @@ export class CoursesService {
     private cloudinaryService: CloudinaryService,
     @InjectRepository(User) private userRepository: Repository<User>,
     private readonly tagsService: TagsService,
-  ) { }
+  ) {}
 
-  //create course
+  // create course
   async create(
     createCourseDto: CreateCourseDto,
     userId: number,
@@ -49,10 +49,17 @@ export class CoursesService {
       createCourseDto.thumbnailUrl = uploaded.secure_url;
     }
 
-    return this.coursesRepository.createCourse({
-      ...createCourseDto,
+    const { tags, ...courseData } = createCourseDto;
+    const newCourse = await this.coursesRepository.createCourse({
+      ...courseData,
       user: courseProvider,
     });
+
+    if (tags && tags.length > 0) {
+      await this.tagsService.setCourseTags(newCourse.courseId, tags);
+    }
+
+    return this.findOne(newCourse.courseId);
   }
 
   async createAndSubmitToReview(
@@ -75,11 +82,18 @@ export class CoursesService {
       createCourseDto.thumbnailUrl = uploaded.secure_url;
     }
 
-    return this.coursesRepository.createCourse({
-      ...createCourseDto,
+    const { tags, ...courseData } = createCourseDto;
+    const newCourse = await this.coursesRepository.createCourse({
+      ...courseData,
       status: CourseStatus.PENDING,
       user: courseProvider,
     });
+
+    if (tags && tags.length > 0) {
+      await this.tagsService.setCourseTags(newCourse.courseId, tags);
+    }
+
+    return this.findOne(newCourse.courseId);
   }
 
   async findAll(): Promise<Course[]> {
@@ -110,46 +124,20 @@ export class CoursesService {
       throw new NotFoundException('Course not found');
     }
 
-    if (course.status !== CourseStatus.DRAFT) {
-      throw new BadRequestException(
-        'Only draft courses can be submitted for review',
-      );
+    if (course.status === CourseStatus.PENDING) {
+      return course;
     }
 
     return await this.coursesRepository.pendingCourse(course);
   }
 
-  //update course
-
+  // update course
   async update(
     id: number,
     updateCourseDto: UpdateCourseDto,
     currentUserId: number,
     file?: Express.Multer.File,
   ): Promise<Course> {
-    if (updateCourseDto.tags !== undefined) {
-      const existingCourse = await this.coursesRepository.findOne({
-        where: {
-          courseId: id,
-          user: {
-            userId: currentUserId,
-          },
-        },
-      });
-
-      if (!existingCourse) {
-        throw new NotFoundException(
-          'Course not found or you do not own this course',
-        );
-      }
-
-      if (existingCourse.status === CourseStatus.APPROVED) {
-        throw new ForbiddenException(
-          'Course Provider cannot edit official tags after approval',
-        );
-      }
-    }
-
     const { tags, ...courseData } = updateCourseDto;
     const course = await this.coursesRepository.findOne({
       where: {
@@ -173,11 +161,18 @@ export class CoursesService {
 
     Object.assign(course, courseData);
 
-    return this.coursesRepository.saveCourse(course);
+    await this.coursesRepository.saveCourse(course);
+
+    if (tags !== undefined) {
+      await this.tagsService.setCourseTags(id, tags);
+      const updatedCourse = await this.coursesRepository.findDetail(id);
+      return updatedCourse!;
+    }
+
+    return course;
   }
 
-  //remove course
-
+  // remove course
   async remove(id: number, userId: number): Promise<{ message: string }> {
     const course = await this.coursesRepository.findOne({
       where: {
@@ -221,7 +216,7 @@ export class CoursesService {
     };
   }
 
-  //approve course
+  // approve course
   public async approveCourse(
     id: number,
     reviewerId: number,
@@ -256,7 +251,9 @@ export class CoursesService {
       course.reviewedBy = reviewer;
 
       await manager.save(Course, course);
-      await this.tagsService.setCourseTags(id, tags, manager);
+      if (tags && tags.length > 0) {
+        await this.tagsService.setCourseTags(id, tags, manager);
+      }
 
       const approvedCourse = await manager
         .getRepository(Course)
@@ -325,6 +322,7 @@ export class CoursesService {
 
     return this.coursesRepository.saveCourse(course);
   }
+
   // ==================== Search & Filter ====================
 
   async search(dto: SearchCourseDto) {

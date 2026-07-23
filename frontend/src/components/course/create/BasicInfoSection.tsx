@@ -1,12 +1,14 @@
 import type { DragEvent, RefObject } from 'react';
 
 import { Field, FormCard, Input, Select, Textarea, ThumbnailUploader } from './fields';
+import { TagSelector } from '../management/TagSelector';
 
 interface BasicInfoSectionProps {
   description: string;
   dragOver: boolean;
   fileInputRef: RefObject<HTMLInputElement | null>;
   language: string;
+  tags?: string[];
   thumbnailPreview: string | null;
   title: string;
   onClearThumbnail: () => void;
@@ -16,6 +18,7 @@ interface BasicInfoSectionProps {
   onDrop: (event: DragEvent) => void;
   onFileChange: (file: File) => void;
   onLanguageChange: (value: string) => void;
+  onTagsChange?: (tags: string[]) => void;
   onTitleChange: (value: string) => void;
 }
 
@@ -24,6 +27,7 @@ export function BasicInfoSection({
   dragOver,
   fileInputRef,
   language,
+  tags = [],
   thumbnailPreview,
   title,
   onClearThumbnail,
@@ -33,6 +37,7 @@ export function BasicInfoSection({
   onDrop,
   onFileChange,
   onLanguageChange,
+  onTagsChange,
   onTitleChange,
 }: BasicInfoSectionProps) {
   return (
@@ -55,6 +60,12 @@ export function BasicInfoSection({
             <option value="Vietnamese">Vietnamese</option>
           </Select>
         </Field>
+        <div>
+          <TagSelector
+            selectedTags={tags}
+            onChange={newTags => onTagsChange && onTagsChange(newTags)}
+          />
+        </div>
         <Field label="Course thumbnail" full>
           <ThumbnailUploader
             dragOver={dragOver}

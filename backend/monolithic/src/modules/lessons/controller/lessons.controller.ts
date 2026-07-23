@@ -98,6 +98,7 @@ export class LessonsController {
     @Param('courseId', ParseIntPipe) courseId: number,
     @Query('lessonId', ParseIntPipe) lessonId: number,
     @Body() updateLessonDto: UpdateLessonDto,
+    @CurrentUser() user: JwtPayloadUser,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     return await this.lessonsService.update(
@@ -105,6 +106,7 @@ export class LessonsController {
       lessonId,
       updateLessonDto,
       file,
+      user.userId,
     );
   }
 

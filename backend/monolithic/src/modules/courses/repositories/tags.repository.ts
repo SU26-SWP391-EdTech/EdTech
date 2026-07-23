@@ -68,6 +68,8 @@ export class TagsRepository extends Repository<Tag> {
       .innerJoin(CourseTag, 'courseTag', 'courseTag.courseId = course.courseId')
       .leftJoin('course.user', 'user')
       .addSelect(['user.userId', 'user.fullName', 'user.avatar'])
+      .leftJoinAndSelect('course.courseTag', 'allCourseTags')
+      .leftJoinAndSelect('allCourseTags.tag', 'tag')
       .where('courseTag.tagId = :tagId', { tagId })
       .andWhere('course.status = :status', { status: CourseStatus.APPROVED })
       .orderBy('course.createdAt', 'DESC')

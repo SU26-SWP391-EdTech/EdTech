@@ -116,11 +116,14 @@ export class LessonsService {
       throw new NotFoundException(`Lesson with ID ${lessonId} not found`);
     }
 
-    // Instructor sở hữu course
-    if (
-      lesson.course.user.userId === userId &&
-      lesson.course.user.role.roleName === RoleEnum.COURSE_PROVIDER
-    ) {
+    // Allow Course Providers, Academic Managers, Admins, or Course Owner
+    const isOwnerOrStaff =
+      lesson.course.user?.userId === userId ||
+      lesson.course.user?.role?.roleName === RoleEnum.COURSE_PROVIDER ||
+      lesson.course.user?.role?.roleName === RoleEnum.ACADEMIC_MANAGER ||
+      lesson.course.user?.role?.roleName === RoleEnum.ADMIN;
+
+    if (isOwnerOrStaff) {
       return lesson;
     }
 
@@ -132,7 +135,6 @@ export class LessonsService {
         course: {
           courseId: lesson.course.courseId,
         },
-        status: EnrollmentStatus.ACTIVE,
       },
     });
 
@@ -150,12 +152,16 @@ export class LessonsService {
     lessonId: number,
     dto: UpdateLessonDto,
     file?: Express.Multer.File,
+    currentUserId?: number,
   ): Promise<Lesson> {
     const lesson = await this.findOne(lessonId);
 
     if (!lesson) throw new NotFoundException('Lesson not exist');
 
-    const course = await this.courseService.findCourseByIdService(courseId);
+    if (!currentUserId) {
+      throw new ForbiddenException('Authenticated course owner is required');
+    }
+    const course = await this.courseService.validateCourseOwner(currentUserId, courseId);
 
     if (!course) {
       throw new NotFoundException(`Not found course with ID ${courseId}`);

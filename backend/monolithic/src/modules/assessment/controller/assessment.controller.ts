@@ -8,6 +8,7 @@ import {
   UseGuards,
   Patch,
   Delete,
+  Put,
 } from '@nestjs/common';
 import { AssessmentService } from '../service/assessment.service';
 import { CreateAssessmentDto } from '../dto/create-assessment.dto';
@@ -20,6 +21,7 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { JwtPayloadUser } from 'src/common/decorators/current-user.decorator';
 import { AssessmentSessionService } from '../service/assessment-session.service';
 import { SubmitAssessmentDto } from '../dto/submit-answer.dto';
+import { SyncAssessmentTreeDto } from '../dto/sync-assessment-tree.dto';
 
 @ApiTags('Assessments')
 @Controller('assessment')
@@ -85,6 +87,32 @@ export class AssessmentController {
       assessmentId,
       lessonId,
       courseId,
+    );
+  }
+
+  @Delete(':id')
+  @Roles(RoleEnum.COURSE_PROVIDER)
+  async remove(
+    @Param('id', ParseIntPipe) assessmentId: number,
+    @CurrentUser() user: JwtPayloadUser,
+  ) {
+    await this.assessmentService.removeService(user.userId, assessmentId);
+    return { success: true };
+  }
+
+  @Put('courses/:courseId/lesson/:lessonId/tree')
+  @Roles(RoleEnum.COURSE_PROVIDER)
+  async syncLessonAssessmentTree(
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Param('lessonId', ParseIntPipe) lessonId: number,
+    @Body() dto: SyncAssessmentTreeDto,
+    @CurrentUser() user: JwtPayloadUser,
+  ) {
+    return this.assessmentService.syncLessonAssessmentTree(
+      user.userId,
+      courseId,
+      lessonId,
+      dto,
     );
   }
 

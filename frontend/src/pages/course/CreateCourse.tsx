@@ -31,6 +31,7 @@ export function CreateCoursePage() {
               dragOver={course.thumbnail.dragOver}
               fileInputRef={course.thumbnail.fileInputRef}
               language={course.form.language}
+              tags={course.form.tags}
               thumbnailPreview={course.thumbnail.thumbnailPreview}
               title={course.form.title}
               onClearThumbnail={course.thumbnail.clearThumbnail}
@@ -40,6 +41,7 @@ export function CreateCoursePage() {
               onDrop={course.thumbnail.onDrop}
               onFileChange={course.thumbnail.handleFileChange}
               onLanguageChange={course.form.setLanguage}
+              onTagsChange={course.form.setTags}
               onTitleChange={course.form.setTitle}
             />
 
