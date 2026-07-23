@@ -1,25 +1,31 @@
 import api from '../../lib/axios';
 
+import type { QuestionType } from '../../types/lesson/create-lesson.types';
+
 export interface CreateQuestionPayload {
     content: string;
-    type: 'MULTIPLE_CHOICE_SINGLE' | 'MULTIPLE_CHOICE_MULTI';
+    type: QuestionType;
     points?: number;
+    position: number;
 }
 
 export interface UpdateQuestionPayload {
     content?: string;
-    type?: 'MULTIPLE_CHOICE_SINGLE' | 'MULTIPLE_CHOICE_MULTI';
+    type?: QuestionType;
     points?: number;
+    position?: number;
 }
 
 export interface CreateQuestionOptionPayload {
     content: string;
     isCorrect: boolean;
+    position: number;
 }
 
 export interface UpdateQuestionOptionPayload {
     content?: string;
     isCorrect?: boolean;
+    position?: number;
 }
 
 export interface ReorderQuestionOptionsPayload {

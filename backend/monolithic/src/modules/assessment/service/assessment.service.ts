@@ -49,6 +49,7 @@ export class AssessmentService {
       lessonId: lessonId || undefined,
       title,
       type,
+      questions: createAssessmentDto.questions,
     });
 
     return await this.assessmentRepository.save(assessment);
@@ -145,7 +146,7 @@ export class AssessmentService {
     return pvpAssessment;
   }
 
-  async getPvpQuestion(courseId: number){
+  async getPvpQuestion(courseId: number) {
     return await this.assessmentRepository.getPvpQuestion(courseId);
   }
 

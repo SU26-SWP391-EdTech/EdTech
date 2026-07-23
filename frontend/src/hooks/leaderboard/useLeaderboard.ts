@@ -209,8 +209,8 @@ export function useLeaderboard() {
                 let pvpAssessmentId = 1; // Fallback to 1 (seeded)
                 try {
                     const res = await api.get(`/assessment/courses/${selectedCourseId}/pvp`);
-                    if (res.data && res.data.length > 0) {
-                        pvpAssessmentId = res.data[0].assessmentId;
+                    if (res.data && res.data.assessmentId) {
+                        pvpAssessmentId = res.data.assessmentId;
                     }
                 } catch (err) {
                     console.warn('Failed to fetch PvP assessment for course, using default ID: 1', err);

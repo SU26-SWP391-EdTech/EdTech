@@ -6,6 +6,7 @@ import { Question } from 'src/modules/question/entities/question.entity';
 import { QuestionOption } from 'src/modules/question/entities/question-option.entity';
 import { PvpMatchStatus } from 'src/common/enums/pvp-match-status.enum';
 import { AssessmentType } from 'src/common/enums/assessment-type.enum';
+import { QuestionType } from 'src/common/enums/question-type.enum';
 
 @Injectable()
 export class MatchRepository {
@@ -61,7 +62,7 @@ export class MatchRepository {
     const assessments = await this.assessmentRepo.find({
       where: {
         courseId,
-        type: In([AssessmentType.LESSON_QUIZ, AssessmentType.PRACTICE]),
+        type: In([AssessmentType.LESSON_QUIZ, AssessmentType.PRACTICE, AssessmentType.PVP]),
       },
       select: ['assessmentId'],
     });
@@ -73,6 +74,11 @@ export class MatchRepository {
     return await this.questionRepo.find({
       where: {
         assessmentId: In(assessments.map((assessment) => assessment.assessmentId)),
+        type: In([
+          QuestionType.MULTIPLE_CHOICE_SINGLE,
+          QuestionType.TRUE_FALSE,
+          QuestionType.MULTIPLE_CHOICE_MULTI,
+        ]),
       },
       relations: {
         options: true,

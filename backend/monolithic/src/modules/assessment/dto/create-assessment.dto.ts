@@ -5,8 +5,12 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsArray,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { AssessmentType } from 'src/common/enums/assessment-type.enum';
+import { CreateQuestionDto } from 'src/modules/question/dto/create-question.dto';
 
 export class CreateAssessmentDto {
   @ApiProperty({
@@ -39,4 +43,14 @@ export class CreateAssessmentDto {
   })
   @IsEnum(AssessmentType)
   type!: AssessmentType;
+
+  @ApiPropertyOptional({
+    type: [CreateQuestionDto],
+    description: 'List of questions for this assessment',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateQuestionDto)
+  questions?: CreateQuestionDto[];
 }

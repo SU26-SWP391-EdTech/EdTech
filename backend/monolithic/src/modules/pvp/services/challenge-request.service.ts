@@ -17,6 +17,7 @@ import { ChallengeRejectDto } from '../dto/challenge/challenge-reject.dto';
 import { SocketService } from './socket.service';
 import { SocketEvents } from '../constants/socket-events.constant';
 import { BattleService } from './battle.service';
+import { MatchRepository } from '../repositories/match.repository';
 @Injectable()
 export class ChallengeRequestService {
   constructor(
@@ -27,6 +28,7 @@ export class ChallengeRequestService {
     private readonly challengeRequestRepo: ChallengeRequestRepository,
     private readonly socketService: SocketService,
     private readonly battleService: BattleService,
+    private readonly matchRepository: MatchRepository,
   ) { }
 
   async challengeRequests(
@@ -45,7 +47,7 @@ export class ChallengeRequestService {
       throw new BadRequestException('You cannot challenge yourself.');
     }
 
-    if (!this.connectionManager.isOnline(receiverId) && receiverId !== 12) {
+    if (!this.connectionManager.isOnline(receiverId)) {
       throw new BadRequestException('Opponent is offline.');
     }
 
@@ -71,12 +73,10 @@ export class ChallengeRequestService {
       userId,
       assessment.courseId,
     ).catch(() => false);
-    const checkEnrollReceiver = receiverId === 12
-      ? true
-      : await this.enrollmentService.checkEnrollment(
-          receiverId,
-          assessment.courseId,
-        ).catch(() => false);
+    const checkEnrollReceiver = await this.enrollmentService.checkEnrollment(
+      receiverId,
+      assessment.courseId,
+    ).catch(() => false);
 
     if (!checkEnrollChallenger || !checkEnrollReceiver) {
       throw new BadRequestException(
@@ -87,6 +87,13 @@ export class ChallengeRequestService {
     if (assessment.type !== AssessmentType.PVP) {
       throw new BadRequestException(
         `The assessment for match must be in PVP type`,
+      );
+    }
+
+    const questions = await this.matchRepository.findQuestionsByCourseId(assessment.courseId);
+    if (questions.length === 0) {
+      throw new BadRequestException(
+        'Assessment does not contain any battle questions.',
       );
     }
 
@@ -110,22 +117,15 @@ export class ChallengeRequestService {
       challenge,
     );
 
-    if (receiverId === 12 && !this.connectionManager.isOnline(12)) {
-      setTimeout(async () => {
-        try {
-          await this.challengeApprove(
-            { challengeId: challenge.challengeId },
-            12,
-          );
-        } catch (e) {
-          console.error(`Failed to auto-approve mock challenge: ${e.message}`);
-        }
-      }, 1500);
-    } else {
-      setTimeout(async () => {
-        await this.challengeExpire(challenge.challengeId);
-      }, 30000);
-    }
+    this.socketService.emitToUser(
+      userId,
+      SocketEvents.CHALLENGE_PENDING,
+      challenge,
+    );
+
+    setTimeout(async () => {
+      await this.challengeExpire(challenge.challengeId);
+    }, 30000);
   }
 
   async challengeExpire(challengeId: number) {
@@ -174,14 +174,14 @@ export class ChallengeRequestService {
       );
     }
 
-    await this.challengeRequestRepo.approveChallenge(challengeId);
-
     await this.battleService.createBattle({
       challengeId: challenge.challengeId,
       assessmentId: challenge.assessmentId,
       challengerId: challenge.challengerId,
       receiverId: challenge.receiverId,
     });
+
+    await this.challengeRequestRepo.approveChallenge(challengeId);
   }
 
   async challengeReject(challengeRejectDto: ChallengeRejectDto, userId: number) {

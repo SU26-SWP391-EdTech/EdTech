@@ -216,11 +216,18 @@ export class LessonsService {
 
   async remove(id: number): Promise<{ success: boolean; message: string }> {
     await this.findOne(id);
-    await this.lessonsRepo.delete(id);
-    return {
-      success: true,
-      message: `Lesson with ID ${id} has been deleted successfully`,
-    };
+    try {
+      await this.lessonsRepo.delete(id);
+      return {
+        success: true,
+        message: `Lesson with ID ${id} has been deleted successfully`,
+      };
+    } catch (error) {
+      if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.code === 'ER_ROW_IS_REFERENCED' || error.message.includes('foreign key constraint')) {
+        throw new BadRequestException('Cannot delete this lesson because it contains Quizzes/Assessments, or students have already started learning it. Please remove all Quizzes inside this lesson first, or unpublish the course.');
+      }
+      throw error;
+    }
   }
 
   public async findLessonByIdService(lessonId: number): Promise<Lesson> {

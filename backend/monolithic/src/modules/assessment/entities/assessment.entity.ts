@@ -85,6 +85,7 @@ export class Assessment {
   @OneToMany(
     () => Question,
     (question) => question.assessment,
+    { cascade: ['insert'] }
   )
   questions!: Question[];
 

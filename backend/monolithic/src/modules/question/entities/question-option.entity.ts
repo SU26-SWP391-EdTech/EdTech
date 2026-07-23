@@ -50,6 +50,7 @@ export class QuestionOption {
     (question) => question.options,
     {
       nullable: false,
+      onDelete: 'CASCADE',
     },
   )
   @JoinColumn({

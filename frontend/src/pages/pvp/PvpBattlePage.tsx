@@ -7,68 +7,7 @@ import { useAuthStore } from '../../stores/auth/auth.stores';
 import api from '../../lib/axios';
 import { getLearnerProfile } from '../../services/learner/learner.services';
 
-const MOCK_QUESTIONS = [
-    {
-        questionId: 1,
-        type: 'MULTIPLE_CHOICE',
-        content: 'Which of the following is NOT a fundamental concept of Object-Oriented Programming?',
-        options: [
-            { optionId: 101, position: 1, content: 'Inheritance' },
-            { optionId: 102, position: 2, content: 'Compilation' },
-            { optionId: 103, position: 3, content: 'Encapsulation' },
-            { optionId: 104, position: 4, content: 'Polymorphism' }
-        ],
-        correctOptionId: 102
-    },
-    {
-        questionId: 2,
-        type: 'MULTIPLE_CHOICE',
-        content: 'In SQL, what statement is used to remove all records from a table without logging the individual row deletions?',
-        options: [
-            { optionId: 201, position: 1, content: 'DELETE' },
-            { optionId: 202, position: 2, content: 'DROP' },
-            { optionId: 203, position: 3, content: 'TRUNCATE' },
-            { optionId: 204, position: 4, content: 'REMOVE' }
-        ],
-        correctOptionId: 203
-    },
-    {
-        questionId: 3,
-        type: 'MULTIPLE_CHOICE',
-        content: 'Which data structure operates on a Last-In, First-Out (LIFO) principle?',
-        options: [
-            { optionId: 301, position: 1, content: 'Queue' },
-            { optionId: 302, position: 2, content: 'Stack' },
-            { optionId: 303, position: 3, content: 'Heap' },
-            { optionId: 304, position: 4, content: 'Tree' }
-        ],
-        correctOptionId: 302
-    },
-    {
-        questionId: 4,
-        type: 'MULTIPLE_CHOICE',
-        content: 'What is the time complexity of searching in a balanced Binary Search Tree (BST) in the worst case?',
-        options: [
-            { optionId: 401, position: 1, content: 'O(1)' },
-            { optionId: 402, position: 2, content: 'O(n)' },
-            { optionId: 403, position: 3, content: 'O(log n)' },
-            { optionId: 404, position: 4, content: 'O(n log n)' }
-        ],
-        correctOptionId: 403
-    },
-    {
-        questionId: 5,
-        type: 'MULTIPLE_CHOICE',
-        content: 'Which protocol is responsible for establishing a secure, encrypted link between a web server and a browser?',
-        options: [
-            { optionId: 501, position: 1, content: 'HTTP' },
-            { optionId: 502, position: 2, content: 'FTP' },
-            { optionId: 503, position: 3, content: 'SMTP' },
-            { optionId: 504, position: 4, content: 'HTTPS' }
-        ],
-        correctOptionId: 504
-    }
-];
+
 
 export function PvpBattlePage() {
     const navigate = useNavigate();
@@ -77,17 +16,17 @@ export function PvpBattlePage() {
     const roomId = searchParams.get('roomId');
     const opponentId = Number(searchParams.get('opponentId'));
     const challengerId = Number(searchParams.get('challengerId'));
-    const isMock = searchParams.get('mock') === 'true';
+
 
     const currentUser = useAuthStore((state) => state.user);
 
     // Battle and Player states
-    const [battleQuestions, setBattleQuestions] = useState<any[]>(MOCK_QUESTIONS);
     const [opponentProfile, setOpponentProfile] = useState<any>(null);
     const [activeQuestion, setActiveQuestion] = useState<any>(null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [totalQuestions, setTotalQuestions] = useState(5);
     const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
+    const [selectedOptionIds, setSelectedOptionIds] = useState<number[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const [questionCountdown, setQuestionCountdown] = useState(15);
     const hasSubmittedRef = useRef(false);
@@ -95,8 +34,7 @@ export function PvpBattlePage() {
     // Live score state
     const [scores, setScores] = useState({ player1Score: 0, player2Score: 0 });
 
-    // Mock mode score tracking
-    const [mockCorrectCount, setMockCorrectCount] = useState(0);
+
 
     // Match status: 'loading' | 'playing' | 'waiting_next' | 'gameover' | 'opponent_left' | 'error'
     const [status, setStatus] = useState<'loading' | 'playing' | 'waiting_next' | 'gameover' | 'opponent_left' | 'error'>('loading');
@@ -107,7 +45,7 @@ export function PvpBattlePage() {
     // Award PvP points when the player wins a match (or opponent forfeits)
     useEffect(() => {
         if (!currentUser?.userId || !matchId || pointsAwarded) return;
-        
+
         let won = false;
         if (status === 'opponent_left') {
             won = true;
@@ -139,40 +77,7 @@ export function PvpBattlePage() {
                     player1Score: 0,
                     player2Score: 0
                 });
-                
-                if (isMock) {
-                    const assId = Number(searchParams.get('assessmentId'));
-                    let loadedQuestions = [...MOCK_QUESTIONS];
-                    if (assId) {
-                        try {
-                            const res = await api.get(`/assessment/${assId}`);
-                            const dbQuestions = res.data?.questions || [];
-                            if (dbQuestions.length >= 5) {
-                                loadedQuestions = dbQuestions.map((q: any) => {
-                                    const correctOpt = q.options?.find((o: any) => o.isCorrect);
-                                    return {
-                                        questionId: q.questionId,
-                                        type: q.type || 'MULTIPLE_CHOICE',
-                                        content: q.content,
-                                        options: (q.options || []).map((o: any, idx: number) => ({
-                                            optionId: o.optionId,
-                                            position: idx + 1,
-                                            content: o.content
-                                        })),
-                                        correctOptionId: correctOpt ? correctOpt.optionId : 0
-                                    };
-                                });
-                            }
-                        } catch (err) {
-                            console.warn('Failed to load real assessment questions for practice, using mock:', err);
-                        }
-                    }
-                    // Select 5 random questions
-                    const shuffled = loadedQuestions.sort(() => 0.5 - Math.random()).slice(0, 5);
-                    setBattleQuestions(shuffled);
-                    setActiveQuestion(shuffled[0]);
-                    setCurrentQuestionIndex(1);
-                }
+
                 setStatus('playing');
             } catch (err) {
                 console.error('Failed to fetch opponent details:', err);
@@ -182,49 +87,16 @@ export function PvpBattlePage() {
                     player1Score: 0,
                     player2Score: 0
                 });
-                if (isMock) {
-                    const assId = Number(searchParams.get('assessmentId'));
-                    let loadedQuestions = [...MOCK_QUESTIONS];
-                    if (assId) {
-                        try {
-                            const res = await api.get(`/assessment/${assId}`);
-                            const dbQuestions = res.data?.questions || [];
-                            if (dbQuestions.length >= 5) {
-                                loadedQuestions = dbQuestions.map((q: any) => {
-                                    const correctOpt = q.options?.find((o: any) => o.isCorrect);
-                                    return {
-                                        questionId: q.questionId,
-                                        type: q.type || 'MULTIPLE_CHOICE',
-                                        content: q.content,
-                                        options: (q.options || []).map((o: any, idx: number) => ({
-                                            optionId: o.optionId,
-                                            position: idx + 1,
-                                            content: o.content
-                                        })),
-                                        correctOptionId: correctOpt ? correctOpt.optionId : 0
-                                    };
-                                });
-                            }
-                        } catch (err) {
-                            console.warn('Failed to load real assessment questions for practice, using mock:', err);
-                        }
-                    }
-                    // Select 5 random questions
-                    const shuffled = loadedQuestions.sort(() => 0.5 - Math.random()).slice(0, 5);
-                    setBattleQuestions(shuffled);
-                    setActiveQuestion(shuffled[0]);
-                    setCurrentQuestionIndex(1);
-                }
                 setStatus('playing');
             }
         }
 
         fetchOpponentDetails();
-    }, [matchId, opponentId, isMock]);
+    }, [matchId, opponentId]);
 
     // Socket Event listeners
     useEffect(() => {
-        if (isMock) return;
+
         if (!matchId) return;
 
         const socket = pvpSocket.getSocket();
@@ -241,6 +113,7 @@ export function PvpBattlePage() {
             setCurrentQuestionIndex(data.questionIndex);
             setQuestionCountdown(15);
             setSelectedOptionId(null);
+            setSelectedOptionIds([]);
             setSubmitted(false);
             hasSubmittedRef.current = false;
             setStatus('playing');
@@ -302,7 +175,7 @@ export function PvpBattlePage() {
             socket.off('opponentLeft', handleOpponentLeft);
             socket.off('error', handleSocketError);
         };
-    }, [matchId, isMock]);
+    }, [matchId]);
 
     // Timer Interval for remaining question time
     useEffect(() => {
@@ -312,54 +185,9 @@ export function PvpBattlePage() {
             setQuestionCountdown((prev) => {
                 if (prev <= 1) {
                     clearInterval(interval);
-                    
-                    // Time out
-                    if (isMock) {
-                        setSubmitted(true);
-                        toast.error('Time limit reached!');
-                        
-                        let nextScores = { ...scores };
-                        // Opponent answers: 60% chance correct
-                        const opponentCorrect = Math.random() < 0.6;
-                        if (opponentCorrect) {
-                            nextScores.player2Score += 10;
-                        }
-                        setScores(nextScores);
 
-                        setTimeout(() => {
-                            if (currentQuestionIndex < 5) {
-                                setStatus('waiting_next');
-                                setTimeout(() => {
-                                    const nextIdx = currentQuestionIndex;
-                                    setCurrentQuestionIndex(nextIdx + 1);
-                                    setActiveQuestion(battleQuestions[nextIdx]);
-                                    setSelectedOptionId(null);
-                                    setSubmitted(false);
-                                    hasSubmittedRef.current = false;
-                                    setQuestionCountdown(15);
-                                    setStatus('playing');
-                                }, 1000);
-                            } else {
-                                const finalResult = {
-                                    winner: nextScores.player1Score > nextScores.player2Score ? currentUser?.userId : (nextScores.player1Score < nextScores.player2Score ? opponentId : null),
-                                    totalQuestions: 5,
-                                    correctAnswers: {
-                                        player1: mockCorrectCount,
-                                        player2: Math.round(nextScores.player2Score / 10)
-                                    },
-                                    accuracy: {
-                                        player1: mockCorrectCount / 5,
-                                        player2: Math.round(nextScores.player2Score / 10) / 5
-                                    },
-                                    battleDuration: 48
-                                };
-                                setMatchResult(finalResult);
-                                setStatus('gameover');
-                            }
-                        }, 1500);
-                    } else {
-                        setSubmitted(true);
-                    }
+                    // Time out
+                    setSubmitted(true);
                     return 0;
                 }
                 return prev - 1;
@@ -367,80 +195,38 @@ export function PvpBattlePage() {
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [status, activeQuestion, currentQuestionIndex, scores, mockCorrectCount, isMock, currentUser?.userId, opponentId]);
+    }, [status, activeQuestion, currentQuestionIndex, scores, currentUser?.userId, opponentId]);
 
     const handleOptionSelect = (optionId: number) => {
         if (submitted || status !== 'playing') return;
-        setSelectedOptionId(optionId);
+        
+        if (activeQuestion?.type === 'MULTIPLE_CHOICE_MULTI') {
+            setSelectedOptionIds(prev => 
+                prev.includes(optionId) ? prev.filter(id => id !== optionId) : [...prev, optionId]
+            );
+        } else {
+            setSelectedOptionId(optionId);
+        }
     };
 
     const handleSubmitAnswer = () => {
-        if (selectedOptionId === null || submitted || hasSubmittedRef.current || !activeQuestion) return;
-
-        hasSubmittedRef.current = true;
-        if (isMock) {
-            setSubmitted(true);
-            toast.success('Answer submitted! Waiting for opponent...');
-
-            // Check correctness of answer
-            const isCorrect = selectedOptionId === activeQuestion.correctOptionId;
-            let nextScores = { ...scores };
-            let nextMockCorrectCount = mockCorrectCount;
-            if (isCorrect) {
-                nextMockCorrectCount += 1;
-                setMockCorrectCount(nextMockCorrectCount);
-                nextScores.player1Score += 10;
-            }
-
-            // Opponent answers: 60% chance correct
-            const opponentCorrect = Math.random() < 0.6;
-            if (opponentCorrect) {
-                nextScores.player2Score += 10;
-            }
-            setScores(nextScores);
-
-            // Wait 1.5s then advance or finish
-            setTimeout(() => {
-                if (currentQuestionIndex < 5) {
-                    setStatus('waiting_next');
-                    setTimeout(() => {
-                        const nextIdx = currentQuestionIndex;
-                        setCurrentQuestionIndex(nextIdx + 1);
-                        setActiveQuestion(battleQuestions[nextIdx]);
-                        setSelectedOptionId(null);
-                        setSubmitted(false);
-                        hasSubmittedRef.current = false;
-                        setQuestionCountdown(15);
-                        setStatus('playing');
-                    }, 1000);
-                } else {
-                    // Match Over
-                    const finalResult = {
-                        winner: nextScores.player1Score > nextScores.player2Score ? currentUser?.userId : (nextScores.player1Score < nextScores.player2Score ? opponentId : null),
-                        totalQuestions: 5,
-                        correctAnswers: {
-                            player1: nextMockCorrectCount,
-                            player2: Math.round(nextScores.player2Score / 10)
-                        },
-                        accuracy: {
-                            player1: nextMockCorrectCount / 5,
-                            player2: Math.round(nextScores.player2Score / 10) / 5
-                        },
-                        battleDuration: 42
-                    };
-                    setMatchResult(finalResult);
-                    setStatus('gameover');
-                }
-            }, 1500);
-
-            return;
+        if (submitted || hasSubmittedRef.current || !activeQuestion) return;
+        
+        if (activeQuestion.type === 'MULTIPLE_CHOICE_MULTI') {
+            if (selectedOptionIds.length === 0) return;
+        } else {
+            if (selectedOptionId === null) return;
         }
 
-        console.log(`Submitting answer for question ${activeQuestion.questionId}, option: ${selectedOptionId}`);
+        hasSubmittedRef.current = true;
+
+
+        console.log(`Submitting answer for question ${activeQuestion.questionId}`);
         pvpSocket.emit('submitAnswer', {
             matchId,
             questionId: activeQuestion.questionId,
-            optionId: selectedOptionId
+            optionId: selectedOptionId || undefined,
+            optionIds: selectedOptionIds.length > 0 ? selectedOptionIds : undefined
         });
 
         setSubmitted(true);
@@ -449,9 +235,7 @@ export function PvpBattlePage() {
 
     const handleLeaveMatch = () => {
         if (window.confirm('Are you sure you want to leave? You will forfeit the match!')) {
-            if (!isMock) {
-                pvpSocket.emit('leaveBattle', { matchId });
-            }
+            pvpSocket.emit('leaveBattle', { matchId });
             navigate('/learner/leaderboard');
         }
     };
@@ -863,7 +647,7 @@ export function PvpBattlePage() {
             fontFamily: "'Inter', 'SF Pro Display', sans-serif"
         }}>
             <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
-                
+
                 {/* Scoreboard / Opponents Header */}
                 <div style={{
                     display: 'grid',
@@ -966,10 +750,10 @@ export function PvpBattlePage() {
                             width: `${(questionCountdown / 15) * 100}%`,
                             height: '100%',
                             borderRadius: 3,
-                            background: questionCountdown > 7 
-                                ? 'linear-gradient(90deg, #10B981, #34D399)' 
-                                : questionCountdown > 3 
-                                    ? 'linear-gradient(90deg, #F59E0B, #FBBF24)' 
+                            background: questionCountdown > 7
+                                ? 'linear-gradient(90deg, #10B981, #34D399)'
+                                : questionCountdown > 3
+                                    ? 'linear-gradient(90deg, #F59E0B, #FBBF24)'
                                     : 'linear-gradient(90deg, #EF4444, #F87171)',
                             transition: 'width 1s linear'
                         }} />
@@ -1017,7 +801,7 @@ export function PvpBattlePage() {
                     </div>
                 ) : activeQuestion ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                        
+
                         {/* Question Panel */}
                         <div style={{
                             background: '#FFFFFF',
@@ -1074,7 +858,9 @@ export function PvpBattlePage() {
                         {/* Options Stack */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                             {activeQuestion.options?.map((option: any) => {
-                                const isSelected = selectedOptionId === option.optionId;
+                                const isSelected = activeQuestion?.type === 'MULTIPLE_CHOICE_MULTI'
+                                    ? selectedOptionIds.includes(option.optionId)
+                                    : selectedOptionId === option.optionId;
                                 return (
                                     <button
                                         key={option.optionId}
@@ -1087,11 +873,11 @@ export function PvpBattlePage() {
                                             width: '100%',
                                             padding: '16px 20px',
                                             borderRadius: 14,
-                                            border: isSelected 
-                                                ? '2px solid #E11D48' 
+                                            border: isSelected
+                                                ? '2px solid #E11D48'
                                                 : '1px solid #E2E8F0',
-                                            background: isSelected 
-                                                ? '#FFF1F3' 
+                                            background: isSelected
+                                                ? '#FFF1F3'
                                                 : '#FFFFFF',
                                             color: isSelected ? '#E11D48' : '#334155',
                                             fontSize: 15,
@@ -1120,8 +906,8 @@ export function PvpBattlePage() {
                                             width: 26,
                                             height: 26,
                                             borderRadius: '50%',
-                                            border: isSelected 
-                                                ? '2px solid #E11D48' 
+                                            border: isSelected
+                                                ? '2px solid #E11D48'
                                                 : '1.5px solid #94A3B8',
                                             background: isSelected ? '#E11D48' : 'transparent',
                                             display: 'flex',
@@ -1165,53 +951,62 @@ export function PvpBattlePage() {
                                     e.currentTarget.style.background = '#FEF2F2';
                                 }}
                             >
-                                <XCircle size={15} /> Forfeit
+                                <XCircle size={15} /> surrender
                             </button>
-                            <button
-                                onClick={handleSubmitAnswer}
-                                disabled={selectedOptionId === null || submitted}
-                                style={{
-                                    flex: 1,
-                                    padding: '12px 20px',
-                                    border: 'none',
-                                    borderRadius: 12,
-                                    background: selectedOptionId === null || submitted 
-                                        ? '#E2E8F0' 
-                                        : 'linear-gradient(135deg, #E11D48, #BE123C)',
-                                    color: selectedOptionId === null || submitted ? '#94A3B8' : '#fff',
-                                    fontSize: 14.5,
-                                    fontWeight: 700,
-                                    cursor: selectedOptionId === null || submitted ? 'not-allowed' : 'pointer',
-                                    boxShadow: selectedOptionId === null || submitted 
-                                        ? 'none' 
-                                        : '0 4px 12px rgba(225, 29, 72, 0.15)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: 6,
-                                    transition: 'all 0.15s'
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (selectedOptionId !== null && !submitted) {
-                                        e.currentTarget.style.transform = 'translateY(-1px)';
-                                        e.currentTarget.style.boxShadow = '0 6px 16px rgba(225, 29, 72, 0.2)';
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (selectedOptionId !== null && !submitted) {
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(225, 29, 72, 0.15)';
-                                    }
-                                }}
-                            >
-                                {submitted ? (
-                                    <>
-                                        <CheckCircle2 size={15} className="text-emerald-600" /> Answer Locked
-                                    </>
-                                ) : (
-                                    'Lock In Answer'
-                                )}
-                            </button>
+                            
+                            {(() => {
+                                const isSubmitDisabled = activeQuestion?.type === 'MULTIPLE_CHOICE_MULTI'
+                                    ? selectedOptionIds.length === 0 || submitted
+                                    : selectedOptionId === null || submitted;
+
+                                return (
+                                    <button
+                                        onClick={handleSubmitAnswer}
+                                        disabled={isSubmitDisabled}
+                                        style={{
+                                            flex: 1,
+                                            padding: '12px 20px',
+                                            border: 'none',
+                                            borderRadius: 12,
+                                            background: isSubmitDisabled
+                                                ? '#E2E8F0'
+                                                : 'linear-gradient(135deg, #E11D48, #BE123C)',
+                                            color: isSubmitDisabled ? '#94A3B8' : '#fff',
+                                            fontSize: 14.5,
+                                            fontWeight: 700,
+                                            cursor: isSubmitDisabled ? 'not-allowed' : 'pointer',
+                                            boxShadow: isSubmitDisabled
+                                                ? 'none'
+                                                : '0 4px 12px rgba(225, 29, 72, 0.15)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: 6,
+                                            transition: 'all 0.15s'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (!isSubmitDisabled) {
+                                                e.currentTarget.style.transform = 'translateY(-1px)';
+                                                e.currentTarget.style.boxShadow = '0 6px 16px rgba(225, 29, 72, 0.2)';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (!isSubmitDisabled) {
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(225, 29, 72, 0.15)';
+                                            }
+                                        }}
+                                    >
+                                        {submitted ? (
+                                            <>
+                                                <CheckCircle2 size={15} className="text-emerald-600" /> Answer Locked
+                                            </>
+                                        ) : (
+                                            'Lock In Answer'
+                                        )}
+                                    </button>
+                                );
+                            })()}
                         </div>
                     </div>
                 ) : (

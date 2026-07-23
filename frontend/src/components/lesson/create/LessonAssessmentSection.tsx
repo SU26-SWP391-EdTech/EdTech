@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Trash2, CheckCircle2, X, HelpCircle, Check, Award } from 'lucide-react';
 import type { Assessment, AssessmentQuestion, AssessmentType, QuestionType, QuestionOption } from '../../../types/lesson/create-lesson.types';
 import { QuestionService } from '../../../services/assessment/question.service';
+import { AssessmentService } from '../../../services/assessment/assessment.service';
 
 interface Props {
   assessments: Assessment[];
@@ -67,6 +68,15 @@ export function LessonAssessmentSection({ assessments, setAssessments, courseId,
             }
           }
         }
+        
+        try {
+          await AssessmentService.deleteAssessment(numericAssessmentId);
+        } catch (err: any) {
+          console.error('Failed to delete assessment from backend:', err);
+          const msg = err.response?.data?.message || 'Failed to delete assessment. It might be linked to a PvP match or student progress.';
+          alert(msg);
+          return; // Stop and don't remove from UI if backend deletion fails
+        }
       }
     }
     setAssessments(prev => prev.filter(a => a.id !== id));
@@ -126,8 +136,9 @@ export function LessonAssessmentSection({ assessments, setAssessments, courseId,
           Number(activeAssessmentId),
           {
             content: newQuestion.content,
-            type: newQuestion.type === 'MULTIPLE_CHOICE_MULTI' ? 'MULTIPLE_CHOICE_MULTI' : 'MULTIPLE_CHOICE_SINGLE',
+            type: newQuestion.type,
             points: newQuestion.points,
+            position: assessments.find(a => a.id === activeAssessmentId)?.questions.length ? assessments.find(a => a.id === activeAssessmentId)!.questions.length + 1 : 1,
           }
         );
         if (qResponse && qResponse.questionId) {
@@ -140,6 +151,7 @@ export function LessonAssessmentSection({ assessments, setAssessments, courseId,
               const optResponse = await QuestionService.createQuestionOption(dbQuestionId, {
                 content: opt.content,
                 isCorrect: opt.isCorrect,
+                position: idx + 1,
               });
               savedOptions.push({
                 id: optResponse.optionId,
@@ -148,6 +160,7 @@ export function LessonAssessmentSection({ assessments, setAssessments, courseId,
               });
             } catch (optErr) {
               console.warn('Failed to save option during direct add:', optErr);
+              alert(`Cảnh báo: Không thể lưu Option "${opt.content}". Vui lòng thử lại. Lỗi: ${optErr}`);
               savedOptions.push(opt);
             }
           }

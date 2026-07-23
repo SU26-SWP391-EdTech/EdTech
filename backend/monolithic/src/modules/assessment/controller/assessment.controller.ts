@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   UseGuards,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import { AssessmentService } from '../service/assessment.service';
 import { CreateAssessmentDto } from '../dto/create-assessment.dto';
@@ -143,6 +144,16 @@ export class AssessmentController {
       user.userId,
       lessonId,
     );
+  }
+
+  @Delete(':id')
+  @Roles(RoleEnum.COURSE_PROVIDER)
+  @ApiOperation({ summary: 'Delete an assessment' })
+  @ApiResponse({ status: 200, description: 'Assessment deleted successfully' })
+  @ApiResponse({ status: 400, description: 'Cannot delete assessment due to constraints' })
+  @ApiResponse({ status: 404, description: 'Assessment not found' })
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return await this.assessmentService.remove(id);
   }
 }
 

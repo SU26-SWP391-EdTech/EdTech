@@ -155,7 +155,7 @@ export class QuestionController {
 
   @Roles(RoleEnum.COURSE_PROVIDER)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Throttle({ default: { limit: 100, ttl: 60000 } })
   @Post(':questionId/option')
   @ApiOperation({ summary: 'Create an option for a question' })
   @ApiBody({ type: CreateQuestionOptionDto })

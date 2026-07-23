@@ -23,6 +23,7 @@ import { ChallengeCancelDto } from '../dto/challenge/challenge-cancel.dto';
 import { BattleService } from '../services/battle.service';
 import { SubmitAnswerDto } from '../dto/battle/submit-answer.dto';
 import { LeaveBattleDto } from '../dto/battle/leave-battle.dto';
+import { BattleSessionManager } from '../manager/battle-session.manager';
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -35,6 +36,7 @@ export class PvpGateway implements OnGatewayConnection, OnGatewayDisconnect, OnG
     private readonly battleService: BattleService,
     private readonly jwtService: JwtService,
     private readonly socketService: SocketService,
+    private readonly battleSessionManager: BattleSessionManager,
   ) {}
 
   @WebSocketServer()
@@ -78,6 +80,16 @@ export class PvpGateway implements OnGatewayConnection, OnGatewayDisconnect, OnG
 
     if(user){
         this.connectionManager.removeConnection(client.id);
+
+        // Check if user is in an active battle and forfeit it
+        const activeSession = this.battleSessionManager.getSessionByUserId(user.userId);
+        if (activeSession) {
+          try {
+            this.battleService.leaveBattle({ matchId: activeSession.matchId }, user.userId);
+          } catch (e) {
+            console.error('Failed to automatically forfeit battle on disconnect', e);
+          }
+        }
 
         // Broadcast that a player went offline
         this.server.emit('online_players_changed', {
