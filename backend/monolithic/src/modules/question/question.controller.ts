@@ -23,6 +23,7 @@ import { CreateQuestionOptionDto } from './dto/create-question-option.dto';
 import { ReorderQuestionOptionsDto } from './dto/reorder-question-option.dto';
 import { UpdateQuestionOptionDto } from './dto/update-question-option.dto';
 import { QuestionOptionResponseDto } from './dto/question-option-response.dto';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('Question')
 @Controller('question')

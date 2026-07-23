@@ -174,15 +174,6 @@ export class AssessmentController {
     );
   }
 
-  @Delete(':id')
-  @Roles(RoleEnum.COURSE_PROVIDER)
-  @ApiOperation({ summary: 'Delete an assessment' })
-  @ApiResponse({ status: 200, description: 'Assessment deleted successfully' })
-  @ApiResponse({ status: 400, description: 'Cannot delete assessment due to constraints' })
-  @ApiResponse({ status: 404, description: 'Assessment not found' })
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    return await this.assessmentService.remove(id);
-  }
 }
 
 // Submit the test and get it graded and will complete assessment_sessions

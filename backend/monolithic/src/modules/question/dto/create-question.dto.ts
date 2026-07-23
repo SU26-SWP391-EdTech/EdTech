@@ -40,11 +40,4 @@ export class CreateQuestionDto {
   @IsPositive()
   @ApiProperty({ example: 1, description: 'Question order position', minimum: 1 })
   position: number;
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateQuestionOptionDto)
-  @ApiPropertyOptional({ type: [CreateQuestionOptionDto], description: 'Options for this question' })
-  options?: CreateQuestionOptionDto[];
 }

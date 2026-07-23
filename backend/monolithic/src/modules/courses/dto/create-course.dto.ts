@@ -11,6 +11,14 @@ export class CreateCourseDto {
   @IsNotEmpty({ message: 'Tên khóa học không được để trống' })
   @IsString()
   title!: string;
+  
+  @ApiPropertyOptional({
+    enum: CourseStatus,
+    example: CourseStatus.DRAFT,
+  })
+  @IsOptional()
+  @IsEnum(CourseStatus)
+  status?: CourseStatus;
 
   @ApiPropertyOptional({
     example: 'Khóa học xây dựng REST API với NestJS',
