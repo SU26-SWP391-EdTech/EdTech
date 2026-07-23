@@ -9,6 +9,15 @@ import type {
 import { getLessonById } from '../lesson/lesson.service';
 
 export class AssessmentService {
+    public static async deleteAssessment(assessmentId: number): Promise<void> {
+        try {
+            await api.delete(`/assessment/${assessmentId}`);
+        } catch (error) {
+            console.error('Failed to delete assessment from backend:', error);
+            throw error;
+        }
+    }
+
     // Helper to get local data from localStorage for persistence in mock state
     private static getLocalAttempts(lessonId: number): AssessmentAttempt[] {
         const key = `assessment_attempts_${lessonId}`;

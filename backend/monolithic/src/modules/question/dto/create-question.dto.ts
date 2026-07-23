@@ -4,9 +4,14 @@ import {
   IsNumber,
   IsPositive,
   IsString,
+  IsOptional,
+  IsArray,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { QuestionType } from 'src/common/enums/question-type.enum';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { CreateQuestionOptionDto } from './create-question-option.dto';
 
 export class CreateQuestionDto {
   @IsString()
@@ -35,4 +40,11 @@ export class CreateQuestionDto {
   @IsPositive()
   @ApiProperty({ example: 1, description: 'Question order position', minimum: 1 })
   position: number;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateQuestionOptionDto)
+  @ApiPropertyOptional({ type: [CreateQuestionOptionDto], description: 'Options for this question' })
+  options?: CreateQuestionOptionDto[];
 }

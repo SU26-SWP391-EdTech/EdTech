@@ -65,12 +65,10 @@ export function useLessonPersistence({
             return null;
         }
 
-        // Validate PVP assessments if present
-        for (const ass of form.assessments) {
-            if (ass.type === 'PVP' && ass.questions.length < 5) {
-                showFeedback(`PvP Arena Quiz "${ass.title}" must have at least 5 questions (currently has ${ass.questions.length}).`);
-                return null;
-            }
+        const invalidPvpAssessment = form.assessments.find(a => a.type === 'PVP' && (!a.questions || a.questions.length < 5));
+        if (invalidPvpAssessment) {
+            showFeedback(`PvP Assessment "${invalidPvpAssessment.title}" must have at least 5 questions.`);
+            return null;
         }
 
         return saveToApi(nextStatus);
@@ -211,6 +209,9 @@ export function useLessonPersistence({
             form.setAssessments(savedAssessments);
             // Lưu kết quả đồng bộ Assessment xuống localStorage để cache cục bộ
             localStorage.setItem(`assessments_lesson_${nextLessonId}`, JSON.stringify(savedAssessments));
+            
+            // Cập nhật lại state để có ID thật từ DB, tránh duplicate ở lần save tiếp theo
+            form.setAssessments(savedAssessments);
 
             // Nếu cập nhật bài học cũ, tự động đưa khóa học về trạng thái 'draft' (cần phê duyệt lại)
             if (existingId) {
