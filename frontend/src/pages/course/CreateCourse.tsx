@@ -5,6 +5,7 @@ import {
   CurriculumSection,
   LoadingOverlay,
   UnsavedModal,
+  SubmitModal,
 } from '../../components/course/create';
 import { useCreateCourse } from '../../hooks/course/createCourse';
 
@@ -24,6 +25,12 @@ export function CreateCoursePage() {
           onSubmitForReview={course.onSubmitForReview}
         />
 
+        {course.reviewReason && (
+          <div className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+            <p className="mb-1 font-semibold">Reason for rejection</p>
+            <p>{course.reviewReason}</p>
+          </div>
+        )}
         <div className="grid grid-cols-12 gap-5">
           <div className="col-span-12 space-y-5">
             <BasicInfoSection
@@ -66,6 +73,19 @@ export function CreateCoursePage() {
           </div>
         </div>
       </div>
+      {course.showSubmit && (
+        <SubmitModal
+          courseTitle={course.form.title}
+          lessonCount={course.lessons.length}
+          isSubmitting={course.isSubmitting}
+          onClose={() => course.setShowSubmit(false)}
+          onConfirm={course.onConfirmSubmit}
+          onAddLesson={() => {
+            course.setShowSubmit(false);
+            course.onCreateLesson();
+          }}
+        />
+      )}
       {course.showUnsaved && (
         <UnsavedModal
           onStay={course.onStayOnPage}

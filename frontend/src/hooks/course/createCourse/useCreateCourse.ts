@@ -45,6 +45,7 @@ export function useCreateCourse() {
   const [isSubmitting, setIsSubmitting] = useState(false); // Trạng thái đang gửi yêu cầu lưu/đồng bộ lên Backend
   const [showSubmit, setShowSubmit] = useState(false);     // Trạng thái ẩn/hiện modal xác nhận nộp kiểm duyệt
   const [showUnsaved, setShowUnsaved] = useState(false);   // Trạng thái hiển thị cảnh báo thay đổi chưa lưu khi rời trang
+  const [reviewReason, setReviewReason] = useState<string | null>(null);
 
   // --- 2. TÍCH HỢP CÁC HOOK CON CHUYÊN BIỆT (SUB-HOOKS) ---
   const form = useCourseForm();                      // Quản lý thông tin form cơ bản (tiêu đề, ngôn ngữ, outcomes...)
@@ -101,6 +102,7 @@ export function useCreateCourse() {
         // Tải thông tin chung của khóa học và đổ vào form + thumbnail preview
         const course = await getCourseById(editId);
         hydrateFromCourse(course);
+        setReviewReason(course.status === 'rejected' ? (course.reviewReason || 'No rejection reason was provided for this earlier review.') : null);
         setThumbnailPreview(course.thumbnailUrl || null);
 
         // Tải danh sách bài học của khóa học đó và map sang cấu trúc dùng trong Builder
@@ -159,6 +161,7 @@ export function useCreateCourse() {
     editId,
     isEditMode: Boolean(editId), // Trả về true nếu đang ở chế độ chỉnh sửa
     isSubmitting,
+    reviewReason,
     showSubmit,
     setShowSubmit,
     isDirty,
@@ -183,6 +186,7 @@ export function useCreateCourse() {
     onEditLesson: persistence.openLessonEditor,
     onSaveDraft: () => persistence.handleSubmit('draft'),
     onSubmitForReview: handleSubmitForReviewClick,
+    onConfirmSubmit: async () => { await persistence.handleSubmit('pending'); setShowSubmit(false); },
     onBackToCourses: handleBackToCourses,
     onStayOnPage: handleStayOnPage,
     onLeavePage: handleLeavePage,

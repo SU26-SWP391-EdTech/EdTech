@@ -4,11 +4,14 @@ import { CourseToolbar } from '../../components/course/management/CourseToolbar'
 import { CourseTable } from '../../components/course/management/CourseTable';
 import { CoursePreviewPanel } from '../../components/course/management/CoursePreviewPanel';
 import { RejectCourseModal } from '../../components/course/management/RejectCourseModal';
+import { ApproveCourseModal } from '../../components/course/management/ApproveCourseModal';
 
 export function PendingCourses() {
     const [selectedRejectCourseId, setSelectedRejectCourseId] = useState<number | null>(null);
     const [rejectReason, setRejectReason] = useState('');
     const [showRejectModal, setShowRejectModal] = useState(false);
+    const [approveCourseId, setApproveCourseId] = useState<number | null>(null);
+    const [isApproving, setIsApproving] = useState(false);
 
     const {
         isLoading,
@@ -26,6 +29,19 @@ export function PendingCourses() {
         sortField,
         sortAsc,
     } = useCourseManagement();
+
+    const selectedApproveCourse = filtered.find(course => course.id === approveCourseId);
+
+    const confirmApprove = async () => {
+        if (approveCourseId === null || isApproving) return;
+        setIsApproving(true);
+        try {
+            await handleApproveCourse(approveCourseId);
+            setApproveCourseId(null);
+        } finally {
+            setIsApproving(false);
+        }
+    };
 
     return (
         <>
@@ -76,7 +92,7 @@ export function PendingCourses() {
                                 sortField={sortField}
                                 sortAsc={sortAsc}
                                 toggleSort={toggleSort}
-                                handleApproveCourse={handleApproveCourse}
+                                handleApproveCourse={setApproveCourseId}
                                 setSelectedRejectCourseId={setSelectedRejectCourseId}
                                 setShowRejectModal={setShowRejectModal}
                             />
@@ -109,6 +125,16 @@ export function PendingCourses() {
                     handleRejectCourse={handleRejectCourse}
                 />
             )}
+
+            <ApproveCourseModal
+                isOpen={approveCourseId !== null}
+                courseTitle={selectedApproveCourse?.title || ''}
+                providerName={selectedApproveCourse?.provider || 'Unknown provider'}
+                lessonCount={selectedApproveCourse?.lessons || 0}
+                isApproving={isApproving}
+                onClose={() => setApproveCourseId(null)}
+                onConfirm={confirmApprove}
+            />
         </>
     );
 }

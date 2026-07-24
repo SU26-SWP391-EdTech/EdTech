@@ -8,6 +8,7 @@ import Filters from '../../components/course/my-courses/Filters';
 import CourseList from '../../components/course/my-courses/CourseList';
 import DeleteModal from '../../components/course/my-courses/DeleteModal';
 import EditWarningModal from '../../components/course/my-courses/EditWarningModal';
+import { SubmitModal } from '../../components/course/create/SubmitModal';
 
 export function MyCoursesPage() {
     const navigate = useNavigate();
@@ -28,6 +29,8 @@ export function MyCoursesPage() {
     } = useMyCourse();
 
     const [editWarningId, setEditWarningId] = useState<number | null>(null);
+    const [submitCourseId, setSubmitCourseId] = useState<number | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         fetchCourses();
@@ -61,11 +64,20 @@ export function MyCoursesPage() {
         }
     };
 
-    const handleSubmitCourse = async (id: number) => {
+    const handleSubmitCourse = (id: number) => setSubmitCourseId(id);
+
+    const confirmSubmitCourse = async () => {
+        if (submitCourseId === null || isSubmitting) return;
         try {
-            await handleSubmitForReview(id);
-        } catch {
-            toast.error('Failed to submit course for review. Please try again.');
+            setIsSubmitting(true);
+            await handleSubmitForReview(submitCourseId);
+            toast.success('Course submitted for review!');
+            setSubmitCourseId(null);
+        } catch (error: unknown) {
+            const message = (error as { response?: { data?: { message?: string } } }).response?.data?.message;
+            toast.error(message || 'Failed to submit course for review.');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -125,6 +137,19 @@ export function MyCoursesPage() {
                 onConfirmDelete={handleConfirmDelete} 
             />
 
+            {submitCourseId !== null && (() => {
+                const selectedCourse = filtered.find(course => course.courseId === submitCourseId);
+                return (
+                    <SubmitModal
+                        courseTitle={selectedCourse?.title || ''}
+                        lessonCount={selectedCourse?.totalLessons || 0}
+                        isSubmitting={isSubmitting}
+                        onClose={() => setSubmitCourseId(null)}
+                        onConfirm={confirmSubmitCourse}
+                        onAddLesson={() => navigate(`/provider/courses/create?id=${submitCourseId}`)}
+                    />
+                );
+            })()}
             {/* Edit Warning modal */}
             <EditWarningModal
                 isOpen={editWarningId !== null}

@@ -32,6 +32,7 @@ import {
 import { Public } from 'src/common/decorators/public.decorator';
 import { Throttle } from '@nestjs/throttler';
 import { ApproveCourseDto, CourseTagsDto } from '../dto/course-tags.dto';
+import { RejectCourseDto } from '../dto/reject-course.dto';
 
 @ApiTags('Courses')
 @Controller('courses')
@@ -259,8 +260,8 @@ export class CoursesController {
   rejectCourse(
     @Param('id', ParseIntPipe) id: number,
     @Req() req: any,
-    @Body('reason') reason?: string,
+    @Body() rejectCourseDto: RejectCourseDto,
   ) {
-    return this.coursesService.rejectCourse(id, req.user.userId, reason);
+    return this.coursesService.rejectCourse(id, req.user.userId, rejectCourseDto.reason);
   }
 }

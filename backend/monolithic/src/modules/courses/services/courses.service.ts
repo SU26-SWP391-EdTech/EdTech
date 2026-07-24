@@ -118,16 +118,22 @@ export class CoursesService {
           userId,
         },
       },
+      relations: { lessons: true },
     });
 
     if (!course) {
       throw new NotFoundException('Course not found');
     }
 
-    if (course.status === CourseStatus.PENDING) {
-      return course;
+    if (course.status !== CourseStatus.DRAFT) {
+      throw new BadRequestException('Only draft courses can be submitted for review');
     }
 
+    if (!course.lessons || course.lessons.length === 0) {
+      throw new BadRequestException('Course must have at least one lesson before it can be submitted for review');
+    }
+
+    course.reviewReason = null;
     return await this.coursesRepository.pendingCourse(course);
   }
 
@@ -249,6 +255,7 @@ export class CoursesService {
     return this.coursesRepository.manager.transaction(async (manager) => {
       course.status = CourseStatus.APPROVED;
       course.reviewedBy = reviewer;
+      course.reviewReason = null;
 
       await manager.save(Course, course);
       if (tags && tags.length > 0) {
@@ -294,7 +301,7 @@ export class CoursesService {
   public async rejectCourse(
     id: number,
     reviewerId: number,
-    reason?: string,
+    reason: string,
   ): Promise<Course> {
     const course = await this.coursesRepository.findCourseById(id);
 
@@ -314,11 +321,14 @@ export class CoursesService {
       throw new NotFoundException('Reviewer not found');
     }
 
+    const normalizedReason = reason.trim();
+    if (!normalizedReason) {
+      throw new BadRequestException('Rejection reason is required');
+    }
+
     course.status = CourseStatus.REJECTED;
     course.reviewedBy = reviewer;
-    if (reason) {
-      course.reviewReason = reason;
-    }
+    course.reviewReason = normalizedReason;
 
     return this.coursesRepository.saveCourse(course);
   }
