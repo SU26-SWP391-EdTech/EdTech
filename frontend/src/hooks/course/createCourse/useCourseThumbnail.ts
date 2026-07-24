@@ -22,8 +22,19 @@ export function useCourseThumbnail() {
    * @param file - Đối tượng File ảnh được chọn
    */
   function handleFileChange(file: File) {
+    if (!file.type.startsWith('image/')) {
+      toast.error('Thumbnail must be a valid image file.');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
     if (file.size > 2 * 1024 * 1024) {
       toast.error('File is too large. Max size is 2MB.');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       return;
     }
 
@@ -41,6 +52,9 @@ export function useCourseThumbnail() {
   function clearThumbnail() {
     setThumbnailFile(null);
     setThumbnailPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   }
 
   // --- 2. XỬ LÝ SỰ KIỆN KÉO THẢ FILE (DRAG & DROP EVENTS) ---

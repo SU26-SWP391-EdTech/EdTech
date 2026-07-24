@@ -1,5 +1,6 @@
 import type { DragEvent, RefObject } from 'react';
 
+import { COURSE_TITLE_MAX_LENGTH } from '../../../constants/courseValidation.constants';
 import { Field, FormCard, Input, Select, Textarea, ThumbnailUploader } from './fields';
 import { TagSelector } from '../management/TagSelector';
 
@@ -11,6 +12,7 @@ interface BasicInfoSectionProps {
   tags?: string[];
   thumbnailPreview: string | null;
   title: string;
+  titleError?: string;
   onClearThumbnail: () => void;
   onDescriptionChange: (value: string) => void;
   onDragLeave: () => void;
@@ -30,6 +32,7 @@ export function BasicInfoSection({
   tags = [],
   thumbnailPreview,
   title,
+  titleError,
   onClearThumbnail,
   onDescriptionChange,
   onDragLeave,
@@ -43,8 +46,20 @@ export function BasicInfoSection({
   return (
     <FormCard step={1} title="Basic Information" description="Tell learners what your course is about.">
       <div className="grid grid-cols-2 gap-4">
-        <Field label="Course title" required full>
-          <Input value={title} onChange={event => onTitleChange(event.target.value)} placeholder="e.g. Spring Boot REST API Masterclass" />
+        <Field
+          label="Course title"
+          hint={`${title.length}/${COURSE_TITLE_MAX_LENGTH}`}
+          error={titleError}
+          required
+          full
+        >
+          <Input
+            value={title}
+            onChange={event => onTitleChange(event.target.value)}
+            placeholder="e.g. Spring Boot REST API Masterclass"
+            aria-invalid={Boolean(titleError)}
+            className={titleError ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]/20' : ''}
+          />
         </Field>
         <Field label="Description" full>
           <Textarea

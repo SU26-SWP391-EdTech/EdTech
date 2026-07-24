@@ -3,12 +3,14 @@ import { useCallback, useState } from 'react';
 import type { BackendCourse } from '../../../services/course/course.service';
 import { extractCourseTags } from '../../../services/course/course.service';
 import type { CourseBuilderLesson, CourseDraft } from '../../../types/course/create-course.types';
+import { COURSE_TITLE_MAX_LENGTH } from '../../../constants/courseValidation.constants';
 
 /**
  * Custom hook quản lý trạng thái form thông tin cơ bản của khóa học trong bộ công cụ tạo khóa học (Course Builder).
  * Cung cấp các state nhập liệu và hàm đổ dữ liệu có sẵn (hydrate), chuẩn bị bản nháp (draft) khóa học để lưu.
  */
 export function useCourseForm() {
+  const [titleError, setTitleError] = useState('');
   // --- 1. QUẢN LÝ TRẠNG THÁI FORM (STATE) ---
   const [title, setTitle] = useState('');                                   // Tiêu đề khóa học
   const [description, setDescription] = useState('');                       // Mô tả khóa học
@@ -27,6 +29,7 @@ export function useCourseForm() {
    */
   const hydrateFromCourse = useCallback((course: BackendCourse) => {
     setTitle(course.title || '');
+    setTitleError('');
     setDescription(course.description || '');
     setLanguage(course.language || 'English');
     setProjectUrl(course.projectUrl || '');
@@ -36,6 +39,34 @@ export function useCourseForm() {
     setDurationHours(Math.floor(totalDuration / 60)); // Chuyển đổi tổng số phút thành giờ
     setDurationMinutes(totalDuration % 60);           // Phần số phút dư ra
   }, []);
+
+  function handleTitleChange(value: string) {
+    if (value.length > COURSE_TITLE_MAX_LENGTH) {
+      setTitle(value.slice(0, COURSE_TITLE_MAX_LENGTH));
+      setTitleError(`Course title must not exceed ${COURSE_TITLE_MAX_LENGTH} characters.`);
+      return;
+    }
+
+    setTitle(value);
+    setTitleError('');
+  }
+
+  function validateTitle(): string | null {
+    if (!title.trim()) {
+      const message = 'Course title is required.';
+      setTitleError(message);
+      return message;
+    }
+
+    if (title.length > COURSE_TITLE_MAX_LENGTH) {
+      const message = `Course title must not exceed ${COURSE_TITLE_MAX_LENGTH} characters.`;
+      setTitleError(message);
+      return message;
+    }
+
+    setTitleError('');
+    return null;
+  }
 
   /**
    * Thu thập dữ liệu form hiện tại cùng danh sách bài học để tạo đối tượng bản nháp khóa học (CourseDraft).
@@ -62,7 +93,9 @@ export function useCourseForm() {
 
   return {
     title,
-    setTitle,
+    titleError,
+    setTitle: handleTitleChange,
+    validateTitle,
     description,
     setDescription,
     language,

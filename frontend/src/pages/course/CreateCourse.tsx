@@ -4,7 +4,6 @@ import {
   CreateCourseHeader,
   CurriculumSection,
   LoadingOverlay,
-  SubmitModal,
   UnsavedModal,
 } from '../../components/course/create';
 import { useCreateCourse } from '../../hooks/course/createCourse';
@@ -20,6 +19,7 @@ export function CreateCoursePage() {
         <CreateCourseHeader
           isEditMode={course.isEditMode}
           isSubmitting={course.isSubmitting}
+          onBackToCourses={course.onBackToCourses}
           onSaveDraft={course.onSaveDraft}
           onSubmitForReview={course.onSubmitForReview}
         />
@@ -34,6 +34,7 @@ export function CreateCoursePage() {
               tags={course.form.tags}
               thumbnailPreview={course.thumbnail.thumbnailPreview}
               title={course.form.title}
+              titleError={course.form.titleError}
               onClearThumbnail={course.thumbnail.clearThumbnail}
               onDescriptionChange={course.form.setDescription}
               onDragLeave={course.thumbnail.onDragLeave}
@@ -65,8 +66,12 @@ export function CreateCoursePage() {
           </div>
         </div>
       </div>
-
-      {course.showUnsaved && <UnsavedModal onClose={() => course.setShowUnsaved(false)} />}
+      {course.showUnsaved && (
+        <UnsavedModal
+          onStay={course.onStayOnPage}
+          onLeave={course.onLeavePage}
+        />
+      )}
     </div>
   );
 }

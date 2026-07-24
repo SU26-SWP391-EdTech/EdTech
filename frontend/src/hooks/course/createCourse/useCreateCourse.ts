@@ -1,14 +1,29 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { flushSync } from 'react-dom';
+import { useBeforeUnload, useBlocker, useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-import { getCourseById } from '../../../services/course/course.service';
+import { extractCourseTags, getCourseById } from '../../../services/course/course.service';
 import { getLessonsByCourse } from '../../../services/lesson/lesson.service';
 import { mapBackendLessonToCourseBuilderLesson } from '../../../utils/course/courseMappers';
 import { useCourseForm } from './useCourseForm';
 import { useCourseLessons } from './useCourseLessons';
 import { useCoursePersistence } from './useCoursePersistence';
 import { useCourseThumbnail } from './useCourseThumbnail';
+
+const EMPTY_COURSE_DRAFT_SNAPSHOT = JSON.stringify({
+  title: '',
+  description: '',
+  language: 'English',
+  tags: [],
+  durationHours: 0,
+  durationMinutes: 0,
+  projectUrl: '',
+  outcomes: [],
+  prerequisiteCourseIds: [],
+  thumbnailPreview: null,
+  lessons: [],
+});
 
 /**
  * Hook điều phối trung tâm (Orchestrator) cho tính năng tạo/chỉnh sửa khóa học.
@@ -22,6 +37,9 @@ export function useCreateCourse() {
   
   // Lấy ID khóa học từ URL. Nếu có ID, hook tự động chuyển sang chế độ chỉnh sửa (edit mode)
   const editId = searchParams.get('id') ? Number(searchParams.get('id')) : null;
+  const [initialDraftSnapshot, setInitialDraftSnapshot] = useState<string | null>(
+    editId ? null : EMPTY_COURSE_DRAFT_SNAPSHOT,
+  );
 
   // --- 1. QUẢN LÝ TRẠNG THÁI (STATE) ---
   const [isSubmitting, setIsSubmitting] = useState(false); // Trạng thái đang gửi yêu cầu lưu/đồng bộ lên Backend
@@ -42,6 +60,23 @@ export function useCreateCourse() {
     thumbnail.thumbnailPreview,
   );
 
+  const currentDraftSnapshot = JSON.stringify(getCurrentCourseDraft());
+
+  const isDirty = initialDraftSnapshot !== null
+    && currentDraftSnapshot !== initialDraftSnapshot;
+
+  const allowNextNavigation = useCallback(() => {
+    flushSync(() => setInitialDraftSnapshot(currentDraftSnapshot));
+  }, [currentDraftSnapshot]);
+
+  const blocker = useBlocker(isDirty);
+
+  useBeforeUnload(useCallback((event) => {
+    if (!isDirty) return;
+    event.preventDefault();
+    event.returnValue = '';
+  }, [isDirty]));
+
   // Quản lý giao tiếp API để lưu nháp/nộp duyệt khóa học
   const persistence = useCoursePersistence({
     deletedLessonIds: lessonState.deletedLessonIds,
@@ -52,6 +87,8 @@ export function useCreateCourse() {
     setIsSubmitting,
     thumbnailFile: thumbnail.thumbnailFile,
     title: form.title,
+    validateTitle: form.validateTitle,
+    onBeforeNavigate: allowNextNavigation,
   });
 
   // --- 3. EFFECT: TẢI DỮ LIỆU KHÓA HỌC HIỆN TẠI (KHI Ở CHẾ ĐỘ CHỈNH SỬA) ---
@@ -70,6 +107,20 @@ export function useCreateCourse() {
         const lessonsFromBackend = await getLessonsByCourse(editId);
         const mappedLessons = lessonsFromBackend.map(mapBackendLessonToCourseBuilderLesson);
         setLessons(mappedLessons);
+        const totalDuration = course.duration || 0;
+        setInitialDraftSnapshot(JSON.stringify({
+          title: course.title || '',
+          description: course.description || '',
+          language: course.language || 'English',
+          tags: extractCourseTags(course),
+          durationHours: Math.floor(totalDuration / 60),
+          durationMinutes: totalDuration % 60,
+          projectUrl: course.projectUrl || '',
+          outcomes: [],
+          prerequisiteCourseIds: [],
+          thumbnailPreview: course.thumbnailUrl || null,
+          lessons: mappedLessons,
+        }));
       } catch (err) {
         console.error('Failed to load course details for edit:', err);
         toast.error('Failed to load course details.');
@@ -86,13 +137,32 @@ export function useCreateCourse() {
     persistence.handleSubmit('pending');
   }
 
+  function handleBackToCourses() {
+    navigate('/provider/courses');
+  }
+
+  function handleStayOnPage() {
+    setShowUnsaved(false);
+    if (blocker.state === 'blocked') {
+      blocker.reset();
+    }
+  }
+
+  function handleLeavePage() {
+    setShowUnsaved(false);
+    if (blocker.state === 'blocked') {
+      blocker.proceed();
+    }
+  }
+
   return {
     editId,
     isEditMode: Boolean(editId), // Trả về true nếu đang ở chế độ chỉnh sửa
     isSubmitting,
     showSubmit,
     setShowSubmit,
-    showUnsaved,
+    isDirty,
+    showUnsaved: showUnsaved || blocker.state === 'blocked',
     setShowUnsaved,
 
     // Form và Thumbnail hooks trả về để hiển thị UI tương ứng
@@ -113,5 +183,8 @@ export function useCreateCourse() {
     onEditLesson: persistence.openLessonEditor,
     onSaveDraft: () => persistence.handleSubmit('draft'),
     onSubmitForReview: handleSubmitForReviewClick,
+    onBackToCourses: handleBackToCourses,
+    onStayOnPage: handleStayOnPage,
+    onLeavePage: handleLeavePage,
   };
 }
