@@ -102,7 +102,7 @@ export class LeaderboardController {
   }
 
   @Get('course/:courseId')
-  @Roles(RoleEnum.LEARNER, RoleEnum.ACADEMIC_MANAGER, RoleEnum.ADMIN)
+  @Roles(RoleEnum.LEARNER, RoleEnum.ACADEMIC_MANAGER, RoleEnum.ADMIN, RoleEnum.COURSE_PROVIDER)
   @ApiOperation({
     summary: 'Get leaderboard for a specific course',
   })
@@ -122,7 +122,7 @@ export class LeaderboardController {
   }
 
   @Get()
-  @Roles(RoleEnum.LEARNER, RoleEnum.ACADEMIC_MANAGER, RoleEnum.ADMIN)
+  @Roles(RoleEnum.LEARNER, RoleEnum.ACADEMIC_MANAGER, RoleEnum.ADMIN, RoleEnum.COURSE_PROVIDER)
   @ApiOperation({
     summary: 'Get overall leaderboard',
   })

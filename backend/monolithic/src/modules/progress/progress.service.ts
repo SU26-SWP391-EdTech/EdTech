@@ -97,15 +97,35 @@ export class ProgressService {
 
     const lesson = await this.lessonService.findLessonByIdService(lessonId);
 
-    const lessonProgress = await this.findByUserAndLessonService(
-      userId,
-      lessonId,
-    );
-    const completeLesson = await this.progressRepo.updateStatus(
-      userId,
-      lessonId,
-      LessonProgressStatus.COMPLETED,
-    );
+    const canStart =
+      await this.lessonPrerequisiteService.checkLessonPrerequisite(
+        userId,
+        lessonId,
+      );
+
+    if (!canStart) {
+      throw new ForbiddenException(
+        'You must complete prerequisite lessons first.',
+      );
+    }
+
+    let existed = await this.progressRepo.findByUserAndLesson(userId, lessonId);
+    let completeLesson: LearnerLessonProgress | null = null;
+
+    if (!existed) {
+      completeLesson = await this.progressRepo.create({
+        userId,
+        lessonId,
+        status: LessonProgressStatus.COMPLETED,
+        completedAt: new Date(),
+      });
+    } else {
+      completeLesson = await this.progressRepo.updateStatus(
+        userId,
+        lessonId,
+        LessonProgressStatus.COMPLETED,
+      );
+    }
 
     // Update Streak when completing any lesson (Video, Reading, etc.)
     try {

@@ -75,6 +75,8 @@ export class LessonsService {
       }
     }
 
+    prIds = Array.from(new Set(prIds)).filter(prId => prId && prId !== lesson.lessonId);
+
     if (prIds.length > 0) {
       await this.lessonPrerequisiteService.createPrerequisitesService(lesson.lessonId, prIds);
     }
@@ -201,6 +203,7 @@ export class LessonsService {
     }
 
     if (shouldUpdatePrerequisites) {
+      prIds = Array.from(new Set(prIds)).filter(prId => prId && prId !== lessonId);
       await this.lessonPrerequisiteService.updatePrerequisitesForLesson(lessonId, prIds);
     }
 
