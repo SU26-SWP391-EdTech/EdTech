@@ -91,9 +91,11 @@ export class ChallengeRequestService {
     }
 
     const questions = await this.matchRepository.findQuestionsByCourseId(assessment.courseId);
-    if (questions.length === 0) {
+    const validQuestions = questions.filter((q) => q.options && q.options.length >= 2);
+
+    if (validQuestions.length < 5) {
       throw new BadRequestException(
-        'Assessment does not contain any battle questions.',
+        'Course must contain at least 5 valid questions (with at least 2 options) to initiate a PVP challenge.',
       );
     }
 
