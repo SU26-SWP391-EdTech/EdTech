@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { AlertCircle, Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
-import { CustomCheckbox } from '../../components/auth/CustomCheckbox';
 import { FormInput } from '../../components/auth/FormInput';
 import { PrimaryButton } from '../../components/auth/PrimaryButton';
 import { SplitAuthLayout } from '../../layouts/Auth/SplitAuthLayout';
@@ -71,6 +70,7 @@ export function SignUp() {
               placeholder="Create a strong password"
               value={password}
               onChange={setPassword}
+              onEnter={handleSubmit}
               icon={<Lock className="w-4 h-4" />}
               rightEl={
                 <button onClick={() => setShowPwd((value) => !value)} className="text-[#9CA3AF] hover:text-[#6B7280] transition-colors">

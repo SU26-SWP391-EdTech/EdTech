@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { AlertCircle, Eye, EyeOff, Lock, Mail } from 'lucide-react';
-import { CustomCheckbox } from '../../components/auth/CustomCheckbox';
 import { FormInput } from '../../components/auth/FormInput';
 import { PrimaryButton } from '../../components/auth/PrimaryButton';
 import { SplitAuthLayout } from '../../layouts/Auth/SplitAuthLayout';
@@ -85,6 +84,7 @@ export function SignIn() {
               setPassword(value);
               setError('');
             }}
+            onEnter={handleSubmit}
             icon={<Lock className="w-4 h-4" />}
             error={error ? '' : undefined}
             rightEl={

@@ -7,6 +7,7 @@ interface FormInputProps {
   placeholder?: string;
   value: string;
   onChange: (value: string) => void;
+  onEnter?: () => void;
   icon?: ReactNode;
   error?: string;
   hint?: string;
@@ -20,6 +21,7 @@ export function FormInput({
   placeholder,
   value,
   onChange,
+  onEnter,
   icon,
   error,
   hint,
@@ -37,6 +39,7 @@ export function FormInput({
           type={type}
           value={value}
           onChange={(event) => onChange(event.target.value)}
+          onKeyDown={(event) => { if (event.key === 'Enter') onEnter?.(); }}
           placeholder={placeholder}
           disabled={disabled}
           className={`w-full py-3 border rounded-xl text-sm text-[#111827] placeholder:text-[#C4C9D4] focus:outline-none transition-all disabled:bg-[#F9FAFB] disabled:cursor-not-allowed ${

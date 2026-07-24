@@ -34,6 +34,7 @@ import { Public } from 'src/common/decorators/public.decorator';
 import { UpdateLessonPrerequisitesDto } from '../dto/update-lesson-prerequisites.dto';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { JwtPayloadUser } from 'src/common/decorators/current-user.decorator';
+import { ReorderLessonsDto } from '../dto/reorder-lesson.dto';
 
 @ApiTags('Lessons')
 @Controller('lessons')
@@ -150,5 +151,23 @@ export class LessonsController {
     @Param('lessonId', ParseIntPipe) lessonId: number,
   ) {
     return this.lessonPrerequisiteService.getPrerequisitesByLessonIdService(lessonId);
+  }
+
+  @Patch(':lessonId/reorder')
+  @Roles(RoleEnum.COURSE_PROVIDER)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({ summary: 'Reorder lessons in a course' })
+  @ApiBody({ type: ReorderLessonsDto })
+  @ApiResponse({ status: 200, description: 'Lessons reordered successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Lesson not found' })
+  async reorderLessons(
+    @Param('lessonId', ParseIntPipe) lessonId: number,
+    @Body() reorderLessonsDto: ReorderLessonsDto,
+    @CurrentUser() user: JwtPayloadUser,
+  ) {
+    return await this.lessonsService.reorderLessons(lessonId, reorderLessonsDto, user.userId);
   }
 }

@@ -84,8 +84,21 @@ export class LessonsRepository {
     return await this.repo.save(lesson);
   }
 
+  public async saveMany(lessons: Lesson[]): Promise<Lesson[]> {
+    return await this.repo.save(lessons);
+  }
+
   public async delete(lessonId: number): Promise<void> {
     await this.repo.delete(lessonId);
+  }
+
+  public async getMaxPosition(courseId: number): Promise<number | null> {
+    const result = await this.repo
+      .createQueryBuilder('lesson')
+      .select('MAX(lesson.position)', 'max')
+      .where('lesson.course = :courseId', { courseId })
+      .getRawOne<{ max: number | null }>();
+    return result?.max ?? null;
   }
 }
 
