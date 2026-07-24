@@ -70,7 +70,7 @@ export class MatchRepository {
     const fallbackAssessments = await this.assessmentRepo.find({
       where: {
         courseId,
-        type: Not(AssessmentType.PVP),
+        type: In([AssessmentType.LESSON_QUIZ, AssessmentType.PRACTICE]),
       },
       select: ['assessmentId'],
     });
