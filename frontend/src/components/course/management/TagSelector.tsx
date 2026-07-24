@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Tag as TagIcon, X, Plus } from 'lucide-react';
 import { getAllTags, type Tag } from '../../../services/tag/tag.service';
+import { COURSE_TAG_MAX_COUNT, COURSE_TAG_MAX_LENGTH } from '../../../constants/courseValidation.constants';
 
 interface TagSelectorProps {
   selectedTags: string[];
@@ -12,10 +13,11 @@ interface TagSelectorProps {
 export function TagSelector({
   selectedTags,
   onChange,
-  maxTags = 10,
+  maxTags = COURSE_TAG_MAX_COUNT,
   disabled = false,
 }: TagSelectorProps) {
   const [inputValue, setInputValue] = useState('');
+  const [inputError, setInputError] = useState('');
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -45,8 +47,13 @@ export function TagSelector({
   const handleAddTag = (tagName: string) => {
     const trimmed = tagName.trim().replace(/^#/, '');
     if (!trimmed) return;
+    if (trimmed.length > COURSE_TAG_MAX_LENGTH) {
+      setInputError(`Course tag must not exceed ${COURSE_TAG_MAX_LENGTH} characters.`);
+      return;
+    }
     if (selectedTags.some((t) => t.toLowerCase() === trimmed.toLowerCase())) {
       setInputValue('');
+      setInputError('');
       setShowDropdown(false);
       return;
     }
@@ -54,6 +61,7 @@ export function TagSelector({
 
     onChange([...selectedTags, trimmed]);
     setInputValue('');
+    setInputError('');
     setShowDropdown(false);
   };
 
@@ -76,6 +84,9 @@ export function TagSelector({
       t.name.toLowerCase().includes(inputValue.toLowerCase()) &&
       !selectedTags.some((st) => st.toLowerCase() === t.name.toLowerCase()),
   );
+
+  const normalizedInputLength = inputValue.trim().replace(/^#/, '').length;
+  const inputTooLong = normalizedInputLength > COURSE_TAG_MAX_LENGTH;
 
   return (
     <div className="space-y-2 relative" ref={dropdownRef}>
@@ -115,16 +126,33 @@ export function TagSelector({
             type="text"
             value={inputValue}
             onChange={(e) => {
-              setInputValue(e.target.value);
+              const nextValue = e.target.value;
+              const nextLength = nextValue.trim().replace(/^#/, '').length;
+              setInputValue(nextValue);
+              setInputError(nextLength > COURSE_TAG_MAX_LENGTH
+                ? `Course tag must not exceed ${COURSE_TAG_MAX_LENGTH} characters.`
+                : '');
               setShowDropdown(true);
             }}
             onFocus={() => setShowDropdown(true)}
             onKeyDown={handleKeyDown}
             placeholder={selectedTags.length === 0 ? 'Type tag or select (e.g. React, Python)...' : 'Add tag...'}
             className="flex-1 min-w-[140px] bg-transparent text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none px-1 py-1"
+            aria-invalid={Boolean(inputError)}
           />
         )}
       </div>
+
+      {!disabled && selectedTags.length < maxTags && inputValue && (
+        <div className="flex items-center justify-between gap-3 text-[11px]">
+          <span className={inputError ? 'text-[#B91C1C]' : 'text-[#64748B]'} role={inputError ? 'alert' : undefined}>
+            {inputError || `Maximum ${COURSE_TAG_MAX_LENGTH} characters per tag.`}
+          </span>
+          <span className={inputTooLong ? 'text-[#B91C1C]' : 'text-[#64748B]'}>
+            {normalizedInputLength}/{COURSE_TAG_MAX_LENGTH}
+          </span>
+        </div>
+      )}
 
       {/* Dropdown Suggestions */}
       {showDropdown && !disabled && (inputValue.trim() || filteredSuggestions.length > 0) && (
@@ -134,7 +162,8 @@ export function TagSelector({
               <button
                 type="button"
                 onClick={() => handleAddTag(inputValue)}
-                className="w-full text-left px-3 py-2 text-[#3B82F6] hover:bg-[#EFF6FF] font-medium flex items-center gap-2 transition-colors"
+                disabled={inputTooLong}
+                className="w-full text-left px-3 py-2 text-[#3B82F6] hover:bg-[#EFF6FF] font-medium flex items-center gap-2 transition-colors disabled:text-[#94A3B8] disabled:cursor-not-allowed disabled:hover:bg-white"
               >
                 <Plus className="w-3.5 h-3.5" />
                 Create tag <span className="font-bold">"{inputValue.trim()}"</span>
