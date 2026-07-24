@@ -28,7 +28,6 @@ export function LessonList({
         <LessonRow
           key={lesson.id}
           lesson={lesson}
-          index={index}
           isDragging={draggedLessonIndex === index}
           onDragStart={() => onDragStart(index)}
           onDragOver={() => onDragOver(index)}

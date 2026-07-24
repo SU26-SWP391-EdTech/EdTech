@@ -16,6 +16,7 @@ import { Enrollment } from 'src/modules/enrollments/entities/enrollment.entity';
 import { RoleEnum } from 'src/common/enums/role.enum';
 import { CoursesService } from 'src/modules/courses/services/courses.service';
 import { LessonPrerequisiteService } from './lesson-prerequisite.service';
+import { ReorderLessonsDto } from '../dto/reorder-lesson.dto';
 
 @Injectable()
 export class LessonsService {
@@ -47,16 +48,12 @@ export class LessonsService {
       lessonData.videoUrl = uploadedVideo.secure_url;
     }
 
-    // Tự động tính toán vị trí (position) của bài học mới
-    const allLessons = await this.lessonsRepo.findByCourseId(id);
-    const count = allLessons.length;
-    const match = dto.title.match(/^\[Order:(\d+)\]/);
-    const position = match ? parseInt(match[1], 10) : count + 1;
+    const maxPosition = await this.lessonsRepo.getMaxPosition(id);
 
     const lesson = await this.lessonsRepo.createLesson({
       ...lessonData,
       course,
-      position,
+      position: (maxPosition ?? 0) + 1,
     });
 
     // Lưu các bài học tiên quyết
@@ -179,15 +176,6 @@ export class LessonsService {
     const { prerequisiteLessonIds, clearPrerequisites, ...updateData } = dto;
 
     Object.assign(lesson, updateData);
-
-    // If title has order prefix, update position accordingly
-    if (dto.title) {
-      const match = dto.title.match(/^\[Order:(\d+)\]/);
-      if (match) {
-        lesson.position = parseInt(match[1], 10);
-      }
-    }
-
     // Sửa đổi các bài học tiên quyết nếu được cung cấp
     let prIds: number[] = [];
     let shouldUpdatePrerequisites = false;
@@ -242,5 +230,31 @@ export class LessonsService {
       throw new NotFoundException(`Lesson with ID ${lessonId} not found`);
     }
     return lesson;
+  }
+
+  public async reorderLessons(lessonId: number, reorderLessonsDto: ReorderLessonsDto, userId: number): Promise<Lesson[]> {
+    const lesson = await this.findOne(lessonId);
+    const course = await this.courseService.validateCourseOwner(userId, lesson.course.courseId);
+    if (!course) {
+      throw new NotFoundException(`Not found course with ID ${lesson.course.courseId}`);
+    }
+    const { lessonIds } = reorderLessonsDto;
+    const allLessons = await this.lessonsRepo.findByCourseId(lesson.course.courseId);
+    const lessonIdsSet = new Set(lessonIds);
+    const validLessons = allLessons.filter(l => lessonIdsSet.has(l.lessonId));
+    validLessons.sort((a, b) => lessonIds.indexOf(a.lessonId) - lessonIds.indexOf(b.lessonId));
+
+    // Bước 1: Gán position âm tạm thời để tránh vi phạm unique constraint (course_id, position)
+    // trong quá trình MySQL update tuần tự từng record.
+    await this.lessonsRepo.saveMany(
+      validLessons.map((l, i) => ({ ...l, position: -(i + 1) } as Lesson))
+    );
+
+    // Bước 2: Gán position thực
+    validLessons.forEach((l, index) => {
+      l.position = index + 1;
+    });
+    await this.lessonsRepo.saveMany(validLessons);
+    return validLessons;
   }
 }

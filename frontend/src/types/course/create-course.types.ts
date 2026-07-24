@@ -2,6 +2,7 @@ export type CourseBuilderLessonType = 'Video' | 'Reading' | 'Quiz' | 'Assignment
 
 export interface CourseBuilderLesson {
     id: string;
+    position: number;
     title: string;
     type: CourseBuilderLessonType;
     duration: string;
