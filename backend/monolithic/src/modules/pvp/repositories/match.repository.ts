@@ -59,37 +59,85 @@ export class MatchRepository {
   }
 
   async findQuestionsByCourseId(courseId: number): Promise<Question[]> {
-    const assessments = await this.assessmentRepo.find({
+    const pvpAssessments = await this.assessmentRepo.find({
       where: {
         courseId,
-        type: In([AssessmentType.LESSON_QUIZ, AssessmentType.PRACTICE, AssessmentType.PVP]),
+        type: AssessmentType.PVP,
       },
       select: ['assessmentId'],
     });
 
-    if (assessments.length === 0) {
-      return [];
+    const fallbackAssessments = await this.assessmentRepo.find({
+      where: {
+        courseId,
+        type: In([AssessmentType.LESSON_QUIZ, AssessmentType.PRACTICE]),
+      },
+      select: ['assessmentId'],
+    });
+
+    const allowedTypes = [
+      QuestionType.MULTIPLE_CHOICE_SINGLE,
+      QuestionType.TRUE_FALSE,
+      QuestionType.MULTIPLE_CHOICE_MULTI,
+    ];
+
+    let pvpQuestions: Question[] = [];
+    if (pvpAssessments.length > 0) {
+      pvpQuestions = await this.questionRepo.find({
+        where: {
+          assessmentId: In(pvpAssessments.map((a) => a.assessmentId)),
+          type: In(allowedTypes),
+        },
+        relations: {
+          options: true,
+        },
+        order: {
+          position: 'ASC',
+          options: {
+            position: 'ASC',
+          },
+        },
+      });
     }
 
-    return await this.questionRepo.find({
-      where: {
-        assessmentId: In(assessments.map((assessment) => assessment.assessmentId)),
-        type: In([
-          QuestionType.MULTIPLE_CHOICE_SINGLE,
-          QuestionType.TRUE_FALSE,
-          QuestionType.MULTIPLE_CHOICE_MULTI,
-        ]),
-      },
-      relations: {
-        options: true,
-      },
-      order: {
-        position: 'ASC',
-        options: {
-          position: 'ASC',
+    const validPvpQuestions = pvpQuestions.filter(
+      (q) => q.options && q.options.length >= 2,
+    );
+
+    if (validPvpQuestions.length >= 5) {
+      return validPvpQuestions;
+    }
+
+    let fallbackQuestions: Question[] = [];
+    if (fallbackAssessments.length > 0) {
+      fallbackQuestions = await this.questionRepo.find({
+        where: {
+          assessmentId: In(fallbackAssessments.map((a) => a.assessmentId)),
+          type: In(allowedTypes),
         },
-      },
-    });
+        relations: {
+          options: true,
+        },
+        order: {
+          position: 'ASC',
+          options: {
+            position: 'ASC',
+          },
+        },
+      });
+    }
+
+    const validFallbackQuestions = fallbackQuestions.filter(
+      (q) => q.options && q.options.length >= 2,
+    );
+
+    const pvpQuestionIds = new Set(validPvpQuestions.map((q) => q.questionId));
+    const combinedQuestions = [
+      ...validPvpQuestions,
+      ...validFallbackQuestions.filter((q) => !pvpQuestionIds.has(q.questionId)),
+    ];
+
+    return combinedQuestions;
   }
 
   async findAssessmentById(assessmentId: number): Promise<Assessment | null> {
