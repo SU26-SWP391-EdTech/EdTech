@@ -4,7 +4,6 @@ import toast from 'react-hot-toast';
 import {
   createCourse,
   submitCourseToReview,
-  submitNewCourseToReview,
   updateCourse,
 } from '../../../services/course/course.service';
 import {
@@ -105,9 +104,12 @@ export function useCoursePersistence({
         await updateCourse(editId, updateFormData);
       } else {
         // Tạo mới khóa học
-        const newCourse = status === 'pending'
-          ? await submitNewCourseToReview(formData)
-          : await createCourse(formData);
+        const draftFormData = await buildCourseFormData({
+          status: 'draft',
+          thumbnailFile,
+          draft: getCurrentCourseDraft(),
+        });
+        const newCourse = await createCourse(draftFormData);
         courseId = newCourse.courseId;
       }
 
@@ -115,8 +117,8 @@ export function useCoursePersistence({
       await syncLessons(courseId!);
 
       // Nếu đang chỉnh sửa khóa học và muốn gửi duyệt
-      if (editId && status === 'pending') {
-        await submitCourseToReview(editId);
+      if (status === 'pending') {
+        await submitCourseToReview(courseId!);
       }
 
       // Xóa bản nháp tạm lưu ở Local Storage nếu tạo mới thành công

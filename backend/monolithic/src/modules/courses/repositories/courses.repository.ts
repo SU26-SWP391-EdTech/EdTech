@@ -63,6 +63,7 @@ export class CoursesRepository extends Repository<Course> {
       search,
       status,
       language,
+      tag,
       minDuration,
       maxDuration,
       sortBy = 'createdAt',
@@ -75,6 +76,7 @@ export class CoursesRepository extends Repository<Course> {
 
     // Nạp thêm các quan hệ cần hiển thị (ví dụ: thông tin người tạo, tổ chức, tags)
     queryBuilder
+      .distinct(true)
       .leftJoin('course.user', 'user')
       .addSelect(['user.userId', 'user.fullName', 'user.avatar'])
       .leftJoinAndSelect('course.courseTag', 'courseTag')
@@ -102,7 +104,12 @@ export class CoursesRepository extends Repository<Course> {
     if (language) {
       queryBuilder.andWhere('LOWER(course.language) = LOWER(:language)', {
         language,
+      tag,
       });
+    }
+
+    if (tag) {
+      queryBuilder.andWhere('LOWER(tag.name) = LOWER(:tag)', { tag });
     }
 
     // 4. Lọc theo khoảng thời lượng (min - max duration)

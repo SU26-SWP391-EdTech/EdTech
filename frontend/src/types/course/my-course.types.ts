@@ -14,7 +14,8 @@ export interface Course {
     status: CourseStatus;
     createdAt: string;
     updatedAt: string;
-    thumbnailUrl: string; 
+    thumbnailUrl: string;
+    reviewReason?: string | null;
 }
 
 export interface StatusConfigItem {

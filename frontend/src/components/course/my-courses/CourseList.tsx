@@ -75,9 +75,9 @@ const CourseList = ({ filtered, canDelete, setDeleteId, onView, onEdit, onSubmit
                                     </div>
                                 </div>
                                 {statusKey === 'REJECTED' && (
-                                    <p style={{ fontSize: 12, color: '#E11D48', marginTop: 6, fontWeight: 500 }}>
-                                        ✗ Rejected — revise and resubmit to change status back to Draft
-                                    </p>
+                                    <div style={{ marginTop: 8, border: '1px solid #FECACA', background: '#FEF2F2', borderRadius: 8, padding: '8px 10px', fontSize: 12, color: '#991B1B' }}>
+                                        <strong>Reason for rejection:</strong> {c.reviewReason || 'No rejection reason was provided for this earlier review.'}
+                                    </div>
                                 )}
                                 {statusKey === 'PENDING' && (
                                     <p style={{ fontSize: 12, color: '#D97706', marginTop: 6, fontWeight: 500 }}>

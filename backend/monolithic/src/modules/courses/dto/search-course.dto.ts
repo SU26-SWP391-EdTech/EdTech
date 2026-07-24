@@ -37,6 +37,14 @@ export class SearchCourseDto {
     @IsString()
     language?: string;
 
+    @ApiPropertyOptional({
+        example: 'Web Development',
+        description: 'Filter courses by tag name (case-insensitive)',
+    })
+    @IsOptional()
+    @IsString()
+    tag?: string;
+
 
     @ApiPropertyOptional({
         example: 30,

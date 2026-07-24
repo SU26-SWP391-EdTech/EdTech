@@ -111,7 +111,7 @@ export class Course {
   learningPathCourses!: LearningPathCourse[];
 
   @Column({ name: 'review_reason', type: 'text', nullable: true })
-  reviewReason!: string
+  reviewReason!: string | null;
 
   // courses 1 - 1 leaderbpoard_rules
   @OneToOne(
