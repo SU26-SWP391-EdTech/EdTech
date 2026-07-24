@@ -185,6 +185,7 @@ export function useCreateCourse() {
     onEditLesson: persistence.openLessonEditor,
     onSaveDraft: () => persistence.handleSubmit('draft'),
     onSubmitForReview: handleSubmitForReviewClick,
+    onConfirmSubmit: async () => { await persistence.handleSubmit('pending'); setShowSubmit(false); },
     onBackToCourses: handleBackToCourses,
     onStayOnPage: handleStayOnPage,
     onLeavePage: handleLeavePage,
