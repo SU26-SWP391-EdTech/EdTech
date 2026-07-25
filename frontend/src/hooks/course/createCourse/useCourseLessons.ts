@@ -14,18 +14,6 @@ export function useCourseLessons() {
   const [lessons, setLessons] = useState<CourseBuilderLesson[]>([]);     // Danh sách các bài học hiện tại trong builder
   const [draggedLessonIndex, setDraggedLessonIndex] = useState<number | null>(null); // Vị trí (index) của bài học đang bị kéo
 
-  /**
-   * Bật hoặc tắt trạng thái khóa (locked) của một bài học.
-   * 
-   * @param lessonId - ID bài học dạng chuỗi
-   */
-  function toggleLessonLock(lessonId: string) {
-    setLessons(prev => prev.map(lesson => (
-      lesson.id === lessonId
-        ? { ...lesson, locked: !lesson.locked }
-        : lesson
-    )));
-  }
 
   /**
    * Thực hiện xóa một bài học.
@@ -92,7 +80,6 @@ export function useCourseLessons() {
     setLessons,
     draggedLessonIndex,
     setDraggedLessonIndex,
-    toggleLessonLock,
     deleteLesson,
     dragLesson,
     clearDraggedLesson,

@@ -52,7 +52,6 @@ export function mapBackendLessonToCourseBuilderLesson(lesson: BackendLesson): Co
         title: lesson.title,
         type,
         duration: `${mins} min`,
-        locked: false,
         content: lesson.content || '',
         videoUrl: lesson.videoUrl || '',
         description: lesson.description || '',

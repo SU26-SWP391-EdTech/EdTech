@@ -9,7 +9,6 @@ interface LessonListProps {
   onDragOver: (targetIndex: number) => void;
   onDragStart: (index: number) => void;
   onEditLesson: (lessonId: string) => void;
-  onToggleLessonLock: (lessonId: string) => void;
 }
 
 export function LessonList({
@@ -20,7 +19,6 @@ export function LessonList({
   onDragOver,
   onDragStart,
   onEditLesson,
-  onToggleLessonLock,
 }: LessonListProps) {
   return (
     <div className="space-y-2">
@@ -34,7 +32,6 @@ export function LessonList({
           onDragEnd={onDragEnd}
           onEdit={() => onEditLesson(lesson.id)}
           onDelete={() => onDeleteLesson(lesson.id)}
-          onToggleLock={() => onToggleLessonLock(lesson.id)}
         />
       ))}
     </div>

@@ -13,7 +13,6 @@ interface CurriculumSectionProps {
   onDragOver: (targetIndex: number) => void;
   onDragStart: (index: number) => void;
   onEditLesson: (lessonId: string) => void;
-  onToggleLessonLock: (lessonId: string) => void;
 }
 
 export function CurriculumSection({
@@ -25,7 +24,6 @@ export function CurriculumSection({
   onDragOver,
   onDragStart,
   onEditLesson,
-  onToggleLessonLock,
 }: CurriculumSectionProps) {
   return (
     <FormCard
@@ -56,7 +54,6 @@ export function CurriculumSection({
           onDragOver={onDragOver}
           onDragStart={onDragStart}
           onEditLesson={onEditLesson}
-          onToggleLessonLock={onToggleLessonLock}
         />
       )}
     </FormCard>
