@@ -1,4 +1,5 @@
-import { Upload, Link2, CheckCircle2, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Upload, Link2, Trash2 } from 'lucide-react';
 import { ReadingMarkdownEditor } from './ReadingMarkdownEditor';
 
 function getEmbedUrl(url: string): string | null {
@@ -34,7 +35,12 @@ export function LessonContentSection({
   const embeddedUrl = getEmbedUrl(videoUrl);
   const hasPreview = Boolean(videoFile || (videoUrl && (embedRequested || videoUploaded)));
 
-
+  useEffect(() => {
+    if (!videoUrl) {
+      setEmbedRequested(false);
+      setVideoUrlError('');
+    }
+  }, [videoUrl]);
 
   const handleEmbed = () => {
     try {
