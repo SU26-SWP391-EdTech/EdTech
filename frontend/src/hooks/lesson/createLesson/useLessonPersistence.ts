@@ -65,6 +65,11 @@ export function useLessonPersistence({
             return null;
         }
 
+        if (form.hasAssessment && form.assessments.length === 0) {
+            showFeedback('Create a Lesson Quiz, Practice, or PvP assessment before saving.');
+            return null;
+        }
+
         const invalidPvpAssessment = form.assessments.find(a => a.type === 'PVP' && (!a.questions || a.questions.length < 5));
         if (invalidPvpAssessment) {
             showFeedback(`PvP Assessment "${invalidPvpAssessment.title}" must have at least 5 questions.`);
