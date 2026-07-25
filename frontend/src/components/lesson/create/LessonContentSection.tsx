@@ -1,4 +1,5 @@
-import { Upload, Link2, Bold, Italic, List, Code, CheckCircle2, Trash2 } from 'lucide-react';
+import { Upload, Link2, CheckCircle2, Trash2 } from 'lucide-react';
+import { ReadingMarkdownEditor } from './ReadingMarkdownEditor';
 
 function getEmbedUrl(url: string): string | null {
   if (!url) return null;
@@ -136,29 +137,7 @@ export function LessonContentSection({
             <h2 style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Reading Material Content</h2>
           </div>
 
-          <div>
-            <div style={{ border: '1px solid #E5E7EB', borderRadius: 10, overflow: 'hidden' }}>
-              <div style={{ padding: '8px 12px', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-                {[Bold, Italic, List, Code, Link2].map((Icon, i) => (
-                  <button type="button" key={i} style={{ width: 30, height: 28, border: 'none', background: 'transparent', borderRadius: 5, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Icon size={13} style={{ color: '#374151' }} />
-                  </button>
-                ))}
-                <div style={{ width: 1, height: 18, background: '#E5E7EB', margin: '0 4px' }} />
-                {['H1', 'H2', 'H3'].map(h => (
-                  <button type="button" key={h} style={{ padding: '2px 7px', border: 'none', background: 'transparent', borderRadius: 5, cursor: 'pointer', fontSize: 11.5, fontWeight: 700, color: '#6B7280' }}>{h}</button>
-                ))}
-              </div>
-              <textarea
-                value={content}
-                onChange={e => setContent(e.target.value)}
-                placeholder="Start writing your lesson content here..."
-                rows={12}
-                style={{ width: '100%', border: 'none', padding: '16px', fontSize: 14, color: '#374151', outline: 'none', resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.7, boxSizing: 'border-box', background: '#fff' }}
-              />
-            </div>
-            <p style={{ fontSize: 11.5, color: '#9CA3AF', marginTop: 6 }}>Estimated reading time: ~5 min based on content length</p>
-          </div>
+          <ReadingMarkdownEditor content={content} setContent={setContent} />
         </div>
       )}
     </div>
