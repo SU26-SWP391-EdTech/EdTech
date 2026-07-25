@@ -21,8 +21,8 @@ export function CreateLessonPage() {
           display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20,
         }}>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111827', letterSpacing: '-0.4px', marginBottom: 5 }}>Create Lesson</h1>
-            <p style={{ fontSize: 13.5, color: '#6B7280' }}>Add lesson content, resources, and practice activities to your course.</p>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111827', letterSpacing: '-0.4px', marginBottom: 5 }}>{hook.isModeLocked ? 'Edit Lesson' : 'Create Lesson'}</h1>
+            <p style={{ fontSize: 13.5, color: '#6B7280' }}>{hook.isModeLocked ? 'Update this lesson while keeping its saved content mode.' : 'Add lesson content, resources, and practice activities to your course.'}</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             <button
