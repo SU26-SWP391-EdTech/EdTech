@@ -30,7 +30,7 @@ type UseLessonPersistenceParams = {
     data: UseLessonDataReturn;
     draftFlow: UseLessonDraftFlowReturn;
 
-    showFeedback: (message: string) => void;
+    showFeedback: (message: string, type?: 'success' | 'error') => void;
 };
 
 /**
@@ -61,18 +61,18 @@ export function useLessonPersistence({
     async function persistLesson(nextStatus: LessonStatus): Promise<Lesson | null> {
         if (!form.title.trim()) {
             form.setTitleError(true);
-            showFeedback('Lesson title is required.');
+            showFeedback('Lesson title is required.', 'error');
             return null;
         }
 
         if (form.hasAssessment && form.assessments.length === 0) {
-            showFeedback('Create a Lesson Quiz, Practice, or PvP assessment before saving.');
+            showFeedback('Create a Lesson Quiz, Practice, or PvP assessment before saving.', 'error');
             return null;
         }
 
         const invalidPvpAssessment = form.assessments.find(a => a.type === 'PVP' && (!a.questions || a.questions.length < 5));
         if (invalidPvpAssessment) {
-            showFeedback(`PvP Assessment "${invalidPvpAssessment.title}" must have at least 5 questions.`);
+            showFeedback(`PvP Assessment "${invalidPvpAssessment.title}" must have at least 5 questions.`, 'error');
             return null;
         }
 
@@ -94,12 +94,12 @@ export function useLessonPersistence({
             draftFlow.isCourseBuilder &&
             (!Number.isFinite(explicitCourseId) || explicitCourseId <= 0)
         ) {
-            showFeedback('Missing course id. Go back to the course builder and create the lesson again.');
+            showFeedback('Missing course id. Go back to the course builder and create the lesson again.', 'error');
             return null;
         }
 
         if (!data.selectedCourseId) {
-            showFeedback('Please select a course before saving the lesson.');
+            showFeedback('Please select a course before saving the lesson.', 'error');
             return null;
         }
 
@@ -236,7 +236,7 @@ export function useLessonPersistence({
             // Tải lại danh sách bài học trên giao diện
             await data.reloadLessons(data.selectedCourseId);
 
-            showFeedback('Lesson saved to database.');
+            showFeedback('Lesson saved to database.', 'success');
 
             // Kiểm tra và chuyển hướng người dùng nếu có redirect URL
             const redirectBack = searchParams.get('redirectBack');
@@ -251,7 +251,7 @@ export function useLessonPersistence({
             const message = error && typeof error === 'object' && 'response' in error
                 ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
                 : undefined;
-            showFeedback(message || 'Failed to save lesson.');
+            showFeedback(message || 'Failed to save lesson.', 'error');
 
             return null;
         } finally {
