@@ -11,6 +11,7 @@ import {
   createLesson,
   deleteLesson as apiDeleteLesson,
   updateLesson,
+  reorderLessons,
 } from '../../../services/lesson/lesson.service';
 import type { CourseBuilderLesson, CourseDraft } from '../../../types/course/create-course.types';
 import { clearCourseDraft } from '../../../utils/course/courseDraftStorage';
@@ -57,16 +58,23 @@ export function useCoursePersistence({
       await apiDeleteLesson(lessonId);
     }
 
-    // 2. Đồng bộ thêm mới/cập nhật và cập nhật lại thứ tự sắp xếp (index) của bài học
-    let index = 1;
+    // 2. Đồng bộ thêm mới/cập nhật bài học (không inject [Order:N] vào title nữa)
+    const persistedIds: number[] = [];
     for (const lesson of lessons) {
-      const payload = buildLessonSyncPayload(lesson, index++);
+      const payload = buildLessonSyncPayload(lesson);
       const isNew = lesson.id.startsWith('l-');
       if (isNew) {
-        await createLesson(courseId, payload);
+        const created = await createLesson(courseId, payload);
+        persistedIds.push(Number(created.lessonId));
       } else {
         await updateLesson(courseId, Number(lesson.id), payload);
+        persistedIds.push(Number(lesson.id));
       }
+    }
+
+    // 3. Gọi reorder để đồng bộ position theo thứ tự mảng hiện tại
+    if (persistedIds.length > 0) {
+      await reorderLessons(persistedIds[0], persistedIds);
     }
   }
 

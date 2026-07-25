@@ -32,11 +32,11 @@ export class AssessmentSessionService {
   public async createAssessmentSessionService(userId: number, assessmentId: number) {
     await this.learnersService.getLearnerProfileById(userId);
     await this.assessmentService.findOneService(assessmentId);
-
+    const timeStart = new Date();
     return this.assessmentSessionRepository.createAssessmentSession({
       userId,
       assessmentId,
-    })
+    }, timeStart)
   }
 
   public async startAssessmentSessionService(userId: number, assessmentId: number) {

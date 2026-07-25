@@ -176,14 +176,6 @@ export class AssessmentService {
     }
 
     for (const assessment of dto.assessments) {
-      if (
-        assessment.type === AssessmentType.PVP &&
-        assessment.questions.length < 5
-      ) {
-        throw new BadRequestException(
-          'PvP assessments require at least 5 questions',
-        );
-      }
       for (const question of assessment.questions) {
         if (question.options.length < 2) {
           throw new BadRequestException(

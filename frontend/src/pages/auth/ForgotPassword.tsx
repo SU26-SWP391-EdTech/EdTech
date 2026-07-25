@@ -79,6 +79,7 @@ export function ForgotPassword() {
               placeholder="you@example.com"
               value={email}
               onChange={setEmail}
+              onEnter={handleSend}
               icon={<Mail className="w-4 h-4" />}
               hint="We'll send a reset link to this address"
             />

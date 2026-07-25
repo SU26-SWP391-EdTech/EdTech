@@ -19,9 +19,10 @@ export class LessonPrerequisiteRepository {
   }
 
   public async createMany(prerequisites: Partial<LessonPrerequisite>[], manager?: EntityManager): Promise<LessonPrerequisite[]> {
+    if (!prerequisites || prerequisites.length === 0) return [];
     const repo = this.getRepo(manager);
-    const entities = repo.create(prerequisites);
-    return await repo.save(entities);
+    await repo.insert(prerequisites as any);
+    return prerequisites as LessonPrerequisite[];
   }
 
   public async findNextLessons(prerequisiteLessonId: number, manager?: EntityManager): Promise<LessonPrerequisite[]> {

@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 import toast from 'react-hot-toast';
-import { updateStreak } from '../../utils/learner/streakUtils';
 import {
     getLeaderboardCourses,
     getCourseLeaderboardData,
