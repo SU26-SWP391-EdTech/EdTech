@@ -9,7 +9,7 @@ import type {
 type UseLessonQuizModalParams = {
     setQuizQuestions: Dispatch<SetStateAction<QuizQuestion[]>>;
     setModal: Dispatch<SetStateAction<ModalType>>;
-    showFeedback: (message: string) => void;
+    showFeedback: (message: string, type?: 'success' | 'error') => void;
 };
 
 /**
@@ -50,7 +50,7 @@ export function useLessonQuizModal({
             options = qOptions.filter(option => option.trim());
 
             if (options.length < 2) {
-                showFeedback('Please add at least 2 answer options.');
+                showFeedback('Please add at least 2 answer options.', 'error');
                 return;
             }
         } else if (qType === 'True / False') {
