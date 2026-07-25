@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, X, HelpCircle, Check, Award } from 'lucide-react';
+import { Plus, Trash2, X, HelpCircle, Check, Award, Pencil } from 'lucide-react';
 import type { Assessment, AssessmentQuestion, AssessmentType, QuestionType } from '../../../types/lesson/create-lesson.types';
 
 interface Props {
@@ -22,12 +22,41 @@ export function LessonAssessmentSection({ assessments, setAssessments }: Props) 
 
   // Question Form State (for a specific assessment)
   const [activeAssessmentId, setActiveAssessmentId] = useState<string | null>(null);
+  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   const [qContent, setQContent] = useState('');
   const [qType, setQType] = useState<QuestionType>('MULTIPLE_CHOICE_SINGLE');
   const [qPoints, setQPoints] = useState(1);
   const [qOptions, setQOptions] = useState<string[]>(['', '', '', '']);
   const [correctIndices, setCorrectIndices] = useState<number[]>([0]);
 
+  const resetQuestionForm = () => {
+    setQContent('');
+    setQType('MULTIPLE_CHOICE_SINGLE');
+    setQPoints(1);
+    setQOptions(['', '', '', '']);
+    setCorrectIndices([0]);
+    setEditingQuestionId(null);
+  };
+
+  const closeQuestionModal = () => {
+    setActiveAssessmentId(null);
+    resetQuestionForm();
+  };
+
+  const openAddQuestion = (assessmentId: string) => {
+    resetQuestionForm();
+    setActiveAssessmentId(assessmentId);
+  };
+
+  const openEditQuestion = (assessmentId: string, question: AssessmentQuestion) => {
+    setActiveAssessmentId(assessmentId);
+    setEditingQuestionId(question.id);
+    setQContent(question.content);
+    setQType(question.type);
+    setQPoints(question.points);
+    setQOptions(question.options.map(option => option.content));
+    setCorrectIndices(question.options.flatMap((option, index) => option.isCorrect ? [index] : []));
+  };
   // Create Assessment
   const handleCreateAssessment = () => {
     if (!newTitle.trim()) return;
@@ -72,44 +101,32 @@ export function LessonAssessmentSection({ assessments, setAssessments }: Props) 
     }
   };
 
-  // Save Question
-  const handleSaveQuestion = async () => {
+  // Add or update a question while preserving persisted IDs for tree synchronization.
+  const handleSaveQuestion = () => {
     if (!activeAssessmentId || !qContent.trim()) return;
-
-    // Filter out blank options
-    const filteredOptions = qOptions.map((o, idx) => ({
-      id: `opt-${Date.now()}-${idx}`,
-      content: o.trim() || `Option ${idx + 1}`,
-      isCorrect: correctIndices.includes(idx),
+    setAssessments(prev => prev.map(assessment => {
+      if (assessment.id !== activeAssessmentId) return assessment;
+      const existingQuestion = editingQuestionId ? assessment.questions.find(question => question.id === editingQuestionId) : undefined;
+      const updatedQuestion: AssessmentQuestion = {
+        id: existingQuestion?.id || `q-${Date.now()}`,
+        content: qContent.trim(),
+        type: qType,
+        points: qPoints,
+        options: qOptions.map((option, index) => ({
+          id: existingQuestion?.options[index]?.id || `opt-${Date.now()}-${index}`,
+          content: option.trim(),
+          isCorrect: correctIndices.includes(index),
+        })),
+      };
+      return {
+        ...assessment,
+        questions: existingQuestion
+          ? assessment.questions.map(question => question.id === existingQuestion.id ? updatedQuestion : question)
+          : [...assessment.questions, updatedQuestion],
+      };
     }));
-
-    const newQuestion: AssessmentQuestion = {
-      id: `q-${Date.now()}`,
-      content: qContent.trim(),
-      type: qType,
-      points: qPoints,
-      options: filteredOptions,
-    };
-
-    setAssessments(prev => prev.map(a => {
-      if (a.id === activeAssessmentId) {
-        return {
-          ...a,
-          questions: [...a.questions, newQuestion],
-        };
-      }
-      return a;
-    }));
-
-    // Reset question form
-    setQContent('');
-    setQType('MULTIPLE_CHOICE_SINGLE');
-    setQPoints(1);
-    setQOptions(['', '', '', '']);
-    setCorrectIndices([0]);
-    setActiveAssessmentId(null);
+    closeQuestionModal();
   };
-
   // Delete Question
   const handleDeleteQuestion = (assessmentId: string | number, questionId: string | number) => {
     setAssessments(prev => prev.map(a => {
@@ -122,6 +139,12 @@ export function LessonAssessmentSection({ assessments, setAssessments }: Props) 
       return a;
     }));
   };
+
+  const isQuestionValid = qContent.trim().length > 0
+    && qOptions.length >= 2
+    && qOptions.every(option => option.trim().length > 0)
+    && correctIndices.length > 0
+    && (qType === 'MULTIPLE_CHOICE_MULTI' || correctIndices.length === 1);
 
   return (
     <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14, padding: '22px 26px' }}>
@@ -206,7 +229,7 @@ export function LessonAssessmentSection({ assessments, setAssessments }: Props) 
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button
                     type="button"
-                    onClick={() => setActiveAssessmentId(ast.id)}
+                    onClick={() => openAddQuestion(ast.id)}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px',
                       background: '#FFF1F3', border: '1px solid #FECDD3', borderRadius: 6,
@@ -263,6 +286,7 @@ export function LessonAssessmentSection({ assessments, setAssessments }: Props) 
                             ))}
                           </div>
                         </div>
+                        <button type="button" title="Edit question" aria-label={`Edit question ${qidx + 1}`} onClick={() => openEditQuestion(ast.id, q)} style={{ border: 'none', background: 'transparent', color: '#64748B', cursor: 'pointer', alignSelf: 'flex-start', padding: 4 }}><Pencil size={13} /></button>
                         <button
                           type="button"
                           onClick={() => handleDeleteQuestion(ast.id, q.id)}
@@ -288,10 +312,10 @@ export function LessonAssessmentSection({ assessments, setAssessments }: Props) 
           <div style={{ background: '#fff', borderRadius: 16, padding: '28px 32px', width: 500, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.16)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
               <div>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: 0 }}>Add Question</h3>
-                <p style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>Adding to assessment: {assessments.find(a => a.id === activeAssessmentId)?.title}</p>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: 0 }}>{editingQuestionId ? 'Edit Question' : 'Add Question'}</h3>
+                <p style={{ fontSize: 12, color: '#64748B', marginTop: 2 }}>{editingQuestionId ? 'Editing question in' : 'Adding to assessment'}: {assessments.find(a => a.id === activeAssessmentId)?.title}</p>
               </div>
-              <button onClick={() => setActiveAssessmentId(null)} style={{ border: 'none', background: '#F3F4F6', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={13} /></button>
+              <button onClick={closeQuestionModal} style={{ border: 'none', background: '#F3F4F6', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={13} /></button>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -414,7 +438,7 @@ export function LessonAssessmentSection({ assessments, setAssessments }: Props) 
             <div style={{ display: 'flex', gap: 10, marginTop: 26 }}>
               <button
                 type="button"
-                onClick={() => setActiveAssessmentId(null)}
+                onClick={closeQuestionModal}
                 style={{ flex: 1, padding: '10px', border: '1px solid #E5E7EB', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#374151', background: '#fff' }}
               >
                 Cancel
@@ -422,14 +446,14 @@ export function LessonAssessmentSection({ assessments, setAssessments }: Props) 
               <button
                 type="button"
                 onClick={handleSaveQuestion}
-                disabled={!qContent.trim() || qOptions.some((o, i) => qType !== 'TRUE_FALSE' && !o.trim() && correctIndices.includes(i))}
+                disabled={!isQuestionValid}
                 style={{
                   flex: 1, padding: '10px', background: '#E11D48', border: 'none',
-                  borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                  color: '#fff', opacity: qContent.trim() ? 1 : 0.6,
+                  borderRadius: 8, fontSize: 13, fontWeight: 600,
+                  color: '#fff', opacity: isQuestionValid ? 1 : 0.6, cursor: isQuestionValid ? 'pointer' : 'not-allowed',
                 }}
               >
-                Save Question
+                {editingQuestionId ? 'Update Question' : 'Save Question'}
               </button>
             </div>
           </div>
