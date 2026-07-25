@@ -25,8 +25,17 @@ export class CoursesService {
     private readonly coursesRepository: CoursesRepository,
     private cloudinaryService: CloudinaryService,
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Lesson) private lessonRepository: Repository<Lesson>,
     private readonly tagsService: TagsService,
   ) {}
+
+  // Sync totalLessons column với số lesson thực tế trong DB
+  public async updateTotalLessons(courseId: number): Promise<void> {
+    const count = await this.lessonRepository.count({
+      where: { course: { courseId } },
+    });
+    await this.coursesRepository.update({ courseId }, { totalLessons: count });
+  }
 
   // create course
   async create(

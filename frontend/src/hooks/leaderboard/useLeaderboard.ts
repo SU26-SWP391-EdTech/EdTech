@@ -205,14 +205,22 @@ export function useLeaderboard() {
 
         toast.promise(
             (async () => {
-                let pvpAssessmentId = 1; // Fallback to 1 (seeded)
+                let pvpAssessmentId: number | null = null;
                 try {
                     const res = await api.get(`/assessment/courses/${selectedCourseId}/pvp`);
-                    if (res.data && res.data.assessmentId) {
-                        pvpAssessmentId = res.data.assessmentId;
+                    if (res.data) {
+                        if (res.data.assessmentId) {
+                            pvpAssessmentId = res.data.assessmentId;
+                        } else if (Array.isArray(res.data) && res.data.length > 0) {
+                            pvpAssessmentId = res.data[0].assessmentId;
+                        }
                     }
                 } catch (err) {
-                    console.warn('Failed to fetch PvP assessment for course, using default ID: 1', err);
+                    console.warn('Failed to fetch PvP assessment for course:', err);
+                }
+
+                if (!pvpAssessmentId) {
+                    throw new Error('PvP assessment not found for this course.');
                 }
 
                 // Send the socket event

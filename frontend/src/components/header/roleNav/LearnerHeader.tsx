@@ -37,15 +37,28 @@ export function LearnerHeader() {
     const [streak, setStreak] = useState<number | null>(null);
 
     useEffect(() => {
-        if (user) {
-            getLearnerProfile(user.userId)
-                .then((profileData) => {
-                    setStreak(profileData.currentStreak ?? 0);
-                })
-                .catch(() => {
-                    setStreak(0);
-                });
-        }
+        const fetchStreak = () => {
+            if (user) {
+                getLearnerProfile(user.userId)
+                    .then((profileData) => {
+                        setStreak(profileData.currentStreak ?? 0);
+                    })
+                    .catch(() => {
+                        setStreak(0);
+                    });
+            }
+        };
+
+        fetchStreak();
+
+        const handleStreakUpdated = () => {
+            fetchStreak();
+        };
+
+        window.addEventListener('streak-updated', handleStreakUpdated);
+        return () => {
+            window.removeEventListener('streak-updated', handleStreakUpdated);
+        };
     }, [user]);
 
 

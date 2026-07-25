@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, In, Not, Repository } from 'typeorm';
 import { PvpMatch } from '../entities/pvp-match.entity';
 import { Assessment } from 'src/modules/assessment/entities/assessment.entity';
 import { Question } from 'src/modules/question/entities/question.entity';
@@ -70,7 +70,7 @@ export class MatchRepository {
     const fallbackAssessments = await this.assessmentRepo.find({
       where: {
         courseId,
-        type: In([AssessmentType.LESSON_QUIZ, AssessmentType.PRACTICE]),
+        type: Not(AssessmentType.PVP),
       },
       select: ['assessmentId'],
     });
