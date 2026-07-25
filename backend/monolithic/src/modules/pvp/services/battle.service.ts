@@ -70,10 +70,10 @@ export class BattleService {
       console.log(`[PVP DEBUG] Invalid questions (missing options):`, questions.filter(q => !q.options || q.options.length < 2).map(q => ({ id: q.questionId, optionsLength: q.options?.length })));
     }
 
-    if (validQuestions.length === 0) {
+    if (validQuestions.length < 5) {
       throw new BadRequestException({
         code: 'QUESTION_NOT_FOUND',
-        message: 'Assessment does not contain any valid battle questions (must have at least 2 options).',
+        message: 'Course must contain at least 5 valid battle questions (with at least 2 options) to start a PvP match.',
       });
     }
 

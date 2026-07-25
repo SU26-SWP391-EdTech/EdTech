@@ -11,8 +11,9 @@ export class AssessmentSessionRepository {
     private readonly repo: Repository<AssessmentSession>,
   ) {}
 
-  public async createAssessmentSession(data: Partial<AssessmentSession>) {
+  public async createAssessmentSession(data: Partial<AssessmentSession>, timeStart: Date) {
     const session = this.repo.create(data);
+    session.startedAt = timeStart;
     return this.repo.save(session);
   }
 

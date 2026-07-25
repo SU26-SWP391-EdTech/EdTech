@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import type { CourseBuilderLesson } from '../../../types/course/create-course.types';
+import { reorderLessons as apiReorderLessons } from '../../../services/lesson/lesson.service';
 
 /**
  * Custom hook quản lý danh sách bài học và thứ tự sắp xếp bài học trong bộ công cụ tạo khóa học.
  * Hỗ trợ các tính năng: bật/tắt khóa bài học, xóa bài học (đồng bộ xóa API hoặc đưa vào hàng đợi xóa), 
- * kéo thả sắp xếp thứ tự hiển thị của các bài học.
+ * kéo thả sắp xếp thứ tự hiển thị của các bài học (gọi reorder API ngay sau khi thả).
  * 
  */
 export function useCourseLessons() {
@@ -48,18 +49,34 @@ export function useCourseLessons() {
 
   /**
    * Cập nhật vị trí bài học khi thực hiện hành động kéo thả (Drag over).
+   * Sau khi reorder state, gọi API reorder ngay lập tức nếu danh sách có ít nhất 1 lesson đã lưu trong DB.
    * 
    * @param targetIndex - Vị trí đích mà bài học được kéo thả tới
    */
-  function dragLesson(targetIndex: number) {
+  async function dragLesson(targetIndex: number) {
     if (draggedLessonIndex === null || draggedLessonIndex === targetIndex) return;
 
     const updated = [...lessons];
     const draggedItem = updated[draggedLessonIndex];
-    updated.splice(draggedLessonIndex, 1);     // Xóa ở vị trí cũ
+    updated.splice(draggedLessonIndex, 1);      // Xóa ở vị trí cũ
     updated.splice(targetIndex, 0, draggedItem); // Chèn vào vị trí mới
-    setLessons(updated);
+
+    // Cập nhật position trên UI theo thứ tự mới
+    const updatedWithPosition = updated.map((l, i) => ({ ...l, position: i + 1 }));
+    setLessons(updatedWithPosition);
     setDraggedLessonIndex(targetIndex);
+
+    // Gọi API reorder với các lesson đã có trong DB (ID không bắt đầu bằng 'l-')
+    const persistedLessons = updatedWithPosition.filter(l => !l.id.startsWith('l-'));
+    if (persistedLessons.length > 0) {
+      const anyLessonId = Number(persistedLessons[0].id);
+      const lessonIds = persistedLessons.map(l => Number(l.id));
+      try {
+        await apiReorderLessons(anyLessonId, lessonIds);
+      } catch (err) {
+        console.error('Failed to reorder lessons:', err);
+      }
+    }
   }
 
   /**

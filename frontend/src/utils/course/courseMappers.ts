@@ -1,8 +1,6 @@
 import type { Lesson as BackendLesson } from '../../services/lesson/lesson.service';
 import type { CourseBuilderLesson, CourseBuilderLessonType } from '../../types/course/create-course.types';
 
-const ORDER_REGEX = /^\[Order:(\d+)\]\s*/;
-
 export function mapBackendLessonToCourseBuilderLesson(lesson: BackendLesson): CourseBuilderLesson {
     const hasVideo = Boolean(lesson.videoUrl);
     
@@ -48,11 +46,10 @@ export function mapBackendLessonToCourseBuilderLesson(lesson: BackendLesson): Co
         mins = 10;
     }
 
-    const cleanTitle = lesson.title.replace(ORDER_REGEX, '');
-
     return {
         id: String(lesson.lessonId),
-        title: cleanTitle,
+        position: lesson.position,
+        title: lesson.title,
         type,
         duration: `${mins} min`,
         locked: false,
@@ -63,10 +60,7 @@ export function mapBackendLessonToCourseBuilderLesson(lesson: BackendLesson): Co
     };
 }
 
-export function buildLessonSyncPayload(lesson: CourseBuilderLesson, index?: number) {
-    const cleanTitle = lesson.title.replace(ORDER_REGEX, '');
-    const title = typeof index === 'number' ? `[Order:${index}] ${cleanTitle}` : cleanTitle;
-    
+export function buildLessonSyncPayload(lesson: CourseBuilderLesson) {
     let videoSec = 0;
     const totalMin = lesson.duration ? parseInt(lesson.duration) : 0;
     if (lesson.type === 'Video & Reading') {
@@ -76,7 +70,7 @@ export function buildLessonSyncPayload(lesson: CourseBuilderLesson, index?: numb
     }
 
     return {
-        title,
+        title: lesson.title,
         description: lesson.description || '',
         content: lesson.content || '',
         videoUrl: lesson.videoUrl || '',

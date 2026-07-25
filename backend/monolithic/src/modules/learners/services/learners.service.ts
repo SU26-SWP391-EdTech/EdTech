@@ -202,14 +202,22 @@ export class LearnersService {
       if (!user) {
         throw new NotFoundException("Can not find user by ID " + userId);
       }
-      learner = this.learnerRepository.create({
-        userId,
-        currentStreak: 0,
-        longestStreak: 0,
-        streakLife: 1,
-        pvpStatus: PvpStatus.IDLE,
-      });
-      learner = await this.learnerRepository.save(learner);
+      try {
+        learner = this.learnerRepository.create({
+          userId,
+          currentStreak: 0,
+          longestStreak: 0,
+          streakLife: 1,
+          pvpStatus: PvpStatus.IDLE,
+        });
+        learner = await this.learnerRepository.save(learner);
+      } catch (err) {
+        // Race condition fallback: retrieve profile created concurrently by another request
+        learner = await this.learnerRepo.findLeanerById(userId);
+        if (!learner) {
+          throw err;
+        }
+      }
     }
     return learner;
   }
