@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException, UseInterceptors, forwardRef } from '@nestjs/common';
 import { Repository, MoreThanOrEqual } from 'typeorm';
 import { User } from 'src/modules/users/entities/user.entity';
 import { EditLearnerProfileDto } from '../dto/edit-learner-profile.dto';
@@ -12,6 +12,7 @@ import { PvpStatus } from 'src/common/enums/pvp-status.enum';
 import { LearnerLessonProgress } from 'src/modules/progress/entities/learner-lesson-progress.entity';
 import { LessonProgressStatus } from 'src/common/enums/lesson-progress-status.enum';
 import { AssessmentSession } from 'src/modules/assessment/entities/assessment-session.entity';
+import { LearnerStreakService } from './learner-streak.service';
 
 @Injectable()
 export class LearnersService {
@@ -22,7 +23,9 @@ export class LearnersService {
     private learnerRepository: Repository<Learner>,
     private cloudinaryService: CloudinaryService,
 
-    private learnerRepo: LearnerRepository
+    private learnerRepo: LearnerRepository,
+    @Inject(forwardRef(() => LearnerStreakService))
+    private learnerStreakService: LearnerStreakService,
   ) { }
 
   async updateProfile(id: number, userId: number, dto: UpdateLearnerInfoDto) {
@@ -109,7 +112,7 @@ export class LearnersService {
   }
 
   async viewLearnerProfile(id: number): Promise<GetLearnerProfileDto> {
-    const learner = await this.learnerRepository.findOne({
+    let learner = await this.learnerRepository.findOne({
       where: { userId: id },
       relations: ['user'],
     });
@@ -159,6 +162,22 @@ export class LearnersService {
     const sortedActiveDates = Array.from(activeDates).sort();
 
     if (learner && learner.user) {
+      // Auto-recover streak if learner has active dates but currentStreak is 0
+      if ((!learner.currentStreak || learner.currentStreak === 0) && sortedActiveDates.length > 0) {
+        try {
+          await this.learnerStreakService.updateStreak(id, new Date());
+          const updatedLearner = await this.learnerRepository.findOne({
+            where: { userId: id },
+            relations: ['user'],
+          });
+          if (updatedLearner) {
+            learner = updatedLearner;
+          }
+        } catch (err) {
+          console.error('Failed auto-recovering streak:', err);
+        }
+      }
+
       return {
         fullName: learner.user.fullName,
         email: learner.user.email,

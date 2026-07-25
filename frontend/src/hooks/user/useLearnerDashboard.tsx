@@ -3,7 +3,7 @@ import { Flame, Clock, GraduationCap } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 import { getMyEnrollments, type Enrollment } from '../../services/enrollment/enrollment.service';
 import { getLearningPaths, type LearningPath, getFollowedLearningPathIds } from '../../services/learning-path/learning-path.service';
-import type { NodeState } from '../../components/User/dashboard/learner/RoadmapNode';
+import type { NodeState } from '../../components/user/dashboard/learner/RoadmapNode';
 import { getLearnerProfile } from '../../services/learner/learner.services';
 
 /**
@@ -71,6 +71,15 @@ export function useLearnerDashboard() {
             }
         };
         loadDashboardData();
+
+        const handleStreakUpdated = () => {
+            loadDashboardData();
+        };
+
+        window.addEventListener('streak-updated', handleStreakUpdated);
+        return () => {
+            window.removeEventListener('streak-updated', handleStreakUpdated);
+        };
     }, [user]);
 
     // --- 2. TỔNG HỢP CÁC CHỈ SỐ THỐNG KÊ (STATS CARD DATA) ---
