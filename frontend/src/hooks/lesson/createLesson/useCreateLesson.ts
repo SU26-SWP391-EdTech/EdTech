@@ -160,6 +160,7 @@ export function useCreateLesson() {
     toastMessage: toast.toastMessage,
 
     isSaving: persistence.isSaving,
+    isModeLocked: Boolean(data.editingLessonId || data.savedLessonId),
 
     // Dữ liệu khóa học/bài học liên kết
     courses: data.courses,
