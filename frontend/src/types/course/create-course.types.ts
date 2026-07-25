@@ -6,7 +6,6 @@ export interface CourseBuilderLesson {
     title: string;
     type: CourseBuilderLessonType;
     duration: string;
-    locked: boolean;
     content?: string;
     videoUrl?: string;
     description?: string;

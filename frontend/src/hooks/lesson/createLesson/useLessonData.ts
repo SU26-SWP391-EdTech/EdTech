@@ -16,7 +16,7 @@ import type { UseLessonFormReturn } from './useLessonForm';
 type UseLessonDataParams = {
   userId?: number;
   searchParams: URLSearchParams;
-  showFeedback: (message: string) => void;
+  showFeedback: (message: string, type?: 'success' | 'error') => void;
   hydrateFromApiLesson: UseLessonFormReturn['hydrateFromApiLesson'];
 };
 
@@ -106,7 +106,7 @@ export function useLessonData({
         });
       } catch (error) {
         console.error('Failed to load courses:', error);
-        showFeedback('Could not load courses from database.');
+        showFeedback('Could not load courses from database.', 'error');
       }
     }
 
@@ -147,7 +147,7 @@ export function useLessonData({
         hydrateFromApiLesson(lesson);
       } catch (error) {
         console.error('Failed to load lesson detail:', error);
-        showFeedback('Could not load lesson detail.');
+        showFeedback('Could not load lesson detail.', 'error');
       }
     }
 

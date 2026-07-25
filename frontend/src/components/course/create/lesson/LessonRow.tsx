@@ -1,4 +1,4 @@
-import { Clock, GripVertical, Lock, Pencil, Trash2, Unlock } from 'lucide-react';
+import { Clock, GripVertical, Pencil, Trash2 } from 'lucide-react';
 
 import type { CourseBuilderLesson } from '../../../../types/course/create-course.types';
 import { IconButton } from '../fields';
@@ -12,7 +12,6 @@ interface LessonRowProps {
   onDragEnd: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  onToggleLock: () => void;
 }
 
 export function LessonRow({
@@ -23,7 +22,6 @@ export function LessonRow({
   onDragEnd,
   onEdit,
   onDelete,
-  onToggleLock,
 }: LessonRowProps) {
   return (
     <div
@@ -47,13 +45,6 @@ export function LessonRow({
         <Clock className="w-3 h-3" />
         {lesson.duration}
       </span>
-      <button
-        title={lesson.locked ? 'Locked - preview disabled' : 'Free preview'}
-        onClick={onToggleLock}
-        className={`p-1 rounded ${lesson.locked ? 'text-[#9CA3AF] hover:bg-[#F8FAFC]' : 'text-[#10B981] hover:bg-[#ECFDF5]'}`}
-      >
-        {lesson.locked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
-      </button>
       <IconButton title="Edit" onClick={onEdit}>
         <Pencil className="w-3.5 h-3.5" />
       </IconButton>

@@ -7,6 +7,7 @@ interface Props {
   setHasReading: (b: boolean) => void;
   hasAssessment: boolean;
   setHasAssessment: (b: boolean) => void;
+  isModeLocked: boolean;
 }
 
 export function LessonTypeSection({
@@ -15,7 +16,8 @@ export function LessonTypeSection({
   hasReading,
   setHasReading,
   hasAssessment,
-  setHasAssessment
+  setHasAssessment,
+  isModeLocked,
 }: Props) {
   const handleToggleVideo = () => {
     if (hasAssessment) {
@@ -48,18 +50,25 @@ export function LessonTypeSection({
     <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 14, padding: '22px 26px', marginBottom: 16 }}>
       <div style={{ marginBottom: 18 }}>
         <h2 style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Lesson Content Options</h2>
-        <p style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>Select the content type(s) included in this lesson (choose at least one).</p>
+        <p style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>
+          {isModeLocked
+            ? 'The content mode is fixed after the lesson is saved.'
+            : 'Select the content type(s) included in this lesson (choose at least one).'}
+        </p>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
         {/* Video Card */}
         <button
           type="button"
           onClick={handleToggleVideo}
+          disabled={isModeLocked}
+          aria-disabled={isModeLocked}
           style={{
             textAlign: 'left', padding: '16px 20px', borderRadius: 10,
             border: `1.5px solid ${hasVideo ? '#E11D48' : '#E5E7EB'}`,
             background: hasVideo ? '#FFF1F3' : '#FAFAFA',
-            cursor: 'pointer', transition: 'all 0.15s',
+            cursor: isModeLocked ? 'not-allowed' : 'pointer', transition: 'all 0.15s',
+            opacity: isModeLocked ? 0.72 : 1,
             display: 'flex', flexDirection: 'column', gap: 4
           }}
         >
@@ -80,11 +89,14 @@ export function LessonTypeSection({
         <button
           type="button"
           onClick={handleToggleReading}
+          disabled={isModeLocked}
+          aria-disabled={isModeLocked}
           style={{
             textAlign: 'left', padding: '16px 20px', borderRadius: 10,
             border: `1.5px solid ${hasReading ? '#E11D48' : '#E5E7EB'}`,
             background: hasReading ? '#FFF1F3' : '#FAFAFA',
-            cursor: 'pointer', transition: 'all 0.15s',
+            cursor: isModeLocked ? 'not-allowed' : 'pointer', transition: 'all 0.15s',
+            opacity: isModeLocked ? 0.72 : 1,
             display: 'flex', flexDirection: 'column', gap: 4
           }}
         >
@@ -105,11 +117,14 @@ export function LessonTypeSection({
         <button
           type="button"
           onClick={handleToggleAssessment}
+          disabled={isModeLocked}
+          aria-disabled={isModeLocked}
           style={{
             textAlign: 'left', padding: '16px 20px', borderRadius: 10,
             border: `1.5px solid ${hasAssessment ? '#E11D48' : '#E5E7EB'}`,
             background: hasAssessment ? '#FFF1F3' : '#FAFAFA',
-            cursor: 'pointer', transition: 'all 0.15s',
+            cursor: isModeLocked ? 'not-allowed' : 'pointer', transition: 'all 0.15s',
+            opacity: isModeLocked ? 0.72 : 1,
             display: 'flex', flexDirection: 'column', gap: 4
           }}
         >

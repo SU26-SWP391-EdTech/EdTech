@@ -62,7 +62,6 @@ export function CreateCoursePage() {
               onDragOver={course.onDragOverLesson}
               onDragStart={course.onDragStartLesson}
               onEditLesson={course.onEditLesson}
-              onToggleLessonLock={course.onToggleLessonLock}
             />
 
             <CourseActionBar

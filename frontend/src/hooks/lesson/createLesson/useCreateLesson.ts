@@ -158,8 +158,10 @@ export function useCreateLesson() {
     showToast: toast.showToast,
     setShowToast: toast.setShowToast,
     toastMessage: toast.toastMessage,
+    feedbackType: toast.feedbackType,
 
     isSaving: persistence.isSaving,
+    isModeLocked: Boolean(data.editingLessonId || data.savedLessonId),
 
     // Dữ liệu khóa học/bài học liên kết
     courses: data.courses,

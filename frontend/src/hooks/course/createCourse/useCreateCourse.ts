@@ -179,7 +179,6 @@ export function useCreateCourse() {
     onDragEnd: lessonState.clearDraggedLesson,
     onDragOverLesson: lessonState.dragLesson,
     onDragStartLesson: lessonState.setDraggedLessonIndex,
-    onToggleLessonLock: lessonState.toggleLessonLock,
 
     // Các hàm xử lý hành động lớn (Thêm bài học mới, sửa bài học cũ, lưu nháp, nộp duyệt)
     onCreateLesson: () => persistence.openLessonEditor(),

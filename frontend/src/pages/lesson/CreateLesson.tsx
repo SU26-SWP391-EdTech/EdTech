@@ -1,4 +1,4 @@
-import { Save, CheckCircle2, X } from 'lucide-react';
+import { Save, CheckCircle2, CircleX, X } from 'lucide-react';
 import { useCreateLesson } from '../../hooks/lesson/createLesson';
 import { LessonInfoSection } from '../../components/lesson/create/LessonInfoSection';
 import { LessonTypeSection } from '../../components/lesson/create/LessonTypeSection';
@@ -21,8 +21,8 @@ export function CreateLessonPage() {
           display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20,
         }}>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111827', letterSpacing: '-0.4px', marginBottom: 5 }}>Create Lesson</h1>
-            <p style={{ fontSize: 13.5, color: '#6B7280' }}>Add lesson content, resources, and practice activities to your course.</p>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111827', letterSpacing: '-0.4px', marginBottom: 5 }}>{hook.isModeLocked ? 'Edit Lesson' : 'Create Lesson'}</h1>
+            <p style={{ fontSize: 13.5, color: '#6B7280' }}>{hook.isModeLocked ? 'Update this lesson while keeping its saved content mode.' : 'Add lesson content, resources, and practice activities to your course.'}</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             <button
@@ -79,6 +79,7 @@ export function CreateLessonPage() {
             setHasReading={hook.setHasReading}
             hasAssessment={hook.hasAssessment}
             setHasAssessment={hook.setHasAssessment}
+            isModeLocked={hook.isModeLocked}
           />
 
           {(hook.hasVideo || hook.hasReading) && (
@@ -127,7 +128,9 @@ export function CreateLessonPage() {
           borderRadius: 10, padding: '12px 18px', display: 'flex', alignItems: 'center',
           gap: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', zIndex: 2000,
         }}>
-          <CheckCircle2 size={16} style={{ color: '#4ADE80' }} />
+          {hook.feedbackType === 'error'
+            ? <CircleX size={16} style={{ color: '#F87171' }} />
+            : <CheckCircle2 size={16} style={{ color: '#4ADE80' }} />}
           <span style={{ fontSize: 13.5, fontWeight: 500, color: '#fff' }}>{hook.toastMessage}</span>
           <button onClick={() => hook.setShowToast(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', marginLeft: 8 }}>
             <X size={13} style={{ color: '#9CA3AF' }} />

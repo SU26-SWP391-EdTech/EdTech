@@ -1,6 +1,6 @@
 import { BookOpen } from 'lucide-react';
-import toast from 'react-hot-toast';
 import type { Lesson } from '../../../types/lesson/lesson.types';
+import { MarkdownRenderer } from '../MarkdownRenderer';
 
 interface LessonReadingProps {
   activeLesson: Lesson;
@@ -18,9 +18,7 @@ export function LessonReading({ activeLesson }: LessonReadingProps) {
       <div className="prose prose-slate max-w-none">
         <h2 className="text-lg font-bold text-[#111827]">{activeLesson.title}</h2>
         {activeLesson.content ? (
-          <div className="text-sm text-[#374151] leading-relaxed mt-2 whitespace-pre-wrap font-sans">
-            {activeLesson.content}
-          </div>
+          <MarkdownRenderer content={activeLesson.content} className="mt-2" />
         ) : (
           <>
             <p className="text-sm text-[#374151] leading-relaxed mt-2">
