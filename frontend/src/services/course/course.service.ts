@@ -35,6 +35,7 @@ export interface BackendCourse {
   courseTags?: BackendCourseTag[];
   courseTag?: BackendCourseTag[];
   tags?: string[];
+  reviewReason?: string | null;
 }
 
 export function extractCourseTags(course: BackendCourse): string[] {
@@ -97,13 +98,14 @@ export async function searchCourses(params?: {
   search?: string;
   status?: string;
   language?: string;
+  tag?: string;
   minDuration?: number;
   maxDuration?: number;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
   userId?: number;
-}): Promise<SearchCoursesResponse> {
-  const response = await api.get('/courses/search', { params });
+}, signal?: AbortSignal): Promise<SearchCoursesResponse> {
+  const response = await api.get('/courses/search', { params, signal });
   return response.data;
 }
 
@@ -133,7 +135,7 @@ export async function approveCourse(id: number): Promise<BackendCourse> {
 }
 
 // Từ chối khóa học
-export async function rejectCourse(id: number, reason?: string): Promise<BackendCourse> {
+export async function rejectCourse(id: number, reason: string): Promise<BackendCourse> {
   const response = await api.patch(`/courses/${id}/reject`, { reason });
   return response.data;
 }

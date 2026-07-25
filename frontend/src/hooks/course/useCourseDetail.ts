@@ -395,7 +395,7 @@ export function useCourseDetail() {
   // --- 6. HÀM TỪ CHỐI KHÓA HỌC (ADMIN/MANAGER) ---
   const handleRejectCourse = async (id: number, reason: string) => {
     try {
-      await rejectCourse(id);
+      await rejectCourse(id, reason);
       toast.success('Course rejected successfully!');
       await loadData();
     } catch (e: any) {

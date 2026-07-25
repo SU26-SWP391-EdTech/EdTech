@@ -4,7 +4,6 @@ import toast from 'react-hot-toast';
 import {
   createCourse,
   submitCourseToReview,
-  submitNewCourseToReview,
   updateCourse,
 } from '../../../services/course/course.service';
 import {
@@ -27,6 +26,8 @@ interface UseCoursePersistenceOptions {
   setIsSubmitting: (isSubmitting: boolean) => void;
   thumbnailFile: File | null;
   title: string;
+  validateTitle: () => string | null;
+  onBeforeNavigate: () => void;
 }
 
 /**
@@ -43,6 +44,8 @@ export function useCoursePersistence({
   setIsSubmitting,
   thumbnailFile,
   title,
+  validateTitle,
+  onBeforeNavigate,
 }: UseCoursePersistenceOptions) {
 
   /**
@@ -84,8 +87,9 @@ export function useCoursePersistence({
    * @param status - Trạng thái khóa học: 'draft' (Lưu nháp) hoặc 'pending' (Gửi kiểm duyệt)
    */
   async function handleSubmit(status: 'draft' | 'pending') {
-    if (!title.trim()) {
-      toast.error('Course Title is required.');
+    const titleValidationError = validateTitle();
+    if (titleValidationError) {
+      toast.error(titleValidationError);
       return;
     }
 
@@ -108,9 +112,12 @@ export function useCoursePersistence({
         await updateCourse(editId, updateFormData);
       } else {
         // Tạo mới khóa học
-        const newCourse = status === 'pending'
-          ? await submitNewCourseToReview(formData)
-          : await createCourse(formData);
+        const draftFormData = await buildCourseFormData({
+          status: 'draft',
+          thumbnailFile,
+          draft: getCurrentCourseDraft(),
+        });
+        const newCourse = await createCourse(draftFormData);
         courseId = newCourse.courseId;
       }
 
@@ -118,8 +125,8 @@ export function useCoursePersistence({
       await syncLessons(courseId!);
 
       // Nếu đang chỉnh sửa khóa học và muốn gửi duyệt
-      if (editId && status === 'pending') {
-        await submitCourseToReview(editId);
+      if (status === 'pending') {
+        await submitCourseToReview(courseId!);
       }
 
       // Xóa bản nháp tạm lưu ở Local Storage nếu tạo mới thành công
@@ -128,6 +135,7 @@ export function useCoursePersistence({
       }
 
       toast.success(editId ? 'Course updated successfully!' : 'Course created successfully!');
+      onBeforeNavigate();
       navigate('/provider/courses');
     } catch (err: unknown) {
       console.error(err);
@@ -149,8 +157,11 @@ export function useCoursePersistence({
   async function ensureCourseExistsForLesson() {
     if (editId) return editId; // Đã có sẵn khóa học
 
-    if (!title.trim()) {
-      toast.error('Course Title is required before creating a lesson.');
+    const titleValidationError = validateTitle();
+    if (titleValidationError) {
+      toast.error(titleValidationError === 'Course title is required.'
+        ? 'Course title is required before creating a lesson.'
+        : titleValidationError);
       return null;
     }
 
@@ -192,6 +203,11 @@ export function useCoursePersistence({
     const lessonParam = lessonId ? `&lessonId=${lessonId}` : '';
     const courseTitleParam = !editId && title.trim() ? `&courseTitle=${encodeURIComponent(title.trim())}` : '';
     
+    // New courses are persisted above before opening the lesson editor. Existing
+    // courses still rely on the route blocker when they contain unsaved edits.
+    if (!editId) {
+      onBeforeNavigate();
+    }
     navigate(`/provider/lessons/create?redirectBack=${backUrl}&isCourseBuilder=true&courseId=${courseId}${lessonParam}${courseTitleParam}`);
   }
 
