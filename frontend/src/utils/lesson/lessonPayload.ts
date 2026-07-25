@@ -33,7 +33,6 @@ export function buildLocalLessonDraft(options: {
         title: options.title.trim(),
         type,
         duration: options.duration ? `${options.duration} min` : '10 min',
-        locked: false,
         content: buildLessonContent(options),
         videoUrl: options.hasVideo ? (options.videoUrl.trim() || undefined) : undefined,
         description: '',
