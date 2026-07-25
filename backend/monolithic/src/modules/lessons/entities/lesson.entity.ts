@@ -8,14 +8,12 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
-  Unique
 } from 'typeorm';
 import { LessonPrerequisite } from './lesson-prerequisite.entity';
 import { Assessment } from 'src/modules/assessment/entities/assessment.entity';
 import { LearnerLessonProgress } from 'src/modules/progress/entities/learner-lesson-progress.entity';
 
 @Entity('lessons')
-@Unique(['course', 'position'])
 export class Lesson {
   @PrimaryGeneratedColumn({ name: 'lesson_id' })
   lessonId!: number;

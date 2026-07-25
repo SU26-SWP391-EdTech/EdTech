@@ -70,47 +70,66 @@ export class AssessmentService {
     if (assessment.type === AssessmentType.PVP) {
       const questionRepo =
         this.assessmentRepository.manager.getRepository(Question);
-      const assessments = await this.assessmentRepository.find({
+      
+      // 1. Get questions directly belonging to this PVP assessment
+      const pvpQuestions = await questionRepo.find({
         where: {
-          courseId: assessment.courseId,
-          type: Not(AssessmentType.PVP),
+          assessmentId: id,
+        },
+        relations: {
+          options: true,
+        },
+        order: {
+          position: 'ASC',
+          options: {
+            position: 'ASC',
+          },
         },
       });
 
-      if (assessments.length > 0) {
-        const assessmentIds = assessments.map((a) => a.assessmentId);
-        assessment.questions = await questionRepo.find({
-          where: {
-            assessmentId: In(assessmentIds),
-          },
-          relations: {
-            options: true,
-          },
-          order: {
-            position: 'ASC',
-            options: {
-              position: 'ASC',
-            },
-          },
-        });
-      }
+      const validPvpQuestions = pvpQuestions.filter(
+        (q) => q.options && q.options.length >= 2,
+      );
 
-      // Fallback if course has no questions
-      if (!assessment.questions || assessment.questions.length === 0) {
-        assessment.questions = await questionRepo.find({
+      if (validPvpQuestions.length >= 5) {
+        assessment.questions = validPvpQuestions;
+      } else {
+        // 2. Fallback to other assessments (LESSON_QUIZ, PRACTICE) in the same course
+        const otherAssessments = await this.assessmentRepository.find({
           where: {
-            assessmentId: 1, // Fallback to Spring Boot quiz
-          },
-          relations: {
-            options: true,
-          },
-          order: {
-            position: 'ASC',
-            options: {
-              position: 'ASC',
-            },
+            courseId: assessment.courseId,
+            type: Not(AssessmentType.PVP),
           },
         });
+
+        let fallbackQuestions: Question[] = [];
+        if (otherAssessments.length > 0) {
+          const otherAssessmentIds = otherAssessments.map((a) => a.assessmentId);
+          fallbackQuestions = await questionRepo.find({
+            where: {
+              assessmentId: In(otherAssessmentIds),
+            },
+            relations: {
+              options: true,
+            },
+            order: {
+              position: 'ASC',
+              options: {
+                position: 'ASC',
+              },
+            },
+          });
+        }
+
+        const validFallbackQuestions = fallbackQuestions.filter(
+          (q) => q.options && q.options.length >= 2,
+        );
+
+        const pvpQuestionIds = new Set(validPvpQuestions.map((q) => q.questionId));
+        assessment.questions = [
+          ...validPvpQuestions,
+          ...validFallbackQuestions.filter((q) => !pvpQuestionIds.has(q.questionId)),
+        ];
       }
     }
 

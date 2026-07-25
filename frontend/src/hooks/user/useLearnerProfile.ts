@@ -6,7 +6,6 @@ import { getMyEnrollments, type Enrollment } from '../../services/enrollment/enr
 import { getLearningPaths, type LearningPath, getFollowedLearningPathIds } from '../../services/learning-path/learning-path.service';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 import toast from 'react-hot-toast';
-import { getStreak } from '../../utils/learner/streakUtils';
 
 
 /**
@@ -65,12 +64,7 @@ export function useLearnerProfile(userId?: number) {
                     getLearningPaths(),
                     getFollowedLearningPathIds(),
                 ])
-                const streakData = getStreak(userId);
-                setProfile({
-                    ...learnerData,
-                    currentStreak: streakData.currentStreak,
-                    longestStreak: streakData.longestStreak,
-                });
+                setProfile(learnerData);
                 setUser(userResponse);
                 setEnrollments(enrollmentsResponse);
 

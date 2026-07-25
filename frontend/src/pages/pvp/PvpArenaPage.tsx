@@ -112,15 +112,19 @@ export function PvpArenaPage() {
     }, [selectedCourseId, currentUser?.userId]);
 
     const getPvpAssessmentId = async () => {
-        let pvpAssessmentId = 3;
+        let pvpAssessmentId: number | null = null;
         if (selectedCourseId) {
             try {
                 const res = await api.get(`/assessment/courses/${selectedCourseId}/pvp`);
-                if (res.data && res.data.length > 0) {
-                    pvpAssessmentId = res.data[0].assessmentId;
+                if (res.data) {
+                    if (res.data.assessmentId) {
+                        pvpAssessmentId = res.data.assessmentId;
+                    } else if (Array.isArray(res.data) && res.data.length > 0) {
+                        pvpAssessmentId = res.data[0].assessmentId;
+                    }
                 }
             } catch (err) {
-                console.warn('Failed to fetch PvP assessment for course, using default: 3', err);
+                console.warn('Failed to fetch PvP assessment for course:', err);
             }
         }
         return pvpAssessmentId;
@@ -128,6 +132,10 @@ export function PvpArenaPage() {
 
     const handleChallengeReal = async (player: PvpPlayer) => {
         const assessmentId = await getPvpAssessmentId();
+        if (!assessmentId) {
+            toast.error('Could not find PvP assessment for this course.');
+            return;
+        }
         try {
             sendChallenge(player.userId, assessmentId);
             toast.success(`Challenge sent to ${player.fullName}! Waiting for response...`, {

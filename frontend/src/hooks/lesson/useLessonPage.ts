@@ -9,7 +9,7 @@ import {
 } from '../../utils/lesson/lessonUtils';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 import { getCourseById } from '../../services/course/course.service';
-import { getLessonsByCourse } from '../../services/lesson/lesson.service';
+import { getLessonsByCourse, getLessonsByCourseForManager } from '../../services/lesson/lesson.service';
 import { getMyEnrollments, updateEnrollmentProgress } from '../../services/enrollment/enrollment.service';
 import api from '../../lib/axios';
 import { updateStreak } from '../../utils/learner/streakUtils';
@@ -79,10 +79,14 @@ export function useLessonPage() {
     async function loadData() {
       try {
         setIsLoading(true);
-        // Tải đồng thời thông tin khóa học và danh sách bài học tương ứng
+        // Tải đồng thời thông tin khóa học và danh sách bài học tương ứng (Academic Manager dùng API manager-review)
+        const fetchLessons = role === 'academic manager' 
+          ? getLessonsByCourseForManager(courseId)
+          : getLessonsByCourse(courseId);
+
         const [courseData, lessonsData] = await Promise.all([
           getCourseById(courseId),
-          getLessonsByCourse(courseId),
+          fetchLessons,
         ]);
         setCourse(courseData);
         setLessonsList(lessonsData);
@@ -409,6 +413,7 @@ export function useLessonPage() {
       if (user?.userId) {
         updateStreak(user.userId);
       }
+      window.dispatchEvent(new CustomEvent('streak-updated'));
     } catch (err) {
       console.error('Failed to update progress on backend:', err);
       toast.error('Failed to update progress on server.');

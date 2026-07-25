@@ -81,6 +81,9 @@ export class LessonsService {
       await this.lessonPrerequisiteService.createPrerequisitesService(lesson.lessonId, prIds);
     }
 
+    // Sync totalLessons trên course
+    await this.courseService.updateTotalLessons(id);
+
     return await this.findOne(lesson.lessonId);
   }
 
@@ -90,6 +93,15 @@ export class LessonsService {
       throw new NotFoundException(`Not found course with ID ${courseId}`);
     }
 
+    return await this.lessonsRepo.findByCourseId(courseId);
+  }
+
+  // Dành cho Academic Manager: xem toàn bộ nội dung lessons để duyệt (không check enrollment)
+  async findAllByCourseForManager(courseId: number): Promise<Lesson[]> {
+    const course = await this.courseService.findCourseByIdService(courseId);
+    if (!course) {
+      throw new NotFoundException(`Not found course with ID ${courseId}`);
+    }
     return await this.lessonsRepo.findByCourseId(courseId);
   }
 
@@ -212,9 +224,12 @@ export class LessonsService {
   }
 
   async remove(id: number): Promise<{ success: boolean; message: string }> {
-    await this.findOne(id);
+    const lesson = await this.findOne(id);
+    const courseId = lesson.course.courseId;
     try {
       await this.lessonsRepo.delete(id);
+      // Sync totalLessons trên course
+      await this.courseService.updateTotalLessons(courseId);
       return {
         success: true,
         message: `Lesson with ID ${id} has been deleted successfully`,

@@ -9,7 +9,9 @@ import { CurriculumSidebar } from '../../components/lesson/detail/CurriculumSide
 import { AssessmentDetailPage } from '../assessment/AssessmentDetailPage';
 import { QuizArenaPage } from '../assessment/QuizArenaPage';
 import { AssessmentResultPage } from '../assessment/AssessmentResultPage';
-import { AssessmentService } from '../../services/assessment/assessment.service';
+import { AssessmentManagerReviewView } from '../../components/assessment/AssessmentManagerReviewView';
+
+const NON_LEARNER_ROLES = ['course provider', 'academic manager', 'admin'];
 
 export function LessonPage() {
   const lesson = useLessonPage();
@@ -94,6 +96,7 @@ export function LessonPage() {
   };
 
   const isAssessment = lesson.activeLesson?.type === 'Assessment';
+  const isNonLearnerRole = NON_LEARNER_ROLES.includes(lesson.role?.toLowerCase() || '');
 
   const handleVideoProgressReach80 = async () => {
     if (lesson.activeLesson && !lesson.isCompleted) {
@@ -126,6 +129,9 @@ export function LessonPage() {
           {/* ── LEFT CONTENT AREA ─────────────────────────────────────────── */}
           <div className="flex-1 min-w-0 space-y-5">
             {isAssessment ? (
+              isNonLearnerRole ? (
+                <AssessmentManagerReviewView lessonId={Number(lesson.activeLesson?.id)} />
+              ) : (
               <div style={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 16, overflow: 'hidden' }}>
                 {assessmentStage === 'detail' && (
                   <AssessmentDetailPage 
@@ -148,6 +154,7 @@ export function LessonPage() {
                   />
                 )}
               </div>
+              )
             ) : (
               <>
                 {/* VIDEO PLAYER / INTERACTIVE CONTENT AREA */}

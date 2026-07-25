@@ -45,7 +45,11 @@ export class AssessmentRepository extends Repository<Assessment> {
   async findByLessonId(lessonId: number): Promise<Assessment[]> {
     return this.find({
       where: { lessonId },
-      relations: ['course'],
+      relations: ['course', 'questions', 'questions.options'],
+      order: {
+        assessmentId: 'ASC',
+        questions: { position: 'ASC', options: { position: 'ASC' } },
+      },
     });
   }
 

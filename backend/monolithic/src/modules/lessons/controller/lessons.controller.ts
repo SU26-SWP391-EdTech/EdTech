@@ -74,6 +74,16 @@ export class LessonsController {
     return await this.lessonsService.findAllByCourse(courseId);
   }
 
+  @Get('manager-review/:courseId')
+  @Roles(RoleEnum.ACADEMIC_MANAGER)
+  @ApiOperation({ summary: 'Academic Manager: get all lessons of a course for review (no enrollment required)' })
+  @ApiResponse({ status: 200, description: 'Lessons returned successfully for review' })
+  @ApiResponse({ status: 403, description: 'Forbidden - requires Academic Manager role' })
+  @ApiResponse({ status: 404, description: 'Course not found' })
+  async findAllByCourseForManager(@Param('courseId', ParseIntPipe) courseId: number) {
+    return await this.lessonsService.findAllByCourseForManager(courseId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get lesson detail' })
   @ApiResponse({ status: 200, description: 'Lesson returned successfully' })

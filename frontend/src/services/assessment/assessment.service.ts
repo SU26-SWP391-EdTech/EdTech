@@ -1,4 +1,5 @@
 import api from '../../lib/axios';
+import { useAuthStore } from '../../stores/auth/auth.stores';
 import type { 
     AssessmentMetadata, 
     AssessmentQuestion, 
@@ -18,9 +19,15 @@ export class AssessmentService {
         }
     }
 
+    // Helper lấy userId hiện tại từ auth store để scope localStorage key
+    private static getCurrentUserId(): number {
+        return useAuthStore.getState().user?.userId ?? 0;
+    }
+
     // Helper to get local data from localStorage for persistence in mock state
     private static getLocalAttempts(lessonId: number): AssessmentAttempt[] {
-        const key = `assessment_attempts_${lessonId}`;
+        const userId = this.getCurrentUserId();
+        const key = `assessment_attempts_${userId}_${lessonId}`;
         const stored = localStorage.getItem(key);
         if (!stored) {
             localStorage.setItem(key, JSON.stringify([]));
@@ -30,10 +37,11 @@ export class AssessmentService {
     }
 
     private static saveLocalAttempt(lessonId: number, attempt: AssessmentAttempt) {
+        const userId = this.getCurrentUserId();
         const attempts = this.getLocalAttempts(lessonId);
         const nextId = attempts.length > 0 ? Math.max(...attempts.map(x => x.id ?? 0)) + 1 : 1;
         attempts.unshift({ ...attempt, id: nextId });
-        localStorage.setItem(`assessment_attempts_${lessonId}`, JSON.stringify(attempts));
+        localStorage.setItem(`assessment_attempts_${userId}_${lessonId}`, JSON.stringify(attempts));
     }
 
     public static async startSession(lessonId: number): Promise<any | null> {
@@ -334,10 +342,14 @@ export class AssessmentService {
             });
 
             // Cache current test result detail so getAssessmentResult hook reads it
-            localStorage.setItem(`last_result_${lessonId}`, JSON.stringify({
+            const userId = this.getCurrentUserId();
+            localStorage.setItem(`last_result_${userId}_${lessonId}`, JSON.stringify({
                 summary: resultSummary,
                 reviews: detailedReviews
             }));
+
+            // Notify header & dashboard to update streak
+            window.dispatchEvent(new CustomEvent('streak-updated'));
 
             return resultSummary;
         } catch (error) {
@@ -347,12 +359,13 @@ export class AssessmentService {
     }
 
     public static async getAssessmentResult(lessonId: number): Promise<{ summary: AssessmentResultSummary; reviews: AnswerReviewItem[] }> {
+        const userId = this.getCurrentUserId();
         try {
             const response = await api.get(`/assessment/lesson/${lessonId}/result`);
             const backendData = response.data;
 
             // Merge with local storage reviews if available to preserve detailed question review
-            const stored = localStorage.getItem(`last_result_${lessonId}`);
+            const stored = localStorage.getItem(`last_result_${userId}_${lessonId}`);
             if (stored) {
                 try {
                     const parsed = JSON.parse(stored);
@@ -368,7 +381,7 @@ export class AssessmentService {
             }
             return backendData;
         } catch {
-            const stored = localStorage.getItem(`last_result_${lessonId}`);
+            const stored = localStorage.getItem(`last_result_${userId}_${lessonId}`);
             if (stored) {
                 try {
                     return JSON.parse(stored);
@@ -396,5 +409,16 @@ export class AssessmentService {
     public static async getSession(sessionId: number): Promise<any> {
         const response = await api.get(`/assessment-session/${sessionId}`);
         return response.data;
+    }
+
+    // Academic Manager: Lấy thông tin chi tiết bài kiểm tra + danh sách câu hỏi của lesson để duyệt
+    public static async getAssessmentForManager(lessonId: number): Promise<any> {
+        try {
+            const response = await api.get(`/assessment/manager-review/lesson/${lessonId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Failed to fetch assessment for manager review:', error);
+            throw error;
+        }
     }
 }

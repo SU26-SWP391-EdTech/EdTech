@@ -174,6 +174,18 @@ export class AssessmentController {
     );
   }
 
+  @Get('manager-review/lesson/:lessonId')
+  @Roles(RoleEnum.ACADEMIC_MANAGER, RoleEnum.COURSE_PROVIDER, RoleEnum.ADMIN)
+  @ApiOperation({ summary: 'Manager / Provider: get full assessment details of a lesson for review (questions + options)' })
+  @ApiResponse({ status: 200, description: 'Assessment details returned for review' })
+  @ApiResponse({ status: 403, description: 'Forbidden - requires Academic Manager role' })
+  @ApiResponse({ status: 404, description: 'Lesson or assessment not found' })
+  async getAssessmentForManager(
+    @Param('lessonId', ParseIntPipe) lessonId: number,
+  ) {
+    return await this.assessmentService.findAssessmentsByLessonId(lessonId);
+  }
+
 }
 
 // Submit the test and get it graded and will complete assessment_sessions
