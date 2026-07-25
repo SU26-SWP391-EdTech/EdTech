@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Upload, Link2, Trash2 } from 'lucide-react';
+import { Upload, Link2, CheckCircle2, Trash2 } from 'lucide-react';
 import { ReadingMarkdownEditor } from './ReadingMarkdownEditor';
 
 function getEmbedUrl(url: string): string | null {
