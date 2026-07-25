@@ -79,6 +79,7 @@ export function CreateLessonPage() {
             setHasReading={hook.setHasReading}
             hasAssessment={hook.hasAssessment}
             setHasAssessment={hook.setHasAssessment}
+            isModeLocked={hook.isModeLocked}
           />
 
           {(hook.hasVideo || hook.hasReading) && (
