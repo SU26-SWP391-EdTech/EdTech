@@ -1,9 +1,8 @@
-import { useState } from 'react';
 import { AlertCircle, Trophy, Zap, BarChart3 } from 'lucide-react';
 import { useAssessmentDetail } from '../../hooks/assessment/useAssessmentDetail';
 import { ScoreRing } from '../../components/assessment/ScoreRing';
 import { AssessmentStatsGrid } from '../../components/assessment/AssessmentStatsGrid';
-import { ASSESSMENT_TIME_LIMIT_MINUTES, formatAssessmentDate, formatAssessmentDuration } from '../../utils/assessment/assessmentUtils';
+import { formatAssessmentDate, formatAssessmentDuration } from '../../utils/assessment/assessmentUtils';
 
 interface AssessmentDetailPageProps {
     lessonId: number;
@@ -12,7 +11,6 @@ interface AssessmentDetailPageProps {
 
 export function AssessmentDetailPage({ lessonId, onStartQuiz }: AssessmentDetailPageProps) {
     const { metadata: a, attempts, isLoading, error } = useAssessmentDetail(lessonId);
-    const [confirmStart, setConfirmStart] = useState(false);
 
     if (isLoading) {
         return (
@@ -56,7 +54,7 @@ export function AssessmentDetailPage({ lessonId, onStartQuiz }: AssessmentDetail
                                         <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
                                             <span style={{ fontSize: 14, fontWeight: 500, color: '#111827' }}>Attempt {attempts.length - i}</span>
                                             <span style={{ fontSize: 13, color: '#64748B' }}>{formatAssessmentDate(s.date)}</span>
-                                            <span style={{ fontSize: 13, color: '#64748B' }}>{formatAssessmentDuration(s.duration)}</span>
+                                            <span style={{ fontSize: 13, color: '#64748B' }}>{formatAssessmentDuration(s.duration, s.durationSeconds)}</span>
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                                             <span style={{ fontSize: 16, fontWeight: 700, color: '#4F46E5' }}>{s.score}%</span>
@@ -82,27 +80,14 @@ export function AssessmentDetailPage({ lessonId, onStartQuiz }: AssessmentDetail
                             </div>
                         </div>
 
-                        {!confirmStart ? (
-                            <button
-                                onClick={() => setConfirmStart(true)}
-                                style={{ width: '100%', padding: '14px', background: `linear-gradient(135deg, #E11D48, #BE123C)`, border: 'none', borderRadius: 12, cursor: 'pointer', fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: '0.3px', boxShadow: `0 4px 14px rgba(225, 29, 72, 0.35)`, transition: 'transform 0.15s, box-shadow 0.15s' }}
-                                onMouseEnter={e => { (e.target as HTMLElement).style.transform = 'translateY(-1px)'; (e.target as HTMLElement).style.boxShadow = `0 6px 20px rgba(225, 29, 72, 0.45)`; }}
-                                onMouseLeave={e => { (e.target as HTMLElement).style.transform = ''; (e.target as HTMLElement).style.boxShadow = `0 4px 14px rgba(225, 29, 72, 0.35)`; }}
-                            >
-                                START ASSESSMENT
-                            </button>
-                        ) : (
-                            <div>
-                                <p style={{ fontSize: 13, color: '#64748B', textAlign: 'center', marginBottom: 14 }}>Start this {ASSESSMENT_TIME_LIMIT_MINUTES}-minute assessment?</p>
-                                <div style={{ display: 'flex', gap: 10 }}>
-                                    <button onClick={() => setConfirmStart(false)} style={{ flex: 1, padding: '11px', background: '#F8FAFC', border: '1px solid #E5E7EB', borderRadius: 10, cursor: 'pointer', fontSize: 13, color: '#64748B', fontWeight: 600 }}>Cancel</button>
-                                    <button
-                                        onClick={onStartQuiz}
-                                        style={{ flex: 1, padding: '11px', background: '#E11D48', border: 'none', borderRadius: 10, cursor: 'pointer', fontSize: 13, color: '#fff', fontWeight: 700 }}
-                                    >Confirm</button>
-                                </div>
-                            </div>
-                        )}
+                        <button
+                            onClick={onStartQuiz}
+                            style={{ width: '100%', padding: '14px', background: `linear-gradient(135deg, #E11D48, #BE123C)`, border: 'none', borderRadius: 12, cursor: 'pointer', fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: '0.3px', boxShadow: `0 4px 14px rgba(225, 29, 72, 0.35)`, transition: 'transform 0.15s, box-shadow 0.15s' }}
+                            onMouseEnter={e => { (e.target as HTMLElement).style.transform = 'translateY(-1px)'; (e.target as HTMLElement).style.boxShadow = `0 6px 20px rgba(225, 29, 72, 0.45)`; }}
+                            onMouseLeave={e => { (e.target as HTMLElement).style.transform = ''; (e.target as HTMLElement).style.boxShadow = `0 4px 14px rgba(225, 29, 72, 0.35)`; }}
+                        >
+                            START ASSESSMENT
+                        </button>
 
                         <div style={{ marginTop: 16, padding: '12px 14px', background: '#F8FAFC', border: '1px solid #E5E7EB', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
                             <Trophy size={18} style={{ color: '#D97706', flexShrink: 0 }} />

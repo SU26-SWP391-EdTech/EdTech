@@ -60,7 +60,7 @@ export function AssessmentResultPage({ lessonId, onRetry, onExit }: AssessmentRe
                             {[
                                 { label: 'Correct', value: `${r.correctCount}/${r.totalQuestions}`, color: '#16A34A' },
                                 { label: 'Incorrect', value: `${r.incorrectCount}`, color: '#E11D48' },
-                                { label: 'Duration', value: formatAssessmentDuration(r.duration), color: '#6B7280' },
+                                { label: 'Duration', value: formatAssessmentDuration(r.duration, r.durationSeconds), color: '#6B7280' },
                             ].map((st, i) => (
                                 <div key={i}>
                                     <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 2, textTransform: 'uppercase', letterSpacing: '0.5px' }}>

@@ -18,12 +18,22 @@ export function calculateAccuracy(correct: number, total: number): number {
     return Math.round((correct / total) * 100);
 }
 
-export function formatAssessmentDuration(duration: string): string {
+export function formatAssessmentDuration(duration: string, durationSeconds?: number): string {
+    if (typeof durationSeconds === 'number' && Number.isFinite(durationSeconds)) {
+        const totalSeconds = Math.max(0, Math.floor(durationSeconds));
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+
+        if (minutes === 0) return `${seconds} sec`;
+        if (seconds === 0) return `${minutes} min`;
+        return `${minutes} min ${seconds} sec`;
+    }
     return duration
         .replace(/\s*ph(?:\u00fa|\u00c3\u00ba)t\s*/gi, ' min ')
         .replace(/\s*gi(?:\u00e2|\u00c3\u00a2)y\s*/gi, ' sec ')
         .replace(/\s+/g, ' ')
-        .trim();
+        .trim()
+        .replace(/^0 min (?=\d+ sec$)/, '');
 }
 
 export function formatAssessmentDate(value: string): string {

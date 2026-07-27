@@ -311,7 +311,7 @@ export class AssessmentService {
             // Get full question details for mapping the review list
             const questions = await this.getQuestions(lessonId);
             const detailedReviews: AnswerReviewItem[] = backendResult.questions.map((qRes: any) => {
-                const matchedQ = questions.find(q => q.id === qRes.questionId);
+                const matchedQ = questions.find(q => Number(q.id) === Number(qRes.questionId));
                 return {
                     id: qRes.questionId,
                     content: matchedQ ? matchedQ.content : `Question ${qRes.questionId}`,
@@ -329,7 +329,8 @@ export class AssessmentService {
                 totalQuestions: backendResult.totalQuestions,
                 correctCount: backendResult.correctQuestions,
                 incorrectCount: backendResult.totalQuestions - backendResult.correctQuestions,
-                duration,
+                duration: backendResult.duration || duration,
+                durationSeconds: typeof backendResult.durationSeconds === 'number' ? backendResult.durationSeconds : undefined,
                 assessment: 'Assessment',
                 submittedAt: new Date().toLocaleString('en-US'),
                 pointsEarned: backendResult.earnedPoints,
@@ -339,7 +340,8 @@ export class AssessmentService {
             this.saveLocalAttempt(lessonId, {
                 date: new Date().toLocaleDateString('en-US'),
                 score: backendResult.score,
-                duration
+                duration: resultSummary.duration,
+                durationSeconds: resultSummary.durationSeconds,
             });
 
             // Cache current test result detail so getAssessmentResult hook reads it
@@ -371,9 +373,18 @@ export class AssessmentService {
                 try {
                     const parsed = JSON.parse(stored);
                     if (parsed && parsed.reviews && parsed.reviews.length > 0) {
+                        const backendSummary = backendData.summary;
+                        const hasBackendDuration = typeof backendSummary?.durationSeconds === 'number';
                         return {
-                            summary: backendData.summary || parsed.summary,
-                            reviews: parsed.reviews
+                            summary: {
+                                ...parsed.summary,
+                                ...backendSummary,
+                                duration: hasBackendDuration ? backendSummary.duration : parsed.summary.duration,
+                                durationSeconds: hasBackendDuration
+                                    ? backendSummary.durationSeconds
+                                    : parsed.summary.durationSeconds,
+                            },
+                            reviews: parsed.reviews,
                         };
                     }
                 } catch (e) {
