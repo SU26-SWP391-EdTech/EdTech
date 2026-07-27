@@ -53,4 +53,18 @@ export class EnrollmentsController {
         return await this.enrollmentsService.getEnrollmentDetail(user.userId, courseId);
     }
 
+    // get all learner enroll couse
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Get('course/:courseId')
+    @Roles(RoleEnum.ACADEMIC_MANAGER, RoleEnum.ADMIN, RoleEnum.COURSE_PROVIDER)
+    @ApiOperation({ summary: 'Get all learner enrollments by course' })
+    @ApiResponse({ status: 200, description: 'Enrollments returned successfully' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 404, description: 'Course not found' })
+    async getAllLearnerEnrollments(
+        @CurrentUser() user: JwtPayloadUser,
+        @Param('courseId', ParseIntPipe) courseId: number,
+    ) {
+        return await this.enrollmentsService.getAllLearnerEnrollments(user.userId, courseId);
+    }
 }

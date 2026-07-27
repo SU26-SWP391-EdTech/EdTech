@@ -70,5 +70,14 @@ export class EnrollmentsRepository {
             relations: ['user'],
         });
     }
+
+    public async getLearnersEnrollCourse(courseId: number): Promise<Enrollment[]> {
+        return await this.repo.find({
+            where: {
+                course: { courseId },
+            },
+            relations: ['user'],
+        });
+    }
 }
 
