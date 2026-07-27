@@ -1,3 +1,5 @@
+export const ASSESSMENT_TIME_LIMIT_MINUTES = 45;
+
 /**
  * Format a number of seconds into mm:ss format.
  * E.g., 2700 seconds -> "45:00"
@@ -14,4 +16,21 @@ export function formatTimer(seconds: number): string {
 export function calculateAccuracy(correct: number, total: number): number {
     if (total === 0) return 0;
     return Math.round((correct / total) * 100);
+}
+
+export function formatAssessmentDuration(duration: string): string {
+    return duration
+        .replace(/\s*ph(?:\u00fa|\u00c3\u00ba)t\s*/gi, ' min ')
+        .replace(/\s*gi(?:\u00e2|\u00c3\u00a2)y\s*/gi, ' sec ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+export function formatAssessmentDate(value: string): string {
+    const legacyDate = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(.*)$/);
+    const normalizedValue = legacyDate
+        ? legacyDate[3] + '-' + legacyDate[2].padStart(2, '0') + '-' + legacyDate[1].padStart(2, '0') + legacyDate[4]
+        : value;
+    const date = new Date(normalizedValue);
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleString('en-US');
 }

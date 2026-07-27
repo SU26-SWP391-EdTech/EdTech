@@ -50,7 +50,7 @@ export function LessonHeader({
                   <span className="text-[#10B981] text-xs" style={{ fontWeight: 600 }}>Completed</span>
                 </span>
               )}
-              {!isCompleted && (
+              {role === 'learner' && !isCompleted && (
                 <span className="flex items-center gap-1.5 px-3 py-1 bg-[#FEF3C7] rounded-full">
                   <PlayCircle className="w-3.5 h-3.5 text-[#F59E0B]" />
                   <span className="text-[#F59E0B] text-xs" style={{ fontWeight: 600 }}>In Progress</span>
@@ -77,8 +77,9 @@ export function LessonHeader({
             </div>
           </div>
 
-          <div className="flex w-[420px] flex-shrink-0 items-center gap-4">
-            <div className="flex-1 rounded-2xl border border-[#F1F5F9] bg-[#F8FAFC] p-4">
+          <div className="flex flex-shrink-0 items-center gap-4">
+            {role === 'learner' && (
+              <div className="w-[320px] rounded-2xl border border-[#F1F5F9] bg-[#F8FAFC] p-4">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-xs text-[#6B7280]" style={{ fontWeight: 600 }}>Course Progress</span>
                 <span className="text-sm text-[#E11D48]" style={{ fontWeight: 700 }}>{overallProgress}%</span>
@@ -90,7 +91,8 @@ export function LessonHeader({
                 <span>{completedLessons} done</span>
                 <span>{Math.max(totalLessons - completedLessons, 0)} left</span>
               </div>
-            </div>
+              </div>
+            )}
             {role === 'learner' && (() => {
               const typeLower = activeLesson?.type?.toLowerCase() || '';
               const isReadingLesson = typeLower === 'reading' || (!activeLesson?.hasVideo && !activeLesson?.videoUrl && !activeLesson?.hasAssessment && typeLower !== 'assessment');

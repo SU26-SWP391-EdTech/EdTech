@@ -8,6 +8,7 @@ import type {
     AnswerReviewItem
 } from '../../types/assessment/assessment.types';
 import { getLessonById } from '../lesson/lesson.service';
+import { ASSESSMENT_TIME_LIMIT_MINUTES } from '../../utils/assessment/assessmentUtils';
 
 export class AssessmentService {
     public static async deleteAssessment(assessmentId: number): Promise<void> {
@@ -98,9 +99,9 @@ export class AssessmentService {
         const attempts = this.getLocalAttempts(lessonId);
         const bestScore = attempts.length > 0 ? Math.max(...attempts.map(a => a.score)) : 0;
 
-        let title = cachedTitle || 'Bài kiểm tra';
-        let description = 'Bài kiểm tra đánh giá kiến thức.';
-        let courseTitle = 'Khóa học';
+        let title = cachedTitle || 'Assessment';
+        let description = 'Knowledge assessment.';
+        let courseTitle = 'Course';
         let questionCount = 0;
         let pointsReward = 0;
 
@@ -135,7 +136,7 @@ export class AssessmentService {
             id: assessmentId || 0,
             title: title,
             description: description,
-            timeLimit: 0,
+            timeLimit: ASSESSMENT_TIME_LIMIT_MINUTES,
             attempts: attempts.length,
             bestScore,
             questionCount,
@@ -155,11 +156,11 @@ export class AssessmentService {
             return {
                 id: qId,
                 type: isMulti ? 'multiple-choice' : 'single-choice',
-                content: q.content || q.title || `Câu hỏi ${idx + 1}`,
+                content: q.content || q.title || `Question ${idx + 1}`,
                 points: q.points ? Number(q.points) : 10,
                 options: (q.options || []).map((opt: any, oIdx: number) => ({
                     id: String(opt.id || opt.optionId || `opt-${qId}-${oIdx + 1}`),
-                    text: opt.text || opt.content || `Phương án ${oIdx + 1}`,
+                    text: opt.text || opt.content || `Option ${oIdx + 1}`,
                 })),
             };
         };
@@ -313,7 +314,7 @@ export class AssessmentService {
                 const matchedQ = questions.find(q => q.id === qRes.questionId);
                 return {
                     id: qRes.questionId,
-                    content: matchedQ ? matchedQ.content : `Câu hỏi ${qRes.questionId}`,
+                    content: matchedQ ? matchedQ.content : `Question ${qRes.questionId}`,
                     type: matchedQ ? matchedQ.type : 'single-choice',
                     isCorrect: qRes.isCorrect,
                     selected: qRes.selectedOptionIds.map(String),
@@ -329,14 +330,14 @@ export class AssessmentService {
                 correctCount: backendResult.correctQuestions,
                 incorrectCount: backendResult.totalQuestions - backendResult.correctQuestions,
                 duration,
-                assessment: 'Bài kiểm tra',
-                submittedAt: new Date().toLocaleString('vi-VN'),
+                assessment: 'Assessment',
+                submittedAt: new Date().toLocaleString('en-US'),
                 pointsEarned: backendResult.earnedPoints,
             };
 
             // Save to localStorage history attempts so the statistics display works
             this.saveLocalAttempt(lessonId, {
-                date: new Date().toLocaleDateString('vi-VN'),
+                date: new Date().toLocaleDateString('en-US'),
                 score: backendResult.score,
                 duration
             });
@@ -396,9 +397,9 @@ export class AssessmentService {
                     totalQuestions: 0,
                     correctCount: 0,
                     incorrectCount: 0,
-                    duration: '0 phút',
-                    assessment: 'Bài kiểm tra',
-                    submittedAt: new Date().toLocaleString('vi-VN'),
+                    duration: '0 min',
+                    assessment: 'Assessment',
+                    submittedAt: new Date().toLocaleString('en-US'),
                     pointsEarned: 0,
                 },
                 reviews: []

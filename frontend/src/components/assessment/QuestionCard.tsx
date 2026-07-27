@@ -18,20 +18,20 @@ export function QuestionCard({ question, index, total, selectedAnswers, toggleOp
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ background: '#E11D48', color: '#fff', fontSize: 13, fontWeight: 700, padding: '4px 12px', borderRadius: 6 }}>
-                        Câu {index + 1}
+                        Question {index + 1}
                     </span>
-                    <span 
-                        style={{ 
-                            fontSize: 12, 
-                            padding: '3px 10px', 
-                            borderRadius: 20, 
-                            background: isMulti ? '#FFFBEB' : '#FFF1F3', 
-                            color: isMulti ? '#D97706' : '#E11D48', 
-                            fontWeight: 600, 
-                            border: `1px solid ${isMulti ? '#FDE68A' : '#FECDD3'}` 
+                    <span
+                        style={{
+                            fontSize: 12,
+                            padding: '3px 10px',
+                            borderRadius: 20,
+                            background: isMulti ? '#FFFBEB' : '#FFF1F3',
+                            color: isMulti ? '#D97706' : '#E11D48',
+                            fontWeight: 600,
+                            border: `1px solid ${isMulti ? '#FDE68A' : '#FECDD3'}`
                         }}
                     >
-                        {isMulti ? 'Nhiều lựa chọn' : 'Một lựa chọn'}
+                        {isMulti ? 'Multiple choice' : 'Single choice'}
                     </span>
                 </div>
                 <span style={{ fontSize: 12.5, color: '#9CA3AF' }}>{index + 1} / {total}</span>
@@ -56,7 +56,7 @@ export function QuestionCard({ question, index, total, selectedAnswers, toggleOp
                             lineHeight: 1.5,
                         }}
                     >
-                        Câu hỏi này chưa có phương án trả lời. Vui lòng cập nhật lại câu hỏi trong phần quản lý bài học.
+                        This question has no answer options. Update it in lesson management.
                     </div>
                 )}
                 {question.options.map(opt => {
@@ -66,15 +66,15 @@ export function QuestionCard({ question, index, total, selectedAnswers, toggleOp
                             key={opt.id}
                             onClick={() => toggleOption(opt.id)}
                             style={{
-                                display: 'flex', 
-                                alignItems: 'flex-start', 
-                                gap: 11, 
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                gap: 11,
                                 padding: '13px 15px',
                                 background: selected ? '#FFF1F3' : '#FFFFFF',
                                 border: `1.5px solid ${selected ? '#E11D48' : '#E5E7EB'}`,
-                                borderRadius: 10, 
-                                cursor: 'pointer', 
-                                textAlign: 'left', 
+                                borderRadius: 10,
+                                cursor: 'pointer',
+                                textAlign: 'left',
                                 transition: 'all 0.12s',
                                 color: selected ? '#111827' : '#374151',
                             }}
@@ -86,18 +86,18 @@ export function QuestionCard({ question, index, total, selectedAnswers, toggleOp
                                     ? <CheckSquare size={17} style={{ color: '#E11D48', flexShrink: 0, marginTop: 1 }} />
                                     : <Square size={17} style={{ color: '#9CA3AF', flexShrink: 0, marginTop: 1 }} />
                             ) : (
-                                <div 
-                                    style={{ 
-                                        width: 17, 
-                                        height: 17, 
-                                        borderRadius: '50%', 
-                                        border: `2px solid ${selected ? '#E11D48' : '#9CA3AF'}`, 
-                                        background: selected ? '#E11D48' : 'transparent', 
-                                        flexShrink: 0, 
-                                        marginTop: 1, 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
-                                        justifyContent: 'center' 
+                                <div
+                                    style={{
+                                        width: 17,
+                                        height: 17,
+                                        borderRadius: '50%',
+                                        border: `2px solid ${selected ? '#E11D48' : '#9CA3AF'}`,
+                                        background: selected ? '#E11D48' : 'transparent',
+                                        flexShrink: 0,
+                                        marginTop: 1,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
                                     }}
                                 >
                                     {selected && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />}
