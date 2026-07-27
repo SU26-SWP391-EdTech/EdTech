@@ -18,6 +18,11 @@ import { CoursesService } from 'src/modules/courses/services/courses.service';
 import { LessonPrerequisiteService } from './lesson-prerequisite.service';
 import { ReorderLessonsDto } from '../dto/reorder-lesson.dto';
 
+type LessonOutline = Pick<
+  Lesson,
+  'lessonId' | 'title' | 'description' | 'videoDuration' | 'position' | 'prerequisites'
+> & { hasAssessment: boolean };
+
 @Injectable()
 export class LessonsService {
   constructor(
@@ -87,13 +92,37 @@ export class LessonsService {
     return await this.findOne(lesson.lessonId);
   }
 
-  async findAllByCourse(courseId: number): Promise<Lesson[]> {
+  async findAllByCourse(courseId: number): Promise<LessonOutline[]> {
     const course = await this.courseService.findCourseByIdService(courseId);
     if (!course) {
       throw new NotFoundException(`Not found course with ID ${courseId}`);
     }
 
-    return await this.lessonsRepo.findByCourseId(courseId);
+    const lessons = await this.lessonsRepo.findByCourseId(courseId);
+    return lessons.map((lesson) => ({
+      lessonId: lesson.lessonId,
+      title: lesson.title,
+      description: lesson.description,
+      videoDuration: lesson.videoDuration,
+      position: lesson.position,
+      prerequisites: lesson.prerequisites,
+      hasAssessment: Boolean(lesson.assessments?.length),
+    }));
+  }
+
+  async findAllByCourseContent(courseId: number, userId: number, roleName: string): Promise<Lesson[]> {
+    const course = await this.courseService.findCourseByIdService(courseId);
+    if (!course) throw new NotFoundException(`Not found course with ID ${courseId}`);
+    if (roleName === RoleEnum.ADMIN || roleName === RoleEnum.ACADEMIC_MANAGER) return await this.lessonsRepo.findByCourseId(courseId);
+    if (roleName === RoleEnum.COURSE_PROVIDER) {
+      if (course.user?.userId !== userId) throw new ForbiddenException('You can only access content for your own courses');
+      return await this.lessonsRepo.findByCourseId(courseId);
+    }
+    if (roleName === RoleEnum.LEARNER) {
+      await this.requireValidEnrollment(userId, courseId);
+      return await this.lessonsRepo.findByCourseId(courseId);
+    }
+    throw new ForbiddenException('You are not allowed to access course content');
   }
 
   // Dành cho Academic Manager: xem toàn bộ nội dung lessons để duyệt (không check enrollment)
@@ -119,6 +148,7 @@ export class LessonsService {
   async findLesson(
     lessonId: number,
     userId: number,
+    roleName?: string,
   ): Promise<Lesson> {
 
     const lesson = await this.lessonsRepo.findById(lessonId);
@@ -127,35 +157,36 @@ export class LessonsService {
       throw new NotFoundException(`Lesson with ID ${lessonId} not found`);
     }
 
-    // Allow Course Providers, Academic Managers, Admins, or Course Owner
-    const isOwnerOrStaff =
-      lesson.course.user?.userId === userId ||
-      lesson.course.user?.role?.roleName === RoleEnum.COURSE_PROVIDER ||
-      lesson.course.user?.role?.roleName === RoleEnum.ACADEMIC_MANAGER ||
-      lesson.course.user?.role?.roleName === RoleEnum.ADMIN;
-
-    if (isOwnerOrStaff) {
+    if (roleName === RoleEnum.ADMIN || roleName === RoleEnum.ACADEMIC_MANAGER) {
       return lesson;
     }
+    if (!roleName && lesson.course.user?.userId === userId) {
+      return lesson;
+    }
+    if (roleName === RoleEnum.COURSE_PROVIDER) {
+      if (lesson.course.user?.userId !== userId) throw new ForbiddenException('You can only access lessons in your own courses');
+      return lesson;
+    }
+    if (roleName === RoleEnum.LEARNER) {
+      await this.requireValidEnrollment(userId, lesson.course.courseId);
+      return lesson;
+    }
+    throw new ForbiddenException('You are not allowed to access this lesson');
+  }
 
+  private async requireValidEnrollment(userId: number, courseId: number): Promise<Enrollment> {
     const enrollment = await this.enrollmentsRepo.findOne({
       where: {
-        user: {
-          userId,
-        },
-        course: {
-          courseId: lesson.course.courseId,
-        },
+        user: { userId },
+        course: { courseId },
       },
     });
-
-    if (!enrollment) {
+    if (!enrollment || ![EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED].includes(enrollment.status)) {
       throw new ForbiddenException(
-        'You must enroll in this course before accessing lessons',
+        'An active or completed enrollment is required to access course content',
       );
     }
-
-    return lesson;
+    return enrollment;
   }
 
   async update(

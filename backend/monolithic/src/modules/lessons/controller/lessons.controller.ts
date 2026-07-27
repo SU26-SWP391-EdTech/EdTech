@@ -74,6 +74,13 @@ export class LessonsController {
     return await this.lessonsService.findAllByCourse(courseId);
   }
 
+  @Get('course/:courseId/content')
+  @ApiOperation({ summary: 'Get protected lesson content by course' })
+  @ApiResponse({ status: 403, description: 'Enrollment, ownership, or staff access required' })
+  async findAllByCourseContent(@Param('courseId', ParseIntPipe) courseId: number, @CurrentUser() user: JwtPayloadUser) {
+    return await this.lessonsService.findAllByCourseContent(courseId, user.userId, user.roleName);
+  }
+
   @Get('manager-review/:courseId')
   @Roles(RoleEnum.ACADEMIC_MANAGER)
   @ApiOperation({ summary: 'Academic Manager: get all lessons of a course for review (no enrollment required)' })
@@ -90,7 +97,7 @@ export class LessonsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Lesson not found' })
   async findOne(@Param('id', ParseIntPipe) id: number, @Req() req) {
-    return await this.lessonsService.findLesson(id, req.user.userId);
+    return await this.lessonsService.findLesson(id, req.user.userId, req.user.roleName);
   }
 
   @Patch(':courseId')
