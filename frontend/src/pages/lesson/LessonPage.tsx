@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
+import { useBeforeUnload, useBlocker } from 'react-router-dom';
 import { useLessonPage } from '../../hooks/lesson/useLessonPage';
 import { LessonHeader } from '../../components/lesson/detail/LessonHeader';
 import { LessonPlayer } from '../../components/lesson/detail/LessonPlayer';
@@ -10,12 +11,16 @@ import { AssessmentDetailPage } from '../assessment/AssessmentDetailPage';
 import { QuizArenaPage } from '../assessment/QuizArenaPage';
 import { AssessmentResultPage } from '../assessment/AssessmentResultPage';
 import { AssessmentManagerReviewView } from '../../components/assessment/AssessmentManagerReviewView';
+import { AssessmentExitModal } from '../../components/assessment/AssessmentExitModal';
+import { ASSESSMENT_TIME_LIMIT_MINUTES } from '../../utils/assessment/assessmentUtils';
 
 const NON_LEARNER_ROLES = ['course provider', 'academic manager', 'admin'];
 
 export function LessonPage() {
   const lesson = useLessonPage();
   const [assessmentStage, setAssessmentStage] = useState<'detail' | 'arena' | 'result'>('detail');
+  const isAssessmentInProgress = assessmentStage === 'arena';
+  const navigationBlocker = useBlocker(isAssessmentInProgress);
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     const saved = localStorage.getItem('lesson_sidebar_open');
     return saved !== 'false';
@@ -34,6 +39,12 @@ export function LessonPage() {
     setAssessmentStage('detail');
   }, [lesson.activeLesson?.id]);
 
+  useBeforeUnload(useCallback((event) => {
+    if (!isAssessmentInProgress) return;
+    event.preventDefault();
+    event.returnValue = '';
+  }, [isAssessmentInProgress]));
+
   if (lesson.isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
@@ -44,40 +55,6 @@ export function LessonPage() {
       </div>
     );
   }
-
-  // Navigation Guard Warn
-  const checkArenaExit = (): boolean => {
-    if (assessmentStage === 'arena') {
-      return window.confirm(
-        'Bạn đang làm bài kiểm tra. Nếu rời đi, kết quả thi hiện tại sẽ không được lưu. Bạn có chắc chắn muốn rời đi?'
-      );
-    }
-    return true;
-  };
-
-  const handleLessonClickWithGuard = (l: any) => {
-    if (checkArenaExit()) {
-      lesson.handleLessonClick(l);
-    }
-  };
-
-  const handlePrevLessonWithGuard = () => {
-    if (checkArenaExit()) {
-      lesson.handlePrevLesson();
-    }
-  };
-
-  const handleNextLessonWithGuard = () => {
-    if (checkArenaExit()) {
-      lesson.handleNextLesson();
-    }
-  };
-
-  const handleBackToCourseWithGuard = () => {
-    if (checkArenaExit()) {
-      lesson.handleBackToCourse();
-    }
-  };
 
   const handleQuizSubmitted = async () => {
     setAssessmentStage('result');
@@ -118,14 +95,14 @@ export function LessonPage() {
         overallProgress={lesson.overallProgress}
         isCompleted={lesson.isCompleted}
         role={lesson.role}
-        onBackToCourse={handleBackToCourseWithGuard}
+        onBackToCourse={lesson.handleBackToCourse}
         onMarkComplete={lesson.handleMarkComplete}
       />
 
       {/* ── MAIN CONTENT ────────────────────────────────────────────────────── */}
       <div className="max-w-[1440px] mx-auto px-8 py-6 relative">
         <div className={`flex items-start transition-all duration-300 ${isSidebarOpen ? 'gap-6' : 'gap-0'}`}>
-          
+
           {/* ── LEFT CONTENT AREA ─────────────────────────────────────────── */}
           <div className="flex-1 min-w-0 space-y-5">
             {isAssessment ? (
@@ -134,20 +111,20 @@ export function LessonPage() {
               ) : (
               <div style={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 16, overflow: 'hidden' }}>
                 {assessmentStage === 'detail' && (
-                  <AssessmentDetailPage 
+                  <AssessmentDetailPage
                     lessonId={Number(lesson.activeLesson?.id)}
                     onStartQuiz={() => setAssessmentStage('arena')}
                   />
                 )}
                 {assessmentStage === 'arena' && (
-                  <QuizArenaPage 
+                  <QuizArenaPage
                     lessonId={Number(lesson.activeLesson?.id)}
-                    timeLimit={45} // 45 minutes default
+                    timeLimit={ASSESSMENT_TIME_LIMIT_MINUTES}
                     onSubmit={handleQuizSubmitted}
                   />
                 )}
                 {assessmentStage === 'result' && (
-                  <AssessmentResultPage 
+                  <AssessmentResultPage
                     lessonId={Number(lesson.activeLesson?.id)}
                     onRetry={() => setAssessmentStage('detail')}
                     onExit={handleExitQuiz}
@@ -187,17 +164,17 @@ export function LessonPage() {
                   totalLessons={lesson.totalLessons}
                   completedLessons={lesson.completedLessons}
                   flatLessons={lesson.flatLessons}
-                  onPrevLesson={handlePrevLessonWithGuard}
-                  onNextLesson={handleNextLessonWithGuard}
+                  onPrevLesson={lesson.handlePrevLesson}
+                  onNextLesson={lesson.handleNextLesson}
                 />
               </>
             )}
           </div>
 
           {/* ── RIGHT SIDEBAR ─────────────────────────────────────────────── */}
-          <div 
+          <div
             className="transition-all duration-300 ease-in-out flex-shrink-0"
-            style={{ 
+            style={{
               width: isSidebarOpen ? '360px' : '0px',
               opacity: isSidebarOpen ? 1 : 0,
               overflow: 'hidden',
@@ -210,7 +187,7 @@ export function LessonPage() {
               activeLesson={lesson.activeLesson}
               totalLessons={lesson.totalLessons}
               onToggleModule={lesson.toggleModule}
-              onLessonClick={handleLessonClickWithGuard}
+              onLessonClick={lesson.handleLessonClick}
               onToggleSidebar={toggleSidebar}
             />
           </div>
@@ -227,6 +204,12 @@ export function LessonPage() {
           </button>
         )}
       </div>
+      {navigationBlocker.state === 'blocked' && (
+        <AssessmentExitModal
+          onStay={() => navigationBlocker.reset()}
+          onLeave={() => navigationBlocker.proceed()}
+        />
+      )}
     </div>
   );
 }
