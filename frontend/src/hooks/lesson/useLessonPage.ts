@@ -9,8 +9,8 @@ import {
 } from '../../utils/lesson/lessonUtils';
 import { useAuthStore } from '../../stores/auth/auth.stores';
 import { getCourseById } from '../../services/course/course.service';
-import { getLessonsByCourse, getLessonsByCourseForManager } from '../../services/lesson/lesson.service';
-import { getMyEnrollments, updateEnrollmentProgress } from '../../services/enrollment/enrollment.service';
+import { getCourseLessonContent } from '../../services/lesson/lesson.service';
+import { getMyEnrollments } from '../../services/enrollment/enrollment.service';
 import api from '../../lib/axios';
 import { updateStreak } from '../../utils/learner/streakUtils';
 
@@ -80,20 +80,24 @@ export function useLessonPage() {
       try {
         setIsLoading(true);
         // Tải đồng thời thông tin khóa học và danh sách bài học tương ứng (Academic Manager dùng API manager-review)
-        const fetchLessons = role === 'academic manager' 
-          ? getLessonsByCourseForManager(courseId)
-          : getLessonsByCourse(courseId);
-
+        let enrolls: any[] = [];
+        if (role === 'learner') {
+          enrolls = await getMyEnrollments();
+          const enrollment = enrolls.find((item) => item.course?.courseId === courseId);
+          if (!enrollment || !['active', 'completed'].includes(enrollment.status)) {
+            navigate(`/learner/courses/detail?id=${courseId}`, { replace: true });
+            return;
+          }
+        }
         const [courseData, lessonsData] = await Promise.all([
           getCourseById(courseId),
-          fetchLessons,
+          getCourseLessonContent(courseId),
         ]);
         setCourse(courseData);
         setLessonsList(lessonsData);
 
         // Nếu là Học viên, tải thêm tiến độ đăng ký học và kiểm tra trạng thái hoàn thành của từng bài học
         if (role === 'learner') {
-          const enrolls = await getMyEnrollments();
           setEnrollments(enrolls);
 
           // Gọi API kiểm tra xem từng bài học đã được đánh dấu hoàn thành (COMPLETED) chưa
@@ -117,14 +121,18 @@ export function useLessonPage() {
           setEnrollments([]);
           setCompletedLessonIds(new Set());
         }
-      } catch (error) {
+      } catch (error: any) {
+        if (role === 'learner' && error.response?.status === 403) {
+          navigate(`/learner/courses/detail?id=${courseId}`, { replace: true });
+          return;
+        }
         console.error('Failed to load lesson page data:', error);
       } finally {
         setIsLoading(false);
       }
     }
     loadData();
-  }, [courseId, role]);
+  }, [courseId, role, navigate]);
 
   const matchedCourse: any = course || {
     courseId,
@@ -170,7 +178,7 @@ export function useLessonPage() {
   ];
 
   const currentEnrollment = enrollments.find(e => e.course?.courseId === courseId);
-  const isEnrolled = role === 'learner' && Boolean(currentEnrollment);
+  const isEnrolled = role === 'learner' && ['active', 'completed'].includes(currentEnrollment?.status);
   const isSpecialRole = ['guest', 'course provider', 'admin', 'academic manager'].includes(role);
   const progressVal = isSpecialRole ? 0 : (isEnrolled ? (currentEnrollment?.progress ?? 0) : 0);
 
@@ -186,7 +194,7 @@ export function useLessonPage() {
   // --- 5. EFFECT: TỰ ĐỘNG KHỞI TẠO TIẾN ĐỘ HỌC BÀI HỌC (START PROGRESS) ---
   // Khi học viên chọn một bài học chưa hoàn thành, tự động gọi API `/progress/lesson/{id}/start` để ghi nhận
   useEffect(() => {
-    if (role !== 'learner' || !activeLessonId || isLoading) return;
+    if (role !== 'learner' || !activeLessonId || isLoading || !isEnrolled) return;
     
     const lessonStrId = String(activeLessonId);
     if (completedLessonIds.has(lessonStrId)) return;
@@ -197,7 +205,11 @@ export function useLessonPage() {
         if (!res.data || !res.data.status) {
           try {
             await api.post(`/progress/lesson/${activeLessonId}/start`);
-          } catch (startErr) {
+          } catch (startErr: any) {
+            if (startErr.response?.status === 403) {
+              navigate(`/learner/courses/detail?id=${courseId}`, { replace: true });
+              return;
+            }
             console.warn('Failed to start lesson progress:', startErr);
           }
         }
@@ -205,14 +217,18 @@ export function useLessonPage() {
         if (err.response?.status === 404) {
           try {
             await api.post(`/progress/lesson/${activeLessonId}/start`);
-          } catch (startErr) {
+          } catch (startErr: any) {
+            if (startErr.response?.status === 403) {
+              navigate(`/learner/courses/detail?id=${courseId}`, { replace: true });
+              return;
+            }
             console.warn('Failed to start lesson progress:', startErr);
           }
         }
       }
     }
     checkAndStartProgress();
-  }, [activeLessonId, role, isLoading]);
+  }, [activeLessonId, role, isLoading, isEnrolled, courseId, navigate, completedLessonIds]);
 
   const hasTrackedLessonProgress = completedLessonIds.size > 0;
   const completedFromProgressCount = !hasTrackedLessonProgress && rawModules.length > 0
@@ -389,6 +405,10 @@ export function useLessonPage() {
       if (showToast) toast.error('Only learners can update course progress.');
       return;
     }
+    if (!isEnrolled) {
+      navigate(`/learner/courses/detail?id=${courseId}`, { replace: true });
+      return;
+    }
 
     const lessonId = String(lesson.id);
     if (completedLessonIds.has(lessonId)) {
@@ -414,7 +434,11 @@ export function useLessonPage() {
         updateStreak(user.userId);
       }
       window.dispatchEvent(new CustomEvent('streak-updated'));
-    } catch (err) {
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        navigate(`/learner/courses/detail?id=${courseId}`, { replace: true });
+        return;
+      }
       console.error('Failed to update progress on backend:', err);
       toast.error('Failed to update progress on server.');
     }

@@ -59,7 +59,8 @@ export class ProgressService {
     lessonId: number,
   ): Promise<LearnerLessonProgress> {
     await this.learnerService.getLearnerProfileById(userId);
-    await this.lessonService.findLessonByIdService(lessonId);
+    const lesson = await this.lessonService.findLessonByIdService(lessonId);
+    await this.requireValidEnrollment(userId, lesson.course.courseId);
 
     const canStart =
       await this.lessonPrerequisiteService.checkLessonPrerequisite(
@@ -96,6 +97,7 @@ export class ProgressService {
       await this.learnerService.getLearnerProfileById(userId);
 
     const lesson = await this.lessonService.findLessonByIdService(lessonId);
+    await this.requireValidEnrollment(userId, lesson.course.courseId);
 
     const canStart =
       await this.lessonPrerequisiteService.checkLessonPrerequisite(
@@ -175,6 +177,13 @@ export class ProgressService {
     }
 
     return completeLesson;
+  }
+
+  private async requireValidEnrollment(userId: number, courseId: number): Promise<void> {
+    const enrollment = await this.dataSource.getRepository(Enrollment).findOne({ where: { user: { userId }, course: { courseId } } });
+    if (!enrollment || ![EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED].includes(enrollment.status)) {
+      throw new ForbiddenException('An active or completed enrollment is required to update lesson progress');
+    }
   }
 
   public async isLessonCompleted(userId, lessonId): Promise<boolean> {

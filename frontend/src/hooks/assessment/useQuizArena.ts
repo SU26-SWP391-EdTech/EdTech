@@ -130,13 +130,13 @@ export function useQuizArena(
             const timeUsedSeconds = totalTimeSeconds - timeLeft;  
             const minsUsed = Math.floor(timeUsedSeconds / 60);
             const secsUsed = timeUsedSeconds % 60;
-            const durationStr = `${minsUsed} phút ${secsUsed} giây`;
+            const durationStr = `${minsUsed} min ${secsUsed} sec`;
 
             await AssessmentService.submitAnswers(lessonId, answers, durationStr); // Gửi toàn bộ đáp án và thời gian làm bài lên backend
             onSubmitSuccess(); // Thông báo cho component rằng bài đã được nộp thành công
         } catch (err: any) {
             console.error('Submit failed:', err);
-            alert('Có lỗi xảy ra khi nộp bài. Vui lòng thử lại!');
+            alert('The assessment could not be submitted. Please try again.');
         } finally {
             setIsSubmitting(false);
         }

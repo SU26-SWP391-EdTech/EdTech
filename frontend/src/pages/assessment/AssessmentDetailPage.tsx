@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { BookOpen, ChevronRight, FileQuestion, AlertCircle, Trophy, Zap, BarChart3 } from 'lucide-react';
+import { AlertCircle, Trophy, Zap, BarChart3 } from 'lucide-react';
 import { useAssessmentDetail } from '../../hooks/assessment/useAssessmentDetail';
 import { ScoreRing } from '../../components/assessment/ScoreRing';
 import { AssessmentStatsGrid } from '../../components/assessment/AssessmentStatsGrid';
+import { formatAssessmentDate, formatAssessmentDuration } from '../../utils/assessment/assessmentUtils';
 
 interface AssessmentDetailPageProps {
     lessonId: number;
@@ -11,14 +11,13 @@ interface AssessmentDetailPageProps {
 
 export function AssessmentDetailPage({ lessonId, onStartQuiz }: AssessmentDetailPageProps) {
     const { metadata: a, attempts, isLoading, error } = useAssessmentDetail(lessonId);
-    const [confirmStart, setConfirmStart] = useState(false);
 
     if (isLoading) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '300px', fontFamily: "'Inter',sans-serif" }}>
                 <div style={{ textAlign: 'center' }}>
                     <div style={{ border: '3px solid #E2E8F0', borderTop: '3px solid #E11D48', borderRadius: '50%', width: 32, height: 32, animation: 'spin 1s linear infinite', margin: '0 auto 12px' }} />
-                    <p style={{ fontSize: 13, color: '#64748B' }}>Đang tải thông tin bài thi...</p>
+                    <p style={{ fontSize: 13, color: '#64748B' }}>Loading assessment details...</p>
                     <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
                 </div>
             </div>
@@ -29,7 +28,7 @@ export function AssessmentDetailPage({ lessonId, onStartQuiz }: AssessmentDetail
         return (
             <div style={{ padding: 24, textAlign: 'center', color: '#EF4444', fontFamily: "'Inter',sans-serif" }}>
                 <AlertCircle size={24} style={{ margin: '0 auto 8px' }} />
-                <p style={{ fontSize: 14 }}>{error || 'Không tìm thấy thông tin bài thi.'}</p>
+                <p style={{ fontSize: 14 }}>{error || 'Assessment details could not be found.'}</p>
             </div>
         );
     }
@@ -40,23 +39,22 @@ export function AssessmentDetailPage({ lessonId, onStartQuiz }: AssessmentDetail
                 {/* Left column */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                     {/* Stats row */}
-                    <AssessmentStatsGrid 
-                        timeLimit={a.timeLimit} 
-                        questionCount={a.questionCount} 
-                        pointsReward={a.pointsReward} 
+                    <AssessmentStatsGrid
+                        questionCount={a.questionCount}
+                        pointsReward={a.pointsReward}
                     />
 
                     {/* Previous attempts */}
                     {attempts.length > 0 && (
                         <div style={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 16, padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
-                            <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: '#111827' }}>Lịch sử làm bài</h3>
+                            <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 700, color: '#111827' }}>Attempt history</h3>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 {attempts.map((s, i) => (
                                     <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', background: '#F8FAFC', border: '1px solid #E5E7EB', borderRadius: 12 }}>
                                         <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-                                            <span style={{ fontSize: 14, fontWeight: 500, color: '#111827' }}>Lần {attempts.length - i}</span>
-                                            <span style={{ fontSize: 13, color: '#64748B' }}>{s.date}</span>
-                                            <span style={{ fontSize: 13, color: '#64748B' }}>{s.duration}</span>
+                                            <span style={{ fontSize: 14, fontWeight: 500, color: '#111827' }}>Attempt {attempts.length - i}</span>
+                                            <span style={{ fontSize: 13, color: '#64748B' }}>{formatAssessmentDate(s.date)}</span>
+                                            <span style={{ fontSize: 13, color: '#64748B' }}>{formatAssessmentDuration(s.duration, s.durationSeconds)}</span>
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                                             <span style={{ fontSize: 16, fontWeight: 700, color: '#4F46E5' }}>{s.score}%</span>
@@ -77,36 +75,23 @@ export function AssessmentDetailPage({ lessonId, onStartQuiz }: AssessmentDetail
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 14 }}>
                                 <BarChart3 size={14} style={{ color: '#64748B' }} />
                                 <span style={{ fontSize: 13, color: '#64748B' }}>
-                                    Điểm số tốt nhất: <strong style={{ color: '#4F46E5' }}>{a.bestScore}%</strong>
+                                    Best score: <strong style={{ color: '#4F46E5' }}>{a.bestScore}%</strong>
                                 </span>
                             </div>
                         </div>
 
-                        {!confirmStart ? (
-                            <button
-                                onClick={() => setConfirmStart(true)}
-                                style={{ width: '100%', padding: '14px', background: `linear-gradient(135deg, #E11D48, #BE123C)`, border: 'none', borderRadius: 12, cursor: 'pointer', fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: '0.3px', boxShadow: `0 4px 14px rgba(225, 29, 72, 0.35)`, transition: 'transform 0.15s, box-shadow 0.15s' }}
-                                onMouseEnter={e => { (e.target as HTMLElement).style.transform = 'translateY(-1px)'; (e.target as HTMLElement).style.boxShadow = `0 6px 20px rgba(225, 29, 72, 0.45)`; }}
-                                onMouseLeave={e => { (e.target as HTMLElement).style.transform = ''; (e.target as HTMLElement).style.boxShadow = `0 4px 14px rgba(225, 29, 72, 0.35)`; }}
-                            >
-                                BẮT ĐẦU LÀM BÀI
-                            </button>
-                        ) : (
-                            <div>
-                                <p style={{ fontSize: 13, color: '#64748B', textAlign: 'center', marginBottom: 14 }}>Xác nhận bắt đầu bài thi {a.timeLimit} phút?</p>
-                                <div style={{ display: 'flex', gap: 10 }}>
-                                    <button onClick={() => setConfirmStart(false)} style={{ flex: 1, padding: '11px', background: '#F8FAFC', border: '1px solid #E5E7EB', borderRadius: 10, cursor: 'pointer', fontSize: 13, color: '#64748B', fontWeight: 600 }}>Hủy</button>
-                                    <button
-                                        onClick={onStartQuiz}
-                                        style={{ flex: 1, padding: '11px', background: '#E11D48', border: 'none', borderRadius: 10, cursor: 'pointer', fontSize: 13, color: '#fff', fontWeight: 700 }}
-                                    >Xác nhận</button>
-                                </div>
-                            </div>
-                        )}
+                        <button
+                            onClick={onStartQuiz}
+                            style={{ width: '100%', padding: '14px', background: `linear-gradient(135deg, #E11D48, #BE123C)`, border: 'none', borderRadius: 12, cursor: 'pointer', fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: '0.3px', boxShadow: `0 4px 14px rgba(225, 29, 72, 0.35)`, transition: 'transform 0.15s, box-shadow 0.15s' }}
+                            onMouseEnter={e => { (e.target as HTMLElement).style.transform = 'translateY(-1px)'; (e.target as HTMLElement).style.boxShadow = `0 6px 20px rgba(225, 29, 72, 0.45)`; }}
+                            onMouseLeave={e => { (e.target as HTMLElement).style.transform = ''; (e.target as HTMLElement).style.boxShadow = `0 4px 14px rgba(225, 29, 72, 0.35)`; }}
+                        >
+                            START ASSESSMENT
+                        </button>
 
                         <div style={{ marginTop: 16, padding: '12px 14px', background: '#F8FAFC', border: '1px solid #E5E7EB', borderRadius: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
                             <Trophy size={18} style={{ color: '#D97706', flexShrink: 0 }} />
-                            <span style={{ fontSize: 13, color: '#64748B', lineHeight: 1.4 }}>Hoàn thành bài thi nhận ngay <strong style={{ color: '#D97706' }}>{a.pointsReward} Points</strong> và huy hiệu khóa học</span>
+                            <span style={{ fontSize: 13, color: '#64748B', lineHeight: 1.4 }}>Complete the assessment to earn <strong style={{ color: '#D97706' }}>{a.pointsReward} Points</strong> and a course badge</span>
                         </div>
                     </div>
 
@@ -115,8 +100,8 @@ export function AssessmentDetailPage({ lessonId, onStartQuiz }: AssessmentDetail
                             <Zap size={16} style={{ color: '#059669' }} />
                         </div>
                         <div>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>Lượt thi tiếp theo</div>
-                            <div style={{ fontSize: 12, color: '#64748B' }}>Lần thử {a.attempts + 1} của bạn</div>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>Next attempt</div>
+                            <div style={{ fontSize: 12, color: '#64748B' }}>Attempt {a.attempts + 1}</div>
                         </div>
                     </div>
                 </div>

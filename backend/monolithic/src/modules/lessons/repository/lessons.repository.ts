@@ -73,7 +73,15 @@ export class LessonsRepository {
       where: {
         course: { courseId },
       },
-      relations: ['prerequisites', 'course', 'assessments'],
+      relations: {
+        prerequisites: true,
+        course: true,
+        assessments: {
+          questions: {
+            options: true,
+          },
+        },
+      },
       order: {
         position: 'ASC',
       },
