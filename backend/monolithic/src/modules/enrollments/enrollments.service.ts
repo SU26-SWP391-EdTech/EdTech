@@ -177,4 +177,21 @@ export class EnrollmentsService {
   async findEnrollmentsByCourseId(courseId: number) {
     return await this.enrollmentsRepo.findByCourseId(courseId);
   }
+
+  async getAllLearnerEnrollments(userId: number, courseId: number) {
+    const course = await this.courseRepo.findOne({
+      where: {
+        courseId,
+        user: {
+          userId,
+        }
+      }
+    });
+
+    if(!course){
+      throw new NotFoundException(`You are not the owner of this course!`);
+    }
+
+    return await this.enrollmentsRepo.getLearnersEnrollCourse(courseId);
+  }
 }
