@@ -11,7 +11,7 @@ export function AnswerReviewList({ reviews }: AnswerReviewListProps) {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {reviews.map(a => {
+            {reviews.map((a, index) => {
                 const expanded = expandedQ === a.id;
                 return (
                     <div
@@ -54,7 +54,7 @@ export function AnswerReviewList({ reviews }: AnswerReviewListProps) {
                                     : <XCircle size={14} style={{ color: '#E11D48' }} />
                                 }
                             </div>
-                            <span style={{ fontSize: 12, color: '#9CA3AF', flexShrink: 0, fontWeight: 600 }}>Q{a.id}</span>
+                            <span style={{ fontSize: 12, color: '#9CA3AF', flexShrink: 0, fontWeight: 600 }}>Q{index + 1}</span>
                             <span style={{ flex: 1, fontSize: 13.5, color: '#374151', lineHeight: 1.5 }}>{a.content}</span>
                             <span
                                 style={{
