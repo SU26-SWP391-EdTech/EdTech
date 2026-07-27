@@ -7,7 +7,7 @@ import {
 
 import {
   getLessonById,
-  getLessonsByCourse,
+  getCourseLessonContent,
   type Lesson,
 } from '../../../services/lesson/lesson.service';
 
@@ -122,7 +122,7 @@ export function useLessonData({
       }
 
       try {
-        const data = await getLessonsByCourse(courseId);
+        const data = await getCourseLessonContent(courseId);
         setLessons(data);
       } catch {
         setLessons([]);

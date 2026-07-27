@@ -16,13 +16,14 @@ export interface AssessmentAttempt {
     date: string;
     score: number;
     duration: string;
+    durationSeconds?: number;
 }
 
 export interface AssessmentMetadata {
     id: number;
     title: string;
     description: string;
-    timeLimit: number; // in minutes (0 for unlimited)
+    timeLimit: number; // fixed assessment limit in minutes
     questionCount: number;
     course: string;
     attempts: number;
@@ -47,6 +48,7 @@ export interface AssessmentResultSummary {
     correctCount: number;
     incorrectCount: number;
     duration: string;
+    durationSeconds?: number;
     assessment: string;
     submittedAt: string;
     pointsEarned: number;

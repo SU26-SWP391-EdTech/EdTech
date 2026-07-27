@@ -14,7 +14,6 @@ interface DayData {
     dayOfWeek: number; // 0 = Sun, 1 = Mon, ..., 6 = Sat
     month: number; // 0-11
     monthName: string;
-    level: number; // 0 (none), 1 (active)
     isActive: boolean;
     label: string;
 }
@@ -31,7 +30,7 @@ export default function StreakCalendarMap({
     const { weeks, monthHeaders } = useMemo(() => {
         const today = new Date();
         const currentDayOfWeek = today.getDay(); // 0 = Sun, 6 = Sat
-        
+
         // Find the Saturday of the current week (end of grid)
         const endDate = new Date(today);
         endDate.setDate(today.getDate() + (6 - currentDayOfWeek));
@@ -40,11 +39,7 @@ export default function StreakCalendarMap({
         const startDate = new Date(endDate);
         startDate.setDate(endDate.getDate() - (52 * 7 - 1));
 
-        // Map real activeDates occurrences
-        const activeMap = new Map<string, number>();
-        activeDates.forEach(date => {
-            activeMap.set(date, (activeMap.get(date) || 0) + 1);
-        });
+        const activeDateSet = new Set(activeDates);
 
         const allWeeks: DayData[][] = [];
         let currentWeek: DayData[] = [];
@@ -62,22 +57,13 @@ export default function StreakCalendarMap({
             const dayOfWeek = cursor.getDay();
 
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
-            const activityCount = activeMap.get(dateStr) || 0;
-            const isActive = activityCount > 0;
-            
-            // Assign level strictly based on real activity count
-            let level = 0;
-            if (activityCount >= 4) level = 4;
-            else if (activityCount >= 3) level = 3;
-            else if (activityCount >= 2) level = 2;
-            else if (activityCount >= 1) level = 1;
+            const isActive = activeDateSet.has(dateStr);
 
             const dayData: DayData = {
                 dateStr,
                 dayOfWeek,
                 month,
                 monthName: MONTH_NAMES[month],
-                level,
                 isActive,
                 label: `${MONTH_NAMES[month]} ${dayNum}, ${year}`
             };
@@ -106,15 +92,10 @@ export default function StreakCalendarMap({
         return { weeks: allWeeks, monthHeaders: headers };
     }, [activeDates]);
 
-    const getLevelColor = (level: number) => {
-        switch (level) {
-            case 1: return 'bg-[#9BE9A8] hover:ring-1 hover:ring-[#40C463]';
-            case 2: return 'bg-[#40C463] hover:ring-1 hover:ring-[#30A14E]';
-            case 3: return 'bg-[#30A14E] hover:ring-1 hover:ring-[#216E39]';
-            case 4: return 'bg-[#216E39] hover:ring-1 hover:ring-[#144723]';
-            default: return 'bg-[#EBEDF0] hover:bg-gray-300';
-        }
-    };
+    const getActivityColor = (isActive: boolean) =>
+        isActive
+            ? 'bg-[#40C463] hover:ring-1 hover:ring-[#30A14E]'
+            : 'bg-[#EBEDF0] hover:bg-gray-300';
 
     return (
         <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6 shadow-[0_1px_4px_rgba(0,0,0,0.04)] select-none">
@@ -164,8 +145,8 @@ export default function StreakCalendarMap({
                                         {week.map((day) => (
                                             <div
                                                 key={day.dateStr}
-                                                className={`w-[13px] h-[13px] rounded-[2.5px] transition-colors cursor-pointer group relative ${getLevelColor(
-                                                    day.level
+                                                className={`w-[13px] h-[13px] rounded-[2.5px] transition-colors cursor-pointer group relative ${getActivityColor(
+                                                    day.isActive
                                                 )}`}
                                             >
                                                 {/* Tooltip */}
@@ -179,21 +160,15 @@ export default function StreakCalendarMap({
                             </div>
                         </div>
 
-                        {/* Footer Legend */}
-                        <div className="mt-3 flex items-center justify-between text-[11px] text-[#57606A] pt-2 border-t border-[#F3F4F6]">
-                            <span className="hover:underline cursor-pointer">Learn how we count contributions</span>
-                            
-                            <div className="flex items-center gap-1.5">
-                                <span>Less</span>
-                                <div className="flex items-center gap-[3px]">
-                                    <div className="w-[11px] h-[11px] rounded-[2px] bg-[#EBEDF0]" title="No activity" />
-                                    <div className="w-[11px] h-[11px] rounded-[2px] bg-[#9BE9A8]" title="Low activity" />
-                                    <div className="w-[11px] h-[11px] rounded-[2px] bg-[#40C463]" title="Medium activity" />
-                                    <div className="w-[11px] h-[11px] rounded-[2px] bg-[#30A14E]" title="High activity" />
-                                    <div className="w-[11px] h-[11px] rounded-[2px] bg-[#216E39]" title="Highest activity" />
-                                </div>
-                                <span>More</span>
-                            </div>
+                        <div className="mt-3 flex items-center justify-end gap-4 text-[11px] text-[#57606A] pt-2 border-t border-[#F3F4F6]">
+                            <span className="flex items-center gap-1.5">
+                                <span className="w-[11px] h-[11px] rounded-[2px] bg-[#EBEDF0]" />
+                                No activity
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                                <span className="w-[11px] h-[11px] rounded-[2px] bg-[#40C463]" />
+                                Active day
+                            </span>
                         </div>
                     </div>
                 </div>
