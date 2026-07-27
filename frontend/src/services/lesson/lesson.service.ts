@@ -63,6 +63,11 @@ export async function getLessonsByCourse(courseId: number): Promise<Lesson[]> {
     return response.data || [];
 }
 
+export async function getCourseLessonContent(courseId: number): Promise<Lesson[]> {
+    const response = await api.get(`/lessons/course/${courseId}/content`);
+    return response.data || [];
+}
+
 // 2b. Academic Manager: Lấy toàn bộ danh sách bài học của khóa học để xem/duyệt (không yêu cầu enrollment)
 export async function getLessonsByCourseForManager(courseId: number): Promise<Lesson[]> {
     const response = await api.get(`/lessons/manager-review/${courseId}`);
