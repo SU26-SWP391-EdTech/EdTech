@@ -17,6 +17,13 @@ const STREAK_ELIGIBLE_TYPES: AssessmentType[] = [
   AssessmentType.PRACTICE,
   AssessmentType.LESSON_QUIZ,
 ];
+function formatDurationSeconds(durationSeconds: number): string {
+  const minutes = Math.floor(durationSeconds / 60);
+  const seconds = durationSeconds % 60;
+  if (minutes === 0) return `${seconds} sec`;
+  if (seconds === 0) return `${minutes} min`;
+  return `${minutes} min ${seconds} sec`;
+}
 
 @Injectable()
 export class AssessmentSessionService {
@@ -45,7 +52,8 @@ export class AssessmentSessionService {
     if (assessmentSession && !assessmentSession.completedAt) {
       let attemptNo = assessmentSession.attemptNo + 1;
       const newAssessmentSession = await this.assessmentSessionRepository.updateAssessmentSession(assessmentSession.sessionId, {
-        attemptNo
+        attemptNo,
+        startedAt: new Date(),
       })
       return newAssessmentSession;
     }
@@ -161,9 +169,14 @@ export class AssessmentSessionService {
         : 0;
 
     // 5. Update AssessmentSession
+    const completedAt = new Date();
+    const durationSeconds = Math.max(
+      0,
+      Math.floor((completedAt.getTime() - session.startedAt.getTime()) / 1000),
+    );
     await this.assessmentSessionRepository.updateAssessmentSession(session.sessionId, {
       score,
-      completedAt: new Date(),
+      completedAt,
       earnedPoints,
     });
 
@@ -207,6 +220,8 @@ export class AssessmentSessionService {
       totalPoints,
       correctQuestions: correctQuestionsCount,
       totalQuestions: assessment.questions.length,
+      duration: formatDurationSeconds(durationSeconds),
+      durationSeconds,
       questions: questionsResponse,
     };
   }
@@ -231,6 +246,9 @@ export class AssessmentSessionService {
     const score = Number(session.score) || 0;
 
     const correctQuestions = Math.round((score / 100) * totalQuestions);
+    const durationSeconds = session.completedAt
+      ? Math.max(0, Math.floor((session.completedAt.getTime() - session.startedAt.getTime()) / 1000))
+      : 0;
 
     return {
       summary: {
@@ -238,9 +256,10 @@ export class AssessmentSessionService {
         totalQuestions,
         correctCount: correctQuestions,
         incorrectCount: totalQuestions - correctQuestions,
-        duration: '0 phút',
-        assessment: fullAssessment.title || 'Bài kiểm tra',
-        submittedAt: session.completedAt ? session.completedAt.toLocaleString('vi-VN') : '',
+        duration: formatDurationSeconds(durationSeconds),
+        durationSeconds,
+        assessment: fullAssessment.title || 'Assessment',
+        submittedAt: session.completedAt ? session.completedAt.toLocaleString('en-US') : '',
         pointsEarned: earnedPoints,
       },
       reviews: [],

@@ -16,6 +16,7 @@ export interface AssessmentAttempt {
     date: string;
     score: number;
     duration: string;
+    durationSeconds?: number;
 }
 
 export interface AssessmentMetadata {
@@ -47,6 +48,7 @@ export interface AssessmentResultSummary {
     correctCount: number;
     incorrectCount: number;
     duration: string;
+    durationSeconds?: number;
     assessment: string;
     submittedAt: string;
     pointsEarned: number;
