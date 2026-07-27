@@ -244,6 +244,11 @@ export class LeaderboardService {
       const leaderboard: LeaderboardResponse[] = [];
     
       for (const learner of learners) {
+        const verifiedLearner = await this.usersService.findOne(learner.userId);
+        if(!verifiedLearner?.isEmailVerified){
+          continue;
+        }
+
         const stats = await this.calculateOverallStats(learner);
     
         leaderboard.push({
