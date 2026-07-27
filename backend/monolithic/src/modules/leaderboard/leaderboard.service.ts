@@ -245,6 +245,10 @@ export class LeaderboardService {
     
       for (const learner of learners) {
         const stats = await this.calculateOverallStats(learner);
+
+        if(!learner.isEmailVerified){
+          continue;
+        }
     
         leaderboard.push({
           rank: 0,
