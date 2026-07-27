@@ -36,29 +36,27 @@ export class AssessmentSessionService {
   ) { }
 
 
-  public async createAssessmentSessionService(userId: number, assessmentId: number) {
+  public async createAssessmentSessionService(userId: number, assessmentId: number, attemptNo = 1) {
     await this.learnersService.getLearnerProfileById(userId);
     await this.assessmentService.findOneService(assessmentId);
     const timeStart = new Date();
     return this.assessmentSessionRepository.createAssessmentSession({
       userId,
       assessmentId,
+      attemptNo,
     }, timeStart)
   }
 
   public async startAssessmentSessionService(userId: number, assessmentId: number) {
     const assessmentSession = await this.assessmentSessionRepository.getAssessmentSessionByUserIdAndAssessmentId(userId, assessmentId);
-    // check learner complete or not complete
+    // Starting is idempotent while an attempt is still in progress. Reloading or
+    // remounting the quiz must not create a new attempt or reset its timer.
     if (assessmentSession && !assessmentSession.completedAt) {
-      let attemptNo = assessmentSession.attemptNo + 1;
-      const newAssessmentSession = await this.assessmentSessionRepository.updateAssessmentSession(assessmentSession.sessionId, {
-        attemptNo,
-        startedAt: new Date(),
-      })
-      return newAssessmentSession;
+      return assessmentSession;
     }
 
-    const startAssessSession = await this.createAssessmentSessionService(userId, assessmentId);
+    const nextAttemptNo = assessmentSession ? assessmentSession.attemptNo + 1 : 1;
+    const startAssessSession = await this.createAssessmentSessionService(userId, assessmentId, nextAttemptNo);
     return startAssessSession;
   }
 
@@ -96,9 +94,15 @@ export class AssessmentSessionService {
     submitAnswerDto: SubmitAssessmentDto,
   ) {
     // 2. Find AssessmentSession
-    const session = await this.assessmentSessionRepository.getAssessmentSessionByUserIdAndAssessmentId(userId, assessmentId);
+    const session = await this.assessmentSessionRepository.getAssessmentSessionByUserIdAndSessionId(
+      userId,
+      submitAnswerDto.sessionId,
+    );
     if (!session) {
-      throw new NotFoundException(`Assessment session not found for user ${userId} and assessment ${assessmentId}`);
+      throw new NotFoundException(`Assessment session ${submitAnswerDto.sessionId} not found for user ${userId}`);
+    }
+    if (session.assessmentId !== assessmentId) {
+      throw new BadRequestException('Assessment session does not belong to this assessment');
     }
     if (session.completedAt) {
       throw new BadRequestException('Assessment session has already been completed');
