@@ -13,6 +13,8 @@ import { MailModule } from '../mail/mail.module';
 import { PlatformSettingsModule } from '../platform-settings/platform-settings.module';
 
 
+import { LoginLockService } from './login-lock.service';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Role, Learner, UserProfile]),
@@ -27,7 +29,7 @@ import { PlatformSettingsModule } from '../platform-settings/platform-settings.m
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService, JwtModule],
+  providers: [AuthService, LoginLockService],
+  exports: [AuthService, JwtModule, LoginLockService],
 })
 export class AuthModule {}

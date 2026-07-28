@@ -103,6 +103,16 @@ export class User {
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   deletedAt!: Date;
 
+  @Column({
+    default: 0,
+  })
+  failedAttempts!: number;
+
+  @Column({
+    nullable: true,
+  })
+  lockedUntil!: Date;
+
   // user 1-1 userProfile
   @OneToOne(() => UserProfile, (userProfile) => userProfile.user, { nullable: false })
   userProfile!: UserProfile;

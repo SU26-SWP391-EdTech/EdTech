@@ -23,6 +23,8 @@ import { RoleEnum } from 'src/common/enums/role.enum';
 import { PlatformSettingsService } from '../platform-settings/platform-settings.service';
 import { randomBytes } from 'crypto';
 
+import { LoginLockService } from './login-lock.service';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -37,6 +39,7 @@ export class AuthService {
     private mailService: MailService,
     private jwtService: JwtService,
     private platformSettingsService: PlatformSettingsService,
+    private loginLockService: LoginLockService,
   ) { }
 
   //validate fields
@@ -92,7 +95,7 @@ export class AuthService {
 
     const user = await this.userRepository
       .createQueryBuilder('user')
-      .addSelect('user.password')
+      .addSelect(['user.password', 'user.failedAttempts', 'user.lockedUntil'])
       .where('user.email = :email', { email })
       .leftJoinAndSelect('user.role', 'role')
       .getOne();
@@ -101,14 +104,19 @@ export class AuthService {
       throw new UnauthorizedException('Email or password is not true');
     }
 
+    this.loginLockService.checkLock(user);
+
     if (!user.isEmailVerified) {
       throw new UnauthorizedException('Please verify your email first');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      await this.loginLockService.handleFailedAttempt(user);
       throw new UnauthorizedException('Email or password is not true');
     }
+
+    await this.loginLockService.handleSuccessAttempt(user);
 
     const userData = {
       userId: user.userId,
