@@ -23,3 +23,27 @@ export interface CourseRankInfo {
 
 export type LeaderboardTab = 'course' | 'overall';
 export type EnrollFilter = 'all' | 'enrolled' | 'not_enrolled';
+
+export interface LeaderboardRule {
+    ruleId: number;
+    scoreWeight: number;
+    timeWeight: number;
+    attemptWeight: number;
+    course?: {
+        courseId: number;
+        title?: string;
+    };
+}
+
+export interface CreateLeaderboardRulePayload {
+    scoreWeight: number;
+    timeWeight: number;
+    attemptWeight: number;
+}
+
+export interface UpdateLeaderboardRulePayload {
+    scoreWeight?: number;
+    timeWeight?: number;
+    attemptWeight?: number;
+}
+

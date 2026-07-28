@@ -1,17 +1,26 @@
 import api from '../../lib/axios';
 import { searchCourses } from '../course/course.service';
 import { getMyEnrollments } from '../enrollment/enrollment.service';
-import type { LeaderboardEntry, CourseRankInfo } from '../../types/leaderboard/leaderboard.types';
+import type {
+    LeaderboardEntry,
+    CourseRankInfo,
+    LeaderboardRule,
+    CreateLeaderboardRulePayload,
+    UpdateLeaderboardRulePayload
+} from '../../types/leaderboard/leaderboard.types';
 
-export async function getLeaderboardCourses(currentUserId: number): Promise<CourseRankInfo[]> {
+export async function getLeaderboardCourses(currentUserId: number, userRole?: string): Promise<CourseRankInfo[]> {
     try {
         // 1. Fetch all approved courses from backend
         const allCoursesRes = await searchCourses({ status: 'approved' });
         const backendCourses = allCoursesRes.data?.items || [];
 
         if (!backendCourses || backendCourses.length === 0) {
-            throw new Error('No approved courses found in backend');
+            return [];
         }
+
+        // Check if user is academic manager or admin (they can manage/view all courses)
+        const isAcademicOrAdmin = userRole === 'ACADEMIC_MANAGER' || userRole === 'ADMIN' || userRole === 'academic_manager' || userRole === 'admin';
 
         // 2. Fetch current user's enrollments to determine isEnrolled
         let enrolledIds = new Set<number>();
@@ -26,10 +35,10 @@ export async function getLeaderboardCourses(currentUserId: number): Promise<Cour
             console.warn('Failed to load enrollments:', err);
         }
 
-        // 3. Map and filter to CourseRankInfo format (only enrolled courses or owned by provider)
+        // 3. Map and filter to CourseRankInfo format
         return backendCourses
             .map((c) => {
-                const isEnrolled = enrolledIds.has(c.courseId) || c.user?.userId === currentUserId;
+                const isEnrolled = isAcademicOrAdmin || enrolledIds.has(c.courseId) || c.user?.userId === currentUserId;
                 return {
                     courseId: c.courseId,
                     title: c.title,
@@ -113,3 +122,42 @@ export async function getOverallLeaderboardData(currentUserId: number): Promise<
         return [];
     }
 }
+
+/**
+ * Fetch leaderboard rule for a specific course (Academic Manager / Provider)
+ */
+export async function getLeaderboardRule(courseId: number): Promise<LeaderboardRule | null> {
+    try {
+        const response = await api.get(`/leaderboard/courses/${courseId}/leaderboard-rule`);
+        return response.data;
+    } catch (err: any) {
+        if (err?.response?.status === 404) {
+            return null;
+        }
+        console.warn(`Failed to fetch leaderboard rule for course ${courseId}:`, err);
+        return null;
+    }
+}
+
+/**
+ * Create leaderboard rule for a specific course (Academic Manager)
+ */
+export async function createLeaderboardRule(
+    courseId: number,
+    payload: CreateLeaderboardRulePayload
+): Promise<LeaderboardRule> {
+    const response = await api.post(`/leaderboard/course/${courseId}`, payload);
+    return response.data;
+}
+
+/**
+ * Update leaderboard rule for a specific course (Academic Manager)
+ */
+export async function updateLeaderboardRule(
+    courseId: number,
+    payload: UpdateLeaderboardRulePayload
+): Promise<LeaderboardRule> {
+    const response = await api.patch(`/leaderboard/courses/${courseId}/leaderboard-rule`, payload);
+    return response.data;
+}
+
