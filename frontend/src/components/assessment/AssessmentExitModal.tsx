@@ -1,4 +1,5 @@
 import { AlertTriangle } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 interface AssessmentExitModalProps {
     onStay: () => void;
@@ -6,9 +7,9 @@ interface AssessmentExitModalProps {
 }
 
 export function AssessmentExitModal({ onStay, onLeave }: AssessmentExitModalProps) {
-    return (
+    return createPortal(
         <div
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-[#111827]/50 p-6 backdrop-blur-sm"
+            className="fixed inset-0 z-[300] flex items-center justify-center bg-[#111827]/50 p-6 backdrop-blur-sm"
             onClick={onStay}
         >
             <div
@@ -51,6 +52,7 @@ export function AssessmentExitModal({ onStay, onLeave }: AssessmentExitModalProp
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body,
     );
 }

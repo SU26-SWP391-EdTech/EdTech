@@ -11,6 +11,7 @@ import { getLessonById } from '../lesson/lesson.service';
 import { ASSESSMENT_TIME_LIMIT_MINUTES } from '../../utils/assessment/assessmentUtils';
 
 export class AssessmentService {
+    private static sessionStartRequests = new Map<number, Promise<any | null>>();
     public static async deleteAssessment(assessmentId: number): Promise<void> {
         try {
             await api.delete(`/assessment/${assessmentId}`);
@@ -46,6 +47,19 @@ export class AssessmentService {
     }
 
     public static async startSession(lessonId: number): Promise<any | null> {
+        const pendingRequest = this.sessionStartRequests.get(lessonId);
+        if (pendingRequest) return pendingRequest;
+
+        const request = this.startSessionRequest(lessonId);
+        this.sessionStartRequests.set(lessonId, request);
+        try {
+            return await request;
+        } finally {
+            this.sessionStartRequests.delete(lessonId);
+        }
+    }
+
+    private static async startSessionRequest(lessonId: number): Promise<any | null> {
         try {
             let assessmentId: number | null = null;
             const savedAss = localStorage.getItem(`assessments_lesson_${lessonId}`);
@@ -271,6 +285,7 @@ export class AssessmentService {
 
     public static async submitAnswers(
         lessonId: number,
+        sessionId: number,
         answers: Record<number, string[]>,
         duration: string
     ): Promise<AssessmentResultSummary> {
@@ -303,6 +318,7 @@ export class AssessmentService {
             }));
 
             const response = await api.patch(`/assessment/${assessmentId}/session/submit`, {
+                sessionId,
                 answers: formattedAnswers
             });
 

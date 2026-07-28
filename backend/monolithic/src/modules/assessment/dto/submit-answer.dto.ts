@@ -17,6 +17,9 @@ export class SubmitAnswerDto {
 }
 
 export class SubmitAssessmentDto {
+    @IsInt()
+    sessionId: number;
+
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => SubmitAnswerDto)

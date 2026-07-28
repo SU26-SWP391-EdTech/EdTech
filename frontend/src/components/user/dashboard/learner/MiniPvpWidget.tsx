@@ -8,18 +8,8 @@ interface MiniPvpWidgetProps {
 export default function MiniPvpWidget({ profile }: MiniPvpWidgetProps) {
   const navigate = useNavigate();
 
-  // Calculate ELO & Tier from real user profile data
+  // Display the PvP points exposed by the learner profile.
   const pvpPoints = profile?.pvpPoints ?? profile?.elo ?? 0;
-  
-  const getTier = (points: number) => {
-    if (points >= 2000) return { name: 'Diamond', color: 'text-cyan-600', bg: 'bg-cyan-50 border-cyan-200', icon: '💎' };
-    if (points >= 1600) return { name: 'Master', color: 'text-purple-600', bg: 'bg-purple-50 border-purple-200', icon: '👑' };
-    if (points >= 1300) return { name: 'Gold', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200', icon: '🥇' };
-    if (points >= 1100) return { name: 'Silver', color: 'text-slate-600', bg: 'bg-slate-50 border-slate-200', icon: '🥈' };
-    return { name: 'Bronze', color: 'text-orange-700', bg: 'bg-orange-50 border-orange-200', icon: '🥉' };
-  };
-
-  const tier = getTier(pvpPoints);
 
   return (
     <div className="bg-gradient-to-br from-[#1E1B4B] via-[#312E81] to-[#4338CA] text-white rounded-2xl p-5 shadow-lg relative overflow-hidden space-y-4">
@@ -54,7 +44,7 @@ export default function MiniPvpWidget({ profile }: MiniPvpWidgetProps) {
       </div>
 
       {/* Stats Box */}
-      <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-3.5 flex items-center justify-between relative z-10">
+      <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-3.5 relative z-10">
         <div>
           <p className="text-[10px] uppercase tracking-wider text-indigo-200 font-semibold">PvP ELO Rating</p>
           <div className="flex items-baseline gap-1 mt-0.5">
@@ -63,10 +53,6 @@ export default function MiniPvpWidget({ profile }: MiniPvpWidgetProps) {
           </div>
         </div>
 
-        <div className={`px-3 py-1.5 rounded-lg border backdrop-blur-md flex items-center gap-1.5 ${tier.bg}`}>
-          <span className="text-sm">{tier.icon}</span>
-          <span className={`text-xs font-bold ${tier.color}`}>{tier.name}</span>
-        </div>
       </div>
     </div>
   );

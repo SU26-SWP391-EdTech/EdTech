@@ -30,6 +30,7 @@ export function useQuizArena(
     
     // Flag tự động nộp bài
     const didAutoSubmit = useRef(false);
+    const activeSessionId = useRef<number | null>(null);
 
     // Fetch questions & start session
     useEffect(() => {
@@ -38,6 +39,7 @@ export function useQuizArena(
             try {
                 //Bắt đầu 1 phiên làm bài mới ở backend
                 const session = await AssessmentService.startSession(lessonId);
+                activeSessionId.current = session?.sessionId ?? null;
                 //Lấy thông tin chi tiết phiên làm bài
                 if (session && session.sessionId) {
                     try {
@@ -132,7 +134,10 @@ export function useQuizArena(
             const secsUsed = timeUsedSeconds % 60;
             const durationStr = `${minsUsed} min ${secsUsed} sec`;
 
-            await AssessmentService.submitAnswers(lessonId, answers, durationStr); // Gửi toàn bộ đáp án và thời gian làm bài lên backend
+            if (!activeSessionId.current) {
+                throw new Error('No active assessment session was found');
+            }
+            await AssessmentService.submitAnswers(lessonId, activeSessionId.current, answers, durationStr); // Gửi toàn bộ đáp án và thời gian làm bài lên backend
             onSubmitSuccess(); // Thông báo cho component rằng bài đã được nộp thành công
         } catch (err: any) {
             console.error('Submit failed:', err);
