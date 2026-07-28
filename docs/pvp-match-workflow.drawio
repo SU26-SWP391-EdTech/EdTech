@@ -1,0 +1,441 @@
+<mxfile host="app.diagrams.net" modified="2026-07-27T18:35:00.000Z" agent="draw.io" version="21.0.0" type="device">
+  <diagram name="PvP Match flow" id="pvp-match-flow">
+    <mxGraphModel dx="1400" dy="1000" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1400" pageHeight="1180" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===== TITLE ===== -->
+        <mxCell id="title" value="PvP Match flow" style="text;html=1;strokeColor=#000000;fillColor=#000000;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#FFFFFF;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="20" width="1300" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ===== SWIM LANE HEADERS ===== -->
+        <mxCell id="h_challenger" value="Challenger (Learner A)" style="text;html=1;strokeColor=#000000;fillColor=#000000;align=center;verticalAlign=middle;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="50" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="h_system" value="System / Socket Server" style="text;html=1;strokeColor=#000000;fillColor=#000000;align=center;verticalAlign=middle;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="230" y="50" width="700" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="h_receiver" value="Receiver (Learner B)" style="text;html=1;strokeColor=#000000;fillColor=#000000;align=center;verticalAlign=middle;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="930" y="50" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="h_db" value="Database" style="text;html=1;strokeColor=#000000;fillColor=#000000;align=center;verticalAlign=middle;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="50" width="200" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ===== BORDER ===== -->
+        <mxCell id="border" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="30" y="80" width="1300" height="1090" as="geometry" />
+        </mxCell>
+        <mxCell id="div1" value="" style="line;strokeColor=#AAAAAA;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="230" y="80" width="0" height="1090" as="geometry" />
+        </mxCell>
+        <mxCell id="div2" value="" style="line;strokeColor=#AAAAAA;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="930" y="80" width="0" height="1090" as="geometry" />
+        </mxCell>
+        <mxCell id="div3" value="" style="line;strokeColor=#AAAAAA;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="80" width="0" height="1090" as="geometry" />
+        </mxCell>
+
+        <!-- ===== START ===== -->
+        <mxCell id="start" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="118" y="108" width="24" height="24" as="geometry" />
+        </mxCell>
+
+        <!-- ================================================================ -->
+        <!-- PHASE 1: CHALLENGE REQUEST                                        -->
+        <!-- ================================================================ -->
+
+        <!-- Challenger browse leaderboard & pick opponent -->
+        <mxCell id="n_browse" value="Browse leaderboard, pick opponent &amp; course" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="155" width="162" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- Send challenge (REST API) -->
+        <mxCell id="n_send_challenge" value="Send challenge request" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="250" width="162" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- System: Validate challenger -->
+        <mxCell id="n_validate_ch" value="Validate: challenger is learner, not self-challenge, opponent online, no pending challenge, both enrolled, assessment is PVP type, ≥ 5 questions" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="260" y="245" width="240" height="66" as="geometry" />
+        </mxCell>
+
+        <!-- Diamond: Valid? -->
+        <mxCell id="d_valid" value="Validation passed?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#8B0000;strokeColor=#8B0000;fontColor=#FFFFFF;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="545" y="240" width="140" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Throw exception: validation fail -->
+        <mxCell id="n_exc_valid" value="Throw exception (return error to Challenger)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="165" width="180" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- Create ChallengeRequest (PENDING) + emit socket -->
+        <mxCell id="n_create_challenge" value="Create ChallengeRequest (status=PENDING) + emit socket events" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="735" y="248" width="180" height="56" as="geometry" />
+        </mxCell>
+
+        <!-- DB: save challenge -->
+        <mxCell id="db_save_challenge" value="Save ChallengeRequest to DB" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="258" width="160" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- Receiver: get notification -->
+        <mxCell id="n_receiver_notif" value="Receive challenge notification (Socket)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="948" y="258" width="162" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- Timeout: 30s auto-expire -->
+        <mxCell id="n_timeout" value="Start 30s auto-expire timer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="735" y="340" width="180" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- ================================================================ -->
+        <!-- PHASE 2: RECEIVER DECISION                                        -->
+        <!-- ================================================================ -->
+
+        <!-- Receiver decision diamond -->
+        <mxCell id="d_decision" value="Receiver action?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#8B0000;strokeColor=#8B0000;fontColor=#FFFFFF;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="968" y="415" width="140" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Receiver: Reject -->
+        <mxCell id="n_reject" value="Reject challenge" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="948" y="535" width="162" height="44" as="geometry" />
+        </mxCell>
+        <!-- System: mark rejected -->
+        <mxCell id="n_sys_reject" value="Update status = REJECTED; emit CHALLENGE_REJECTED to Challenger" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="735" y="525" width="180" height="56" as="geometry" />
+        </mxCell>
+        <!-- Challenger: notified rejected -->
+        <mxCell id="n_ch_rejected" value="Notified: challenge rejected (end)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="540" width="162" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- Timer expires diamond (top of decision alternatives) -->
+        <mxCell id="n_expire" value="Auto-expire: update status = EXPIRED; emit CHALLENGE_EXPIRED to both" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="735" y="415" width="180" height="66" as="geometry" />
+        </mxCell>
+
+        <!-- Receiver: Accept -->
+        <mxCell id="n_accept" value="Accept challenge" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="948" y="635" width="162" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- ================================================================ -->
+        <!-- PHASE 3: BATTLE CREATION                                          -->
+        <!-- ================================================================ -->
+
+        <!-- System: Create battle -->
+        <mxCell id="n_create_battle" value="Update challenge status = ACCEPTED; select 5 random questions; create PvpMatch (STARTED); create BattleRoom; join both players via Socket" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="640" width="370" height="66" as="geometry" />
+        </mxCell>
+
+        <!-- DB: save match -->
+        <mxCell id="db_save_match" value="Save PvpMatch record to DB" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="650" width="160" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- emit BATTLE_STARTED to both -->
+        <mxCell id="n_battle_started" value="Emit BATTLE_STARTED to both players (matchId, roomId, questions count)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="740" width="370" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- ================================================================ -->
+        <!-- PHASE 4: BATTLE Q&A LOOP                                          -->
+        <!-- ================================================================ -->
+
+        <!-- Emit question (after 3s) -->
+        <mxCell id="n_emit_q" value="After 3s: Emit QUESTION to both (question content, options, timer starts)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="820" width="370" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- Both players answer -->
+        <mxCell id="n_both_answer" value="Both players submit answers (or timeout)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="900" width="370" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- System: validate answer, update score -->
+        <mxCell id="n_score" value="Validate answers, update scores; Emit SCORE_UPDATED to room" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="978" width="370" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- DB: update scores -->
+        <mxCell id="db_score" value="Update player scores in DB" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="988" width="160" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- Diamond: more questions? -->
+        <mxCell id="d_more_q" value="More questions?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#8B0000;strokeColor=#8B0000;fontColor=#FFFFFF;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="580" y="1050" width="140" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Loop back label -->
+        <mxCell id="n_next_q" value="Emit NEXT_QUESTION; wait 3s; send next question" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="760" y="1060" width="180" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- ================================================================ -->
+        <!-- PHASE 5: FINISH MATCH                                             -->
+        <!-- ================================================================ -->
+
+        <!-- Finish match -->
+        <mxCell id="n_finish" value="Determine winner (higher score); Emit GAME_OVER + MATCH_RESULT to room; remove room &amp; session" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="260" y="1075" width="290" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- DB: complete match -->
+        <mxCell id="db_complete" value="Update PvpMatch: final scores + winner + status = COMPLETED" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="1082" width="160" height="56" as="geometry" />
+        </mxCell>
+
+        <!-- Learners see result -->
+        <mxCell id="n_result" value="See match result (winner, scores, accuracy)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="1085" width="162" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- END -->
+        <mxCell id="end" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFCCCC;strokeColor=#CC0000;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="118" y="1148" width="24" height="24" as="geometry" />
+        </mxCell>
+
+        <!-- ================================================================ -->
+        <!-- ARROWS                                                             -->
+        <!-- ================================================================ -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;exitPerimeter=0;entryPerimeter=0;" edge="1" source="start" target="n_browse" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_browse" target="n_send_challenge" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Send challenge → validate -->
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_send_challenge" target="n_validate_ch" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="212" y="272" />
+              <mxPoint x="260" y="272" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Validate → validation passed? -->
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_validate_ch" target="d_valid" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Validation passed → no → throw exception -->
+        <mxCell id="e5" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;fontColor=#CC0000;fontStyle=1;fontSize=10;" edge="1" source="d_valid" target="n_exc_valid" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="615" y="240" />
+              <mxPoint x="615" y="187" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Exception back to Challenger -->
+        <mxCell id="e5b" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_exc_valid" target="n_send_challenge" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="530" y="187" />
+              <mxPoint x="131" y="187" />
+              <mxPoint x="131" y="272" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Validation passed → yes → Create challenge -->
+        <mxCell id="e6" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;fontColor=#CC0000;fontStyle=1;fontSize=10;" edge="1" source="d_valid" target="n_create_challenge" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Create challenge → DB save -->
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_create_challenge" target="db_save_challenge" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="915" y="276" />
+              <mxPoint x="1150" y="276" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Create challenge → Receiver notification (socket) -->
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_create_challenge" target="n_receiver_notif" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="915" y="276" />
+              <mxPoint x="948" y="276" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Create challenge → Start timer -->
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_create_challenge" target="n_timeout" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Receiver notif → receiver decision -->
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_receiver_notif" target="d_decision" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Timer → expire (if no action) -->
+        <mxCell id="e11" value="no action in 30s" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;fontColor=#CC0000;fontStyle=1;fontSize=10;" edge="1" source="n_timeout" target="n_expire" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Decision → Reject -->
+        <mxCell id="e12" value="Reject" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;fontColor=#CC0000;fontStyle=1;fontSize=10;" edge="1" source="d_decision" target="n_reject" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Reject → System mark rejected -->
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_reject" target="n_sys_reject" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="948" y="557" />
+              <mxPoint x="915" y="557" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Sys reject → Challenger notified -->
+        <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_sys_reject" target="n_ch_rejected" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="735" y="557" />
+              <mxPoint x="131" y="557" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Decision → Accept -->
+        <mxCell id="e15" value="Accept" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;fontColor=#CC0000;fontStyle=1;fontSize=10;" edge="1" source="d_decision" target="n_accept" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Accept → Create battle -->
+        <mxCell id="e16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_accept" target="n_create_battle" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="948" y="657" />
+              <mxPoint x="900" y="657" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Create battle → DB save match -->
+        <mxCell id="e17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_create_battle" target="db_save_match" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="673" />
+              <mxPoint x="1150" y="673" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Create battle → Emit BATTLE_STARTED -->
+        <mxCell id="e18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_create_battle" target="n_battle_started" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- BATTLE_STARTED → emit question -->
+        <mxCell id="e19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_battle_started" target="n_emit_q" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Emit Q → both answer -->
+        <mxCell id="e20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_emit_q" target="n_both_answer" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Both answer → validate/score -->
+        <mxCell id="e21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_both_answer" target="n_score" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Score → DB update scores -->
+        <mxCell id="e22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_score" target="db_score" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="1000" />
+              <mxPoint x="1150" y="1000" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Score → more questions? -->
+        <mxCell id="e23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_score" target="d_more_q" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- More Q → yes → next question (loop) -->
+        <mxCell id="e24" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;fontColor=#CC0000;fontStyle=1;fontSize=10;" edge="1" source="d_more_q" target="n_next_q" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Next Q → loop back to emit_q -->
+        <mxCell id="e25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_next_q" target="n_emit_q" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="960" y="1082" />
+              <mxPoint x="960" y="842" />
+              <mxPoint x="900" y="842" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- More Q → no → Finish match -->
+        <mxCell id="e26" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;fontColor=#CC0000;fontStyle=1;fontSize=10;" edge="1" source="d_more_q" target="n_finish" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="580" y="1090" />
+              <mxPoint x="550" y="1090" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Finish → DB complete -->
+        <mxCell id="e27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_finish" target="db_complete" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="550" y="1102" />
+              <mxPoint x="1150" y="1102" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Finish → Learners see result -->
+        <mxCell id="e28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_finish" target="n_result" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="260" y="1102" />
+              <mxPoint x="131" y="1102" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Result → End -->
+        <mxCell id="e29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;exitPerimeter=0;entryPerimeter=0;" edge="1" source="n_result" target="end" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Also: expire → end (both get notified) -->
+        <mxCell id="e30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_expire" target="n_ch_rejected" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="735" y="448" />
+              <mxPoint x="131" y="448" />
+              <mxPoint x="131" y="540" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

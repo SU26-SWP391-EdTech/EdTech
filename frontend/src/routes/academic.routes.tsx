@@ -7,6 +7,7 @@ import { PendingCourses } from '../pages/course/PendingCourses';
 import { LearningPathManagement } from '../pages/learning-path/LearningPathManagement';
 import { LessonPage } from '../pages/lesson/LessonPage';
 import { UserProfile } from '../pages/user/UserProfile';
+import { LeaderboardPage } from '../pages/leaderboard/LeaderboardPage';
 
 export const academicRoutes: RouteObject = {
     path: '/academic',
@@ -24,5 +25,6 @@ export const academicRoutes: RouteObject = {
         { path: 'courses/lessons', element: <CourseManagement /> },
         { path: 'lesson', element: <LessonPage /> },
         { path: 'learning-paths', element: <LearningPathManagement /> },
+        { path: 'leaderboard', element: <LeaderboardPage /> },
     ],
 };
