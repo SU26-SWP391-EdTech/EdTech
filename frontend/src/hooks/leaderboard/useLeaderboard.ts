@@ -4,10 +4,14 @@ import toast from 'react-hot-toast';
 import {
     getLeaderboardCourses,
     getCourseLeaderboardData,
-    getOverallLeaderboardData
+    getOverallLeaderboardData,
+    getLeaderboardRule,
+    createLeaderboardRule,
+    updateLeaderboardRule
 } from '../../services/leaderboard/leaderboard.service';
-import type { LeaderboardEntry, CourseRankInfo, LeaderboardTab, EnrollFilter } from '../../types/leaderboard/leaderboard.types';
+import type { LeaderboardEntry, CourseRankInfo, LeaderboardTab, EnrollFilter, LeaderboardRule } from '../../types/leaderboard/leaderboard.types';
 import { usePvp } from '../../context/PvpContext';
+import { getUserRoleName } from '../../utils/user/roleUtils';
 import api from '../../lib/axios';
 
 /**
@@ -19,6 +23,8 @@ import api from '../../lib/axios';
 export function useLeaderboard() {
     const user = useAuthStore(state => state.user);
     const currentUserId = user?.userId || 1;
+    const userRoleName = getUserRoleName(user);
+    const isAcademicManager = userRoleName === 'academic manager' || userRoleName === 'academic_manager';
     const { sendChallenge } = usePvp();
 
     // --- 1. QUẢN LÝ TRẠNG THÁI (STATE) ---
@@ -34,6 +40,10 @@ export function useLeaderboard() {
     const [courses, setCourses] = useState<CourseRankInfo[]>([]);             // Danh sách khóa học có xếp hạng kèm thứ hạng của user
     const [isLoading, setIsLoading] = useState<boolean>(true);                // Trạng thái loading dữ liệu
 
+    // Trạng thái cho Leaderboard Rule (dành cho Academic Manager)
+    const [currentRule, setCurrentRule] = useState<LeaderboardRule | null>(null);
+    const [isLoadingRule, setIsLoadingRule] = useState<boolean>(false);
+
     // Cấu trúc ma trận dữ liệu hỗ trợ cập nhật tương tác thời gian thực
     const [courseLeaderboards, setCourseLeaderboards] = useState<Record<number, LeaderboardEntry[]>>({}); // Map: [courseId] -> Danh sách học viên xếp hạng
     const [overallLeaderboard, setOverallLeaderboard] = useState<(LeaderboardEntry & { coursesCompleted: number })[]>([]); // Danh sách xếp hạng tổng hợp
@@ -43,11 +53,11 @@ export function useLeaderboard() {
         async function initData() {
             try {
                 setIsLoading(true);
-                // Gọi API lấy các khóa học xếp hạng ứng với học viên hiện tại
-                const fetchedCourses = await getLeaderboardCourses(currentUserId);
+                // Gọi API lấy các khóa học xếp hạng ứng với học viên/role hiện tại
+                const fetchedCourses = await getLeaderboardCourses(currentUserId, userRoleName);
                 setCourses(fetchedCourses);
 
-                // Ưu tiên chọn khóa học đầu tiên mà học viên đang đăng ký học
+                // Ưu tiên chọn khóa học đầu tiên
                 const firstEnrolled = fetchedCourses.find(c => c.isEnrolled);
                 if (firstEnrolled) {
                     setSelectedCourseId(firstEnrolled.courseId);
@@ -74,7 +84,56 @@ export function useLeaderboard() {
             }
         }
         initData();
-    }, [currentUserId]);
+    }, [currentUserId, userRoleName]);
+
+    // --- EFFECT: TẢI LEADERBOARD RULE KHI KHÓA HỌC THAY ĐỔI ---
+    useEffect(() => {
+        if (!selectedCourseId || tab !== 'course') return;
+        async function fetchRule() {
+            try {
+                setIsLoadingRule(true);
+                const ruleData = await getLeaderboardRule(selectedCourseId);
+                setCurrentRule(ruleData);
+            } catch (err) {
+                console.warn('Failed to fetch leaderboard rule:', err);
+                setCurrentRule(null);
+            } finally {
+                setIsLoadingRule(false);
+            }
+        }
+        fetchRule();
+    }, [selectedCourseId, tab]);
+
+    // --- HÀM TẠO/CẬP NHẬT LEADERBOARD RULE (CHO ACADEMIC MANAGER) ---
+    const handleSaveRule = async (
+        weights: { scoreWeight: number; timeWeight: number; attemptWeight: number },
+        isEdit: boolean
+    ) => {
+        if (!selectedCourseId) return;
+        try {
+            let updated: LeaderboardRule;
+            if (isEdit) {
+                updated = await updateLeaderboardRule(selectedCourseId, weights);
+                toast.success('Leaderboard rule updated successfully!');
+            } else {
+                updated = await createLeaderboardRule(selectedCourseId, weights);
+                toast.success('Leaderboard rule created successfully!');
+            }
+            setCurrentRule(updated);
+            // Refresh course leaderboard entries to show updated ranks based on new rule weights
+            const updatedEntries = await getCourseLeaderboardData(selectedCourseId, currentUserId);
+            setCourseLeaderboards(prev => ({
+                ...prev,
+                [selectedCourseId]: updatedEntries
+            }));
+        } catch (err: any) {
+            console.error('Failed to save leaderboard rule:', err);
+            const errorMsg = err?.response?.data?.message || 'Failed to save leaderboard rule.';
+            toast.error(errorMsg);
+            throw err;
+        }
+    };
+
 
     // --- 3. EFFECT: ĐỒNG BỘ ĐIỂM THƯỞNG PVP TỪ LOCAL STORAGE ---
     // Khôi phục điểm PvP đã lưu của user từ các lần chơi trước để đảm bảo thứ hạng được cập nhật chuẩn
@@ -254,6 +313,10 @@ export function useLeaderboard() {
         currentUserCourseEntry,
         currentUserOverallEntry,
         isLoading,
-        handleSendChallenge
+        handleSendChallenge,
+        isAcademicManager,
+        currentRule,
+        isLoadingRule,
+        handleSaveRule
     };
 }

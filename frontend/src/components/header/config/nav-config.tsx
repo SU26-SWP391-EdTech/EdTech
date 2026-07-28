@@ -34,6 +34,7 @@ export const ACADEMIC_MANAGER_NAV = [
     { id: 'pending-courses', label: 'Pending Courses', icon: <CheckSquare className="w-3.5 h-3.5" /> },
     { id: 'courses', label: 'Courses', icon: <BookOpen className="w-3.5 h-3.5" /> },
     { id: 'learning-paths', label: 'Learning Paths', icon: <GraduationCap className="w-3.5 h-3.5" /> },
+    { id: 'leaderboard', label: 'Leaderboard', icon: <Trophy className="w-3.5 h-3.5" /> },
 ];
 
 export const GUEST_NAV = [

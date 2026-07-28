@@ -3,6 +3,7 @@ import { LeaderboardHeader } from '../../components/leaderboard/LeaderboardHeade
 import { LeaderboardFilterTabs } from '../../components/leaderboard/LeaderboardFilterTabs';
 import { LeaderboardSummaryCard } from '../../components/leaderboard/LeaderboardSummaryCard';
 import { LeaderboardTable } from '../../components/leaderboard/LeaderboardTable';
+import { LeaderboardRuleCard } from '../../components/leaderboard/LeaderboardRuleCard';
 import { ChallengeModal } from '../../components/leaderboard/ChallengeModal';
 
 export function LeaderboardPage() {
@@ -27,6 +28,10 @@ export function LeaderboardPage() {
         currentUserOverallEntry,
         isLoading,
         handleSendChallenge,
+        isAcademicManager,
+        currentRule,
+        isLoadingRule,
+        handleSaveRule
     } = useLeaderboard();
 
     if (isLoading) {
@@ -69,6 +74,17 @@ export function LeaderboardPage() {
                 currentUserOverallEntry={currentUserOverallEntry}
             />
 
+            {/* Academic Manager Leaderboard Rule Configuration Card */}
+            {isAcademicManager && tab === 'course' && (
+                <LeaderboardRuleCard
+                    courseId={selectedCourseId}
+                    courseTitle={selectedCourse.title}
+                    rule={currentRule}
+                    isLoadingRule={isLoadingRule}
+                    onSaveRule={handleSaveRule}
+                />
+            )}
+
             {/* Current user summary stats highlight card */}
             <LeaderboardSummaryCard
                 tab={tab}
@@ -93,7 +109,19 @@ export function LeaderboardPage() {
                     <span><strong style={{ color: '#374151' }}>Courses</strong> — completed out of {courses.length}</span>
                 )}
             </div>
+
+            {/* Challenge modal */}
+            <ChallengeModal
+                challengeModalEntry={challengeModalEntry}
+                setChallengeModalEntry={setChallengeModalEntry}
+                tab={tab}
+                selectedCourseTitle={selectedCourse.title}
+                currentUserCourseEntry={currentUserCourseEntry}
+                currentUserOverallEntry={currentUserOverallEntry}
+                handleSendChallenge={handleSendChallenge}
+            />
         </div>
     );
 }
 export default LeaderboardPage;
+
