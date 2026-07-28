@@ -17,7 +17,7 @@ class PvpSocketService {
 
         const socketUrl = import.meta.env.VITE_API_URL 
             ? import.meta.env.VITE_API_URL.replace(/\/api$/, '') 
-            : 'http://localhost:5002';
+            : (typeof window !== 'undefined' ? window.location.origin : '');
 
         this.socket = io(socketUrl, {
             auth: {
