@@ -23,7 +23,7 @@ class PvpSocketService {
             auth: {
                 token,
             },
-            transports: ['websocket'],
+            transports: ['websocket', 'polling'],
             autoConnect: true,
         });
 
