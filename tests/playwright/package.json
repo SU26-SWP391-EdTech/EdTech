@@ -1,0 +1,19 @@
+{
+  "name": "playwright",
+  "version": "1.0.0",
+  "description": "docs for my framework: https://github.com/tuserl/playwright-visible-mouse/tree/main/docs\r install \r ```\r npm install playwright-visible-mouse\r npx playwright install chromium\r ```",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:login": "playwright test edTechTestFiles/login/login.spec.ts",
+    "test:login:qtest": "playwright test edTechTestFiles/login/login.spec.ts --reporter=list,junit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@playwright/test": "^1.61.1",
+    "dotenv": "^17.4.2",
+    "playwright-visible-mouse": "^1.4.1"
+  }
+}

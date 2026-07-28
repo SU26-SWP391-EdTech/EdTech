@@ -26,7 +26,8 @@ export class Enrollment {
 
   // ===== COURSE FK =====
   @ManyToOne(() => Course, (course) => course.enrollments,{
-    nullable: false
+    nullable: false,
+    onDelete: 'CASCADE'
   })
   @JoinColumn({ name: 'course_id' }) // 👈 custom FK column
   course!: Course;

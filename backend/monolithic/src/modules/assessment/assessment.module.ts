@@ -1,0 +1,50 @@
+import { Module, forwardRef } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Assessment } from './entities/assessment.entity';
+import { AssessmentSession } from './entities/assessment-session.entity';
+import { AssessmentController } from './controller/assessment.controller';
+import { AssessmentService } from './service/assessment.service';
+import { AssessmentRepository } from './repository/assessment.repository';
+import { CoursesModule } from '../courses/courses.module';
+import { LessonsModule } from '../lessons/lessons.module';
+import { AssessmentSessionService } from './service/assessment-session.service'
+import { AssessmentSessionRepository } from './repository/assessment-session.repository';
+import { LearnersModule } from '../learners/learners.module';
+import { AssessmentSessionController } from './controller/assessment-session.controller';
+import { Question } from '../question/entities/question.entity';
+import { QuestionOption } from '../question/entities/question-option.entity';
+import { ProgressModule } from '../progress/progress.module';
+import { LearnerStreakService } from '../learners/services/learner-streak.service';
+
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([Assessment, AssessmentSession, Question, QuestionOption]),
+    CoursesModule,
+    forwardRef(() => LessonsModule),
+    LearnersModule,
+    forwardRef(() => ProgressModule)
+  ],
+  controllers: [
+    AssessmentController,
+    AssessmentSessionController
+  ],
+  providers: [
+    AssessmentService,
+    AssessmentRepository,
+
+    AssessmentSessionService,
+    AssessmentSessionRepository,
+
+    LearnerStreakService,
+  ],
+  exports: [
+    AssessmentService,
+    AssessmentRepository,
+    AssessmentSessionService,
+    AssessmentSessionRepository,
+    LearnerStreakService,
+  ],
+})
+export class AssessmentModule { }
+

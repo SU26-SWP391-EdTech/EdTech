@@ -1,0 +1,99 @@
+import type { DragEvent, RefObject } from 'react';
+
+import { COURSE_TITLE_MAX_LENGTH } from '../../../constants/courseValidation.constants';
+import { Field, FormCard, Input, Select, Textarea, ThumbnailUploader } from './fields';
+import { TagSelector } from '../management/TagSelector';
+
+interface BasicInfoSectionProps {
+  description: string;
+  dragOver: boolean;
+  fileInputRef: RefObject<HTMLInputElement | null>;
+  language: string;
+  tags?: string[];
+  thumbnailPreview: string | null;
+  title: string;
+  titleError?: string;
+  onClearThumbnail: () => void;
+  onDescriptionChange: (value: string) => void;
+  onDragLeave: () => void;
+  onDragOver: (event: DragEvent) => void;
+  onDrop: (event: DragEvent) => void;
+  onFileChange: (file: File) => void;
+  onLanguageChange: (value: string) => void;
+  onTagsChange?: (tags: string[]) => void;
+  onTitleChange: (value: string) => void;
+}
+
+export function BasicInfoSection({
+  description,
+  dragOver,
+  fileInputRef,
+  language,
+  tags = [],
+  thumbnailPreview,
+  title,
+  titleError,
+  onClearThumbnail,
+  onDescriptionChange,
+  onDragLeave,
+  onDragOver,
+  onDrop,
+  onFileChange,
+  onLanguageChange,
+  onTagsChange,
+  onTitleChange,
+}: BasicInfoSectionProps) {
+  return (
+    <FormCard step={1} title="Basic Information" description="Tell learners what your course is about.">
+      <div className="grid grid-cols-2 gap-4">
+        <Field
+          label="Course title"
+          hint={`${title.length}/${COURSE_TITLE_MAX_LENGTH}`}
+          error={titleError}
+          required
+          full
+        >
+          <Input
+            value={title}
+            onChange={event => onTitleChange(event.target.value)}
+            placeholder="e.g. Spring Boot REST API Masterclass"
+            aria-invalid={Boolean(titleError)}
+            className={titleError ? 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]/20' : ''}
+          />
+        </Field>
+        <Field label="Description" full>
+          <Textarea
+            rows={4}
+            value={description}
+            onChange={event => onDescriptionChange(event.target.value)}
+            placeholder="Describe what learners will gain from this course..."
+          />
+        </Field>
+        <Field label="Language">
+          <Select value={language} onChange={event => onLanguageChange(event.target.value)}>
+            <option value="English">English</option>
+            <option value="Vietnamese">Vietnamese</option>
+          </Select>
+        </Field>
+        <div>
+          <TagSelector
+            selectedTags={tags}
+            onChange={newTags => onTagsChange && onTagsChange(newTags)}
+          />
+        </div>
+        <Field label="Course thumbnail" full>
+          <ThumbnailUploader
+            dragOver={dragOver}
+            fileInputRef={fileInputRef}
+            thumbnailPreview={thumbnailPreview}
+            onClear={onClearThumbnail}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}
+            onFileChange={onFileChange}
+          />
+        </Field>
+      </div>
+    </FormCard>
+  );
+}

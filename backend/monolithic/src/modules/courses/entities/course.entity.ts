@@ -1,5 +1,7 @@
 import { CourseStatus } from 'src/common/enums/course.enum';
+import { Assessment } from 'src/modules/assessment/entities/assessment.entity';
 import { Enrollment } from 'src/modules/enrollments/entities/enrollment.entity';
+import { LeaderboardRule } from 'src/modules/leaderboard/entities/leaderboard-rule.entity';
 import { LearningPathCourse } from 'src/modules/learning-paths/entities/learning-path-course.entity';
 import { Lesson } from 'src/modules/lessons/entities/lesson.entity';
 import { User } from 'src/modules/users/entities/user.entity';
@@ -12,7 +14,9 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToOne,
 } from 'typeorm';
+import { CourseTag } from './course-tag.entity';
 
 @Entity('courses')
 export class Course {
@@ -63,6 +67,8 @@ export class Course {
   @Column({ name: 'duration', nullable: true })
   duration!: number;
 
+
+
   @Column({ name: 'total_lessons', default: 0 })
   totalLessons!: number;
 
@@ -91,7 +97,7 @@ export class Course {
   @JoinColumn({ name: 'reviewed_by' })
   reviewedBy!: User;
 
-  @Column({ name: 'errollment_count', default: 0 })
+  @Column({ name: 'enrollment_count', default: 0 })
   enrollmentCount!: number;
 
   // course 1-n learning-path-course
@@ -103,4 +109,28 @@ export class Course {
     },
   )
   learningPathCourses!: LearningPathCourse[];
+
+  @Column({ name: 'review_reason', type: 'text', nullable: true })
+  reviewReason!: string | null;
+
+  // courses 1 - 1 leaderbpoard_rules
+  @OneToOne(
+    () => LeaderboardRule,
+    (rule) => rule.course,
+    { nullable: false }
+  )
+  leaderboardRule!: LeaderboardRule;
+
+  @OneToMany(
+    () => Assessment,
+    (assessment) => assessment.course,
+  )
+  assessments!: Assessment[];
+
+  @OneToMany(
+    () => CourseTag,
+    (courseTag) => courseTag.course,
+    { nullable: false }
+  )
+  courseTag!: CourseTag[];
 }

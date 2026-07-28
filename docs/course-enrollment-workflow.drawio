@@ -1,0 +1,332 @@
+<mxfile host="app.diagrams.net" modified="2026-07-27T22:10:00.000Z" agent="draw.io" version="21.0.0" type="device">
+  <diagram name="Course Enrollment flow" id="course-enrollment-flow">
+    <mxGraphModel dx="1200" dy="900" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1200" pageHeight="960" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===== TITLE ===== -->
+        <mxCell id="title" value="Course Enrollment flow" style="text;html=1;strokeColor=#000000;fillColor=#000000;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#FFFFFF;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="20" width="1120" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ===== SWIM LANE HEADERS ===== -->
+        <mxCell id="h_learner" value="Learner" style="text;html=1;strokeColor=#000000;fillColor=#000000;align=center;verticalAlign=middle;fontColor=#FFFFFF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="50" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="h_system" value="System" style="text;html=1;strokeColor=#000000;fillColor=#000000;align=center;verticalAlign=middle;fontColor=#FFFFFF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="230" y="50" width="560" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="h_db" value="Database" style="text;html=1;strokeColor=#000000;fillColor=#000000;align=center;verticalAlign=middle;fontColor=#FFFFFF;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="790" y="50" width="360" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ===== BORDER ===== -->
+        <mxCell id="border" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="30" y="80" width="1120" height="850" as="geometry" />
+        </mxCell>
+        <mxCell id="div1" value="" style="line;strokeColor=#AAAAAA;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="230" y="80" width="0" height="850" as="geometry" />
+        </mxCell>
+        <mxCell id="div2" value="" style="line;strokeColor=#AAAAAA;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="790" y="80" width="0" height="850" as="geometry" />
+        </mxCell>
+
+        <!-- ===== START ===== -->
+        <mxCell id="start" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="118" y="108" width="24" height="24" as="geometry" />
+        </mxCell>
+
+        <!-- ================================================================ -->
+        <!-- LEARNER NODES                                                      -->
+        <!-- ================================================================ -->
+        <mxCell id="n_browse" value="Browse available courses" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="55" y="155" width="150" height="44" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_click_enroll" value="Click &quot;Enroll&quot; on course detail" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="55" y="270" width="150" height="44" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_enrolled" value="Access course content &amp; start learning" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="55" y="760" width="150" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- ================================================================ -->
+        <!-- SYSTEM NODES                                                       -->
+        <!-- ================================================================ -->
+
+        <!-- Step 1: Load approved courses -->
+        <mxCell id="n_load_courses" value="Load courses with status = APPROVED" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="280" y="155" width="190" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- Step 2: Check course exists -->
+        <mxCell id="d_course_exists" value="Course exists?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#8B0000;strokeColor=#8B0000;fontColor=#FFFFFF;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="510" y="255" width="130" height="75" as="geometry" />
+        </mxCell>
+
+        <!-- Exception: not found -->
+        <mxCell id="n_exc_notfound" value="Throw exception &#xa;&quot;Course not found&quot;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="165" width="155" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- Step 3: Check course status = APPROVED -->
+        <mxCell id="d_approved" value="Course status = APPROVED?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#8B0000;strokeColor=#8B0000;fontColor=#FFFFFF;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="365" width="150" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Exception: not available -->
+        <mxCell id="n_exc_notapproved" value="Throw exception &#xa;&quot;Course not available&#xa;for enrollment&quot;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="372" width="155" height="56" as="geometry" />
+        </mxCell>
+
+        <!-- Step 4: Check existing enrollment -->
+        <mxCell id="d_existing" value="Existing enrollment?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#8B0000;strokeColor=#8B0000;fontColor=#FFFFFF;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="490" width="150" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Exception: already enrolled -->
+        <mxCell id="n_exc_enrolled" value="Throw exception &#xa;&quot;Already enrolled&#xa;in this course&quot;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="495" width="155" height="56" as="geometry" />
+        </mxCell>
+
+        <!-- Step 5: Transaction: create/reactivate enrollment -->
+        <mxCell id="d_prev_enroll" value="Has previous (non-ACTIVE) enrollment?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#8B0000;strokeColor=#8B0000;fontColor=#FFFFFF;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="610" width="150" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Reactivate enrollment -->
+        <mxCell id="n_reactivate" value="Reactivate: set status=ACTIVE, progress=0, enrolledAt=now" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="615" width="180" height="56" as="geometry" />
+        </mxCell>
+
+        <!-- Create new enrollment -->
+        <mxCell id="n_create_enroll" value="Create new Enrollment (status=ACTIVE, progress=0)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="265" y="735" width="190" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Increment enrollmentCount -->
+        <mxCell id="n_inc_count" value="Increment course enrollmentCount + 1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="735" width="190" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ================================================================ -->
+        <!-- DATABASE NODES                                                     -->
+        <!-- ================================================================ -->
+        <mxCell id="db_query_courses" value="Query courses (status=APPROVED)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="820" y="155" width="190" height="44" as="geometry" />
+        </mxCell>
+
+        <mxCell id="db_query_course" value="Query course by courseId" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="820" y="270" width="190" height="44" as="geometry" />
+        </mxCell>
+
+        <mxCell id="db_query_enrollment" value="Query enrollment by userId + courseId" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="820" y="505" width="190" height="44" as="geometry" />
+        </mxCell>
+
+        <mxCell id="db_save_enrollment" value="Save Enrollment record; Update Course.enrollmentCount" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#FFFFFF;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="820" y="742" width="190" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ===== END ===== -->
+        <mxCell id="end" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFCCCC;strokeColor=#CC0000;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="118" y="878" width="24" height="24" as="geometry" />
+        </mxCell>
+
+        <!-- ================================================================ -->
+        <!-- ARROWS                                                             -->
+        <!-- ================================================================ -->
+
+        <!-- Start → Browse -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;exitPerimeter=0;entryPerimeter=0;" edge="1" source="start" target="n_browse" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Browse → Load courses (System) + Query DB -->
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_browse" target="n_load_courses" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="130" y="177" />
+              <mxPoint x="280" y="177" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Load courses → DB query -->
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_load_courses" target="db_query_courses" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="470" y="177" />
+              <mxPoint x="820" y="177" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- DB result → Load courses (return) → Browse display -->
+        <mxCell id="e3b" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="db_query_courses" target="n_browse" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="915" y="199" />
+              <mxPoint x="915" y="215" />
+              <mxPoint x="130" y="215" />
+              <mxPoint x="130" y="199" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Browse → Click Enroll -->
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_browse" target="n_click_enroll" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Click Enroll → Query course by ID -->
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_click_enroll" target="db_query_course" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="130" y="292" />
+              <mxPoint x="820" y="292" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- DB course → Course exists? -->
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="db_query_course" target="d_course_exists" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="915" y="292" />
+              <mxPoint x="575" y="292" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Course exists → no → Exception -->
+        <mxCell id="e7" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;fontColor=#CC0000;fontStyle=1;fontSize=10;" edge="1" source="d_course_exists" target="n_exc_notfound" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="575" y="255" />
+              <mxPoint x="575" y="187" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Exception not found → back to learner (click enroll again) -->
+        <mxCell id="e7b" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_exc_notfound" target="n_click_enroll" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="500" y="187" />
+              <mxPoint x="130" y="187" />
+              <mxPoint x="130" y="270" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Course exists → yes → Check APPROVED -->
+        <mxCell id="e8" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;fontColor=#CC0000;fontStyle=1;fontSize=10;" edge="1" source="d_course_exists" target="d_approved" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="575" y="330" />
+              <mxPoint x="415" y="330" />
+              <mxPoint x="415" y="365" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- APPROVED → no → Exception -->
+        <mxCell id="e9" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;fontColor=#CC0000;fontStyle=1;fontSize=10;" edge="1" source="d_approved" target="n_exc_notapproved" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- APPROVED → yes → Query enrollment -->
+        <mxCell id="e10" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;fontColor=#CC0000;fontStyle=1;fontSize=10;" edge="1" source="d_approved" target="db_query_enrollment" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="415" y="470" />
+              <mxPoint x="915" y="470" />
+              <mxPoint x="915" y="505" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- DB enrollment → Existing enrollment? -->
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="db_query_enrollment" target="d_existing" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="915" y="527" />
+              <mxPoint x="490" y="527" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Existing + ACTIVE → yes → Exception already enrolled -->
+        <mxCell id="e12" value="yes (ACTIVE)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;fontColor=#CC0000;fontStyle=1;fontSize=10;" edge="1" source="d_existing" target="n_exc_enrolled" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Existing → no → Has previous (non-ACTIVE)? -->
+        <mxCell id="e13" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;fontColor=#CC0000;fontStyle=1;fontSize=10;" edge="1" source="d_existing" target="d_prev_enroll" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Has previous → yes → Reactivate -->
+        <mxCell id="e14" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;fontColor=#CC0000;fontStyle=1;fontSize=10;" edge="1" source="d_prev_enroll" target="n_reactivate" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Has previous → no → Create new enrollment -->
+        <mxCell id="e15" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;fontColor=#CC0000;fontStyle=1;fontSize=10;" edge="1" source="d_prev_enroll" target="n_create_enroll" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="415" y="690" />
+              <mxPoint x="360" y="690" />
+              <mxPoint x="360" y="735" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Reactivate → Increment count -->
+        <mxCell id="e16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_reactivate" target="n_inc_count" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="620" y="690" />
+              <mxPoint x="575" y="690" />
+              <mxPoint x="575" y="735" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Create enrollment → Increment count -->
+        <mxCell id="e17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_create_enroll" target="n_inc_count" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Increment count → Save to DB -->
+        <mxCell id="e18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_inc_count" target="db_save_enrollment" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="670" y="760" />
+              <mxPoint x="820" y="760" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Increment count → Learner: access course -->
+        <mxCell id="e19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;" edge="1" source="n_inc_count" target="n_enrolled" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="782" />
+              <mxPoint x="130" y="782" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Learner enrolled → End -->
+        <mxCell id="e20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#CC0000;strokeWidth=1.5;exitPerimeter=0;entryPerimeter=0;" edge="1" source="n_enrolled" target="end" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
